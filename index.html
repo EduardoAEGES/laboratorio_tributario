@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - Superintendencia Nacional de Aduanas y de Administración Tributaria</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Announcement Bar -->
+    <div class="announcement-bar" id="announcement">
+        <div class="container">
+            <span><i class="fas fa-info-circle"></i> Comunicaciones destacadas</span>
+            <a href="#" class="announcement-link">VER MÁS</a>
+            <span class="close-announcement" onclick="document.getElementById('announcement').style.display='none'">&times;</span>
+        </div>
+    </div>
+
+    <!-- Header gob.pe -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-gob">
+                <img src="ESCUDO.png" alt="Escudo del Perú" style="width: 35px; height: auto;">
+                <span>gob.pe</span>
+                <span class="platform-desc">Plataforma digital única del Estado Peruano</span>
+            </div>
+            <div class="search-box">
+                <input type="text" placeholder="Buscar en SUNAT">
+                <button class="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs">
+        <div class="container">
+            <ul>
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">El Estado</a></li>
+                <li><a href="#">MEF</a></li>
+                <li>SUNAT</li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="container">
+            <ul>
+                <li class="nav-item active">Trámites y servicios</li>
+                <li class="nav-item">Campañas</li>
+                <li class="nav-item">Canales de atención y redes sociales</li>
+                <li class="nav-item">Noticias</li>
+                <li class="nav-item">Información institucional</li>
+                <li class="nav-item">Informes y publicaciones</li>
+                <li class="nav-item">Enlaces de interés</li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Renta Anual Banner Section -->
+    <section class="renta-anual-banner">
+        <div class="container">
+            <div class="renta-anual-content">
+                <div class="renta-anual-title">
+                    <h2>DECLARA RENTA<br>ANUAL EJERCICIOS:<br>2019-2025</h2>
+                    <i class="fas fa-caret-right title-caret"></i>
+                </div>
+                <div class="renta-anual-cards">
+                    <div class="renta-card">
+                        <h3>Personas</h3>
+                        <p>Declaración y pago del Impuesto a la Renta Anual para Personas Naturales.</p>
+                        <a href="#" class="renta-btn" onclick="alert('EN PROCESO DE IMPLEMENTACIÓN'); return false;">Ingresar <i class="fas fa-caret-right"></i></a>
+                    </div>
+                    <div class="renta-card">
+                        <h3>Empresas</h3>
+                        <p>Declaración y pago del Impuesto a la Renta Anual para Empresas.</p>
+                        <a href="renta.html" class="renta-btn">Ingresar <i class="fas fa-caret-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container hero">
+        <div class="hero-content">
+            <div class="hero-left">
+                <div class="sunat-logo">
+                    <img src="LOGO_SUNAT.png" alt="SUNAT Logo" style="width: 150px; margin-bottom: 20px;">
+                </div>
+                <h1 class="hero-title">Superintendencia Nacional de Aduanas y de Administración Tributaria</h1>
+                <p class="hero-subtitle">Administramos los tributos del Gobierno Nacional Peruano.</p>
+                
+                <a href="#" class="conocer-mas">Conocer más <i class="fas fa-chevron-right"></i></a>
+
+                <div class="quick-access">
+                    <div class="access-card">
+                        <div class="access-icon" style="color: #004B91;"><i class="fas fa-id-card"></i></div>
+                        <span class="access-text">Inscripción en el RUC <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="access-card">
+                        <div class="access-icon" style="color: #F8941D;"><i class="fab fa-rev"></i></div>
+                        <span class="access-text">Renta Anual 2025 <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="access-card">
+                        <div class="access-icon" style="color: #E61E6E;"><i class="fas fa-search-dollar"></i></div>
+                        <span class="access-text">Consulta RUC de Oficio <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="access-card">
+                        <div class="access-icon" style="color: #009640;"><i class="fas fa-graduation-cap"></i></div>
+                        <span class="access-text">Capacitación para microempresas <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="access-card">
+                        <div class="access-icon" style="color: #00AEEF;"><i class="fas fa-laptop-code"></i></div>
+                        <span class="access-text">Servicios Digitales <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="access-card">
+                        <div class="access-icon" style="color: #E6004D;"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <span class="access-text">Paga aquí tu Fraccionamiento <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="sidebar-widget">
+                    <a href="#" class="transparency-link">
+                        <i class="fas fa-search"></i> Portal de transparencia
+                    </a>
+                </div>
+
+                <div class="sidebar-widget exchange-rate">
+                    <div class="exchange-header">
+                        <i class="fas fa-dollar-sign"></i>
+                        <div class="exchange-title">
+                            Tipo de cambio <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 11px; color: #666; margin-bottom: 10px; padding-left: 47px;">22/04/2026</div>
+                    <div class="exchange-data">
+                        <div class="exchange-row">
+                            <span class="exchange-label">Venta:</span>
+                            <span class="exchange-value">3.442</span>
+                        </div>
+                        <div class="exchange-row">
+                            <span class="exchange-label">Compra:</span>
+                            <span class="exchange-value">3.433</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="#" style="color: #004B91; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-external-link-alt"></i> Ver portal web anterior
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Services Visited Section -->
+    <section class="services-section">
+        <div class="container">
+            <h2 class="section-title">
+                Orientación, trámites y servicios más visitados
+                <a href="sol.html" class="sol-btn"><i class="fas fa-user-circle"></i> Operaciones en línea (SOL) <i class="fas fa-chevron-right"></i></a>
+            </h2>
+
+            <div class="sub-tabs">
+                <div class="sub-tab active">Personas</div>
+                <div class="sub-tab">Negocios y empresas</div>
+                <div class="sub-tab">Aduanas</div>
+            </div>
+
+            <div class="services-content">
+                <div class="service-item">
+                    <h3>Solicitar la suspensión de retenciones de cuarta categoría - Formulario N° 1609</h3>
+                    <p>Puedes presentar tu solicitud de suspensión de retenciones de cuarta categoría si proyectas que tus ingresos en el año no van a superar el monto afecto.</p>
+                </div>
+                <div class="service-item">
+                    <h3>Suspensión de retenciones y pagos a cuenta de renta de cuarta categoría</h3>
+                    <p>Si eres un trabajador independiente que genera rentas de cuarta categoría (emite recibos por honorarios), puedes solicitar la suspensión.</p>
+                </div>
+                <div class="service-item">
+                    <h3>Consultar información de mis recibos por honorarios y notas de crédito</h3>
+                    <p>Si eres un trabajador independiente y necesitas encontrar la información de tus recibos por honorarios electrónicos emitidos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section class="news-section">
+        <div class="container">
+            <h2 class="section-title">Noticias</h2>
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-img"></div>
+                    <div class="news-date">21 de abril de 2026</div>
+                    <h3 class="news-title">SUNAT implementa nuevos servicios digitales para facilitar el cumplimiento tributario</h3>
+                </div>
+                <div class="news-card">
+                    <div class="news-img"></div>
+                    <div class="news-date">20 de abril de 2026</div>
+                    <h3 class="news-title">Más de 500 mil contribuyentes ya utilizaron el App Personas para su Declaración Anual</h3>
+                </div>
+                <div class="news-card">
+                    <div class="news-img"></div>
+                    <div class="news-date">19 de abril de 2026</div>
+                    <h3 class="news-title">Orientación gratuita sobre Renta 2025 en Centros de Servicios de todo el país</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feedback Banner -->
+    <div class="feedback-banner">
+        <div class="container">
+            <p>¿Hay algo que pueda mejorar en la página?</p>
+            <a href="#" class="feedback-btn">Cuéntanos sobre tu experiencia</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer-slim">
+        <div class="footer-left">
+            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Eduardo Mamani Roque</strong></span>
+        </div>
+        <div class="footer-right">
+            <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank">Aprende en la página oficial de SUNAT</a>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,776 @@
+/* 
+   SUNAT Replica Design System
+   Colors based on Peru's gob.pe and SUNAT standards
+*/
+
+:root {
+    --gob-red: #C0142A;
+    --gob-dark-red: #A01123;
+    --gob-light-gray: #f2f2f2;
+    --sunat-blue: #004B91;
+    --sunat-dark-blue: #004b8d;
+    --sunat-light-blue: #0066CC;
+    --sofia-pink: #BD1C5F;
+    --feedback-purple: #7e3e8f;
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --bg-light: #F2F2F2;
+    --white: #FFFFFF;
+    --border-gray: #DDDDDD;
+    --footer-dark: #1e2124;
+    
+    --transition: all 0.3s ease;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', 'Open Sans', Arial, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.6;
+    background-color: var(--white);
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+}
+
+li {
+    list-style: none;
+}
+
+/* Utilities */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+/* Announcement Bar */
+.announcement-bar {
+    background-color: #007F3D;
+    color: var(--white);
+    padding: 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.announcement-bar .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.announcement-link {
+    text-decoration: underline;
+    margin-left: 5px;
+}
+
+.close-announcement {
+    position: absolute;
+    right: 20px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* Main Header (Red Bar) */
+.main-header {
+    background-color: var(--gob-red);
+    color: var(--white);
+    padding: 15px 0;
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-gob {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.platform-desc {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-left: 15px;
+    padding-left: 15px;
+    border-left: 1px solid rgba(255,255,255,0.3);
+}
+
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 45px 10px 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 45px;
+    background-color: #333;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    padding: 15px 0;
+    font-size: 13px;
+    color: var(--sunat-blue);
+}
+
+.breadcrumbs ul {
+    display: flex;
+    gap: 8px;
+}
+
+.breadcrumbs li:not(:last-child)::after {
+    content: '>';
+    margin-left: 8px;
+    color: var(--text-gray);
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-gray);
+    background-color: var(--gob-light-gray);
+}
+
+.nav-tabs ul {
+    display: flex;
+}
+
+.nav-item {
+    padding: 20px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    max-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.nav-item:hover {
+    background-color: #EAEAEA;
+}
+
+.nav-item.active {
+    color: var(--gob-red);
+    background-color: var(--white);
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 4px;
+    background-color: var(--gob-red);
+}
+
+/* Renta Anual Banner Section */
+.renta-anual-banner {
+    background-color: #F4F7F9;
+    padding: 60px 0;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+.renta-anual-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    max-width: 900px;
+    margin: 0 auto 30px auto;
+}
+
+.renta-anual-title {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: right;
+    position: relative;
+    padding-right: 30px;
+    max-width: 280px;
+    line-height: 1.4;
+    color: var(--text-dark);
+}
+
+.renta-anual-title h2 {
+    font-size: 20px;
+}
+
+.renta-anual-title .title-caret {
+    position: absolute;
+    right: 0;
+    font-size: 24px;
+    color: var(--text-dark);
+}
+
+.renta-anual-cards {
+    display: flex;
+    background-color: var(--white);
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-gray);
+}
+
+.renta-card {
+    padding: 30px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+.renta-card:first-child {
+    border-right: 1px solid var(--border-gray);
+}
+
+.renta-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+}
+
+.renta-card p {
+    font-size: 14px;
+    color: var(--text-gray);
+    margin-bottom: 30px;
+    flex-grow: 1;
+    line-height: 1.5;
+}
+
+.renta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border: 1px solid var(--sunat-light-blue);
+    color: var(--sunat-light-blue);
+    font-weight: 600;
+    border-radius: 4px;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+.renta-btn:hover {
+    background-color: var(--sunat-light-blue);
+    color: var(--white);
+}
+
+.elaborado-por {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-gray);
+    background-color: #E3E9EE;
+    padding: 12px 25px;
+    border-radius: 30px;
+    display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.elaborado-por i {
+    color: var(--sunat-blue);
+    margin-right: 8px;
+}
+
+.elaborado-por strong {
+    color: var(--sunat-blue);
+    font-weight: 700;
+}
+
+/* Hero Section */
+.hero {
+    padding: 40px 0;
+}
+
+.hero-content {
+    display: flex;
+    gap: 40px;
+}
+
+.hero-left {
+    flex: 2;
+}
+
+.hero-right {
+    flex: 1;
+}
+
+.sunat-logo {
+    display: block;
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+.sunat-logo svg {
+    width: 100%;
+    height: auto;
+}
+
+.hero-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 16px;
+    color: var(--text-gray);
+    margin-bottom: 25px;
+}
+
+.conocer-mas {
+    color: var(--sunat-blue);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 30px;
+}
+
+/* Quick Access Grid */
+.quick-access {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.access-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.access-card:hover {
+    background-color: #f0f7ff;
+}
+
+.access-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.access-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--sunat-blue);
+}
+
+.access-card i {
+    font-size: 20px;
+}
+
+/* Sidebar Widgets */
+.sidebar-widget {
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.transparency-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--sunat-blue);
+    font-weight: 700;
+}
+
+.exchange-rate {
+    background-color: var(--gob-light-gray);
+    border: none;
+}
+
+.exchange-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.exchange-header i {
+    color: var(--sunat-blue);
+    font-size: 32px;
+}
+
+.exchange-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--sunat-dark-blue);
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.exchange-data {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 47px;
+}
+
+.exchange-row {
+    display: flex;
+    gap: 10px;
+}
+
+.exchange-label {
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.exchange-value {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+/* Sections for Tabs (Trámites visitados) */
+.services-section {
+    background-color: #F4F7F9;
+    padding: 60px 0;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sol-btn {
+    background-color: var(--sunat-blue);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 4px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sub-tabs {
+    display: flex;
+    background-color: #E3E9EE;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+}
+
+.sub-tab {
+    padding: 15px 40px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.sub-tab.active {
+    background-color: var(--white);
+    color: var(--sunat-blue);
+}
+
+.services-content {
+    background-color: var(--white);
+    padding: 40px;
+    border-radius: 0 0 4px 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+}
+
+.service-item h3 {
+    font-size: 16px;
+    color: var(--sunat-blue);
+    margin-bottom: 15px;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.service-item h3:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.service-item p {
+    font-size: 14px;
+    color: var(--text-gray);
+}
+
+/* News Section */
+.news-section {
+    padding: 60px 0;
+    background-color: var(--white);
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.news-card {
+    border-bottom: 1px solid var(--border-gray);
+    padding-bottom: 20px;
+}
+
+.news-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background-color: var(--bg-light);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    object-fit: cover;
+}
+
+.news-date {
+    font-size: 12px;
+    color: var(--text-gray);
+    margin-bottom: 8px;
+}
+
+.news-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--sunat-dark-blue);
+    line-height: 1.4;
+}
+
+/* Feedback Banner */
+.feedback-banner {
+    background-color: var(--feedback-purple);
+    color: white;
+    padding: 25px 0;
+    text-align: center;
+}
+
+.feedback-banner .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.feedback-btn {
+    background-color: white;
+    color: var(--feedback-purple);
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* Footer Slim Dark Bar */
+.dashboard-footer-slim {
+    background-color: #222;
+    color: #CCC;
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    border-top: 1px solid #444;
+}
+
+.dashboard-footer-slim strong {
+    color: white;
+}
+
+.dashboard-footer-slim i {
+    color: #00AEEF;
+    margin-right: 5px;
+}
+
+.footer-right a {
+    color: #CCC;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.footer-right a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Floating Sofia */
+.sofia-assistant {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--sofia-pink);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+.sofia-assistant:hover {
+    transform: scale(1.05);
+    background-color: #A51853;
+}
+
+.sofia-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.sofia-avatar img {
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .hero-content {
+        flex-direction: column;
+    }
+    
+    .services-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-access {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-tabs ul {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .search-box {
+        display: none;
+    }
+
+    .renta-anual-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .renta-anual-title {
+        text-align: left;
+        padding-right: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .renta-anual-title .title-caret {
+        display: none;
+    }
+
+    .renta-anual-cards {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .renta-card {
+        width: 100%;
+    }
+
+    .renta-card:first-child {
+        border-right: none;
+        border-bottom: 1px solid var(--border-gray);
+    }
+    
+    .news-grid, .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .sub-tabs {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 500px) {
+    .logo-gob {
+        font-size: 18px;
+    }
+    .platform-desc {
+        display: none;
+    }
+    .hero-title {
+        font-size: 24px;
+    }
+    .section-title {
+        font-size: 22px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}

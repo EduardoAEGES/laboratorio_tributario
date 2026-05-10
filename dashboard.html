@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - Declaración Jurada Anual de Renta</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="top-logo-bar">
+            <img src="LOGO_SUNAT.png" alt="SUNAT" class="sunat-logo">
+        </div>
+        <div class="blue-info-bar">
+            <div class="info-left">
+                <span id="current-datetime">10/05/2026 04:53</span>
+            </div>
+            <div class="info-center">
+                <div class="user-welcome">
+                    <span class="welcome-text">Bienvenido, <strong>EMPRESA DEMO S.A.C.</strong> <i class="fas fa-caret-down"></i></span>
+                    <div class="user-dropdown">
+                        <p><strong>EMPRESA DEMO S.A.C.</strong></p>
+                        <p>RUC: 20123456789</p>
+                        <p>Usuario: SIST</p>
+                    </div>
+                </div>
+            </div>
+            <div class="info-right">
+                <span class="status-badge">Domicilio: <strong>HABIDO</strong></span>
+                <a href="login.html" class="btn-exit">Salir</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <button class="btn-home" onclick="location.reload()"><i class="fas fa-home"></i> Ir al Inicio</button>
+                <button class="btn-collapse"><i class="fas fa-chevron-left"></i></button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section active">
+                    <h3 class="section-title">MIS DECLARACIONES Y PAGOS</h3>
+                    
+                    <ul class="nav-list">
+                        <li class="nav-item has-submenu open">
+                            <div class="item-header">
+                                <i class="fas fa-caret-down"></i> <span>Presentación y pago</span>
+                            </div>
+                            <ul class="submenu">
+                                <li class="nav-item has-submenu open">
+                                    <div class="item-header">
+                                        <i class="fas fa-caret-down"></i> <span>Renta Anual</span>
+                                    </div>
+                                    <ul class="submenu">
+                                        <li><a href="#" onclick="alert('POR IMPLEMENTAR')">709 Renta Anual PERSONAS</a></li>
+                                        <li><a href="#" id="link-renta-710">710 Renta Anual EMPRESAS</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-submenu" id="menu-consultas">
+                            <div class="item-header">
+                                <i class="fas fa-caret-right"></i> <span>Consultas</span>
+                            </div>
+                            <ul class="submenu">
+                                <li class="nav-item has-submenu">
+                                    <div class="item-header">
+                                        <i class="fas fa-caret-right"></i> <span>Consultas de Presentación y Pago</span>
+                                    </div>
+                                    <ul class="submenu">
+                                        <li><a href="#" onclick="alert('POR IMPLEMENTAR')">Consulta de Declaraciones y Pagos de Renta Anual 2019 - 2026</a></li>
+                                        <li><a href="#" onclick="alert('POR IMPLEMENTAR')">Consulta de Declaraciones y Pagos - Nueva Plataforma</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="content-panel" id="main-content">
+            <!-- Welcome View -->
+            <div id="view-welcome">
+                <div class="panel-header">
+                    <h1>Bienvenido a la Declaración Jurada Anual de Renta</h1>
+                </div>
+                <div class="panel-body">
+                    <p>Usted se encuentra en la Plataforma de presentación de la Declaración Jurada Anual de Renta. A través de este medio podrá presentar y pagar la declaración que le corresponde. Si desea presentar su declaración jurada debe seleccionar el formulario que le corresponde de los mostrados en la columna izquierda, ya sea Persona Natural o Persona Jurídica.</p>
+                    <p>Le sugerimos que cuando ingrese verifique la información que se le muestra y que lea las instrucciones que le aparecen a lo largo del formulario.</p>
+                </div>
+            </div>
+
+            <!-- Form 710 Year Selection View (Initially hidden) -->
+            <div id="view-renta-710" style="display: none;">
+                <div class="form-stepper">
+                    <div class="step active">Complete</div>
+                    <div class="step">Presente/Pague</div>
+                    <div class="step">Constancia</div>
+                </div>
+
+                <div class="step-info-box">
+                    <p><strong>Paso 1:</strong> Complete o revise los datos del formulario. Las casillas en color verde permiten <span style="text-decoration: underline; color: #0056b3;">ingresar detalle de la información</span></p>
+                </div>
+
+                <div class="form-container-box">
+                    <div class="form-header-grey">
+                        Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025
+                    </div>
+                    <div class="form-body-white">
+                        <p class="instruction">Si desea presentar su declaración jurada debe seleccionar el ejercicio que va a declarar.</p>
+                        
+                        <div class="form-field-row">
+                            <label>Ejercicio</label>
+                            <select class="form-select-custom">
+                                <option value="">Seleccionar</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Informativa View (Initially hidden) -->
+            <div id="view-informativa" style="display: none;">
+                <div class="form-stepper">
+                    <div class="step active">Complete</div>
+                    <div class="step">Presente/Pague</div>
+                    <div class="step">Constancia</div>
+                </div>
+
+                <div class="form-container-box">
+                    <div class="top-action-buttons-row">
+                        <button class="btn-top-action" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-undo"></i> Restablecer Personalizado</button>
+                        <button class="btn-top-action" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-alt"></i> Reporte Preliminar</button>
+                    </div>
+                    <div class="form-header-grey">
+                        Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Informativa
+                        <a href="https://renta.sunat.gob.pe/empresas/ayuda-para-el-registro-del-formulario-virtual-710-simplificado" target="_blank" style="color: white; margin-left: 10px;">
+                            <i class="far fa-question-circle"></i>
+                        </a>
+                    </div>
+                    <div class="form-body-white no-padding">
+                        <div class="informativa-tabs-container">
+                            <div class="main-tabs">
+                                <div class="tab-item active" onclick="switchSection('informativa')">Sección Informativa</div>
+                                <div class="tab-item" onclick="showDeterminativaMessage()">Sección Determinativa</div>
+                            </div>
+                        </div>
+
+                        <div id="informativa-full-area">
+                            <div class="sub-tabs-bar">
+                                <div class="sub-tab-item active">Identificación</div>
+                                <div class="sub-tab-item" onclick="alert('POR IMPLEMENTAR')">Información Complementaria</div>
+                            </div>
+
+                            <div class="informativa-content-area">
+                            <div class="rectificatoria-section">
+                                <span class="label">Indicador de rectificatoria</span>
+                                <div class="radio-stack">
+                                    <label><input type="radio" name="rect" checked> Original</label>
+                                    <label><input type="radio" name="rect"> Sustitutoria/Rectificatoria</label>
+                                </div>
+                            </div>
+
+                            <div class="info-section-grey">
+                                <h4 class="grey-title">Tratamiento Especial</h4>
+                                
+                                <div class="info-box-bordered informative-box">
+                                    <h5 class="box-title">Régimen de Renta</h5>
+                                    <div class="casilla-row-aligned">
+                                        <label>Tipo de Régimen</label>
+                                        <div class="field-right-content">
+                                            <select class="form-select-sm" style="width: 450px;">
+                                                <option value="MYPE" selected>RÉGIMEN MYPE</option>
+                                                <option value="GENERAL">RÉGIMEN GENERAL</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-box-bordered informative-box">
+                                    <h5 class="box-title">Exoneración</h5>
+                                    <div class="rectificatoria-section">
+                                        <p class="label">¿Está exonerado totalmente del Impuesto a la Renta por alguna norma legal?</p>
+                                        <div class="radio-stack">
+                                            <label><input type="radio" name="exon" value="si" id="exon-si"> Si</label>
+                                            <label><input type="radio" name="exon" value="no" id="exon-no" checked> No</label>
+                                        </div>
+                                    </div>
+                                    <div class="casilla-fields-aligned">
+                                        <div class="casilla-row-aligned">
+                                            <label>Base Legal</label>
+                                            <div class="casilla-input-group">
+                                                <span class="casilla-num">210</span>
+                                                <select id="select-210" class="form-select-sm" style="width: 350px;" disabled>
+                                                    <option value="">--Seleccionar--</option>
+                                                    <option value="RELIGIOSAS">SOCIEDADES E INSTITUCIONES RELIGIOSAS</option>
+                                                    <option value="FUNDACIONES">FUNDACIONES AFECTAS Y ASOCIACIONES SIN FINES DE LUCRO</option>
+                                                    <option value="ZEE">ZONAS ECONÓMICAS ESPECIALES (ZEE)</option>
+                                                    <option value="OTROS">OTROS - ESPECIFIQUE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="casilla-row-aligned">
+                                            <label>Otros - Especifique Norma</label>
+                                            <div class="casilla-input-group">
+                                                <span class="casilla-num">216</span>
+                                                <input type="text" id="input-216" class="form-input-sm" style="width: 350px;" placeholder="INGRESAR" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="casilla-row-aligned">
+                                            <label>Otros - Fecha</label>
+                                            <div class="casilla-input-group">
+                                                <span class="casilla-num">343</span>
+                                                <input type="date" id="date-343" class="form-input-sm date-picker-custom" style="width: 350px;" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-box-bordered informative-box">
+                                    <h5 class="box-title">Inafectación</h5>
+                                    <div class="rectificatoria-section" style="margin-bottom: 30px;">
+                                        <p class="label">¿Está inafecto al Impuesto a la Renta por alguna norma legal?</p>
+                                        <div class="radio-stack">
+                                            <label><input type="radio" name="inaf" value="si" id="inaf-si"> Si</label>
+                                            <label><input type="radio" name="inaf" value="no" id="inaf-no" checked> No</label>
+                                        </div>
+                                    </div>
+                                    <div class="casilla-fields-aligned">
+                                        <div class="casilla-row-aligned">
+                                            <label>Base Legal</label>
+                                            <div class="casilla-input-group">
+                                                <span class="casilla-num">221</span>
+                                                <select id="select-221" class="form-select-sm" style="width: 350px;" disabled>
+                                                    <option value="">--Seleccionar--</option>
+                                                    <option value="PUBLICO">SECTOR PÚBLICO NACIONAL (INC. A) DEL ART. 18° DEL TUO DE LA LEY DEL IMPUESTO A LA RENTA</option>
+                                                    <option value="CULTURA">FUNDAC. ESTABLEC.PARA FINES DE CULTURA, INVESTIG.SUPERIOR, BENEFIC., ASIST. SOCIAL Y HOSPITAL.Y BENEF. SOCIAL (INC. C) DEL ART. 18° DEL TUO DE LA LEY DEL IMPUESTO A LA RENTA</option>
+                                                    <option value="MUTUO">ENTIDADES DE AUXILIO MUTUO (INC. D) DEL ART. 18° DEL TUO DE LA LEY DE IMPUESTO A LA RENTA</option>
+                                                    <option value="CAMPESINAS">COMUNIDADES CAMPESINAS (INC. E) DEL ART. 18° DEL TUO DE LA LEY DEL IMPUESTO A LA RENTA</option>
+                                                    <option value="NATIVAS">COMUNIDADES NATIVAS (INC. F) DEL ART. 18° DEL TUO DE LA LEY DE IMPUESTO A LA RENTA</option>
+                                                    <option value="OTROS">OTROS - ESPECIFIQUE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="casilla-row-aligned">
+                                            <label>Otros - Especifique</label>
+                                            <div class="casilla-input-group">
+                                                <span class="casilla-num">222</span>
+                                                <input type="text" id="input-222" class="form-input-sm" style="width: 350px;" placeholder="INGRESAR" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <div class="info-box-bordered informative-box">
+                                    <h5 class="box-title">Donaciones</h5>
+                                    <div class="rectificatoria-section" style="margin-bottom: 10px;">
+                                        <p class="label">¿Está deduciendo gastos por concepto de donaciones según las normas vigentes?</p>
+                                        <div class="radio-stack">
+                                            <label><input type="radio" name="dona" value="si"> Si</label>
+                                            <label><input type="radio" name="dona" value="no" checked> No</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                        <div class="form-footer-actions" style="justify-content: center; margin-top: 40px;">
+                                            <button class="btn-next-blue" onclick="showDeterminativaMessage()">Siguiente <i class="fas fa-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN DETERMINATIVA (HIDDEN BY DEFAULT) -->
+                        <div id="determinativa-area" style="display: none;">
+                            <div class="sub-tabs-bar">
+                                <div class="sub-tab-item active">Estados Financieros</div>
+                                <div class="sub-tab-item">Impuesto a la Renta</div>
+                                <div class="sub-tab-item">Cred. Contra Imp. Renta</div>
+                                <div class="sub-tab-item">Determinación de la Deuda</div>
+                            </div>
+                            
+                            <div class="determinativa-content-area">
+                                <div class="eeff-sub-tabs">
+                                    <div class="eeff-tab active" onclick="switchEEFF('activo')">Activo</div>
+                                    <div class="eeff-tab" onclick="switchEEFF('pasivo')">Pasivo y Patrimonio</div>
+                                    <div class="eeff-tab" onclick="switchEEFF('resultados')">Estado de Resultados</div>
+                                </div>
+
+                                <div class="eeff-body">
+                                    <div class="eeff-header-row">
+                                        <p>I. Estado de Situación Financiera (Balance General) - Valor Histórico al 31 de Dic. 2025</p>
+                                        <button class="btn-import-blue" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-import"></i> Importar</button>
+                                    </div>
+
+                                    <!-- AREA ACTIVO -->
+                                    <div id="eeff-activo">
+                                        <h5 class="eeff-section-title">ACTIVOS</h5>
+                                        <div class="eeff-grid">
+                                            <!-- ... existing column 1 ... -->
+                                            <div class="eeff-column">
+                                                <div class="eeff-row"><label>Efectivo y equivalentes de efectivo</label><div class="eeff-input-group"><span class="eeff-casilla">359</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Inversiones Financieras</label><div class="eeff-input-group"><span class="eeff-casilla">360</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Cuentas por cobrar comerciales – terceros</label><div class="eeff-input-group"><span class="eeff-casilla">361</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Cuentas por cobrar comerciales - relacionadas</label><div class="eeff-input-group"><span class="eeff-casilla">362</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Cuentas por cobrar al personal, acc y directores</label><div class="eeff-input-group"><span class="eeff-casilla">363</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Cuentas por cobrar diversas - terceros</label><div class="eeff-input-group"><span class="eeff-casilla">364</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Cuentas por cobrar diversas - relacionadas</label><div class="eeff-input-group"><span class="eeff-casilla">365</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Servicios y otros contratados por anticipado</label><div class="eeff-input-group"><span class="eeff-casilla">366</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Estimación de cuentas de cobranza dudosa</label><div class="eeff-input-group"><span class="eeff-casilla">367</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="eeff-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Mercaderías</label><div class="eeff-input-group"><span class="eeff-casilla">368</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Productos terminados</label><div class="eeff-input-group"><span class="eeff-casilla">369</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Subproductos, desechos y desperdicios</label><div class="eeff-input-group"><span class="eeff-casilla">370</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Productos en proceso</label><div class="eeff-input-group"><span class="eeff-casilla">371</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Materias primas</label><div class="eeff-input-group"><span class="eeff-casilla">372</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Materiales auxiliares y suministros</label><div class="eeff-input-group"><span class="eeff-casilla">373</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Envases y embalajes</label><div class="eeff-input-group"><span class="eeff-casilla">374</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                            </div>
+                                            <div class="eeff-column">
+                                                <div class="eeff-row"><label>Inventarios por recibir</label><div class="eeff-input-group"><span class="eeff-casilla">375</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Desvalorización de Inventarios</label><div class="eeff-input-group"><span class="eeff-casilla">376</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="eeff-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Activos no corrientes mantenidos para la venta</label><div class="eeff-input-group"><span class="eeff-casilla">377</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Otros activos corrientes</label><div class="eeff-input-group"><span class="eeff-casilla">378</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Inversiones mobiliarias</label><div class="eeff-input-group"><span class="eeff-casilla">379</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Propiedades de Inversión (1)</label><div class="eeff-input-group"><span class="eeff-casilla">380</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Activos por derecho de uso (2)</label><div class="eeff-input-group"><span class="eeff-casilla">381</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Propiedades, Planta y Equipo</label><div class="eeff-input-group"><span class="eeff-casilla">382</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Depreciación y PPE acumulados</label><div class="eeff-input-group"><span class="eeff-casilla">383</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="eeff-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Intangibles</label><div class="eeff-input-group"><span class="eeff-casilla">384</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Activos biológicos</label><div class="eeff-input-group"><span class="eeff-casilla">385</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Deprec. Act. biológico y amortiz. Acumulada</label><div class="eeff-input-group"><span class="eeff-casilla">386</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="eeff-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Desvalorización de activo inmovilizado</label><div class="eeff-input-group"><span class="eeff-casilla">387</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="eeff-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Activo diferido</label><div class="eeff-input-group"><span class="eeff-casilla">388</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Otros activos no corrientes</label><div class="eeff-input-group"><span class="eeff-casilla">389</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="eeff-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateActivo()"></div></div></div>
+                                                <div class="eeff-row total-row" style="margin-top: 20px;">
+                                                    <label><strong>TOTAL ACTIVO NETO</strong></label>
+                                                    <div class="eeff-input-group">
+                                                        <span class="eeff-casilla">390</span>
+                                                        <div class="currency-input highlight"><span>S/ </span><input type="text" id="total-390" value="0" readonly></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-footer-actions" style="justify-content: flex-end; margin-top: 40px;">
+                                            <button class="btn-next-blue" onclick="switchEEFF('pasivo')">Siguiente <i class="fas fa-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AREA PASIVO Y PATRIMONIO (HIDDEN) -->
+                                    <div id="eeff-pasivo" style="display: none;">
+                                        <div class="eeff-grid">
+                                            <div class="eeff-column">
+                                                <h5 class="eeff-section-title">PASIVO</h5>
+                                                <div class="eeff-row"><label>Sobregiros Bancarios</label><div class="eeff-input-group"><span class="eeff-casilla">401</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Trib. y aport. sist. pens. y salud por pagar</label><div class="eeff-input-group"><span class="eeff-casilla">402</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Remuneraciones y participaciones por pagar</label><div class="eeff-input-group"><span class="eeff-casilla">403</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Ctas por pagar comerciales - terceros</label><div class="eeff-input-group"><span class="eeff-casilla">404</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Ctas por pagar comerciales - relacionadas</label><div class="eeff-input-group"><span class="eeff-casilla">405</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Ctas por pagar accionist y direct.</label><div class="eeff-input-group"><span class="eeff-casilla">406</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Ctas por pagar diversas - terceros</label><div class="eeff-input-group"><span class="eeff-casilla">407</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Ctas por pagar diversas - relacionadas</label><div class="eeff-input-group"><span class="eeff-casilla">408</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Obligaciones financieras</label><div class="eeff-input-group"><span class="eeff-casilla">409</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Provisiones</label><div class="eeff-input-group"><span class="eeff-casilla">410</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row"><label>Pasivo Diferido</label><div class="eeff-input-group"><span class="eeff-casilla">411</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="pasivo-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePasivo()"></div></div></div>
+                                                <div class="eeff-row total-row" style="margin-top: 20px;">
+                                                    <label><strong>TOTAL PASIVO</strong></label>
+                                                    <div class="eeff-input-group">
+                                                        <span class="eeff-casilla">412</span>
+                                                        <div class="currency-input highlight"><span>S/ </span><input type="text" id="total-412" value="0" readonly></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="eeff-column">
+                                                <h5 class="eeff-section-title">PATRIMONIO</h5>
+                                                <div class="eeff-row"><label>Capital</label><div class="eeff-input-group"><span class="eeff-casilla">414</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Acciones de Inversión</label><div class="eeff-input-group"><span class="eeff-casilla">415</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Capital Adicional positivo</label><div class="eeff-input-group"><span class="eeff-casilla">416</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Capital Adicional negativo</label><div class="eeff-input-group"><span class="eeff-casilla">417</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="patri-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Resultados no realizados</label><div class="eeff-input-group"><span class="eeff-casilla">418</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Excedente de revaluación</label><div class="eeff-input-group"><span class="eeff-casilla">419</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Reservas</label><div class="eeff-input-group"><span class="eeff-casilla">420</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Resultados Acumulados Positivos</label><div class="eeff-input-group"><span class="eeff-casilla">421</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Resultados Acumulados Negativos</label><div class="eeff-input-group"><span class="eeff-casilla">422</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="patri-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Utilidad del ejercicio</label><div class="eeff-input-group"><span class="eeff-casilla">423</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="patri-field" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"></div></div></div>
+                                                <div class="eeff-row"><label>Pérdida del ejercicio</label><div class="eeff-input-group"><span class="eeff-casilla">424</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="patri-field-neg" onfocus="handleFocus(this)" onblur="handleBlur(this); calculatePatrimonio()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row" style="margin-top: 10px;">
+                                                    <label><strong>TOTAL PATRIMONIO</strong></label>
+                                                    <div class="eeff-input-group">
+                                                        <span class="eeff-casilla">425</span>
+                                                        <div class="currency-input highlight"><span>S/ </span><input type="text" id="total-425" value="0" readonly></div>
+                                                    </div>
+                                                </div>
+                                                <div class="eeff-row total-row" style="margin-top: 20px;">
+                                                    <label><strong>TOTAL PASIVO Y PATRIMONIO</strong></label>
+                                                    <div class="eeff-input-group">
+                                                        <span class="eeff-casilla">426</span>
+                                                        <div class="currency-input highlight"><span>S/ </span><input type="text" id="total-426" value="0" readonly></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-footer-actions" style="justify-content: flex-end; gap: 10px; margin-top: 40px;">
+                                            <button class="btn-top-action" onclick="switchEEFF('activo')"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                            <button class="btn-next-blue" onclick="switchEEFF('resultados')">Siguiente <i class="fas fa-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AREA ESTADO DE RESULTADOS (HIDDEN) -->
+                                    <div id="eeff-resultados" style="display: none;">
+                                        <div class="eeff-header-row">
+                                            <p>II. Estado de Resultados del 01/01 al 31/12 del 2025</p>
+                                            <button class="btn-import-blue" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-import"></i> Importar</button>
+                                        </div>
+                                        <div class="eeff-grid">
+                                            <div class="eeff-column">
+                                                <div class="eeff-row"><label>Ventas Netas o Ing. por Servicios</label><div class="eeff-input-group"><span class="eeff-casilla">461</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="er-field" id="er-461" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"></div></div></div>
+                                                <div class="eeff-row"><label>Desc. rebajas y bonif. concedidas</label><div class="eeff-input-group"><span class="eeff-casilla">462</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-462" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Ventas Netas</label><div class="eeff-input-group"><span class="eeff-casilla">463</span><div class="currency-input highlight-blue"><span>S/ </span><input type="text" value="0" id="er-463" readonly></div></div></div>
+                                                <div class="eeff-row"><label>Costo de Ventas</label><div class="eeff-input-group"><span class="eeff-casilla">464</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-464" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado bruto Utilidad</label><div class="eeff-input-group"><span class="eeff-casilla">466</span><div class="currency-input highlight-blue"><span>S/ </span><input type="text" value="0" id="er-466" readonly></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado bruto Pérdida</label><div class="eeff-input-group"><span class="eeff-casilla">467</span><div class="currency-input highlight-blue"><span>(S/ </span><input type="text" value="0" id="er-467" readonly><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Gastos de Ventas</label><div class="eeff-input-group"><span class="eeff-casilla">468</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-468" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Gastos de Administración</label><div class="eeff-input-group"><span class="eeff-casilla">469</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-469" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado de operación Utilidad</label><div class="eeff-input-group"><span class="eeff-casilla">470</span><div class="currency-input highlight-blue"><span>S/ </span><input type="text" value="0" id="er-470" readonly></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado de operación Pérdida</label><div class="eeff-input-group"><span class="eeff-casilla">471</span><div class="currency-input highlight-blue"><span>(S/ </span><input type="text" value="0" id="er-471" readonly><span>)</span></div></div></div>
+                                            </div>
+                                            <div class="eeff-column">
+                                                <div class="eeff-row"><label>Gastos Financieros</label><div class="eeff-input-group"><span class="eeff-casilla">472</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-472" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Ingresos Financieros Gravados</label><div class="eeff-input-group"><span class="eeff-casilla">473</span><div class="currency-input highlight-green"><span>S/ </span><input type="text" value="0" class="er-field" id="er-473" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"> <i class="far fa-question-circle" style="margin-left: 5px; cursor: help;"></i></div></div></div>
+                                                <div class="eeff-row"><label>Otros Ingresos gravados</label><div class="eeff-input-group"><span class="eeff-casilla">475</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="er-field" id="er-475" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"></div></div></div>
+                                                <div class="eeff-row"><label>Otros Ingresos no gravados</label><div class="eeff-input-group"><span class="eeff-casilla">476</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="er-field" id="er-476" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"> <i class="far fa-question-circle" style="margin-left: 5px; cursor: help;"></i></div></div></div>
+                                                <div class="eeff-row"><label>Enajen. de val. y bienes del Act. F.</label><div class="eeff-input-group"><span class="eeff-casilla">477</span><div class="currency-input highlight-green"><span>S/ </span><input type="text" value="0" class="er-field" id="er-477" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"></div></div></div>
+                                                <div class="eeff-row"><label>Costo enajen. de val. y bienes A.F.</label><div class="eeff-input-group"><span class="eeff-casilla">478</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-478" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Gastos diversos</label><div class="eeff-input-group"><span class="eeff-casilla">480</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-480" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado antes de part. Utilidad</label><div class="eeff-input-group"><span class="eeff-casilla">484</span><div class="currency-input highlight-blue"><span>S/ </span><input type="text" value="0" id="er-484" readonly></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado antes de part. Pérdida</label><div class="eeff-input-group"><span class="eeff-casilla">485</span><div class="currency-input highlight-blue"><span>(S/ </span><input type="text" value="0" id="er-485" readonly><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Distribución legal de la renta</label><div class="eeff-input-group"><span class="eeff-casilla">486</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-486" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado antes del Imp. Utilidad</label><div class="eeff-input-group"><span class="eeff-casilla">487</span><div class="currency-input highlight-blue"><span>S/ </span><input type="text" value="0" id="er-487" readonly></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado antes del Imp. Pérdida</label><div class="eeff-input-group"><span class="eeff-casilla">489</span><div class="currency-input highlight-blue"><span>(S/ </span><input type="text" value="0" id="er-489" readonly><span>)</span></div></div></div>
+                                                <div class="eeff-row"><label>Impuesto a la renta - Ingreso</label><div class="eeff-input-group"><span class="eeff-casilla">351</span><div class="currency-input"><span>S/ </span><input type="text" value="0" class="er-field" id="er-351" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"></div></div></div>
+                                                <div class="eeff-row"><label>Impuesto a la renta - Gasto</label><div class="eeff-input-group"><span class="eeff-casilla">490</span><div class="currency-input"><span>(S/ </span><input type="text" value="0" class="er-field-neg" id="er-490" onfocus="handleFocus(this)" onblur="handleBlur(this); calculateER()"><span>)</span></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado del ejercicio Utilidad</label><div class="eeff-input-group"><span class="eeff-casilla">492</span><div class="currency-input highlight-blue"><span>S/ </span><input type="text" value="0" id="er-492" readonly></div></div></div>
+                                                <div class="eeff-row total-row-blue"><label>Resultado del ejercicio Pérdida</label><div class="eeff-input-group"><span class="eeff-casilla">493</span><div class="currency-input highlight-blue"><span>(S/ </span><input type="text" value="0" id="er-493" readonly><span>)</span></div></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-footer-actions" style="justify-content: flex-end; gap: 10px; margin-top: 40px;">
+                                            <button class="btn-top-action" onclick="switchEEFF('pasivo')"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                            <button class="btn-next-blue" onclick="switchSection('determinativa_impuesto')">Siguiente <i class="fas fa-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay"></div>
+    
+    <!-- Modals (Confirm/Info) -->
+    <div id="confirm-modal" class="custom-modal">
+        <div class="modal-header-blue">MENSAJE</div>
+        <div class="modal-body-white">
+            <p id="modal-message"></p>
+            <div class="modal-footer-btns">
+                <button class="btn-modal-blue" id="btn-modal-si">SÍ</button>
+                <button class="btn-modal-dark" id="btn-modal-no">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-modal" class="custom-modal">
+        <div class="modal-header-blue">MENSAJE</div>
+        <div class="modal-body-white">
+            <p>A partir del Ejercicio 2019 en adelante, la declaración de renta anual para empresas se realiza a través del Formulario Virtual 710.</p>
+            <div class="modal-footer-btns">
+                <button class="btn-modal-blue" id="btn-modal-aceptar">ACEPTAR</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="dashboard-footer-slim">
+        <div class="footer-left">
+            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Eduardo Mamani Roque</strong></span>
+        </div>
+        <div class="footer-right">
+            <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank">Aprende en la página oficial de SUNAT</a>
+        </div>
+    </footer>
+
+    <script>
+        // Simple script to update time
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('current-datetime').textContent = `${dateStr} ${timeStr}`;
+        }
+        setInterval(updateDateTime, 60000);
+        updateDateTime();
+
+        // Collapsible sidebar logic
+        document.querySelectorAll('.item-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                const parent = header.parentElement;
+                parent.classList.toggle('open');
+                const icon = header.querySelector('i');
+                if (parent.classList.contains('open')) {
+                    icon.classList.replace('fa-caret-right', 'fa-caret-down');
+                } else {
+                    icon.classList.replace('fa-caret-down', 'fa-caret-right');
+                }
+                e.stopPropagation();
+            });
+        });
+
+        // Navigation Logic
+        const linkRenta710 = document.getElementById('link-renta-710');
+        const viewWelcome = document.getElementById('view-welcome');
+        const viewRenta710 = document.getElementById('view-renta-710');
+        const viewInformativa = document.getElementById('view-informativa');
+
+        linkRenta710.addEventListener('click', (e) => {
+            e.preventDefault();
+            hideAllViews();
+            viewRenta710.style.display = 'block';
+            
+            document.querySelectorAll('.submenu a').forEach(a => a.classList.remove('active'));
+            linkRenta710.classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('selected-item'));
+            linkRenta710.closest('.nav-item').classList.add('selected-item');
+        });
+
+        function hideAllViews() {
+            viewWelcome.style.display = 'none';
+            viewRenta710.style.display = 'none';
+            viewInformativa.style.display = 'none';
+        }
+
+        // Modal Logic
+        const selectEjercicio = document.querySelector('.form-select-custom');
+        const modalConfirm = document.getElementById('confirm-modal');
+        const modalInfo = document.getElementById('info-modal');
+        const overlay = document.getElementById('modal-overlay');
+        const modalMsg = document.getElementById('modal-message');
+        const btnSi = document.getElementById('btn-modal-si');
+        const btnNo = document.getElementById('btn-modal-no');
+        const btnAceptar = document.getElementById('btn-modal-aceptar');
+
+        selectEjercicio.addEventListener('change', () => {
+            const year = selectEjercicio.value;
+            if (year) {
+                modalMsg.textContent = `Sr. Contribuyente, usted ha seleccionado el ejercicio ${year} ¿Desea continuar con la presentación del ejercicio ${year}?`;
+                showModal(modalConfirm);
+            }
+        });
+
+        function showModal(m) {
+            m.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function hideModals() {
+            modalConfirm.style.display = 'none';
+            modalInfo.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        overlay.addEventListener('click', hideModals);
+
+        btnNo.addEventListener('click', () => {
+            hideModals();
+            selectEjercicio.value = "";
+        });
+
+        btnSi.addEventListener('click', () => {
+            modalConfirm.style.display = 'none';
+            // Switch background view
+            hideAllViews();
+            viewInformativa.style.display = 'block';
+            // Show second modal
+            showModal(modalInfo);
+        });
+
+        btnAceptar.addEventListener('click', hideModals);
+
+        // Form Logic (Exoneración/Inafectación)
+        const exonSi = document.getElementById('exon-si');
+        const exonNo = document.getElementById('exon-no');
+        const select210 = document.getElementById('select-210');
+        const input216 = document.getElementById('input-216');
+        const date343 = document.getElementById('date-343');
+
+        function showDeterminativaMessage() {
+            const modal = document.getElementById('confirm-modal');
+            const title = modal.querySelector('.modal-header-blue');
+            const body = modal.querySelector('.modal-body-white p');
+            const footer = modal.querySelector('.modal-footer-btns');
+
+            title.innerText = 'Mensaje';
+            body.innerText = 'La información de los EEFF debe ser formulada de acuerdo a las Normas y Principios Contables, los ajustes para determinar la base tributaria deben ser consignados en las casillas de Adiciones y Deducciones';
+            
+            footer.innerHTML = `
+                <button class="btn-modal-dark" onclick="hideModals(); switchSection('determinativa')">Aceptar</button>
+            `;
+
+            modal.style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+        }
+
+        function switchSection(section) {
+            if(section === 'determinativa') {
+                document.getElementById('informativa-full-area').style.display = 'none';
+                document.getElementById('determinativa-area').style.display = 'block';
+                
+                // Update main tabs
+                const tabs = document.querySelectorAll('.main-tabs .tab-item');
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+
+                // Update Header Title
+                const headerText = document.querySelector('.form-header-grey');
+                headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Determinativa ';
+            } else if(section === 'informativa') {
+                document.getElementById('informativa-full-area').style.display = 'block';
+                document.getElementById('determinativa-area').style.display = 'none';
+                
+                const tabs = document.querySelectorAll('.main-tabs .tab-item');
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+
+                const headerText = document.querySelector('.form-header-grey');
+                headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Informativa ';
+            }
+        }
+
+        function handleFocus(input) {
+            if (input.value === '0') {
+                input.value = '';
+            } else {
+                // Remove commas for editing
+                input.value = input.value.replace(/,/g, '');
+            }
+        }
+
+        function handleBlur(input) {
+            // Clean input: remove commas and handle empty string
+            let cleanValue = input.value.replace(/,/g, '');
+            
+            if (cleanValue === '' || isNaN(parseFloat(cleanValue))) {
+                input.value = '0';
+            } else {
+                // Format with commas on blur, ignoring decimals for integers if needed
+                const val = Math.round(parseFloat(cleanValue)); // SUNAT usually handles integers here
+                input.value = val.toLocaleString('en-US');
+            }
+        }
+
+        function switchEEFF(area) {
+            document.getElementById('eeff-activo').style.display = 'none';
+            document.getElementById('eeff-pasivo').style.display = 'none';
+            document.getElementById('eeff-resultados').style.display = 'none';
+            
+            document.querySelectorAll('.eeff-tab').forEach(t => t.classList.remove('active'));
+            
+            if(area === 'activo') {
+                document.getElementById('eeff-activo').style.display = 'block';
+                document.querySelectorAll('.eeff-tab')[0].classList.add('active');
+            } else if(area === 'pasivo') {
+                document.getElementById('eeff-pasivo').style.display = 'block';
+                document.querySelectorAll('.eeff-tab')[1].classList.add('active');
+            } else if(area === 'resultados') {
+                document.getElementById('eeff-resultados').style.display = 'block';
+                document.querySelectorAll('.eeff-tab')[2].classList.add('active');
+            }
+        }
+
+        function getVal(id) {
+            const el = document.getElementById(id);
+            if(!el) return 0;
+            return parseFloat(el.value.replace(/,/g, '')) || 0;
+        }
+
+        function setVal(id, val) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            const absoluteVal = Math.abs(val);
+            el.value = absoluteVal.toLocaleString('en-US');
+        }
+
+        function calculateER() {
+            // Cascade Calculation
+            const v461 = getVal('er-461');
+            const v462 = getVal('er-462');
+            const ventasNetas = v461 - v462;
+            setVal('er-463', ventasNetas);
+
+            const v464 = getVal('er-464');
+            const bruto = ventasNetas - v464;
+            setVal('er-466', bruto > 0 ? bruto : 0);
+            setVal('er-467', bruto < 0 ? bruto : 0);
+
+            const v468 = getVal('er-468');
+            const v469 = getVal('er-469');
+            const operativo = bruto - v468 - v469;
+            setVal('er-470', operativo > 0 ? operativo : 0);
+            setVal('er-471', operativo < 0 ? operativo : 0);
+
+            const v472 = getVal('er-472');
+            const v473 = getVal('er-473');
+            const v475 = getVal('er-475');
+            const v476 = getVal('er-476');
+            const v477 = getVal('er-477');
+            const v478 = getVal('er-478');
+            const v480 = getVal('er-480');
+            const antesPart = operativo - v472 + v473 + v475 + v476 + v477 - v478 - v480;
+            setVal('er-484', antesPart > 0 ? antesPart : 0);
+            setVal('er-485', antesPart < 0 ? antesPart : 0);
+
+            const v486 = getVal('er-486');
+            const antesImp = antesPart - v486;
+            setVal('er-487', antesImp > 0 ? antesImp : 0);
+            setVal('er-489', antesImp < 0 ? antesImp : 0);
+
+            const v351 = getVal('er-351');
+            const v490 = getVal('er-490');
+            const ejercicio = antesImp + v351 - v490;
+            setVal('er-492', ejercicio > 0 ? ejercicio : 0);
+            setVal('er-493', ejercicio < 0 ? ejercicio : 0);
+        }
+
+        function calculatePasivo() {
+            let sum = 0;
+            document.querySelectorAll('.pasivo-field').forEach(input => {
+                sum += parseFloat(input.value.replace(/,/g, '')) || 0;
+            });
+            document.getElementById('total-412').value = sum.toLocaleString('en-US');
+            calculateTotalPasPat();
+        }
+
+        function calculatePatrimonio() {
+            let sum = 0;
+            document.querySelectorAll('.patri-field').forEach(input => {
+                sum += parseFloat(input.value.replace(/,/g, '')) || 0;
+            });
+            document.querySelectorAll('.patri-field-neg').forEach(input => {
+                sum -= parseFloat(input.value.replace(/,/g, '')) || 0;
+            });
+            document.getElementById('total-425').value = sum.toLocaleString('en-US');
+            calculateTotalPasPat();
+        }
+
+        function calculateTotalPasPat() {
+            const pasivo = parseFloat(document.getElementById('total-412').value.replace(/,/g, '')) || 0;
+            const patri = parseFloat(document.getElementById('total-425').value.replace(/,/g, '')) || 0;
+            document.getElementById('total-426').value = (pasivo + patri).toLocaleString('en-US');
+        }
+
+        function calculateActivo() {
+            let sum = 0;
+            document.querySelectorAll('.eeff-field').forEach(input => {
+                sum += parseFloat(input.value.replace(/,/g, '')) || 0;
+            });
+            document.querySelectorAll('.eeff-field-neg').forEach(input => {
+                sum -= parseFloat(input.value.replace(/,/g, '')) || 0;
+            });
+            document.getElementById('total-390').value = sum.toLocaleString('en-US');
+        }
+
+        exonSi.addEventListener('change', () => {
+            select210.disabled = false;
+        });
+        exonNo.addEventListener('change', () => {
+            select210.disabled = true;
+            select210.value = "";
+            input216.disabled = true;
+            input216.value = "";
+            date343.disabled = true;
+            date343.value = "";
+        });
+
+        select210.addEventListener('change', () => {
+            if (select210.value === "OTROS") {
+                input216.disabled = false;
+                date343.disabled = false;
+            } else {
+                input216.disabled = true;
+                date343.disabled = true;
+                input216.value = "";
+                date343.value = "";
+            }
+        });
+
+        const inafSi = document.getElementById('inaf-si');
+        const inafNo = document.getElementById('inaf-no');
+        const select221 = document.getElementById('select-221');
+        const input222 = document.getElementById('input-222');
+
+        inafSi.addEventListener('change', () => {
+            select221.disabled = false;
+        });
+        inafNo.addEventListener('change', () => {
+            select221.disabled = true;
+            select221.value = "";
+            input222.disabled = true;
+            input222.value = "";
+        });
+
+        select221.addEventListener('change', () => {
+            if (select221.value === "OTROS") {
+                input222.disabled = false;
+            } else {
+                input222.disabled = true;
+                input222.value = "";
+            }
+        });
+    </script>
+</body>
+</html>

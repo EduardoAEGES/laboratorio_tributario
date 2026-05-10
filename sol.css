@@ -1,0 +1,457 @@
+:root {
+    --gob-red: #C0142A;
+    --sunat-blue: #004B91;
+    --text-dark: #333333;
+    --text-blue: #0054A6;
+    --bg-light: #F9F9F9;
+    --border-gray: #DDDDDD;
+    --white: #FFFFFF;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-dark);
+    background-color: var(--white);
+    overflow-y: auto;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Header gob.pe */
+.top-header {
+    background-color: var(--gob-red);
+    color: var(--white);
+    padding: 12px 0;
+    height: 64px;
+    display: flex;
+    align-items: center;
+}
+
+.header-container {
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.logo-gob {
+    display: flex;
+    align-items: center;
+}
+
+.gob-logo-img {
+    height: 42px;
+    margin-right: 12px;
+}
+
+.logo-text {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.header-separator {
+    width: 1px;
+    height: 35px;
+    background-color: rgba(255, 255, 255, 0.4);
+    margin: 0 25px;
+}
+
+.platform-name {
+    font-size: 14px;
+    font-weight: 400;
+    max-width: 180px;
+    line-height: 1.2;
+}
+
+.header-search {
+    display: flex;
+    background: var(--white);
+    border-radius: 4px;
+    overflow: hidden;
+    height: 38px;
+    width: 320px;
+}
+
+.header-search input {
+    flex: 1;
+    padding: 0 15px;
+    border: none;
+    font-size: 14px;
+    outline: none;
+}
+
+.header-search button {
+    background: transparent;
+    border: none;
+    padding: 0 15px;
+    color: #333;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Main Layout */
+.main-layout {
+    display: flex;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    min-height: calc(100vh - 120px);
+    gap: 40px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.back-link {
+    color: var(--text-blue);
+    font-weight: 500;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 50px;
+}
+
+.sidebar-info {
+    color: var(--text-blue);
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+.sidebar-info strong {
+    font-weight: 700;
+}
+
+#info-sin-clave-sol {
+    margin-top: 300px;
+}
+
+/* Content */
+.content {
+    flex-grow: 1;
+}
+
+.sunat-logo-container {
+    margin-bottom: 40px;
+}
+
+.sunat-logo {
+    height: 38px;
+}
+
+/* Renta Anual Banner in SOL */
+.renta-anual-banner-sol {
+    background-color: var(--bg-light);
+    padding: 25px 30px;
+    margin-bottom: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.renta-anual-content-sol {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.renta-anual-title-sol {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: right;
+    position: relative;
+    padding-right: 25px;
+    max-width: 220px;
+    line-height: 1.35;
+    color: var(--text-dark);
+}
+
+.renta-anual-title-sol h2 {
+    font-size: 19px;
+}
+
+.renta-anual-title-sol .title-caret {
+    position: absolute;
+    right: 0;
+    font-size: 22px;
+    color: var(--text-dark);
+}
+
+.renta-anual-cards-sol {
+    display: flex;
+    background-color: var(--white);
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+    flex-grow: 1;
+}
+
+.renta-card-sol {
+    padding: 25px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.renta-card-sol:first-child {
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.renta-card-sol h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+}
+
+.renta-card-sol p {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 25px;
+    flex-grow: 1;
+    line-height: 1.5;
+}
+
+.renta-btn-sol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid var(--sunat-blue);
+    color: var(--sunat-blue);
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+    width: fit-content;
+}
+
+.renta-btn-sol:hover {
+    background-color: var(--sunat-blue);
+    color: var(--white);
+    box-shadow: 0 4px 8px rgba(0,75,145,0.2);
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.card-section h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.card {
+    background: var(--bg-light);
+    border-radius: 8px;
+    padding: 30px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-gray);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+}
+
+.card p {
+    font-size: 16px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    flex-grow: 1;
+}
+
+.btn-ingresar {
+    align-self: flex-start;
+    padding: 10px 30px;
+    border: 1px solid var(--sunat-blue);
+    border-radius: 4px;
+    color: var(--sunat-blue);
+    background-color: var(--white);
+    font-weight: 500;
+    font-size: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-ingresar:hover {
+    background-color: var(--sunat-blue);
+    color: white;
+    box-shadow: 0 4px 8px rgba(0,75,145,0.2);
+}
+
+.lower-section {
+    margin-top: 20px;
+}
+
+.card-wide {
+    width: 65%;
+    min-height: 200px;
+}
+
+/* Footer Slim Dark Bar */
+.dashboard-footer-slim {
+    background-color: #222;
+    color: #CCC;
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    border-top: 1px solid #444;
+    width: 100%;
+}
+
+.dashboard-footer-slim strong {
+    color: white;
+}
+
+.dashboard-footer-slim i {
+    color: #00AEEF;
+    margin-right: 5px;
+}
+
+.footer-right a {
+    color: #CCC;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.footer-right a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .main-layout {
+        flex-direction: column;
+        padding: 40px 20px;
+        gap: 30px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        margin-bottom: 0px;
+    }
+
+    .back-link {
+        margin-bottom: 20px;
+    }
+
+    .sidebar-info {
+        display: none; /* Hide contextual info on mobile as it groups awkwardly at the top */
+    }
+
+    .renta-anual-content-sol {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .renta-anual-title-sol {
+        text-align: left;
+        max-width: 100%;
+        padding-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .renta-anual-title-sol .title-caret {
+        display: none;
+    }
+
+    .renta-anual-cards-sol {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .renta-card-sol:first-child {
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-wide {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 0 15px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .top-header {
+        height: auto;
+        padding: 15px 0;
+    }
+    
+    .logo-text {
+        font-size: 24px;
+    }
+    
+    .platform-name {
+        display: none; /* Hide on very small screens to save space */
+    }
+    
+    .header-separator {
+        display: none;
+    }
+    
+    .header-search {
+        width: 100%;
+    }
+    
+    .bottom-bar {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+        padding: 20px 15px;
+    }
+    
+    .footer-links {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+}

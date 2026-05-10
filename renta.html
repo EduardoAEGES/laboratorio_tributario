@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENTA ANUAL - EMPRESAS</title>
+    <link rel="stylesheet" href="sol.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Modern SUNAT Styling */
+        :root {
+            --sunat-blue: #004B91;
+            --sunat-light-blue: #0066CC;
+            --bg-light: #F4F7F9;
+            --text-dark: #333333;
+            --text-gray: #555555;
+            --white: #FFFFFF;
+        }
+
+        body {
+            background-color: #EAEFF4; /* Slightly darker background outside the box */
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-dark);
+        }
+
+        /* Official top red bar */
+        .top-red-bar {
+            background-color: #C0142A;
+            height: 8px;
+            width: 100%;
+        }
+
+        .renta-page-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 20px 60px 20px; /* Reduced top padding */
+        }
+        
+        .renta-header {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .renta-header img {
+            height: 45px; /* Slightly larger logo */
+        }
+        
+        .renta-box {
+            background-color: var(--white);
+            padding: 45px 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 75, 145, 0.08); /* Premium shadow */
+            border: 1px solid rgba(0,0,0,0.03);
+            color: var(--text-dark);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .renta-box h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--sunat-blue);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #EAEFF4;
+            padding-bottom: 15px;
+        }
+        
+        .renta-box p {
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: var(--text-gray);
+        }
+        
+        .btn-center-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .btn-renta-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 35px;
+            border: 1px solid var(--sunat-blue);
+            color: var(--sunat-blue);
+            background-color: var(--white);
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .btn-renta-action:hover {
+            background-color: var(--sunat-blue);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 75, 145, 0.2);
+        }
+        
+        .renta-list {
+            padding-left: 0;
+            margin-bottom: 30px;
+            list-style: none;
+            counter-reset: custom-counter;
+        }
+        
+        .renta-list li {
+            margin-bottom: 12px;
+            text-align: justify;
+            position: relative;
+            padding-left: 45px;
+            color: var(--text-gray);
+        }
+
+        .renta-list li::before {
+            counter-increment: custom-counter;
+            content: counter(custom-counter) ".";
+            position: absolute;
+            left: 0;
+            top: -2px;
+            width: 28px;
+            height: 28px;
+            background-color: var(--bg-light);
+            color: var(--sunat-blue);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 13px;
+        }
+        
+        .bold-text {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .footer-note {
+            background-color: #FFF9E6;
+            padding: 15px 20px;
+            border-radius: 6px;
+            border-left: 4px solid #F2C94C;
+            font-size: 14px;
+            margin-top: 25px;
+            color: #555;
+        }
+
+        /* Footer Slim Dark Bar */
+        .dashboard-footer-slim {
+            background-color: #222;
+            color: #CCC;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            border-top: 1px solid #444;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .dashboard-footer-slim strong {
+            color: white;
+        }
+
+        .dashboard-footer-slim i {
+            color: #00AEEF;
+            margin-right: 5px;
+        }
+
+        .footer-right a {
+            color: #CCC;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .footer-right a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-footer-slim {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+                padding: 10px;
+            }
+            .footer-right a {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="renta-page-container">
+        <header class="renta-header">
+            <img src="LOGO_SUNAT.png" alt="SUNAT Logo">
+        </header>
+
+        <div class="renta-box">
+            <h1>RENTA ANUAL Ejercicios: 2019 – 2025</h1>
+            
+            <p>A través del Formulario Virtual 710 – <span class="bold-text">SIMPLIFICADO</span> podrás realizar tu declaración</p>
+            
+            <div class="btn-center-container">
+                <a href="login.html" class="btn-renta-action">Ingresar <i class="fas fa-caret-right"></i></a>
+            </div>
+
+            <p>De encontrarse en alguno de los siguientes supuestos, deberá presentar su declaración a través del <span class="bold-text">Formulario Virtual 710 – COMPLETO</span></p>
+
+            <ol class="renta-list">
+                <li>Sus ingresos netos superen las 1,700 UIT. Para el ejercicio 2025 corresponde S/ 9'095,000 (1,700 x 5,350) *.</li>
+                <li>Gocen de algún beneficio tributario.</li>
+                <li>Gocen de estabilidad jurídica y/o tributaria.</li>
+                <li>Estén obligados a presentar la declaración jurada anual informativa Reporte Local, Reporte Maestro y/o Reporte País por País.</li>
+                <li>Estén obligados a presentar el balance de comprobación.</li>
+                <li>Pertenezcan al sistema financiero.</li>
+                <li>Hayan presentado el anexo a que se refiere el artículo 12 del Reglamento del ITAN, aprobado por Decreto Supremo N.° 025-2005-EF, mediante el cual se ejerce la opción de acreditar los pagos a cuenta del Impuesto contra las cuotas del ITAN.</li>
+                <li>Hayan intervenido como adquirentes en una reorganización de sociedades.</li>
+                <li>Deduzcan gastos en vehículos automotores asignados a actividades de dirección, representación y administración, de conformidad con lo dispuesto en el inciso w) del artículo 37 de la Ley.</li>
+                <li>Hayan realizado operaciones gravadas con el ITF, conforme a lo previsto en el inciso g) del artículo 9 de la Ley del ITF.</li>
+                <li>Deduzcan los créditos por Impuesto abonado por la distribución de dividendos o utilidades, de conformidad con lo dispuesto en el inciso f) del artículo 88 de la Ley.</li>
+            </ol>
+
+            <p>También deben utilizar el Formulario Virtual N° 710: Renta Anual – Completo – Tercera Categoría e ITF, los contratos de colaboración empresarial que lleven contabilidad independiente de la de sus socios o partes contratantes</p>
+
+            <p>(*) El valor de la UIT 2025 es de S/ 5,350.</p>
+
+            <div class="btn-center-container" style="margin-bottom: 0; margin-top: 30px;">
+                <a href="https://www2.sunat.gob.pe/pdt/pdtdown/independientes/independientes.htm#rentaAnual" target="_blank" class="btn-renta-action">Descargar <i class="fas fa-caret-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="dashboard-footer-slim">
+        <div class="footer-left">
+            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Eduardo Mamani Roque</strong></span>
+        </div>
+        <div class="footer-right">
+            <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank">Aprende en la página oficial de SUNAT</a>
+        </div>
+    </footer>
+
+</body>
+</html>
