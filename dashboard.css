@@ -143,6 +143,34 @@ body {
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
+    transition: width 0.3s ease, min-width 0.3s ease;
+}
+
+.sidebar.collapsed {
+    width: 45px;
+    min-width: 45px;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-nav, 
+.sidebar.collapsed .btn-home span,
+.sidebar.collapsed .section-title {
+    display: none;
+}
+
+.sidebar.collapsed .btn-home {
+    padding: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-top {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 5px;
 }
 
 .sidebar-top {

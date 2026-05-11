@@ -242,10 +242,10 @@
     </header>
 
     <div class="dashboard-layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-top">
-                <button class="btn-home" onclick="showWelcome()"><i class="fas fa-home"></i> Ir al Inicio</button>
-                <button class="btn-collapse"><i class="fas fa-chevron-left"></i></button>
+                <button class="btn-home" onclick="showWelcome()"><i class="fas fa-home"></i> <span>Ir al Inicio</span></button>
+                <button class="btn-collapse" onclick="toggleSidebar()"><i id="collapse-icon" class="fas fa-chevron-left"></i></button>
             </div>
 
             <nav class="sidebar-nav">
@@ -1176,6 +1176,18 @@
         }
         setInterval(updateDateTime, 60000);
         updateDateTime();
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = document.getElementById('collapse-icon');
+            sidebar.classList.toggle('collapsed');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+            } else {
+                icon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+            }
+        }
 
         // Collapsible sidebar logic
         document.querySelectorAll('.item-header').forEach(header => {
