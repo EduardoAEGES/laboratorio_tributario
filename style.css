@@ -162,6 +162,9 @@ li {
 .breadcrumbs ul {
     display: flex;
     gap: 8px;
+    overflow: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
 }
 
 .breadcrumbs li:not(:last-child)::after {
@@ -178,6 +181,34 @@ li {
 
 .nav-tabs ul {
     display: flex;
+    overflow: auto;
+    white-space: nowrap;
+    padding-bottom: 6px;
+}
+
+/* Scrollbar styles for menus */
+.nav-tabs ul::-webkit-scrollbar, 
+.sub-tabs::-webkit-scrollbar,
+.breadcrumbs ul::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+.nav-tabs ul::-webkit-scrollbar-track, 
+.sub-tabs::-webkit-scrollbar-track,
+.breadcrumbs ul::-webkit-scrollbar-track {
+    background: #f4f7f9; 
+    border-radius: 4px;
+}
+.nav-tabs ul::-webkit-scrollbar-thumb, 
+.sub-tabs::-webkit-scrollbar-thumb,
+.breadcrumbs ul::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 4px;
+}
+.nav-tabs ul::-webkit-scrollbar-thumb:hover, 
+.sub-tabs::-webkit-scrollbar-thumb:hover,
+.breadcrumbs ul::-webkit-scrollbar-thumb:hover {
+    background: #aaa; 
 }
 
 .nav-item {
@@ -516,7 +547,9 @@ li {
     display: flex;
     background-color: #E3E9EE;
     border-radius: 4px 4px 0 0;
-    overflow: hidden;
+    overflow: auto;
+    white-space: nowrap;
+    padding-bottom: 6px;
 }
 
 .sub-tab {
