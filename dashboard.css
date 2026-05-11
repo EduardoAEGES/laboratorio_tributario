@@ -1243,6 +1243,45 @@ body {
 .eeff-body {
     max-width: 100%; 
     margin: 0;
+    overflow-x: auto;
+}
+
+#determinativa-impuesto-area,
+#determinativa-creditos-area,
+#determinativa-deuda-area,
+.informativa-content-area {
+    overflow-x: auto;
+}
+
+.eeff-body::-webkit-scrollbar,
+#determinativa-impuesto-area::-webkit-scrollbar,
+#determinativa-creditos-area::-webkit-scrollbar,
+#determinativa-deuda-area::-webkit-scrollbar,
+.informativa-content-area::-webkit-scrollbar {
+    height: 8px;
+}
+.eeff-body::-webkit-scrollbar-track,
+#determinativa-impuesto-area::-webkit-scrollbar-track,
+#determinativa-creditos-area::-webkit-scrollbar-track,
+#determinativa-deuda-area::-webkit-scrollbar-track,
+.informativa-content-area::-webkit-scrollbar-track {
+    background: #f4f7f9;
+    border-radius: 4px;
+}
+.eeff-body::-webkit-scrollbar-thumb,
+#determinativa-impuesto-area::-webkit-scrollbar-thumb,
+#determinativa-creditos-area::-webkit-scrollbar-thumb,
+#determinativa-deuda-area::-webkit-scrollbar-thumb,
+.informativa-content-area::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+.eeff-body::-webkit-scrollbar-thumb:hover,
+#determinativa-impuesto-area::-webkit-scrollbar-thumb:hover,
+#determinativa-creditos-area::-webkit-scrollbar-thumb:hover,
+#determinativa-deuda-area::-webkit-scrollbar-thumb:hover,
+.informativa-content-area::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 .modal-table {
