@@ -184,6 +184,31 @@
         .pdf-receipt-box::before { content: attr(data-title); position: absolute; top: -10px; left: 10px; background: white; padding: 0 5px; font-weight: bold; font-size: 11px; }
         
         .pdf-footer { position: absolute; bottom: 10mm; right: 15mm; font-size: 11px; }
+        .infcomp-sub-tabs {
+            display: flex;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            padding: 5px 20px 0 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: 20px;
+        }
+        .infcomp-tab-item {
+            padding: 8px 10px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .infcomp-tab-item:hover {
+            color: #0066B3;
+        }
+        .infcomp-tab-item.active {
+            color: #0066B3;
+            font-weight: bold;
+            border-bottom: 3px solid #0066B3;
+        }
     </style>
 </head>
 <body>
@@ -215,8 +240,9 @@
 
     <div id="main-app-container">
     <header class="dashboard-header">
-        <div class="top-logo-bar">
+        <div class="top-logo-bar" style="display: flex; align-items: center; gap: 10px;">
             <img src="LOGO_SUNAT.png" alt="SUNAT" class="sunat-logo">
+            <span style="font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: bold; color: #1E395B; border-left: 2px solid #006699; padding-left: 10px; height: 30px; display: flex; align-items: center;">LABORATORIO TRIBUTARIO CERTUS</span>
         </div>
         <div class="blue-info-bar">
             <div class="info-left">
@@ -236,6 +262,7 @@
             </div>
             <div class="info-right">
                 <span class="status-badge">Domicilio: <strong id="header-status">HABIDO</strong></span>
+                <a href="index.html" class="btn-exit" style="background-color: #00AEEF;">MENÚ PRINCIPAL</a>
                 <a href="login.html" class="btn-exit">Salir</a>
             </div>
         </div>
@@ -358,21 +385,23 @@
                             <i class="far fa-question-circle"></i>
                         </a>
                     </div>
-                    <div class="form-body-white no-padding">
-                        <div class="informativa-tabs-container">
-                            <div class="main-tabs">
-                                <div class="tab-item active" onclick="switchSection('informativa')">Sección Informativa</div>
-                                <div class="tab-item" onclick="showDeterminativaMessage()">Sección Determinativa</div>
-                            </div>
-                        </div>
-
-                        <div id="informativa-full-area">
-                            <div class="sub-tabs-bar">
-                                <div class="sub-tab-item active">Identificación</div>
-                                <div class="sub-tab-item" onclick="alert('POR IMPLEMENTAR')">Información Complementaria</div>
+                        <div class="form-body-white no-padding">
+                            <div class="informativa-tabs-container">
+                                <div class="main-tabs">
+                                    <div class="tab-item active" id="main-tab-informativa" onclick="switchSection('informativa')">Sección Informativa</div>
+                                    <div class="tab-item" id="main-tab-determinativa" onclick="showDeterminativaMessage()">Sección Determinativa</div>
+                                </div>
                             </div>
 
-                            <div class="informativa-content-area">
+                            <div id="informativa-full-area">
+                                <div class="sub-tabs-bar">
+                                <div id="subtab-identificacion" class="sub-tab-item active" onclick="switchSection('informativa')">Identificación</div>
+                                <div id="subtab-complementaria" class="sub-tab-item" onclick="switchSection('informativa_complementaria')">Información Complementaria</div>
+                            </div>
+
+                            <!-- Identificación Content -->
+                            <div id="identificacion-content-area">
+                                <div class="informativa-content-area">
                             <div class="rectificatoria-section">
                                 <span class="label">Indicador de rectificatoria</span>
                                 <div class="radio-stack">
@@ -486,6 +515,122 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            </div>
+
+                            <!-- Información Complementaria Content -->
+                            <div id="complementaria-content-area" style="display: none;">
+                                <div class="infcomp-sub-tabs">
+                                    <div class="infcomp-tab-item active" id="infcomp-tab-general" onclick="switchInfComp('general')">Información General</div>
+                                    <div class="infcomp-tab-item" id="infcomp-tab-socios" onclick="switchInfComp('socios')">100 Principales socios, asociados y otros</div>
+                                    <div class="infcomp-tab-item" id="infcomp-tab-alquileres" onclick="switchInfComp('alquileres')">Alquileres Pagados</div>
+                                    <div class="infcomp-tab-item" id="infcomp-tab-constructoras" onclick="switchInfComp('constructoras')">Empresas Constructoras...</div>
+                                    <div class="infcomp-tab-item" id="infcomp-tab-itan" onclick="switchInfComp('itan')">ITAN</div>
+                                    <div class="infcomp-tab-item" id="infcomp-tab-niif" onclick="switchInfComp('niif')">NIIF</div>
+                                </div>
+
+                                <div class="informativa-content-area" id="inf-comp-general-content">
+                                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                        <!-- Datos del Contador -->
+                                        <div class="info-box-bordered informative-box" style="flex: 1; min-width: 400px;">
+                                            <h5 class="box-title" style="color: #0066B3; border-bottom: 1px solid #eee; padding-bottom: 5px;">Datos del Contador</h5>
+                                            <div class="casilla-fields-aligned">
+                                                <div class="casilla-row-aligned">
+                                                    <label>Tipo de Documento:</label>
+                                                    <div class="casilla-input-group">
+                                                        <span class="casilla-num">687</span>
+                                                        <select class="form-select-sm" style="width: 250px;">
+                                                            <option value="DNI">DOC. NACIONAL DE IDENTIDAD</option>
+                                                            <option value="CE">CARNET DE EXTRANJERIA</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Nro de documento:</label>
+                                                    <div class="casilla-input-group">
+                                                        <span class="casilla-num">207</span>
+                                                        <input type="text" class="form-input-sm" style="width: 250px;" value="46069339">
+                                                    </div>
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Apellidos y Nombres:</label>
+                                                    <input type="text" class="form-input-sm" style="width: 300px; margin-left: 55px;" value="MAMANI ROQUE EDUARDO LUIS">
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>C.P.C.:</label>
+                                                    <input type="text" class="form-input-sm" style="width: 250px; margin-left: 55px;" placeholder="INGRESAR">
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Correo Electrónico 1:</label>
+                                                    <input type="text" class="form-input-sm" style="width: 250px; margin-left: 55px;" value="EDU.MAMANIROQUE@GMAIL.COM">
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Correo Electrónico 2:</label>
+                                                    <input type="text" class="form-input-sm" style="width: 250px; margin-left: 55px;" placeholder="INGRESAR">
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Teléfono Fijo:</label>
+                                                    <div class="casilla-input-group">
+                                                        <span class="casilla-num">250</span>
+                                                        <input type="text" class="form-input-sm" style="width: 200px;" placeholder="INGRESAR">
+                                                    </div>
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Celular:</label>
+                                                    <div class="casilla-input-group">
+                                                        <span class="casilla-num">251</span>
+                                                        <input type="text" class="form-input-sm" style="width: 200px;" placeholder="INGRESAR">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Datos del Representante Legal -->
+                                        <div class="info-box-bordered informative-box" style="flex: 1; min-width: 400px;">
+                                            <h5 class="box-title" style="color: #0066B3; border-bottom: 1px solid #eee; padding-bottom: 5px;">Datos del Representante Legal</h5>
+                                            <div class="casilla-fields-aligned">
+                                                <div class="casilla-row-aligned">
+                                                    <label>Tipo de Documento:</label>
+                                                    <div class="casilla-input-group">
+                                                        <span class="casilla-num">225</span>
+                                                        <select class="form-select-sm" style="width: 250px;">
+                                                            <option value="DNI">DOC. NACIONAL DE IDENTIDAD</option>
+                                                            <option value="CE">CARNET DE EXTRANJERIA</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Nro de documento:</label>
+                                                    <div class="casilla-input-group">
+                                                        <span class="casilla-num">226</span>
+                                                        <input type="text" class="form-input-sm" style="width: 250px;" value="44452865">
+                                                    </div>
+                                                </div>
+                                                <div class="casilla-row-aligned">
+                                                    <label>Apellidos y Nombres:</label>
+                                                    <input type="text" class="form-input-sm" style="width: 300px; margin-left: 55px;" value="CRUZ ROQUE RODY JOSE MIGUEL">
+                                                </div>
+                                                <div class="casilla-row-aligned" style="margin-top: 20px; justify-content: center;">
+                                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                                        <input type="checkbox" checked> Confirma los datos del representante legal.
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-footer-actions" style="justify-content: center; margin-top: 20px;">
+                                        <button class="btn-prev-sunat" onclick="switchSection('informativa')"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                        <button class="btn-next-blue" onclick="showDeterminativaMessage()">Siguiente <i class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+
+                                <!-- Placeholder contents for other sub-tabs -->
+                                <div class="informativa-content-area" id="inf-comp-others-content" style="display: none; padding: 40px; text-align: center; color: #777;">
+                                    <i class="fas fa-tools" style="font-size: 48px; margin-bottom: 20px;"></i>
+                                    <p>Esta sección se encuentra habilitada para su edición conforme a la normativa vigente.</p>
+                                </div>
+                            </div>
                             </div>
                         </div>
 
@@ -1326,16 +1471,24 @@
             
             if (section === 'form_selection') {
                 document.getElementById('view-renta-710').style.display = 'block';
-            } else if (section === 'informativa') {
+            } else if (section === 'informativa' || section === 'informativa_complementaria') {
                 document.getElementById('view-informativa').style.display = 'block';
-                document.getElementById('informativa-full-area').style.display = 'block';
+                const infFullArea = document.getElementById('informativa-full-area');
+                if (infFullArea) infFullArea.style.display = 'block';
                 
-                const tabs = document.querySelectorAll('.main-tabs .tab-item');
-                if(tabs.length > 1) {
-                    tabs[0].classList.add('active');
-                    tabs[1].classList.remove('active');
+                if (section === 'informativa') {
+                    document.getElementById('identificacion-content-area').style.display = 'block';
+                    document.getElementById('complementaria-content-area').style.display = 'none';
+                    document.getElementById('subtab-identificacion').classList.add('active');
+                    document.getElementById('subtab-complementaria').classList.remove('active');
+                } else {
+                    document.getElementById('identificacion-content-area').style.display = 'none';
+                    document.getElementById('complementaria-content-area').style.display = 'block';
+                    document.getElementById('subtab-identificacion').classList.remove('active');
+                    document.getElementById('subtab-complementaria').classList.add('active');
                 }
 
+                updateMainTabStyles(0);
                 const headerText = document.querySelector('.form-header-grey');
                 if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Informativa ';
             } else if (section === 'determinativa' || section === 'determinativa_eeff') {
@@ -1418,6 +1571,32 @@
             } else if (section === 'consulta_pagos') {
                 document.getElementById('view-consulta-pagos').style.display = 'block';
                 renderConsultaTable();
+            }
+        }
+
+        function switchInfComp(tab) {
+            const tabs = ['general', 'socios', 'alquileres', 'constructoras', 'itan', 'niif'];
+            tabs.forEach(t => {
+                const el = document.getElementById('infcomp-tab-' + t);
+                if (el) {
+                    if (t === tab) {
+                        el.classList.add('active');
+                        el.style.color = '#0066B3';
+                        el.style.fontWeight = 'bold';
+                    } else {
+                        el.classList.remove('active');
+                        el.style.color = '#777';
+                        el.style.fontWeight = 'normal';
+                    }
+                }
+            });
+
+            if (tab === 'general') {
+                document.getElementById('inf-comp-general-content').style.display = 'block';
+                document.getElementById('inf-comp-others-content').style.display = 'none';
+            } else {
+                document.getElementById('inf-comp-general-content').style.display = 'none';
+                document.getElementById('inf-comp-others-content').style.display = 'block';
             }
         }
 

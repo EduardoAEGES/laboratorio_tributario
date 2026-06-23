@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - Menú SOL</title>
+    <link rel="stylesheet" href="tramites.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header class="tramites-header">
+        <div class="header-top">
+            <div class="logo-container">
+                <img src="LOGO_SUNAT.png" alt="SUNAT" class="sunat-logo">
+            </div>
+            <div class="header-actions">
+                <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-envelope"></i> Buzón Electrónico</a>
+                <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-star"></i> Favoritos <i class="fas fa-caret-down"></i></a>
+                <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-print"></i> Imprimir</a>
+            </div>
+        </div>
+        <div class="header-blue">
+            <div class="header-blue-left">
+                <span id="current-datetime">11/05/2026 12:42</span>
+            </div>
+            <div class="header-blue-right">
+                <div class="user-welcome-container">
+                    <span class="user-welcome">Bienvenido, FABRINSUR GROUP S.R.L. <i class="fas fa-caret-down"></i></span>
+                    <div class="user-dropdown-custom">
+                        <div class="dropdown-top-info">
+                            <div class="company-name">FABRINSUR GROUP S.R.L.</div>
+                            <div class="company-ruc">RUC: 20606966823</div>
+                            <div class="company-user">Usuario: SIST</div>
+                            <button class="btn-ver-ficha-ruc" onclick="alert('Consulta de Ficha RUC'); return false;">Ver Ficha Ruc</button>
+                        </div>
+                        <hr class="dropdown-separator">
+                        <div class="dropdown-bottom-operations">
+                            <div class="operations-title">OPERACIONES</div>
+                            <ul>
+                                <li><a href="#" onclick="alert('Actualizar datos del RUC'); return false;">Actualizar datos del RUC</a></li>
+                                <li><a href="#" onclick="alert('Cambiar nombre de usuario'); return false;">Cambiar nombre de usuario</a></li>
+                                <li><a href="#" onclick="alert('Administración de usuarios secundarios'); return false;">Administración de usuarios secundarios</a></li>
+                                <li><a href="#" onclick="alert('Cambiar clave'); return false;">Cambiar clave</a></li>
+                                <li><a href="#" onclick="alert('Modificar pregunta y respuesta segura'); return false;">Modificar pregunta y respuesta segura</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <span class="user-status">Domicilio: Habido</span>
+                <a href="index.html" class="btn-salir" style="background-color: #00AEEF;">MENÚ PRINCIPAL</a>
+                <a href="sol.html" class="btn-salir">Salir</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="tramites-container" id="tramites-content-container">
+        <aside class="tramites-sidebar">
+            <h3 class="sidebar-title">¿Qué necesitas hacer?</h3>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Personas</a></li>
+                <li class="active"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Empresas <i class="fas fa-chevron-right arrow-right"></i></a></li>
+                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Operador de<br>Comercio Exterior</a></li>
+            </ul>
+        </aside>
+
+        <main class="tramites-main">
+            <div class="search-bar" id="search-bar-container">
+                <input type="text" placeholder="Busque una opción del menú">
+                <button onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-search"></i></button>
+            </div>
+
+            <div class="menu-columns" id="menu-columns-container">
+                <div class="menu-col">
+                    <ul class="menu-list">
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Mis Declaraciones y pagos</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Mi RUC y Otros Registros</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Guía de Remisión Electrónica</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Perfil de Cumplimiento</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Propuesta Información para declaración jurada</a></li>
+                        <li class="has-submenu">
+                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Comprobantes de pago</a>
+                            <ul class="submenu-list">
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobantes de Pago</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobantes de Pago Físico</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Certificado Digital Tributario - CDT</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Otros Sistemas de Emisión Electrónica</a></li>
+                                <li class="has-submenu">
+                                    <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> SEE - SOL</a>
+                                    <ul class="submenu-list">
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
+                                        <li class="has-submenu">
+                                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Factura Electrónica</a>
+                                            <ul class="submenu-list last-level">
+                                                <li><a href="#" onclick="showEmitirFactura(); return false;">Emitir Factura</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emitir Nota de Crédito</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emitir Nota de Débito</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Rechazar Factura</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Catalogo de productos</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Consultar Factura y Nota</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emision FE Simplificada</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emision BVE Simplificada</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Consulta Simplificada</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emision ND de BVE Simplificada</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emision ND de FE Simplificada</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emision NC de BVE Simplificada</a></li>
+                                                <li><a href="#" onclick="showDashboard(); return false;">Emision NC de FE Simplificada</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Boleta de Venta Electrónica</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Guía de Remisión -Bienes Fiscalizables</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Guía de Remisión</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobante de Percepción Electrónico</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobante de Retención Electrónico</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Liquidación de Compra Electrónica</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Consulta de Validez de Comprobante de Pago</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> SEE - Del Contribuyente y Envío de Documentos</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Liquidación de Compra</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Factura Electrónica</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Proveedor de Servicios Electrónicos-PSE</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Contingencia de Comprobantes de Pago</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Operador de Servicios Electrónicos - OSE</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Sistema Emisión Electrónica - OSE</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobantes - Contingencia</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Póliza de Adjudicación Electrónica</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Consulta de Obligados</a></li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Consulta de Validez de Comprobante de Pago</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Sistema Integrado de Registros Electronicos</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Sistema de Libros y Registros Electrónicos</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Mis declaraciones informativas</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Portal del Operador de Comercio Exterior</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Otras declaraciones y solicitudes</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Ventanilla de Atención al Operador</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Observaciones realizadas por SUNAT</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Reactiva Perú</a></li>
+                    </ul>
+                </div>
+                <div class="menu-col">
+                    <ul class="menu-list">
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Nuevo Sist. de Embargo por Medios Telemáticos</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Plataforma de Confirmación del RHE y de la FE</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Libro de Reclamaciones</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Revisión de mis deudas</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Mi fraccionamiento</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Expediente Virtual</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Opción para Imprentas SOL</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Plataforma Electrónica de Fiscalización</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Acceso a Entidades Externas</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Registro para control de Bienes Fiscalizados</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Mis Avisos Electrónicos</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Omiso a la presentación DJ</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Operaciones de Comercio Exterior</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> SIGA</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> CCI Único</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Credenciales de API SUNAT</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Liquidación de la Declaración Jurada</a></li>
+                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Control Electrónico Trazabilidad de Mercancía</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Dashboard Container (Hidden by default) -->
+            <div id="factura-electronica-dashboard" style="display: none; margin-top: 20px;">
+                <!-- Back Button -->
+                <button class="dashboard-back-btn" onclick="hideDashboard()">
+                    <i class="fas fa-arrow-left"></i> Volver a Trámites
+                </button>
+
+                <div class="dashboard-container">
+                    <!-- Dashboard Header -->
+                    <div class="dashboard-header-row">
+                        <div class="dashboard-title">Dashboard Interactivo Básico</div>
+                        <div class="dashboard-subtitle">Contextualiza tu tema con un subtítulo</div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="dashboard-stats-row">
+                        <!-- Stat 1 -->
+                        <div class="stat-card">
+                            <div class="stat-number">40%</div>
+                            <div class="stat-title">Contextualiza tu tema con un subtítulo</div>
+                            <div class="stat-desc">Síntesis y organización, los dos pilares para presentar</div>
+                            <button class="plus-btn" onclick="alert('Funcionalidad adicional')">+</button>
+                        </div>
+                        <!-- Stat 2 -->
+                        <div class="stat-card">
+                            <div class="stat-number">50%</div>
+                            <div class="stat-title">Contextualiza tu tema con un subtítulo</div>
+                            <div class="stat-desc">Dales vida a los elementos de tu creación con animación</div>
+                            <button class="plus-btn" onclick="alert('Funcionalidad adicional')">+</button>
+                        </div>
+                        <!-- Stat 3 -->
+                        <div class="stat-card">
+                            <div class="stat-number">10%</div>
+                            <div class="stat-title">Contextualiza tu tema con un subtítulo</div>
+                            <div class="stat-desc">Con tranquilidad y concisión. Sintetiza el contenido.</div>
+                            <button class="plus-btn" onclick="alert('Funcionalidad adicional')">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid -->
+                    <div class="dashboard-main-grid">
+                        <!-- Chart Card -->
+                        <div class="chart-section">
+                            <div class="chart-header">
+                                <div class="chart-title" style="font-weight: bold; font-family: serif; font-size: 18px;">Aquí puedes poner un título destacado</div>
+                                <button class="plus-btn" style="position: relative; right: 0; bottom: 0; display: inline-flex;" onclick="alert('Funcionalidad adicional')">+</button>
+                            </div>
+
+                            <div class="bar-chart-container">
+                                <!-- Col 1 -->
+                                <div class="chart-column">
+                                    <div class="bars-wrapper">
+                                        <div class="bar purple" style="height: 35%;"></div>
+                                        <div class="bar gray" style="height: 15%;"></div>
+                                    </div>
+                                    <i class="fas fa-chart-pie column-icon"></i>
+                                </div>
+                                <!-- Col 2 -->
+                                <div class="chart-column">
+                                    <div class="bars-wrapper">
+                                        <div class="bar purple" style="height: 80%;"></div>
+                                        <div class="bar gray" style="height: 25%;"></div>
+                                    </div>
+                                    <i class="fas fa-headphones column-icon"></i>
+                                </div>
+                                <!-- Col 3 -->
+                                <div class="chart-column">
+                                    <div class="bars-wrapper">
+                                        <div class="bar purple" style="height: 70%;"></div>
+                                        <div class="bar gray" style="height: 45%;"></div>
+                                    </div>
+                                    <i class="fas fa-user-circle column-icon"></i>
+                                </div>
+                                <!-- Col 4 -->
+                                <div class="chart-column">
+                                    <div class="bars-wrapper">
+                                        <div class="bar purple" style="height: 95%;"></div>
+                                        <div class="bar gray" style="height: 20%;"></div>
+                                    </div>
+                                    <i class="fas fa-video column-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar Columns of Dashboard -->
+                        <div class="sidebar-section">
+                            <!-- Progress Card -->
+                            <div class="mini-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
+                                    <div class="mini-card-title" style="font-family: serif; font-size: 17px; margin-bottom: 0;">Un título genial</div>
+                                    <button class="plus-btn" style="position: relative; right: 0; bottom: 0;" onclick="alert('Funcionalidad adicional')">+</button>
+                                </div>
+                                <div class="mini-card-sub">Contextualiza tu tema con un subtítulo</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar-fill">70%</div>
+                                </div>
+                            </div>
+
+                            <!-- Review Card -->
+                            <div class="mini-card">
+                                <div class="profile-row">
+                                    <div class="profile-img-container">
+                                        <img src="profile_smiling.png" alt="Profile photo">
+                                    </div>
+                                    <div class="profile-details">
+                                        <div class="mini-card-title" style="font-family: serif; font-size: 17px; margin-bottom: 0;">Un título genial</div>
+                                        <div class="rating-stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star empty"></i>
+                                        </div>
+                                        <div class="review-text">Comparte tu idea con una imagen</div>
+                                    </div>
+                                </div>
+                                <button class="plus-btn" onclick="alert('Funcionalidad adicional')">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SECCION EMITIR FACTURA (Oculto por defecto) -->
+    <div class="emitir-factura-wrapper" id="emitir-factura-wrapper" style="display: none;">
+        <div class="factura-layout">
+            <aside class="factura-sidebar">
+                <div class="factura-sidebar-header">
+                    <a href="#" onclick="hideEmitirFactura(); return false;">
+                        <i class="fas fa-home"></i> Ir al inicio <i class="fas fa-chevron-left" style="float: right; margin-top: 3px;"></i>
+                    </a>
+                </div>
+                <div class="factura-sidebar-menu">
+                    <h3>COMPROBANTES DE PAGO</h3>
+                    <ul>
+                        <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); return false;"><i class="fas fa-caret-right"></i> Comprobantes de Pago</a></li>
+                        <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); return false;"><i class="fas fa-caret-right"></i> Comprobantes de Pago Físico</a></li>
+                        <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); return false;"><i class="fas fa-caret-right"></i> Certificado Digital Tributario - CDT</a></li>
+                        <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); return false;"><i class="fas fa-caret-right"></i> Otros Sistemas de Emisión Electrónica</a></li>
+                        <li class="has-submenu open">
+                            <a href="#" class="menu-item-link" style="font-weight: bold;"><i class="fas fa-caret-down"></i> SEE - SOL</a>
+                            <ul class="submenu-list-factura">
+                                <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
+                                <li class="has-submenu open">
+                                    <a href="#" class="menu-item-link" style="font-weight: bold;"><i class="fas fa-caret-down"></i> Factura Electrónica</a>
+                                    <ul class="submenu-list-factura last-level-factura">
+                                        <li class="active-factura"><a href="#" onclick="return false;">Emitir Factura <i class="fas fa-chevron-right" style="color: #006699; font-size: 11px;"></i></a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emitir Nota de Crédito</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emitir Nota de Débito</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Rechazar Factura</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Catalogo de productos</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Consultar Factura y Nota</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emision FE Simplificada</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emision BVE Simplificada <i class="fas fa-chevron-right" style="color: #555; font-size: 11px; float: right; margin-top: 3px;"></i></a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Consulta Simplificada</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emision ND de BVE Simplificada</a></li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emision ND de FE Simplificada</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+            <main class="factura-content">
+                <!-- STEP 1: PARÁMETROS INICIALES -->
+                <div class="factura-form-container" id="factura-step-1">
+                    <div class="factura-table-border-wrapper">
+                        <table class="factura-form-table">
+                            <tr>
+                                <td class="question-cell">Indique el Tipo de Transacción</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="tipoTransaccion" value="contado" checked> Al Contado</label>
+                                    <label><input type="radio" name="tipoTransaccion" value="credito"> Al Crédito</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si existen operaciones sujetas a Detracción</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="detraccion" value="si"> Si</label>
+                                    <label><input type="radio" name="detraccion" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si es una Factura de Exportación</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="exportacion" value="si"> Si</label>
+                                    <label><input type="radio" name="exportacion" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Consigne el RUC del Contribuyente Receptor de la Factura</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <input type="text" id="ruc-receptor" class="factura-input-text" maxlength="11" placeholder="" oninput="lookupRuc(this.value)">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell" style="height: 38px;"></td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <div id="ruc-nombre-display" class="factura-client-display" style="background-color: #f0f0f0; min-height: 24px; border: 1px solid #ccc;"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la Factura está vinculado a un contrato de Colaboración Empresarial Sin Contabilidad Independiente</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="contratoColab" value="si"> Si</label>
+                                    <label><input type="radio" name="contratoColab" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la factura se emite por un Pago Anticipado</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="pagoAnticipado" value="si"> Si</label>
+                                    <label><input type="radio" name="pagoAnticipado" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la factura la emite un Emisor Itinerante</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="emisorItinerante" value="si"> Si</label>
+                                    <label><input type="radio" name="emisorItinerante" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique el establecimiento del Emisor donde entregue el bien o preste el servicio</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="establecimientoEmisor" value="si" checked> Si</label>
+                                    <label><input type="radio" name="establecimientoEmisor" value="no"> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Consigne la dirección donde entregue el bien o preste el servicio</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="direccionEntrega" value="si"> Si</label>
+                                    <label><input type="radio" name="direccionEntrega" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la Factura se emite por venta de combustible y/o mantenimiento de un vehículo</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="combustibleVehiculo" value="si"> Si</label>
+                                    <label><input type="radio" name="combustibleVehiculo" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique el Tipo de Moneda de la Factura</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <select class="factura-select" id="moneda-factura">
+                                        <option value="PEN" selected>SOLES</option>
+                                        <option value="USD">DÓLARES AMERICANOS</option>
+                                        <option value="EUR">EUROS</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la Factura tiene Descuentos o Deduce Anticipos</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="descuentos" value="si"> Si</label>
+                                    <label><input type="radio" name="descuentos" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la Factura tiene ISC</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="isc" value="si"> Si</label>
+                                    <label><input type="radio" name="isc" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la Factura tiene Operaciones Gratuitas</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="operacionesGratuitas" value="si"> Si</label>
+                                    <label><input type="radio" name="operacionesGratuitas" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Indique si la Factura tiene Cargos u Otros Tributos que no forman parte de la base imponible del IGV</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <label><input type="radio" name="cargosOtros" value="si"> Si</label>
+                                    <label><input type="radio" name="cargosOtros" value="no" checked> No</label>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="factura-buttons-row">
+                        <button class="btn-factura-action" onclick="continueInvoice()">
+                            <i class="fas fa-arrow-alt-circle-right" style="color: #006699;"></i> Continuar
+                        </button>
+                        <button class="btn-factura-action" onclick="hideEmitirFactura()">
+                            <i class="fas fa-times-circle" style="color: #cc0000;"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: DETALLES DE FACTURACIÓN -->
+                <div class="factura-form-container" id="factura-step-2" style="display: none; max-width: 1000px;">
+                    <div class="factura-table-border-wrapper" style="padding: 15px;">
+                        <table class="factura-header-details">
+                            <tr>
+                                <td class="label-col">Número de documento</td>
+                                <td class="sep-col">:</td>
+                                <td class="value-col">
+                                    <input type="text" id="step2-ruc" class="factura-readonly-input" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">Razón Social</td>
+                                <td class="sep-col">:</td>
+                                <td class="value-col">
+                                    <input type="text" id="step2-razon" class="factura-readonly-input long" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">Establecimiento Emisor</td>
+                                <td class="sep-col">:</td>
+                                <td class="value-col">
+                                    <input type="text" id="step2-establecimiento" class="factura-readonly-input long" readonly style="display: inline-block;">
+                                    <button class="btn-registrar-est" onclick="alert('Registro de establecimiento'); return false;">Registrar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">Tipo Moneda</td>
+                                <td class="sep-col">:</td>
+                                <td class="value-col">
+                                    <input type="text" id="step2-moneda" class="factura-readonly-input" readonly>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="factura-date-row">
+                            <label>Fecha de Emisión :</label>
+                            <input type="text" id="step2-fecha" class="factura-date-input" readonly>
+                        </div>
+
+                        <!-- Toolbar -->
+                        <div class="factura-items-toolbar">
+                            <button class="btn-toolbar-action" onclick="openNuevoItemModal(); return false;">
+                                <i class="fas fa-plus-circle"></i> Adicionar
+                            </button>
+                            <button class="btn-toolbar-action" onclick="alert('Editar ítem'); return false;">
+                                <i class="fas fa-pencil-alt"></i> Editar
+                            </button>
+                            <button class="btn-toolbar-action" onclick="alert('Eliminar ítem'); return false;">
+                                <i class="fas fa-minus-circle"></i> Eliminar
+                            </button>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div class="factura-items-table-wrapper">
+                            <table class="factura-items-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30px; text-align: center;">-</th>
+                                        <th style="width: 60px; text-align: center;">-</th>
+                                        <th>Bien/Servicio</th>
+                                        <th>Gravado/Exonerado/Inafecto</th>
+                                        <th>Unidad Medida</th>
+                                        <th style="text-align: right;">Cantidad</th>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th style="text-align: right;">Valor Unitario</th>
+                                        <th style="text-align: right;">Descuento</th>
+                                        <th style="text-align: right;">IGV</th>
+                                        <th style="text-align: right;">ISC</th>
+                                        <th style="text-align: right;">Importe de Venta</th>
+                                        <th style="text-align: right;">ICBPER</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoice-items-tbody">
+                                    <tr>
+                                        <td colspan="14" style="color: #999; font-style: italic; padding: 25px; text-align: center;">No se han adicionado ítems a la factura.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Totals & Bottom Buttons -->
+                        <div class="factura-bottom-row">
+                            <div class="factura-bottom-left-btns">
+                                <button class="btn-factura-action" onclick="goBackToStep1()">
+                                    <i class="fas fa-arrow-alt-circle-left" style="color: #006699;"></i> Retroceder
+                                </button>
+                                <button class="btn-factura-action" onclick="continueToStep3()">
+                                    <i class="fas fa-arrow-alt-circle-right" style="color: #006699;"></i> Continuar
+                                </button>
+                                <button class="btn-factura-action" onclick="hideEmitirFactura()">
+                                    <i class="fas fa-times-circle" style="color: #cc0000;"></i> Cancelar
+                                </button>
+                            </div>
+
+                            <table class="factura-totals-table">
+                                <tr>
+                                    <td class="label-cell">Sub Total Ventas :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Anticipos :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Descuentos :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Valor de Venta :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">ISC :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">IGV :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">ICBPER :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Otros Cargos :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Otros Tributos :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Monto de Redondeo :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Importe Total :</td>
+                                    <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: INFORMACIÓN ADICIONAL -->
+                <div class="factura-form-container" id="factura-step-3" style="display: none; max-width: 1000px;">
+                    <div class="factura-table-border-wrapper" style="padding: 15px;">
+                        <h3 class="step3-title" style="text-align: center; font-size: 13px; font-weight: bold; color: #1E395B; margin-top: 0; margin-bottom: 15px;">INFORMACIÓN ADICIONAL</h3>
+                        
+                        <div class="step3-description-box" style="border: 1px solid #C0D6E4; padding: 12px 15px; font-size: 11.5px; line-height: 1.5; color: #333333; margin-bottom: 15px; background-color: #F2F5F8; border-radius: 2px;">
+                            <strong>En esta pantalla podrá consignar:</strong><br>
+                            - Algún comentario u observación a la factura que está emitiendo.<br>
+                            - Documentos relacionados a la factura.<br>
+                            - Información relacionada a la factura.<br>
+                            - Información que sustenta el traslado de bienes.<br>
+                            - Placa del vehículo automotor, tratándose de venta de combustible y/o mantenimiento del mismo.<span id="step3-desc-credito" style="display: none;"><br>- Información relacionada al tipo de crédito.</span><span id="step3-desc-detraccion" style="display: none;"><br>- Información relacionada a las detracciones.</span>
+                        </div>
+
+                        <table class="factura-form-table">
+                            <tr>
+                                <td class="question-cell" style="width: 50%;">Consigne las observaciones de la Factura</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <input type="text" id="step3-observaciones" class="factura-input-text" style="width: 90%;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Consigne los Documentos Relacionados de la Factura</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <button class="btn-registrar-est" onclick="alert('Consigne los Documentos Relacionados'); return false;" style="margin-left: 0;">Documentos Relacionados</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="question-cell">Consigne Información Relacionada a la Factura</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <div class="sunat-tooltip-container">
+                                        <button class="btn-registrar-est" onclick="alert('Consigne Información Relacionada'); return false;" style="margin-left: 0;">Información Relacionada</button>
+                                        <div class="sunat-tooltip">
+                                            <div style="font-weight: normal; margin-bottom: 5px; color: #000000; font-size: 11.5px; line-height: 1.3;">Información relacionada a la Factura</div>
+                                            <ul style="margin: 0; padding: 0; list-style: none; color: #333333; font-size: 11.5px; line-height: 1.3;">
+                                                <li>- Número de Expediente</li>
+                                                <li>- Orden de Compra</li>
+                                                <li>- Código Unidad Ejecutora</li>
+                                                <li>- Número de Proceso de Selección</li>
+                                                <li>- Número de Contrato.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="step3-row-detraccion" style="display: none;">
+                                <td class="question-cell">Consigne los datos de la Detracción</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <div class="sunat-tooltip-container">
+                                        <button class="btn-registrar-est" onclick="openDetraccionFormModal(); return false;" style="margin-left: 0;">Información de la Detracción</button>
+                                        <div class="sunat-tooltip">
+                                            <div style="font-weight: normal; margin-bottom: 5px; color: #000000; font-size: 11.5px; line-height: 1.3;">Datos de la Detracción</div>
+                                            <ul style="margin: 0; padding: 0; list-style: none; color: #333333; font-size: 11.5px; line-height: 1.3;">
+                                                <li>- Tasa de detracción</li>
+                                                <li>- Base imponible</li>
+                                                <li>- Tipo de Operación</li>
+                                                <li>- Número de cuenta</li>
+                                                <li>- Monto de detracción, etc.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="step3-row-credito" style="display: none;">
+                                <td class="question-cell">Consigne los datos de transacción</td>
+                                <td class="separator-cell">:</td>
+                                <td class="control-cell">
+                                    <button class="btn-registrar-est" onclick="openCreditoFormModal(); return false;" style="margin-left: 0;">Información al crédito</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="factura-buttons-row">
+                        <button class="btn-factura-action" onclick="goBackToStep2()">
+                            <i class="fas fa-arrow-alt-circle-left" style="color: #006699;"></i> Retroceder
+                        </button>
+                        <button class="btn-factura-action" onclick="continueFromStep3()">
+                            <i class="fas fa-arrow-alt-circle-right" style="color: #006699;"></i> Continuar
+                        </button>
+                        <button class="btn-factura-action" onclick="hideEmitirFactura()">
+                            <i class="fas fa-times-circle" style="color: #cc0000;"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: PRELIMINAR DE FACTURA ELECTRÓNICA -->
+                <div class="factura-form-container" id="factura-step-4" style="display: none; max-width: 1000px; margin-top: 15px;">
+                    <div class="preliminar-paper">
+                        <div class="preliminar-header-box">
+                            PRELIMINAR DE FACTURA ELECTRÓNICA
+                        </div>
+                        
+                        <div class="preliminar-top-layout">
+                            <div class="preliminar-issuer-col">
+                                <div class="name-short">FABRINSUR</div>
+                                <div class="name-full">FABRINSUR GROUP S.R.L.</div>
+                                <div class="address">OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA</div>
+                            </div>
+                            <div class="preliminar-number-box">
+                                <div class="type-title">FACTURA ELECTRONICA</div>
+                                <div class="ruc-val">RUC: 20606966823</div>
+                            </div>
+                        </div>
+                        
+                        <table class="preliminar-details-table">
+                            <tr>
+                                <td class="lbl">Fecha de Emisión</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="preliminar-fecha">15/06/2026</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Forma de pago</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="preliminar-forma-pago">Contado</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Señor(es)</td>
+                                <td class="sep">:</td>
+                                <td class="val">
+                                    <span class="preliminar-client-highlight" id="preliminar-señor">MAMANI ROQUE EDUARDO LUIS</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">RUC</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="preliminar-ruc">10460693395</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Dirección del Cliente</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="preliminar-direccion">PJ. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Tipo de Moneda</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="preliminar-moneda">SOLES</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Observación</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="preliminar-observacion">-</td>
+                            </tr>
+                        </table>
+                        
+                        <table class="preliminar-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%; text-align: center;">Cantidad</th>
+                                    <th style="width: 15%;">Unidad Medida</th>
+                                    <th style="width: 50%;">Descripción</th>
+                                    <th style="width: 15%; text-align: right;">Valor Unitario</th>
+                                    <th style="width: 10%; text-align: right;">ICBPER</th>
+                                </tr>
+                            </thead>
+                            <tbody id="preliminar-items-tbody">
+                                <!-- Items will be populated dynamically -->
+                            </tbody>
+                        </table>
+                        
+                        <div class="preliminar-totals-wrapper">
+                            <table class="preliminar-totals-tbl">
+                                <tr>
+                                    <td class="lbl">Sub Total Ventas:</td>
+                                    <td class="val" id="preliminar-total-subtotal">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Anticipos:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Descuentos:</td>
+                                    <td class="val" id="preliminar-total-descuentos">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Valor Venta:</td>
+                                    <td class="val" id="preliminar-total-valorventa">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">ISC:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">IGV:</td>
+                                    <td class="val" id="preliminar-total-igv">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">ICBPER:</td>
+                                    <td class="val" id="preliminar-total-icbper">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Otros Cargos:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Otros Tributos:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Monto de Redondeo:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr class="final-row">
+                                    <td class="lbl">Importe Total:</td>
+                                    <td class="val" id="preliminar-total-importe">S/ 0.00</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Block: Detracción (shown conditionally) -->
+                        <div id="preliminar-detraccion-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Información de la detracción</h4>
+                            <table class="preliminar-details-table" style="margin-bottom: 0;">
+                                <tr>
+                                    <td class="lbl" style="width: 20%;">Leyenda</td>
+                                    <td class="sep" style="width: 2%;">:</td>
+                                    <td class="val" id="preliminar-detraccion-leyenda" colspan="3">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Bien o Servicio</td>
+                                    <td class="sep">:</td>
+                                    <td class="val" id="preliminar-detraccion-bien-servicio" colspan="3">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Medio Pago</td>
+                                    <td class="sep">:</td>
+                                    <td class="val" id="preliminar-detraccion-medio-pago">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl" colspan="3" style="font-size: 11px; padding-top: 5px; border-top: 1px dotted #ccc;">
+                                        <span style="font-weight: bold; color: #000;">Nro. Cta. Banco de la Nación:</span> <span id="preliminar-detraccion-cuenta">-</span> &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span style="font-weight: bold; color: #000;">Porcentaje de detracción:</span> <span id="preliminar-detraccion-porcentaje">-</span>% &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span style="font-weight: bold; color: #000;">Monto detracción:</span> <span id="preliminar-detraccion-monto">-</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Block: Crédito (shown conditionally) -->
+                        <div id="preliminar-credito-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Información Neto Pendiente de Pago y Cuotas</h4>
+                            <table class="preliminar-details-table" style="margin-bottom: 10px;">
+                                <tr>
+                                    <td class="lbl" style="width: 30%;">Monto Neto Pendiente de Pago</td>
+                                    <td class="sep" style="width: 2%;">:</td>
+                                    <td class="val" id="preliminar-credito-monto-neto-val">-</td>
+                                </tr>
+                            </table>
+                            
+                            <table class="preliminar-table" style="margin-top: 10px; width: 100%; font-size: 11px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%; text-align: center;">Nro. Cuota</th>
+                                        <th style="width: 40%; text-align: center;">Fecha de Vencimiento</th>
+                                        <th style="width: 40%; text-align: right;">Monto (S/)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preliminar-credito-cuotas-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="factura-buttons-row">
+                        <button class="btn-factura-action" onclick="goBackToStep3()">
+                            <i class="fas fa-arrow-alt-circle-left" style="color: #006699;"></i> Retroceder
+                        </button>
+                        <button class="btn-factura-action" onclick="emitirFacturaFinal()">
+                            <i class="fas fa-check-circle" style="color: #0088cc;"></i> Emitir
+                        </button>
+                        <button class="btn-factura-action" onclick="hideEmitirFactura()">
+                            <i class="fas fa-times-circle" style="color: #cc0000;"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 5: FACTURA ELECTRÓNICA FINAL -->
+                <div class="factura-form-container" id="factura-step-5" style="display: none; max-width: 1000px; margin-top: 15px;">
+                    <div class="preliminar-paper" id="factura-step-5-paper">
+                        <div class="preliminar-header-box" style="background-color: #E2EDF4; border-color: #1E395B; color: #1E395B; font-size: 15px; font-weight: bold; padding: 10px; text-align: center;">
+                            FACTURA ELECTRÓNICA
+                        </div>
+                        
+                        <div class="preliminar-top-layout">
+                            <div class="preliminar-issuer-col">
+                                <div class="name-short">FABRINSUR</div>
+                                <div class="name-full">FABRINSUR GROUP S.R.L.</div>
+                                <div class="address">OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA</div>
+                            </div>
+                            <div class="preliminar-number-box">
+                                <div class="type-title" style="font-size: 14px; font-weight: bold; color: #1E395B;">FACTURA ELECTRÓNICA</div>
+                                <div class="ruc-val" style="font-size: 12px; font-weight: bold; margin: 4px 0;">RUC: 20606966823</div>
+                                <div class="invoice-num-val" id="final-invoice-number" style="font-size: 14px; font-weight: bold; color: #cc0000; margin-top: 5px;">F001-00000001</div>
+                            </div>
+                        </div>
+                        
+                        <table class="preliminar-details-table">
+                            <tr>
+                                <td class="lbl">Fecha de Emisión</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="final-fecha">-</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Forma de pago</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="final-forma-pago">-</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Señor(es)</td>
+                                <td class="sep">:</td>
+                                <td class="val">
+                                    <span class="preliminar-client-highlight" id="final-señor">-</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">RUC</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="final-ruc">-</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Dirección del Cliente</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="final-direccion">-</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Tipo de Moneda</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="final-moneda">-</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl">Observación</td>
+                                <td class="sep">:</td>
+                                <td class="val" id="final-observacion">-</td>
+                            </tr>
+                        </table>
+                        
+                        <table class="preliminar-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%; text-align: center;">Cantidad</th>
+                                    <th style="width: 15%;">Unidad Medida</th>
+                                    <th style="width: 50%;">Descripción</th>
+                                    <th style="width: 15%; text-align: right;">Valor Unitario</th>
+                                    <th style="width: 10%; text-align: right;">ICBPER</th>
+                                </tr>
+                            </thead>
+                            <tbody id="final-items-tbody">
+                                <!-- Items populated dynamically -->
+                            </tbody>
+                        </table>
+                        
+                        <div class="preliminar-totals-wrapper">
+                            <table class="preliminar-totals-tbl">
+                                <tr>
+                                    <td class="lbl">Sub Total Ventas:</td>
+                                    <td class="val" id="final-total-subtotal">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Anticipos:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Descuentos:</td>
+                                    <td class="val" id="final-total-descuentos">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Valor Venta:</td>
+                                    <td class="val" id="final-total-valorventa">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">ISC:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">IGV:</td>
+                                    <td class="val" id="final-total-igv">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">ICBPER:</td>
+                                    <td class="val" id="final-total-icbper">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Otros Cargos:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Otros Tributos:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Monto de Redondeo:</td>
+                                    <td class="val">S/ 0.00</td>
+                                </tr>
+                                <tr class="final-row">
+                                    <td class="lbl">Importe Total:</td>
+                                    <td class="val" id="final-total-importe">S/ 0.00</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Block: Detracción (shown conditionally) -->
+                        <div id="final-detraccion-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Información de la detracción</h4>
+                            <table class="preliminar-details-table" style="margin-bottom: 0;">
+                                <tr>
+                                    <td class="lbl" style="width: 20%;">Leyenda</td>
+                                    <td class="sep" style="width: 2%;">:</td>
+                                    <td class="val" id="final-detraccion-leyenda" colspan="3">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Bien o Servicio</td>
+                                    <td class="sep">:</td>
+                                    <td class="val" id="final-detraccion-bien-servicio" colspan="3">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Medio Pago</td>
+                                    <td class="sep">:</td>
+                                    <td class="val" id="final-detraccion-medio-pago">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="lbl" colspan="3" style="font-size: 11px; padding-top: 5px; border-top: 1px dotted #ccc;">
+                                        <span style="font-weight: bold; color: #000;">Nro. Cta. Banco de la Nación:</span> <span id="final-detraccion-cuenta">-</span> &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span style="font-weight: bold; color: #000;">Porcentaje de detracción:</span> <span id="final-detraccion-porcentaje">-</span>% &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span style="font-weight: bold; color: #000;">Monto detracción:</span> <span id="final-detraccion-monto">-</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Block: Crédito (shown conditionally) -->
+                        <div id="final-credito-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Información Neto Pendiente de Pago y Cuotas</h4>
+                            <table class="preliminar-details-table" style="margin-bottom: 10px;">
+                                <tr>
+                                    <td class="lbl" style="width: 30%;">Monto Neto Pendiente de Pago</td>
+                                    <td class="sep" style="width: 2%;">:</td>
+                                    <td class="val" id="final-credito-monto-neto-val">-</td>
+                                </tr>
+                            </table>
+                            
+                            <table class="preliminar-table" style="margin-top: 10px; width: 100%; font-size: 11px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%; text-align: center;">Nro. Cuota</th>
+                                        <th style="width: 40%; text-align: center;">Fecha de Vencimiento</th>
+                                        <th style="width: 40%; text-align: right;">Monto (S/)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="final-credito-cuotas-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="factura-buttons-row">
+                        <button class="btn-factura-action" onclick="window.print();">
+                            <i class="fas fa-print" style="color: #006699;"></i> Imprimir
+                        </button>
+                        <button class="btn-factura-action" onclick="showSimulationSuccessModal(); return false;">
+                            <i class="fas fa-check-circle" style="color: #0088cc;"></i> Finalizar simulación
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MODAL: MENSAJE DETRACCION -->
+                <div id="detraccion-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal" style="width: 500px; border-color: #A8C4DF;">
+                        <div class="sunat-modal-header" style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                            <span>Mensaje</span>
+                            <button class="sunat-modal-close" onclick="closeDetraccionModal()">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body" style="padding: 20px; display: flex; align-items: flex-start; gap: 15px;">
+                            <i class="fas fa-exclamation-triangle" style="color: #f39c12; font-size: 24px; flex-shrink: 0; margin-top: 3px;"></i>
+                            <div style="font-size: 11.5px; line-height: 1.5; color: #333333; font-family: 'Roboto', sans-serif;">
+                                Todos los bienes o servicios a considerar deben estar sujetos a la detracción y el importe total de la factura debe ser mayor a 0.00
+                            </div>
+                        </div>
+                        <div class="sunat-modal-footer" style="padding: 10px; text-align: center; border-top: 1px dotted #E2EDF4; background-color: #F8F9FA; display: block;">
+                            <button onclick="closeDetraccionModal()" style="padding: 4px 15px; font-size: 11px; background-color: #F2F5F8; border: 1px solid #A6A6A6; border-radius: 2px; cursor: pointer; color: #333; font-weight: 500;">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: REGISTRO DETRACCION -->
+                <div id="detraccion-form-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal" style="width: 580px; border-color: #4F81BD;">
+                        <div class="sunat-modal-header" style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                            <span>Información de Detracción</span>
+                            <button class="sunat-modal-close" onclick="closeDetraccionFormModal()">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body" style="padding: 15px;">
+                            <div style="font-weight: bold; font-style: italic; font-size: 11px; text-align: center; color: #333333; margin-bottom: 15px; line-height: 1.4;">
+                                La información de detracción siempre se registrará en moneda nacional "SOL" independiente de la moneda del comprobante.
+                            </div>
+                            <table class="modal-form-table">
+                                <tr>
+                                    <td class="modal-label" style="width: 35%;">Tipo de operación<span style="color: red;">*</span></td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control" style="width: 63%;">
+                                        <select id="detraccion-tipo-operacion" class="modal-select" style="width: 100%; font-size: 11px;" onchange="onDetraccionTipoOperacionChange()">
+                                            <option value="">--Seleccione--</option>
+                                            <option value="Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central">Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central</option>
+                                            <option value="Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Recursos Hidrobiológicos">Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Recursos Hidrobiológicos</option>
+                                            <option value="Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Servicio de Transporte de Pasajeros">Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Servicio de Transporte de Pasajeros</option>
+                                            <option value="Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Servicio de Transporte de Carga">Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Servicio de Transporte de Carga</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Código de bien/servicio sujeto a detracción<span style="color: red;">*</span></td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <select id="detraccion-codigo-bien-servicio" class="modal-select" style="width: 100%; font-size: 11px;" onchange="onDetraccionCodigoChange()">
+                                            <option value="">--Seleccione--</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Nro. Cta. Banco de la Nación<span style="color: red;">*</span></td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="detraccion-nro-cuenta" class="modal-input-text" style="width: 180px;" placeholder="">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Medio de pago<span style="color: red;">*</span></td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <select id="detraccion-medio-pago" class="modal-select" style="width: 250px;">
+                                            <option value="">--Seleccione--</option>
+                                            <option value="001 - Depósito en cuenta">001 - Depósito en cuenta</option>
+                                            <option value="003 - Transferencia de fondos">003 - Transferencia de fondos</option>
+                                            <option value="005 - Tarjeta de Débito">005 - Tarjeta de Débito</option>
+                                            <option value="006 - Tarjeta de Crédito">006 - Tarjeta de Crédito</option>
+                                            <option value="007 - Cheque no negociable">007 - Cheque no negociable</option>
+                                            <option value="008 - Efectivo">008 - Efectivo</option>
+                                            <option value="099 - Otros">099 - Otros</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Porcentaje de detracción<span style="color: red;">*</span></td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <div style="display: flex; align-items: center; gap: 5px;">
+                                            <input type="number" id="detraccion-porcentaje" class="modal-input-text small" style="text-align: right;" step="any" min="0" max="100" oninput="calculateDetraccionMonto()">
+                                            <span>%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Monto de la detracción (S/)<span style="color: red;">*</span></td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="number" id="detraccion-monto" class="modal-input-text" style="width: 100px; text-align: right;" step="any" min="0">
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="font-size: 11px; color: red; margin-top: 15px;">
+                                (*) Datos de ingreso obligatorio
+                            </div>
+                        </div>
+                        <div class="sunat-modal-footer" style="padding: 10px; text-align: center; border-top: 1px dotted #E2EDF4; background-color: #F8F9FA; display: block;">
+                            <button onclick="saveDetraccionFormData()" style="padding: 4px 15px; font-size: 11px; background-color: #F2F5F8; border: 1px solid #A6A6A6; border-radius: 2px; cursor: pointer; color: #333; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-play" style="color: #006699; font-size: 9px;"></i> Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: REGISTRO CREDITO -->
+                <div id="credito-form-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal" style="width: 580px; border-color: #4F81BD;">
+                        <div class="sunat-modal-header" style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                            <span>Información del Crédito</span>
+                            <button class="sunat-modal-close" onclick="closeCreditoFormModal()">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body" style="padding: 15px;">
+                            <div style="font-weight: bold; font-style: italic; font-size: 11px; text-align: center; color: #333333; margin-bottom: 15px; line-height: 1.4;">
+                                La información del crédito registrará el Monto Neto Pendiente de Pago y las cuotas correspondientes.
+                            </div>
+                            
+                            <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <label style="font-size: 11.5px; font-weight: bold; color: #333; width: 220px;">Monto Neto Pendiente de Pago (S/):</label>
+                                <input type="text" id="credito-monto-neto" class="modal-input-readonly" style="width: 120px; text-align: right; font-weight: bold; padding: 2px;" readonly>
+                            </div>
+                            
+                            <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11.5px; font-weight: bold; color: #1E395B;">Detalle de Cuotas</span>
+                                <button onclick="addCreditoCuotaRow(); return false;" style="padding: 3px 10px; font-size: 11px; background-color: #006699; border: 1px solid #004d73; border-radius: 2px; cursor: pointer; color: #fff; font-weight: 500;">Agregar Cuota</button>
+                            </div>
+                            
+                            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #CCCCCC; margin-bottom: 10px;">
+                                <table class="preliminar-table" style="margin-top: 0; width: 100%; font-size: 11px;">
+                                    <thead>
+                                        <tr style="background-color: #F1F1F1;">
+                                            <th style="width: 15%; text-align: center; padding: 5px;">Nro. Cuota</th>
+                                            <th style="width: 50%; padding: 5px;">Fecha de Vencimiento</th>
+                                            <th style="width: 25%; text-align: right; padding: 5px;">Monto (S/)</th>
+                                            <th style="width: 10%; text-align: center; padding: 5px;">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="credito-cuotas-tbody">
+                                        <!-- Cuotas populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; font-size: 11.5px; font-weight: bold; margin-top: 10px; font-family: 'Roboto', sans-serif;">
+                                <span>Total Cuotas (S/):</span>
+                                <span id="credito-total-cuotas-val">S/ 0.00</span>
+                            </div>
+
+                            <div style="font-size: 11px; color: red; margin-top: 15px;">
+                                (*) Todos los campos son obligatorios. La suma de las cuotas debe coincidir con el Monto Neto Pendiente de Pago.
+                            </div>
+                        </div>
+                        <div class="sunat-modal-footer" style="padding: 10px; text-align: center; border-top: 1px dotted #E2EDF4; background-color: #F8F9FA; display: block;">
+                            <button onclick="saveCreditoFormData(); return false;" style="padding: 4px 15px; font-size: 11px; background-color: #F2F5F8; border: 1px solid #A6A6A6; border-radius: 2px; cursor: pointer; color: #333; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-play" style="color: #006699; font-size: 9px;"></i> Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: SIMULACIÓN CON EXITO -->
+                <div id="simulation-success-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal" style="width: 450px; border-color: #5cb85c; text-align: center; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); background: #ffffff;">
+                        <div class="sunat-modal-header" style="background-color: #f8fff8; border-bottom: 1px solid #dff0d8; border-top-left-radius: 6px; border-top-right-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #3c763d; font-weight: bold; font-size: 13px; font-family: 'Roboto', sans-serif;">¡Simulación Completada!</span>
+                            <button class="sunat-modal-close" onclick="closeSimulationSuccessModal()" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: #999;">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body" style="padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            <div style="width: 70px; height: 70px; background-color: #dff0d8; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(92,184,92,0.3);">
+                                <i class="fas fa-check-circle" style="color: #5cb85c; font-size: 48px;"></i>
+                            </div>
+                            <h2 style="font-size: 16px; font-weight: bold; color: #3c763d; margin: 0; font-family: 'Roboto', sans-serif;">SIMULACIÓN REALIZADA CON EXITO</h2>
+                            <p style="font-size: 11.5px; color: #555555; margin: 0; line-height: 1.5; font-family: 'Roboto', sans-serif;">
+                                Su comprobante de pago electrónico ha sido procesado de manera correcta en el entorno de simulación SUNAT SOL.
+                            </p>
+                        </div>
+                        <div class="sunat-modal-footer" style="padding: 15px; text-align: center; border-top: 1px dotted #dff0d8; background-color: #f8fff8; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; display: block;">
+                            <button onclick="finishAndGoToStart(); return false;" style="padding: 6px 20px; font-size: 11px; background-color: #5cb85c; border: 1px solid #4cae4c; border-radius: 4px; cursor: pointer; color: #fff; font-weight: bold; font-family: 'Roboto', sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-home"></i> Volver al inicio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: NUEVO ITEM -->
+                <div id="nuevo-item-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal">
+                        <div class="sunat-modal-header">
+                            <span>Nuevo Item</span>
+                            <button class="sunat-modal-close" onclick="closeNuevoItemModal()">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body">
+                            <table class="modal-form-table">
+                                <tr>
+                                    <td colspan="3" class="modal-radio-group">
+                                        <label><input type="radio" name="modal-bien-servicio" value="BIEN" checked onchange="calculateItemModalValues()"> Bien</label>
+                                        <label><input type="radio" name="modal-bien-servicio" value="SERVICIO" onchange="calculateItemModalValues()"> Servicio</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Cantidad</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="number" id="modal-cantidad" class="modal-input-text small" value="1" step="any" min="0.0001" oninput="calculateItemModalValues()">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Unidad de Medida</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <select id="modal-unidad-medida" class="modal-select">
+                                            <option value="UNIDAD" selected>UNIDAD</option>
+                                            <option value="KILOGRAMOS">KILOGRAMOS</option>
+                                            <option value="METROS">METROS</option>
+                                            <option value="LITROS">LITROS</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <div class="modal-codigo-radios-row">
+                                            <label><input type="radio" name="modal-codigo-tipo" value="USUARIO" checked> Código de producto de usuario:</label>
+                                            <label><input type="radio" name="modal-codigo-tipo" value="SUNAT"> Código de producto SUNAT:</label>
+                                            <label><input type="radio" name="modal-codigo-tipo" value="GTIN"> Código de producto GTIN:</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Código</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <div style="display: flex; gap: 5px; align-items: center;">
+                                            <input type="text" id="modal-codigo" class="modal-input-text medium">
+                                            <button class="btn-modal-plus" onclick="return false;">+</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label" style="vertical-align: top; padding-top: 8px;">Descripción</td>
+                                    <td class="modal-sep" style="vertical-align: top; padding-top: 8px;">:</td>
+                                    <td class="modal-control">
+                                        <textarea id="modal-descripcion" class="modal-textarea" rows="2"></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Impuesto Bolsas Plásticas</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <label><input type="radio" name="modal-bolsas-plasticas" value="SI" onchange="calculateItemModalValues()"> SI</label>
+                                        <label><input type="radio" name="modal-bolsas-plasticas" value="NO" checked onchange="calculateItemModalValues()"> NO</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Valor Unitario</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="modal-valor-unitario" class="modal-input-text" value="S/ 0.00" onfocus="clearCurrency(this)" onblur="formatCurrency(this)" oninput="calculateItemModalValues()">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Descuento</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="modal-descuento" class="modal-input-text" value="S/ 0.00" onfocus="clearCurrency(this)" onblur="formatCurrency(this)" oninput="calculateItemModalValues()">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">ISC</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <div style="display: flex; gap: 5px; align-items: center;">
+                                            <select id="modal-isc-tipo" class="modal-select small" disabled>
+                                                <option value="0">0 %</option>
+                                            </select>
+                                            <input type="text" id="modal-isc-display" class="modal-input-readonly" value="S/ 0.00" readonly>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label" style="vertical-align: top; padding-top: 8px;">IGV</td>
+                                    <td class="modal-sep" style="vertical-align: top; padding-top: 8px;">:</td>
+                                    <td class="modal-control">
+                                        <div class="modal-igv-block">
+                                            <div class="modal-igv-percent-row">
+                                                <label><input type="radio" name="modal-igv-percent" value="18" checked onchange="calculateItemModalValues()"> 18 %</label>
+                                                <label><input type="radio" name="modal-igv-percent" value="10.5" onchange="calculateItemModalValues()"> 10.5 %</label>
+                                            </div>
+                                            <div class="modal-igv-afectacion-row" style="margin-top: 4px; margin-bottom: 4px;">
+                                                <label><input type="radio" name="modal-igv-afectacion" value="GRAVADO" checked onchange="calculateItemModalValues()"> Gravado</label>
+                                                <label><input type="radio" name="modal-igv-afectacion" value="EXONERADO" onchange="calculateItemModalValues()"> Exonerado</label>
+                                                <label><input type="radio" name="modal-igv-afectacion" value="INAFECTO" onchange="calculateItemModalValues()"> Inafecto</label>
+                                            </div>
+                                            <input type="text" id="modal-igv-display" class="modal-input-readonly" value="S/ 0.00" readonly>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">ICBPER</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <div style="display: flex; gap: 5px; align-items: center;">
+                                            <select id="modal-icbper-tipo" class="modal-select small" disabled onchange="calculateItemModalValues()">
+                                                <option value=""></option>
+                                                <option value="0.50">2026</option>
+                                            </select>
+                                            <input type="text" id="modal-icbper-display" class="modal-input-readonly" value="S/ 0.00" readonly style="width: 80px;">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Impuesto ICBPER</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="modal-impuesto-icbper" class="modal-input-readonly" value="S/ 0.00" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Importe Total del Item</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="modal-total-item" class="modal-input-readonly total" value="S/ 0.00" readonly>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="sunat-modal-footer">
+                            <button class="btn-modal-action btn-modal-accept" onclick="acceptItem()">
+                                <i class="fas fa-check"></i> Aceptar
+                            </button>
+                            <button class="btn-modal-action btn-modal-cancel" onclick="closeNuevoItemModal()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            </div>
+            </div>
+
+    <script>
+        document.querySelectorAll('.toggle-submenu').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const parent = this.parentElement;
+                parent.classList.toggle('open');
+                
+                // Toggle icon
+                const icon = this.querySelector('i');
+                if (parent.classList.contains('open')) {
+                    icon.classList.remove('fa-caret-right');
+                    icon.classList.add('fa-caret-down');
+                } else {
+                    icon.classList.remove('fa-caret-down');
+                    icon.classList.add('fa-caret-right');
+                }
+            });
+        });
+
+        function showDashboard() {
+            document.getElementById('search-bar-container').style.display = 'none';
+            document.getElementById('menu-columns-container').style.display = 'none';
+            document.getElementById('factura-electronica-dashboard').style.display = 'block';
+        }
+
+        function hideDashboard() {
+            document.getElementById('search-bar-container').style.display = 'flex';
+            document.getElementById('menu-columns-container').style.display = 'flex';
+            document.getElementById('factura-electronica-dashboard').style.display = 'none';
+        }
+
+        function showEmitirFactura() {
+            // Reset input values
+            document.getElementById('ruc-receptor').value = '';
+            document.getElementById('ruc-nombre-display').innerText = '';
+            document.getElementById('ruc-nombre-display').style.backgroundColor = '#f0f0f0';
+            document.querySelectorAll('input[name="detraccion"]').forEach(r => {
+                if (r.value === 'no') r.checked = true;
+            });
+            document.querySelectorAll('input[name="tipoTransaccion"]').forEach(r => {
+                if (r.value === 'contado') r.checked = true;
+            });
+            document.getElementById('step3-row-detraccion').style.display = 'none';
+            document.getElementById('step3-desc-detraccion').style.display = 'none';
+            document.getElementById('step3-row-credito').style.display = 'none';
+            document.getElementById('step3-desc-credito').style.display = 'none';
+            detraccionData = null;
+            creditoData = null;
+            invoiceItems = [];
+            renderItemsTable();
+            updateInvoiceTotals();
+            
+            document.getElementById('tramites-content-container').style.display = 'none';
+            document.getElementById('emitir-factura-wrapper').style.display = 'block';
+            document.getElementById('factura-step-1').style.display = 'block';
+            document.getElementById('factura-step-2').style.display = 'none';
+            document.getElementById('factura-step-3').style.display = 'none';
+            document.getElementById('factura-step-4').style.display = 'none';
+            document.getElementById('factura-step-5').style.display = 'none';
+            document.getElementById('simulation-success-modal').style.display = 'none';
+        }
+
+        function hideEmitirFactura() {
+            document.getElementById('tramites-content-container').style.display = 'flex';
+            document.getElementById('emitir-factura-wrapper').style.display = 'none';
+        }
+
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://klmjmlhwuzhymrplemgw.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_DSS-WHn-WawxfYe0RWUHRg_odMjrb_b';
+        
+        let supabaseClient = null;
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let currentReceptorData = {
+            ruc: '',
+            razon_social: '',
+            direccion_legal: ''
+        };
+
+        function clearCurrency(input) {
+            let val = input.value.replace('S/', '').trim();
+            if (parseFloat(val) === 0) {
+                input.value = '';
+            } else {
+                input.value = val;
+            }
+        }
+
+        function formatCurrency(input) {
+            let val = parseFloat(input.value) || 0;
+            input.value = 'S/ ' + val.toFixed(2);
+        }
+
+        // Item List for Invoice step 2
+        let invoiceItems = [];
+        let editIndex = -1;
+        let invoiceRounding = 0;
+        let detraccionData = null;
+        let creditoData = null;
+
+        function openNuevoItemModal() {
+            editIndex = -1;
+            // Reset modal inputs to defaults
+            document.getElementById('modal-cantidad').value = '1';
+            document.getElementById('modal-unidad-medida').value = 'UNIDAD';
+            document.getElementById('modal-codigo').value = '';
+            document.getElementById('modal-descripcion').value = '';
+            document.querySelector('input[name="modal-bien-servicio"][value="BIEN"]').checked = true;
+            document.querySelector('input[name="modal-codigo-tipo"][value="USUARIO"]').checked = true;
+            document.querySelector('input[name="modal-bolsas-plasticas"][value="NO"]').checked = true;
+            
+            document.getElementById('modal-valor-unitario').value = 'S/ 0.00';
+            document.getElementById('modal-descuento').value = 'S/ 0.00';
+            
+            document.querySelector('input[name="modal-igv-percent"][value="18"]').checked = true;
+            document.querySelector('input[name="modal-igv-afectacion"][value="GRAVADO"]').checked = true;
+            
+            calculateItemModalValues();
+            document.getElementById('nuevo-item-modal').style.display = 'flex';
+        }
+
+        function closeNuevoItemModal() {
+            document.getElementById('nuevo-item-modal').style.display = 'none';
+        }
+
+        function calculateItemModalValues() {
+            const cant = parseFloat(document.getElementById('modal-cantidad').value) || 0;
+            
+            // Parse Valor Unitario & Descuento
+            const valUnitStr = document.getElementById('modal-valor-unitario').value.replace('S/', '').trim();
+            const valUnit = parseFloat(valUnitStr) || 0;
+            
+            const descStr = document.getElementById('modal-descuento').value.replace('S/', '').trim();
+            const desc = parseFloat(descStr) || 0;
+            
+            // Subtotal
+            let subtotal = (cant * valUnit) - desc;
+            if (subtotal < 0) subtotal = 0;
+
+            // IGV
+            const igvAfect = document.querySelector('input[name="modal-igv-afectacion"]:checked').value;
+            const igvPercent = parseFloat(document.querySelector('input[name="modal-igv-percent"]:checked').value) || 18;
+            
+            let igv = 0;
+            if (igvAfect === 'GRAVADO') {
+                igv = subtotal * (igvPercent / 100);
+            }
+            
+            document.getElementById('modal-igv-display').value = 'S/ ' + igv.toFixed(2);
+
+            // ICBPER (Plastic Bags Tax)
+            const bolsasPlast = document.querySelector('input[name="modal-bolsas-plasticas"]:checked').value;
+            const icbperSelect = document.getElementById('modal-icbper-tipo');
+            let icbperRate = 0;
+            let icbperTotal = 0;
+            
+            if (bolsasPlast === 'SI') {
+                icbperSelect.disabled = false;
+                icbperSelect.value = '0.50'; // Select 2026 (rate 0.50)
+                icbperRate = 0.50;
+                icbperTotal = cant * icbperRate;
+            } else {
+                icbperSelect.disabled = true;
+                icbperSelect.value = '';
+                icbperRate = 0;
+                icbperTotal = 0;
+            }
+            
+            document.getElementById('modal-icbper-display').value = 'S/ ' + icbperRate.toFixed(2);
+            document.getElementById('modal-impuesto-icbper').value = 'S/ ' + icbperTotal.toFixed(2);
+
+            // Total del Item
+            const total = subtotal + igv + icbperTotal;
+            document.getElementById('modal-total-item').value = 'S/ ' + total.toFixed(2);
+        }
+
+        function acceptItem() {
+            const cant = parseFloat(document.getElementById('modal-cantidad').value) || 0;
+            const descrip = document.getElementById('modal-descripcion').value.trim();
+            const cod = document.getElementById('modal-codigo').value.trim();
+            
+            if (cant <= 0) {
+                alert('La cantidad debe ser mayor a 0.');
+                return;
+            }
+            if (!descrip) {
+                alert('Debe ingresar una descripción.');
+                return;
+            }
+
+            const bienServ = document.querySelector('input[name="modal-bien-servicio"]:checked').value;
+            const bienServText = bienServ === 'BIEN' ? 'Bien' : 'Servicio';
+            const unidad = document.getElementById('modal-unidad-medida').value;
+            const igvAfect = document.querySelector('input[name="modal-igv-afectacion"]:checked').value;
+            
+            // Parse Valor Unitario & Descuento
+            const valUnitStr = document.getElementById('modal-valor-unitario').value.replace('S/', '').trim();
+            const valUnit = parseFloat(valUnitStr) || 0;
+            
+            const descStr = document.getElementById('modal-descuento').value.replace('S/', '').trim();
+            const desc = parseFloat(descStr) || 0;
+            
+            const igvStr = document.getElementById('modal-igv-display').value.replace('S/', '').trim();
+            const igv = parseFloat(igvStr) || 0;
+            
+            const icbperStr = document.getElementById('modal-impuesto-icbper').value.replace('S/', '').trim();
+            const icbper = parseFloat(icbperStr) || 0;
+            
+            const subtotal = (cant * valUnit) - desc;
+            const totalItem = subtotal + igv + icbper;
+
+            const itemObj = {
+                bienServicio: bienServText,
+                afectacion: igvAfect,
+                unidadMedida: unidad,
+                cantidad: cant,
+                codigo: cod || '',
+                descripcion: descrip.toUpperCase(), // SUNAT description is capitalized
+                valorUnitario: valUnit,
+                descuento: desc,
+                subtotal: subtotal,
+                igv: igv,
+                isc: 0,
+                icbper: icbper,
+                total: totalItem
+            };
+
+            if (editIndex === -1) {
+                // Add new item
+                invoiceItems.push(itemObj);
+            } else {
+                // Update existing item
+                invoiceItems[editIndex] = itemObj;
+            }
+
+            renderItemsTable();
+            updateInvoiceTotals();
+            closeNuevoItemModal();
+        }
+
+        function renderItemsTable() {
+            const tbody = document.getElementById('invoice-items-tbody');
+            if (!tbody) return;
+
+            if (invoiceItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="14" style="color: #999; font-style: italic; padding: 25px; text-align: center;">No se han adicionado ítems a la factura.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            invoiceItems.forEach((item, index) => {
+                // Capitalize first letter of bienServicio & afectacion
+                const bienServText = item.bienServicio.charAt(0).toUpperCase() + item.bienServicio.slice(1).toLowerCase();
+                const afectText = item.afectacion.charAt(0).toUpperCase() + item.afectacion.slice(1).toLowerCase();
+                
+                html += `
+                    <tr>
+                        <td style="text-align: center;"><input type="checkbox"></td>
+                        <td style="text-align: center;">
+                            <i class="fas fa-pencil-alt" style="color: #EC971F; cursor: pointer; margin-right: 8px;" onclick="editItem(${index})"></i>
+                            <i class="fas fa-minus-circle" style="color: #C9302C; cursor: pointer;" onclick="deleteItem(${index})"></i>
+                        </td>
+                        <td>${bienServText}</td>
+                        <td>${afectText}</td>
+                        <td>${item.unidadMedida}</td>
+                        <td style="text-align: right;">${item.cantidad.toFixed(2)}</td>
+                        <td>${item.codigo}</td>
+                        <td>${item.descripcion}</td>
+                        <td style="text-align: right;">${item.valorUnitario.toFixed(2)}</td>
+                        <td style="text-align: right;">${item.descuento.toFixed(2)}</td>
+                        <td style="text-align: right;">${item.igv.toFixed(2)}</td>
+                        <td style="text-align: right;">${item.isc.toFixed(2)}</td>
+                        <td style="text-align: right;">${item.total.toFixed(2)}</td>
+                        <td style="text-align: right;">${item.icbper.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editItem(index) {
+            editIndex = index;
+            const item = invoiceItems[index];
+
+            // Prefill modal
+            document.getElementById('modal-cantidad').value = item.cantidad;
+            document.getElementById('modal-unidad-medida').value = item.unidadMedida;
+            document.getElementById('modal-codigo').value = item.codigo;
+            document.getElementById('modal-descripcion').value = item.descripcion;
+            
+            const bienVal = item.bienServicio.toUpperCase();
+            const bienRadio = document.querySelector(`input[name="modal-bien-servicio"][value="${bienVal}"]`);
+            if (bienRadio) bienRadio.checked = true;
+
+            const bolsasRadio = document.querySelector(`input[name="modal-bolsas-plasticas"][value="${item.icbper > 0 ? 'SI' : 'NO'}"]`);
+            if (bolsasRadio) bolsasRadio.checked = true;
+
+            document.getElementById('modal-valor-unitario').value = 'S/ ' + item.valorUnitario.toFixed(2);
+            document.getElementById('modal-descuento').value = 'S/ ' + item.descuento.toFixed(2);
+            
+            const igvAfectRadio = document.querySelector(`input[name="modal-igv-afectacion"][value="${item.afectacion}"]`);
+            if (igvAfectRadio) igvAfectRadio.checked = true;
+
+            calculateItemModalValues();
+            document.getElementById('nuevo-item-modal').style.display = 'flex';
+        }
+
+        function deleteItem(index) {
+            if (confirm('¿Está seguro de eliminar este ítem?')) {
+                invoiceItems.splice(index, 1);
+                renderItemsTable();
+                updateInvoiceTotals();
+            }
+        }
+
+        function updateInvoiceTotals() {
+            let subtotalVentas = 0; // Gravado subtotals
+            let descuentos = 0;     // Total discounts
+            let valorVenta = 0;     // Total value before tax
+            let igvTotal = 0;       // Total IGV
+            let icbperTotal = 0;    // Total ICBPER
+            let importeTotal = 0;   // Total amount
+
+            invoiceItems.forEach(item => {
+                if (item.afectacion === 'GRAVADO') {
+                    subtotalVentas += item.subtotal;
+                    descuentos += item.descuento;
+                }
+                valorVenta += item.subtotal;
+                igvTotal += item.igv;
+                icbperTotal += item.icbper;
+                importeTotal += item.total;
+            });
+
+            // Format monetary helper
+            const formatVal = (num) => `S/ ${num.toFixed(2)}`;
+
+            // Populate the totals table input values
+            const totalsTable = document.querySelector('.factura-totals-table');
+            if (totalsTable) {
+                const inputs = totalsTable.querySelectorAll('input.factura-totals-input');
+                if (inputs.length >= 11) {
+                    inputs[0].value = formatVal(subtotalVentas); // Sub Total Ventas
+                    inputs[1].value = formatVal(0);              // Anticipos
+                    inputs[2].value = formatVal(descuentos);      // Descuentos
+                    inputs[3].value = formatVal(valorVenta);      // Valor de Venta
+                    inputs[4].value = formatVal(0);              // ISC
+                    inputs[5].value = formatVal(igvTotal);        // IGV
+                    inputs[6].value = formatVal(icbperTotal);     // ICBPER
+                    inputs[7].value = formatVal(0);              // Otros Cargos
+                    inputs[8].value = formatVal(0);              // Otros Tributos
+                    inputs[9].value = formatVal(0);              // Monto de Redondeo
+                    inputs[10].value = formatVal(importeTotal);   // Importe Total
+                }
+            }
+        }
+
+        async function lookupRuc(val) {
+            const ruc = val.trim();
+            const display = document.getElementById('ruc-nombre-display');
+            const rucs = {
+                '20123456789': 'FABRINSUR GROUP S.R.L.',
+                '20606966823': 'FABRINSUR GROUP S.R.L.',
+                '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
+                '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
+                '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
+                '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
+                '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
+                '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
+                '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
+                '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
+                '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
+            };
+            
+            const dirs = {
+                '20123456789': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
+                '20606966823': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
+                '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
+                '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
+                '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
+                '20606927283': 'Jr. Lima Nro. 264, Barranca',
+                '20613448706': 'Av. Huancayo Nro. 198, Jauja',
+                '20517941507': 'PJ. VILLAC UMO URB. SALAMANCA DE MONTERRICO 176 ATE, LIMA',
+                '20448190740': 'Mza. H Lote. H-1, Municipal Taparachi, Juliaca',
+                '20562707108': 'Av. Coronel Samuel Alcazar Nro. 1280, Rimac',
+                '20611979828': 'Cal. Principal Mza. e Lote. 6 Apv. las Casuarinas de Nieveri, Lurigancho'
+            };
+            
+            if (ruc.length === 0) {
+                display.innerText = '';
+                display.style.backgroundColor = '#f0f0f0';
+                return;
+            }
+            
+            if (ruc.length < 11) {
+                display.innerText = 'Buscando RUC...';
+                display.style.backgroundColor = '#f0f0f0';
+                display.style.color = '#666';
+                return;
+            }
+            
+            // Intentar buscar en Supabase si está configurado
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('empresas')
+                        .select('razon_social, direccion_legal')
+                        .eq('ruc', ruc)
+                        .single();
+                        
+                    if (data && data.razon_social) {
+                        display.innerText = data.razon_social;
+                        display.style.backgroundColor = '#E2EDF4';
+                        display.style.color = '#1E395B';
+                        
+                        currentReceptorData.ruc = ruc;
+                        currentReceptorData.razon_social = data.razon_social;
+                        currentReceptorData.direccion_legal = data.direccion_legal || 'AV. MOCK RECEPTOR S/N';
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Error al conectar con Supabase:', err);
+                }
+            }
+            
+            // Fallback local si no está en Supabase o no está configurado
+            if (rucs[ruc]) {
+                display.innerText = rucs[ruc];
+                currentReceptorData.ruc = ruc;
+                currentReceptorData.razon_social = rucs[ruc];
+                currentReceptorData.direccion_legal = dirs[ruc] || 'AV. MOCK RECEPTOR S/N';
+            } else {
+                display.innerText = 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
+                currentReceptorData.ruc = ruc;
+                currentReceptorData.razon_social = 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
+                currentReceptorData.direccion_legal = 'AV. MOCK RECEPTOR S/N';
+            }
+            display.style.backgroundColor = '#E2EDF4';
+            display.style.color = '#1E395B';
+        }
+
+        function continueInvoice() {
+            const rucVal = document.getElementById('ruc-receptor').value.trim();
+            if (rucVal.length !== 11) {
+                alert('Por favor, ingrese un RUC receptor válido de 11 dígitos.');
+                return;
+            }
+            
+            // Si por alguna razón no se han cargado los datos del RUC actual o hay desfase asíncrono
+            if (currentReceptorData.ruc !== rucVal) {
+                const rucs = {
+                    '20123456789': 'FABRINSUR GROUP S.R.L.',
+                    '20606966823': 'FABRINSUR GROUP S.R.L.',
+                    '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
+                    '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
+                    '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
+                    '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
+                    '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
+                    '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
+                    '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
+                    '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
+                    '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
+                };
+                
+                const dirs = {
+                    '20123456789': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
+                    '20606966823': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
+                    '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
+                    '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
+                    '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
+                    '20606927283': 'Jr. Lima Nro. 264, Barranca',
+                    '20613448706': 'Av. Huancayo Nro. 198, Jauja',
+                    '20517941507': 'PJ. VILLAC UMO URB. SALAMANCA DE MONTERRICO 176 ATE, LIMA',
+                    '20448190740': 'Mza. H Lote. H-1, Municipal Taparachi, Juliaca',
+                    '20562707108': 'Av. Coronel Samuel Alcazar Nro. 1280, Rimac',
+                    '20611979828': 'Cal. Principal Mza. e Lote. 6 Apv. las Casuarinas de Nieveri, Lurigancho'
+                };
+                
+                currentReceptorData.ruc = rucVal;
+                currentReceptorData.razon_social = rucs[rucVal] || document.getElementById('ruc-nombre-display').innerText || 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
+                currentReceptorData.direccion_legal = dirs[rucVal] || 'AV. MOCK RECEPTOR S/N';
+            }
+            
+            // Populate Step 2 Fields
+            document.getElementById('step2-ruc').value = rucVal;
+            document.getElementById('step2-razon').value = currentReceptorData.razon_social || document.getElementById('ruc-nombre-display').innerText || 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
+            
+            // Determine Establishment Address
+            const estRadioSi = document.querySelector('input[name="establecimientoEmisor"][value="si"]');
+            const dirRadioSi = document.querySelector('input[name="direccionEntrega"][value="si"]');
+            
+            if (estRadioSi && estRadioSi.checked) {
+                document.getElementById('step2-establecimiento').value = 'AV LOS INCAS S/N';
+            } else if (dirRadioSi && dirRadioSi.checked) {
+                document.getElementById('step2-establecimiento').value = currentReceptorData.direccion_legal || 'AV LOS INCAS S/N';
+            } else {
+                document.getElementById('step2-establecimiento').value = 'AV LOS INCAS S/N';
+            }
+            
+            // Populate Currency
+            const monSelect = document.getElementById('moneda-factura');
+            const selectedMonedaText = monSelect.options[monSelect.selectedIndex].text;
+            document.getElementById('step2-moneda').value = selectedMonedaText;
+            
+            // Populate Date of Emission
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            document.getElementById('step2-fecha').value = `${day}/${month}/${year}`;
+            
+            // Switch view
+            document.getElementById('factura-step-1').style.display = 'none';
+            document.getElementById('factura-step-2').style.display = 'block';
+        }
+
+        function goBackToStep1() {
+            document.getElementById('factura-step-2').style.display = 'none';
+            document.getElementById('factura-step-1').style.display = 'block';
+        }
+
+        function continueToStep3() {
+            document.getElementById('factura-step-2').style.display = 'none';
+            document.getElementById('factura-step-3').style.display = 'block';
+        }
+
+        function goBackToStep2() {
+            document.getElementById('factura-step-3').style.display = 'none';
+            document.getElementById('factura-step-2').style.display = 'block';
+        }
+
+        // --- DETRACCION LOGIC ---
+        const allDetraccionCodes = [
+            { code: "001", name: "001 - Azúcar y melaza de caña", rate: 10 },
+            { code: "002", name: "002 - Arroz", rate: 4 },
+            { code: "003", name: "003 - Alcohol etílico", rate: 10 },
+            { code: "004", name: "004 - Recursos hidrobiológicos", rate: 4 },
+            { code: "005", name: "005 - Maíz amarillo duro", rate: 4 },
+            { code: "007", name: "007 - Caña de azúcar", rate: 10 },
+            { code: "008", name: "008 - Madera", rate: 4 },
+            { code: "009", name: "009 - Arena y piedra", rate: 10 },
+            { code: "010", name: "010 - Residuos, subproductos, desechos, recortes y desperdicios", rate: 15 },
+            { code: "011", name: "011 - Bienes gravados con el IGV (por renuncia a la exoneración)", rate: 10 },
+            { code: "012", name: "012 - Intermediación laboral y tercerización", rate: 12 },
+            { code: "014", name: "014 - Carnes y despojos comestibles", rate: 4 },
+            { code: "016", name: "016 - Aceite de pescado", rate: 10 },
+            { code: "017", name: "017 - Harina, polvo y 'pellets' de pescado, crustáceos, moluscos", rate: 4 },
+            { code: "019", name: "019 - Arrendamiento de bienes muebles", rate: 10 },
+            { code: "020", name: "020 - Mantenimiento y reparación de bienes muebles", rate: 12 },
+            { code: "021", name: "021 - Movimiento de carga", rate: 10 },
+            { code: "022", name: "022 - Otros servicios empresariales", rate: 12 },
+            { code: "023", name: "023 - Leche", rate: 4 },
+            { code: "024", name: "024 - Comisión mercantil", rate: 10 },
+            { code: "025", name: "025 - Fabricación de bienes por encargo", rate: 10 },
+            { code: "026", name: "026 - Servicio de transporte de personas", rate: 10 },
+            { code: "027", name: "027 - Servicio de transporte de carga", rate: 4 },
+            { code: "028", name: "028 - Transporte de pasajeros", rate: 10 },
+            { code: "030", name: "030 - Contratos de construcción", rate: 4 },
+            { code: "031", name: "031 - Oro gravado con el IGV", rate: 10 },
+            { code: "032", name: "032 - Paprika y otros frutos de los géneros capsicum o pimienta", rate: 10 },
+            { code: "034", name: "034 - Minerales metálicos no auríferos", rate: 10 },
+            { code: "035", name: "035 - Bienes exonerados del IGV", rate: 1.5 },
+            { code: "036", name: "036 - Oro y demás minerales metálicos exonerados del IGV", rate: 10 },
+            { code: "037", name: "037 - Demás servicios gravados con el IGV", rate: 12 },
+            { code: "099", name: "099 - Ley 30737", rate: 10 }
+        ];
+
+        function closeDetraccionModal() {
+            document.getElementById('detraccion-modal').style.display = 'none';
+        }
+
+        function openDetraccionFormModal() {
+            document.getElementById('detraccion-form-modal').style.display = 'flex';
+            if (detraccionData) {
+                document.getElementById('detraccion-tipo-operacion').value = detraccionData.tipoOperacion || '';
+                onDetraccionTipoOperacionChange();
+                document.getElementById('detraccion-codigo-bien-servicio').value = detraccionData.codigoBienServicio || '';
+                document.getElementById('detraccion-nro-cuenta').value = detraccionData.nroCuenta || '';
+                document.getElementById('detraccion-medio-pago').value = detraccionData.medioPago || '';
+                document.getElementById('detraccion-porcentaje').value = detraccionData.porcentaje || '';
+                document.getElementById('detraccion-monto').value = detraccionData.monto || '';
+            } else {
+                document.getElementById('detraccion-tipo-operacion').value = '';
+                document.getElementById('detraccion-codigo-bien-servicio').innerHTML = '<option value="">--Seleccione--</option>';
+                document.getElementById('detraccion-nro-cuenta').value = '';
+                document.getElementById('detraccion-medio-pago').value = '';
+                document.getElementById('detraccion-porcentaje').value = '';
+                document.getElementById('detraccion-monto').value = '';
+            }
+        }
+
+        function closeDetraccionFormModal() {
+            document.getElementById('detraccion-form-modal').style.display = 'none';
+        }
+
+        function onDetraccionTipoOperacionChange() {
+            const tipo = document.getElementById('detraccion-tipo-operacion').value;
+            const codeSelect = document.getElementById('detraccion-codigo-bien-servicio');
+            codeSelect.innerHTML = '<option value="">--Seleccione--</option>';
+            
+            let filtered = [];
+            if (tipo === 'Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central') {
+                filtered = allDetraccionCodes;
+            } else if (tipo === 'Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Recursos Hidrobiológicos') {
+                filtered = allDetraccionCodes.filter(x => x.code === '004' || x.code === '016' || x.code === '017');
+            } else if (tipo === 'Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Servicio de Transporte de Pasajeros') {
+                filtered = allDetraccionCodes.filter(x => x.code === '026' || x.code === '028');
+            } else if (tipo === 'Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central ó Servicio de Transporte de Carga') {
+                filtered = allDetraccionCodes.filter(x => x.code === '027');
+            }
+            
+            filtered.forEach(x => {
+                const opt = document.createElement('option');
+                opt.value = x.code;
+                opt.textContent = x.name;
+                codeSelect.appendChild(opt);
+            });
+            
+            document.getElementById('detraccion-porcentaje').value = '';
+            document.getElementById('detraccion-monto').value = '';
+        }
+
+        function getInvoiceTotal() {
+            let total = 0;
+            invoiceItems.forEach(item => {
+                total += item.total;
+            });
+            return total;
+        }
+
+        function onDetraccionCodigoChange() {
+            const select = document.getElementById('detraccion-codigo-bien-servicio');
+            const code = select.value;
+            const found = allDetraccionCodes.find(x => x.code === code);
+            if (found) {
+                document.getElementById('detraccion-porcentaje').value = found.rate;
+                calculateDetraccionMonto();
+            } else {
+                document.getElementById('detraccion-porcentaje').value = '';
+                document.getElementById('detraccion-monto').value = '';
+            }
+        }
+
+        function calculateDetraccionMonto() {
+            const total = getInvoiceTotal();
+            const pct = parseFloat(document.getElementById('detraccion-porcentaje').value) || 0;
+            const monto = Math.round(total * pct / 100);
+            document.getElementById('detraccion-monto').value = monto;
+        }
+
+        function saveDetraccionFormData() {
+            const tipoOperacion = document.getElementById('detraccion-tipo-operacion').value;
+            const codigoBienServicio = document.getElementById('detraccion-codigo-bien-servicio').value;
+            const nroCuenta = document.getElementById('detraccion-nro-cuenta').value.trim();
+            const medioPago = document.getElementById('detraccion-medio-pago').value;
+            const porcentaje = document.getElementById('detraccion-porcentaje').value;
+            const monto = document.getElementById('detraccion-monto').value;
+            
+            if (!tipoOperacion || !codigoBienServicio || !nroCuenta || !medioPago || !porcentaje || !monto) {
+                alert('Debe completar todos los campos obligatorios (*).');
+                return;
+            }
+            
+            detraccionData = {
+                tipoOperacion,
+                codigoBienServicio,
+                nroCuenta,
+                medioPago,
+                porcentaje,
+                monto
+            };
+            
+            alert('Datos de detracción guardados correctamente.');
+            closeDetraccionFormModal();
+        }
+
+        // --- CREDIT INSTALLMENTS MODAL FUNCTIONS ---
+        function openCreditoFormModal() {
+            const modal = document.getElementById('credito-form-modal');
+            modal.style.display = 'flex';
+            
+            // Calculate net pending payment: Importe Total - Detracción (if detracción is enabled)
+            const totalFactura = getInvoiceTotal();
+            let montoDetraccion = 0;
+            const detraccionChecked = document.querySelector('input[name="detraccion"][value="si"]').checked;
+            if (detraccionChecked && detraccionData) {
+                montoDetraccion = parseFloat(detraccionData.monto) || 0;
+            }
+            const montoNeto = Math.max(0, totalFactura - montoDetraccion);
+            document.getElementById('credito-monto-neto').value = montoNeto.toFixed(2);
+            
+            // Populate existing rows or add one empty row
+            const tbody = document.getElementById('credito-cuotas-tbody');
+            tbody.innerHTML = '';
+            
+            if (creditoData && creditoData.cuotas && creditoData.cuotas.length > 0) {
+                creditoData.cuotas.forEach(cuota => {
+                    addCreditoCuotaRow(cuota.fecha, cuota.monto);
+                });
+            } else {
+                addCreditoCuotaRow('', '');
+            }
+            updateCreditoTotalCuotas();
+        }
+
+        function closeCreditoFormModal() {
+            document.getElementById('credito-form-modal').style.display = 'none';
+        }
+
+        // --- SIMULATION SUCCESS MODAL FUNCTIONS ---
+        function showSimulationSuccessModal() {
+            document.getElementById('simulation-success-modal').style.display = 'flex';
+        }
+
+        function closeSimulationSuccessModal() {
+            document.getElementById('simulation-success-modal').style.display = 'none';
+        }
+
+        function finishAndGoToStart() {
+            closeSimulationSuccessModal();
+            hideEmitirFactura();
+        }
+
+        function addCreditoCuotaRow(fecha = '', monto = '') {
+            const tbody = document.getElementById('credito-cuotas-tbody');
+            const rowCount = tbody.rows.length;
+            const nroCuota = rowCount + 1;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="text-align: center; padding: 5px; font-weight: bold;">${nroCuota}</td>
+                <td style="padding: 5px;">
+                    <input type="date" class="modal-input-text cuota-fecha" style="width: 90%; font-size: 11px; padding: 2px;" value="${fecha}">
+                </td>
+                <td style="padding: 5px;">
+                    <input type="number" class="modal-input-text cuota-monto" style="width: 90%; text-align: right; font-size: 11px; padding: 2px;" step="any" min="0.01" value="${monto}" oninput="updateCreditoTotalCuotas()">
+                </td>
+                <td style="text-align: center; padding: 5px;">
+                    <button onclick="deleteCreditoCuotaRow(this); return false;" style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 12px;"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            updateCreditoTotalCuotas();
+        }
+
+        function deleteCreditoCuotaRow(btn) {
+            const tr = btn.closest('tr');
+            tr.remove();
+            
+            // Re-number remaining cuotas
+            const tbody = document.getElementById('credito-cuotas-tbody');
+            Array.from(tbody.rows).forEach((row, index) => {
+                row.cells[0].textContent = index + 1;
+            });
+            updateCreditoTotalCuotas();
+        }
+
+        function updateCreditoTotalCuotas() {
+            const tbody = document.getElementById('credito-cuotas-tbody');
+            let total = 0;
+            Array.from(tbody.querySelectorAll('.cuota-monto')).forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('credito-total-cuotas-val').textContent = `S/ ${total.toFixed(2)}`;
+        }
+
+        function saveCreditoFormData() {
+            const montoNeto = parseFloat(document.getElementById('credito-monto-neto').value) || 0;
+            const tbody = document.getElementById('credito-cuotas-tbody');
+            const rows = tbody.rows;
+            
+            if (rows.length === 0) {
+                alert('Debe agregar al menos una cuota.');
+                return;
+            }
+            
+            const cuotas = [];
+            let sumCuotas = 0;
+            let hasEmptyFields = false;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const nro = i + 1;
+                const fechaInput = row.querySelector('.cuota-fecha');
+                const montoInput = row.querySelector('.cuota-monto');
+                
+                const fecha = fechaInput.value;
+                const monto = parseFloat(montoInput.value) || 0;
+                
+                if (!fecha || monto <= 0) {
+                    hasEmptyFields = true;
+                }
+                
+                cuotas.push({ nro, fecha, monto });
+                sumCuotas += monto;
+            }
+            
+            if (hasEmptyFields) {
+                alert('Debe completar la fecha y un monto mayor a cero para todas las cuotas.');
+                return;
+            }
+            
+            // Validate that the sum of cuotas equals the net pending payment (allowing up to 0.05 discrepancy for rounding)
+            if (Math.abs(sumCuotas - montoNeto) > 0.05) {
+                alert(`La suma de las cuotas (S/ ${sumCuotas.toFixed(2)}) debe ser igual al Monto Neto Pendiente de Pago (S/ ${montoNeto.toFixed(2)}).`);
+                return;
+            }
+            
+            creditoData = {
+                montoNeto,
+                cuotas
+            };
+            
+            alert('Datos del crédito guardados correctamente.');
+            closeCreditoFormModal();
+        }
+
+        function continueFromStep3() {
+            const detraccionChecked = document.querySelector('input[name="detraccion"][value="si"]').checked;
+            if (detraccionChecked && !detraccionData) {
+                alert('Debe registrar la Información de la Detracción para poder continuar.');
+                return;
+            }
+            
+            const formaPago = document.querySelector('input[name="tipoTransaccion"]:checked').value;
+            if (formaPago === 'credito' && !creditoData) {
+                alert('Debe registrar la Información al Crédito para poder continuar.');
+                return;
+            }
+            
+            // Populate Step 4 (Preliminar) values
+            
+            // 1. Date
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            document.getElementById('preliminar-fecha').textContent = `${day}/${month}/${year}`;
+            
+            // 2. Forma de pago
+            document.getElementById('preliminar-forma-pago').textContent = formaPago === 'contado' ? 'Contado' : 'Crédito';
+            
+            // 3. Receptor details
+            document.getElementById('preliminar-señor').textContent = currentReceptorData.razon_social || 'CONTRIBUYENTE ACTIVO';
+            document.getElementById('preliminar-ruc').textContent = currentReceptorData.ruc || '-';
+            document.getElementById('preliminar-direccion').textContent = currentReceptorData.direccion_legal || '-';
+            
+            // 4. Moneda
+            const monSelect = document.getElementById('moneda-factura');
+            const selectedMonedaText = monSelect.options[monSelect.selectedIndex].text;
+            document.getElementById('preliminar-moneda').textContent = selectedMonedaText.toUpperCase();
+            
+            // 5. Observaciones
+            const obsVal = document.getElementById('step3-observaciones').value.trim();
+            document.getElementById('preliminar-observacion').textContent = obsVal || '-';
+            
+            // 6. Items table
+            const tbody = document.getElementById('preliminar-items-tbody');
+            tbody.innerHTML = '';
+            invoiceItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center;">${item.cantidad.toFixed(2)}</td>
+                    <td>${item.unidadMedida}</td>
+                    <td>${item.descripcion}</td>
+                    <td style="text-align: right;">${item.valorUnitario.toFixed(2)}</td>
+                    <td style="text-align: right;">${item.icbper.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // 7. Totals
+            let subtotalVentas = 0;
+            let descuentos = 0;
+            let valorVenta = 0;
+            let igvTotal = 0;
+            let icbperTotal = 0;
+            let importeTotal = 0;
+            
+            invoiceItems.forEach(item => {
+                if (item.afectacion === 'GRAVADO') {
+                    subtotalVentas += item.subtotal;
+                    descuentos += item.descuento;
+                }
+                valorVenta += item.subtotal;
+                igvTotal += item.igv;
+                icbperTotal += item.icbper;
+                importeTotal += item.total;
+            });
+            
+            const fmt = (num) => `S/ ${num.toFixed(2)}`;
+            document.getElementById('preliminar-total-subtotal').textContent = fmt(subtotalVentas);
+            document.getElementById('preliminar-total-descuentos').textContent = fmt(descuentos);
+            document.getElementById('preliminar-total-valorventa').textContent = fmt(valorVenta);
+            document.getElementById('preliminar-total-igv').textContent = fmt(igvTotal);
+            document.getElementById('preliminar-total-icbper').textContent = fmt(icbperTotal);
+            document.getElementById('preliminar-total-importe').textContent = fmt(importeTotal);
+            
+            // 8. Detracción Block
+            const detraccionBlock = document.getElementById('preliminar-detraccion-block');
+            if (detraccionChecked && detraccionData) {
+                detraccionBlock.style.display = 'block';
+                document.getElementById('preliminar-detraccion-leyenda').textContent = detraccionData.tipoOperacion || '-';
+                
+                // Find code description
+                const foundCode = allDetraccionCodes.find(x => x.code === detraccionData.codigoBienServicio);
+                const codeDesc = foundCode ? foundCode.name : detraccionData.codigoBienServicio;
+                document.getElementById('preliminar-detraccion-bien-servicio').textContent = codeDesc || '-';
+                
+                document.getElementById('preliminar-detraccion-medio-pago').textContent = detraccionData.medioPago || '-';
+                document.getElementById('preliminar-detraccion-cuenta').textContent = detraccionData.nroCuenta || '-';
+                document.getElementById('preliminar-detraccion-porcentaje').textContent = parseFloat(detraccionData.porcentaje).toFixed(2);
+                document.getElementById('preliminar-detraccion-monto').textContent = `S/ ${parseFloat(detraccionData.monto).toFixed(2)}`;
+            } else {
+                detraccionBlock.style.display = 'none';
+            }
+
+            // 9. Credit Block
+            const creditoBlock = document.getElementById('preliminar-credito-block');
+            if (formaPago === 'credito' && creditoData) {
+                creditoBlock.style.display = 'block';
+                document.getElementById('preliminar-credito-monto-neto-val').textContent = `S/ ${creditoData.montoNeto.toFixed(2)}`;
+                
+                const cTbody = document.getElementById('preliminar-credito-cuotas-tbody');
+                cTbody.innerHTML = '';
+                creditoData.cuotas.forEach(cuota => {
+                    const tr = document.createElement('tr');
+                    let formattedDate = cuota.fecha;
+                    if (cuota.fecha.includes('-')) {
+                        const parts = cuota.fecha.split('-');
+                        formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+                    tr.innerHTML = `
+                        <td style="text-align: center;">${cuota.nro}</td>
+                        <td style="text-align: center;">${formattedDate}</td>
+                        <td style="text-align: right;">S/ ${cuota.monto.toFixed(2)}</td>
+                    `;
+                    cTbody.appendChild(tr);
+                });
+            } else {
+                creditoBlock.style.display = 'none';
+            }
+            
+            // Show Step 4
+            document.getElementById('factura-step-3').style.display = 'none';
+            document.getElementById('factura-step-4').style.display = 'block';
+        }
+
+        function goBackToStep3() {
+            document.getElementById('factura-step-4').style.display = 'none';
+            document.getElementById('factura-step-3').style.display = 'block';
+        }
+
+        function emitirFacturaFinal() {
+            // Hide Step 4, Show Step 5
+            document.getElementById('factura-step-4').style.display = 'none';
+            document.getElementById('factura-step-5').style.display = 'block';
+            
+            // Generate sequential/random invoice number
+            const randomNum = Math.floor(Math.random() * 100000000);
+            const formattedNum = String(randomNum).padStart(8, '0');
+            document.getElementById('final-invoice-number').textContent = `F001-${formattedNum}`;
+            
+            // Copy text details
+            document.getElementById('final-fecha').textContent = document.getElementById('preliminar-fecha').textContent;
+            document.getElementById('final-forma-pago').textContent = document.getElementById('preliminar-forma-pago').textContent;
+            document.getElementById('final-señor').textContent = document.getElementById('preliminar-señor').textContent;
+            document.getElementById('final-ruc').textContent = document.getElementById('preliminar-ruc').textContent;
+            document.getElementById('final-direccion').textContent = document.getElementById('preliminar-direccion').textContent;
+            document.getElementById('final-moneda').textContent = document.getElementById('preliminar-moneda').textContent;
+            document.getElementById('final-observacion').textContent = document.getElementById('preliminar-observacion').textContent;
+            
+            // Copy items table
+            document.getElementById('final-items-tbody').innerHTML = document.getElementById('preliminar-items-tbody').innerHTML;
+            
+            // Copy totals
+            document.getElementById('final-total-subtotal').textContent = document.getElementById('preliminar-total-subtotal').textContent;
+            document.getElementById('final-total-descuentos').textContent = document.getElementById('preliminar-total-descuentos').textContent;
+            document.getElementById('final-total-valorventa').textContent = document.getElementById('preliminar-total-valorventa').textContent;
+            document.getElementById('final-total-igv').textContent = document.getElementById('preliminar-total-igv').textContent;
+            document.getElementById('final-total-icbper').textContent = document.getElementById('preliminar-total-icbper').textContent;
+            document.getElementById('final-total-importe').textContent = document.getElementById('preliminar-total-importe').textContent;
+            
+            // Copy detracción block if checked
+            const detraccionChecked = document.querySelector('input[name="detraccion"][value="si"]').checked;
+            const finalDetraccionBlock = document.getElementById('final-detraccion-block');
+            if (detraccionChecked && detraccionData) {
+                finalDetraccionBlock.style.display = 'block';
+                document.getElementById('final-detraccion-leyenda').textContent = document.getElementById('preliminar-detraccion-leyenda').textContent;
+                document.getElementById('final-detraccion-bien-servicio').textContent = document.getElementById('preliminar-detraccion-bien-servicio').textContent;
+                document.getElementById('final-detraccion-medio-pago').textContent = document.getElementById('preliminar-detraccion-medio-pago').textContent;
+                document.getElementById('final-detraccion-cuenta').textContent = document.getElementById('preliminar-detraccion-cuenta').textContent;
+                document.getElementById('final-detraccion-porcentaje').textContent = document.getElementById('preliminar-detraccion-porcentaje').textContent;
+                document.getElementById('final-detraccion-monto').textContent = document.getElementById('preliminar-detraccion-monto').textContent;
+            } else {
+                finalDetraccionBlock.style.display = 'none';
+            }
+            
+            // Copy credit block if credit transaction
+            const formaPago = document.querySelector('input[name="tipoTransaccion"]:checked').value;
+            const finalCreditoBlock = document.getElementById('final-credito-block');
+            if (formaPago === 'credito' && creditoData) {
+                finalCreditoBlock.style.display = 'block';
+                document.getElementById('final-credito-monto-neto-val').textContent = document.getElementById('preliminar-credito-monto-neto-val').textContent;
+                document.getElementById('final-credito-cuotas-tbody').innerHTML = document.getElementById('preliminar-credito-cuotas-tbody').innerHTML;
+            } else {
+                finalCreditoBlock.style.display = 'none';
+            }
+            
+            alert('Simulación: Factura emitida con éxito.');
+        }
+
+        // Set current date/time on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateSpan = document.getElementById('current-datetime');
+            if (dateSpan) {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                dateSpan.textContent = `${day}/${month}/${year} ${hours}:${minutes}`;
+            }
+
+            // Lógica de exclusividad mutua para dirección y establecimiento
+            document.querySelectorAll('input[name="establecimientoEmisor"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const value = this.value;
+                    const targetRadio = document.querySelector(`input[name="direccionEntrega"][value="${value === 'si' ? 'no' : 'si'}"]`);
+                    if (targetRadio) targetRadio.checked = true;
+                });
+            });
+
+            document.querySelectorAll('input[name="direccionEntrega"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const value = this.value;
+                    const targetRadio = document.querySelector(`input[name="establecimientoEmisor"][value="${value === 'si' ? 'no' : 'si'}"]`);
+                    if (targetRadio) targetRadio.checked = true;
+                });
+            });
+
+            // Lógica para detracción (SPOT)
+            document.querySelectorAll('input[name="detraccion"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'si') {
+                        document.getElementById('detraccion-modal').style.display = 'flex';
+                        document.getElementById('step3-row-detraccion').style.display = 'table-row';
+                        document.getElementById('step3-desc-detraccion').style.display = 'inline';
+                    } else {
+                        document.getElementById('step3-row-detraccion').style.display = 'none';
+                        document.getElementById('step3-desc-detraccion').style.display = 'none';
+                        detraccionData = null; // reset data
+                    }
+                });
+            });
+
+            // Initial state check for detracción
+            const detraccionRadioSi = document.querySelector('input[name="detraccion"][value="si"]');
+            if (detraccionRadioSi && detraccionRadioSi.checked) {
+                document.getElementById('step3-row-detraccion').style.display = 'table-row';
+                document.getElementById('step3-desc-detraccion').style.display = 'inline';
+            }
+
+            // Lógica para tipo de transacción (contado / crédito)
+            document.querySelectorAll('input[name="tipoTransaccion"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'credito') {
+                        document.getElementById('step3-row-credito').style.display = 'table-row';
+                        document.getElementById('step3-desc-credito').style.display = 'inline';
+                    } else {
+                        document.getElementById('step3-row-credito').style.display = 'none';
+                        document.getElementById('step3-desc-credito').style.display = 'none';
+                        creditoData = null; // reset data
+                    }
+                });
+            });
+
+            // Initial state check for tipo de transacción
+            const tipoTransaccionRadioCredito = document.querySelector('input[name="tipoTransaccion"][value="credito"]');
+            if (tipoTransaccionRadioCredito && tipoTransaccionRadioCredito.checked) {
+                document.getElementById('step3-row-credito').style.display = 'table-row';
+                document.getElementById('step3-desc-credito').style.display = 'inline';
+            }
+        });
+    </script>
+</body>
+</html>
