@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Validation based on user request
         if (tabRuc.classList.contains('active')) {
-            if (ruc === '20123456789' && user === 'SIST' && pass === 'NORTON') {
+            if ((ruc === '20123456789' || ruc === '20606966823') && user === 'SIST' && pass === 'NORTON') {
                 window.location.href = 'dashboard.html';
             } else {
                 alert('Credenciales incorrectas. Verifique los datos.');

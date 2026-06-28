@@ -29,11 +29,11 @@
             </div>
             <div class="header-blue-right">
                 <div class="user-welcome-container">
-                    <span class="user-welcome">Bienvenido, FABRINSUR GROUP S.R.L. <i class="fas fa-caret-down"></i></span>
+                    <span class="user-welcome">Bienvenido, EMPRESA DEMO S.A.C. <i class="fas fa-caret-down"></i></span>
                     <div class="user-dropdown-custom">
                         <div class="dropdown-top-info">
-                            <div class="company-name">FABRINSUR GROUP S.R.L.</div>
-                            <div class="company-ruc">RUC: 20606966823</div>
+                            <div class="company-name">EMPRESA DEMO S.A.C.</div>
+                            <div class="company-ruc">RUC: 20123456789</div>
                             <div class="company-user">Usuario: SIST</div>
                             <button class="btn-ver-ficha-ruc" onclick="alert('Consulta de Ficha RUC'); return false;">Ver Ficha Ruc</button>
                         </div>
@@ -650,7 +650,7 @@
                                 <td class="question-cell">Consigne los Documentos Relacionados de la Factura</td>
                                 <td class="separator-cell">:</td>
                                 <td class="control-cell">
-                                    <button class="btn-registrar-est" onclick="alert('Consigne los Documentos Relacionados'); return false;" style="margin-left: 0;">Documentos Relacionados</button>
+                                    <button id="btn-docs-relacionados" class="btn-registrar-est" onclick="openDocumentosRelacionadosModal(); return false;" style="margin-left: 0;">Documentos Relacionados</button>
                                 </td>
                             </tr>
                             <tr>
@@ -723,13 +723,13 @@
                         
                         <div class="preliminar-top-layout">
                             <div class="preliminar-issuer-col">
-                                <div class="name-short">FABRINSUR</div>
-                                <div class="name-full">FABRINSUR GROUP S.R.L.</div>
-                                <div class="address">OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA</div>
+                                <div class="name-short">EMPRESA DEMO</div>
+                                <div class="name-full">EMPRESA DEMO S.A.C.</div>
+                                <div class="address">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                             </div>
                             <div class="preliminar-number-box">
                                 <div class="type-title">FACTURA ELECTRONICA</div>
-                                <div class="ruc-val">RUC: 20606966823</div>
+                                <div class="ruc-val">RUC: 20123456789</div>
                             </div>
                         </div>
                         
@@ -866,6 +866,23 @@
                             </table>
                         </div>
 
+                        <!-- Block: Documentos Relacionados (shown conditionally) -->
+                        <div id="preliminar-documentos-relacionados-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Documentos Relacionados</h4>
+                            <table class="preliminar-table" style="margin-top: 10px; width: 100%; font-size: 11px;">
+                                <thead>
+                                    <tr style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                                        <th style="width: 60%; text-align: left; padding: 5px;">Tipo Documento</th>
+                                        <th style="width: 20%; text-align: left; padding: 5px;">Serie</th>
+                                        <th style="width: 20%; text-align: left; padding: 5px;">Número Inicial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preliminar-documentos-relacionados-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+
                         <!-- Block: Crédito (shown conditionally) -->
                         <div id="preliminar-credito-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
                             <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Información Neto Pendiente de Pago y Cuotas</h4>
@@ -914,13 +931,13 @@
                         
                         <div class="preliminar-top-layout">
                             <div class="preliminar-issuer-col">
-                                <div class="name-short">FABRINSUR</div>
-                                <div class="name-full">FABRINSUR GROUP S.R.L.</div>
-                                <div class="address">OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA</div>
+                                <div class="name-short">EMPRESA DEMO</div>
+                                <div class="name-full">EMPRESA DEMO S.A.C.</div>
+                                <div class="address">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                             </div>
                             <div class="preliminar-number-box">
                                 <div class="type-title" style="font-size: 14px; font-weight: bold; color: #1E395B;">FACTURA ELECTRÓNICA</div>
-                                <div class="ruc-val" style="font-size: 12px; font-weight: bold; margin: 4px 0;">RUC: 20606966823</div>
+                                <div class="ruc-val" style="font-size: 12px; font-weight: bold; margin: 4px 0;">RUC: 20123456789</div>
                                 <div class="invoice-num-val" id="final-invoice-number" style="font-size: 14px; font-weight: bold; color: #cc0000; margin-top: 5px;">F001-00000001</div>
                             </div>
                         </div>
@@ -1055,6 +1072,23 @@
                                         <span style="font-weight: bold; color: #000;">Monto detracción:</span> <span id="final-detraccion-monto">-</span>
                                     </td>
                                 </tr>
+                            </table>
+                        </div>
+
+                        <!-- Block: Documentos Relacionados (shown conditionally) -->
+                        <div id="final-documentos-relacionados-block" style="display: none; border-top: 1px solid #1E395B; padding-top: 15px; margin-top: 20px;">
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #1E395B; font-family: 'Roboto', sans-serif;">Documentos Relacionados</h4>
+                            <table class="preliminar-table" style="margin-top: 10px; width: 100%; font-size: 11px;">
+                                <thead>
+                                    <tr style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                                        <th style="width: 60%; text-align: left; padding: 5px;">Tipo Documento</th>
+                                        <th style="width: 20%; text-align: left; padding: 5px;">Serie</th>
+                                        <th style="width: 20%; text-align: left; padding: 5px;">Número Inicial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="final-documentos-relacionados-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
                             </table>
                         </div>
 
@@ -1214,7 +1248,7 @@
                             
                             <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                                 <label style="font-size: 11.5px; font-weight: bold; color: #333; width: 220px;">Monto Neto Pendiente de Pago (S/):</label>
-                                <input type="text" id="credito-monto-neto" class="modal-input-readonly" style="width: 120px; text-align: right; font-weight: bold; padding: 2px;" readonly>
+                                <input type="number" id="credito-monto-neto" class="modal-input-text" style="width: 120px; text-align: right; font-weight: bold; padding: 2px; background-color: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 2px;" step="any" min="0">
                             </div>
                             
                             <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
@@ -1249,6 +1283,94 @@
                         </div>
                         <div class="sunat-modal-footer" style="padding: 10px; text-align: center; border-top: 1px dotted #E2EDF4; background-color: #F8F9FA; display: block;">
                             <button onclick="saveCreditoFormData(); return false;" style="padding: 4px 15px; font-size: 11px; background-color: #F2F5F8; border: 1px solid #A6A6A6; border-radius: 2px; cursor: pointer; color: #333; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-play" style="color: #006699; font-size: 9px;"></i> Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: DOCUMENTOS RELACIONADOS -->
+                <div id="documentos-relacionados-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal" style="width: 580px; border-color: #4F81BD;">
+                        <div class="sunat-modal-header" style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                            <span>Documentos relacionados a la Factura Electrónica</span>
+                            <button class="sunat-modal-close" onclick="closeDocumentosRelacionadosModal()">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body" style="padding: 15px;">
+                            <div style="font-weight: bold; font-size: 11.5px; text-align: left; color: #000000; margin-bottom: 15px; font-family: 'Roboto', sans-serif;">
+                                Ingrese los documentos relacionados a la Factura Electrónica:
+                            </div>
+                            
+                            <table class="modal-form-table" style="margin-bottom: 15px; width: 100%;">
+                                <tr>
+                                    <td class="modal-label" style="width: 30%;">Tipo Documento:</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <select id="doc-rel-tipo" class="modal-select" style="width: 100%; font-size: 11px;">
+                                            <option value="GUIA DE REMISION REMITENTE">GUIA DE REMISION REMITENTE</option>
+                                            <option value="GUIA DE REMISION TRANSPORTISTA">GUIA DE REMISION TRANSPORTISTA</option>
+                                            <option value="GUIA DE REMISION REMITENTE (Correlativo)">GUIA DE REMISION REMITENTE (Correlativo)</option>
+                                            <option value="GUIA DE REMISION TRANSPORTISTA (Correlativo)">GUIA DE REMISION TRANSPORTISTA (Correlativo)</option>
+                                            <option value="GUIA DE REMISION POR EVENTOS">GUIA DE REMISION POR EVENTOS</option>
+                                            <option value="GRE REMITENTE - BIENES FISCALIZABLES">GRE REMITENTE - BIENES FISCALIZABLES</option>
+                                            <option value="GRE TRANSPORTISTA - BIENES FISCALIZABLES">GRE TRANSPORTISTA - BIENES FISCALIZABLES</option>
+                                            <option value="GRE REMITENTE - BIENES FISCALIZABLES (Correlativo)">GRE REMITENTE - BIENES FISCALIZABLES (Correlativo)</option>
+                                            <option value="GRE TRANSPORTISTA - BIENES FISCALIZABLES (Correlativo)">GRE TRANSPORTISTA - BIENES FISCALIZABLES (Correlativo)</option>
+                                            <option value="GRE REMITENTE - BIENES FISCALIZABLES COMPLEMENTARIA">GRE REMITENTE - BIENES FISCALIZABLES COMPLEMENTARIA</option>
+                                            <option value="GRE TRANSPORTISTA - BIENES FISCALIZABLES COMPLEMENTARIA">GRE TRANSPORTISTA - BIENES FISCALIZABLES COMPLEMENTARIA</option>
+                                            <option value="CONSTANCIA DE PAGO SPOT - IVAP">CONSTANCIA DE PAGO SPOT - IVAP</option>
+                                            <option value="TICKET ENAPU">TICKET ENAPU</option>
+                                            <option value="CÓDIGO SCOP">CÓDIGO SCOP</option>
+                                            <option value="OTROS">OTROS</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Serie Documento:</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="doc-rel-serie" class="modal-input-text" style="width: 100%; text-transform: uppercase;">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="modal-label">Número Documento:</td>
+                                    <td class="modal-sep">:</td>
+                                    <td class="modal-control">
+                                        <input type="text" id="doc-rel-numero" class="modal-input-text" style="width: 100%;">
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Buttons row for Adicionar / Eliminar -->
+                            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #CCCCCC; padding-bottom: 5px; background: #E9ECEF; padding: 5px;">
+                                <button onclick="addDocumentoRelacionadoRow(); return false;" style="background: none; border: none; cursor: pointer; font-size: 11px; font-weight: bold; color: #333333; display: flex; align-items: center; gap: 4px;">
+                                    <i class="fas fa-plus-circle" style="color: #5cb85c; font-size: 14px;"></i> Adicionar
+                                </button>
+                                <span style="color: #ccc;">|</span>
+                                <button onclick="deleteSelectedDocumentoRelacionadoRow(); return false;" style="background: none; border: none; cursor: pointer; font-size: 11px; font-weight: bold; color: #333333; display: flex; align-items: center; gap: 4px;">
+                                    <i class="fas fa-minus-circle" style="color: #d9534f; font-size: 14px;"></i> Eliminar
+                                </button>
+                            </div>
+                            
+                            <!-- Table showing added documents -->
+                            <div style="max-height: 180px; overflow-y: auto; border: 1px solid #CCCCCC; margin-bottom: 10px; background-color: #FFFFFF;">
+                                <table class="preliminar-table" style="margin-top: 0; width: 100%; font-size: 11px; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                                            <th style="width: 8%; text-align: center; padding: 5px;">-</th>
+                                            <th style="width: 52%; text-align: left; padding: 5px;">Tipo Documento</th>
+                                            <th style="width: 20%; text-align: left; padding: 5px;">Serie</th>
+                                            <th style="width: 20%; text-align: left; padding: 5px;">Número Inicial</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documentos-relacionados-tbody">
+                                        <!-- Rows added dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="sunat-modal-footer" style="padding: 10px; text-align: center; border-top: 1px dotted #E2EDF4; background-color: #F8F9FA; display: block;">
+                            <button onclick="saveDocumentosRelacionadosData(); return false;" style="padding: 4px 15px; font-size: 11px; background-color: #F2F5F8; border: 1px solid #A6A6A6; border-radius: 2px; cursor: pointer; color: #333; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
                                 <i class="fas fa-play" style="color: #006699; font-size: 9px;"></i> Aceptar
                             </button>
                         </div>
@@ -1482,6 +1604,13 @@
             document.getElementById('step3-desc-credito').style.display = 'none';
             detraccionData = null;
             creditoData = null;
+            documentosRelacionadosData = [];
+            const btnDocs = document.getElementById('btn-docs-relacionados');
+            if (btnDocs) {
+                btnDocs.innerHTML = 'Documentos Relacionados';
+                btnDocs.style.backgroundColor = '';
+                btnDocs.style.borderColor = '';
+            }
             invoiceItems = [];
             renderItemsTable();
             updateInvoiceTotals();
@@ -1536,6 +1665,7 @@
         let invoiceRounding = 0;
         let detraccionData = null;
         let creditoData = null;
+        let documentosRelacionadosData = [];
 
         function openNuevoItemModal() {
             editIndex = -1;
@@ -1802,8 +1932,8 @@
             const ruc = val.trim();
             const display = document.getElementById('ruc-nombre-display');
             const rucs = {
-                '20123456789': 'FABRINSUR GROUP S.R.L.',
-                '20606966823': 'FABRINSUR GROUP S.R.L.',
+                '20123456789': 'EMPRESA DEMO S.A.C.',
+                '20606966823': 'EMPRESA DEMO S.A.C.',
                 '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
                 '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
                 '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
@@ -1816,8 +1946,8 @@
             };
             
             const dirs = {
-                '20123456789': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
-                '20606966823': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
+                '20123456789': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
+                '20606966823': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
                 '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
                 '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
                 '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
@@ -1892,8 +2022,8 @@
             // Si por alguna razón no se han cargado los datos del RUC actual o hay desfase asíncrono
             if (currentReceptorData.ruc !== rucVal) {
                 const rucs = {
-                    '20123456789': 'FABRINSUR GROUP S.R.L.',
-                    '20606966823': 'FABRINSUR GROUP S.R.L.',
+                    '20123456789': 'EMPRESA DEMO S.A.C.',
+                    '20606966823': 'EMPRESA DEMO S.A.C.',
                     '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
                     '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
                     '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
@@ -1906,8 +2036,8 @@
                 };
                 
                 const dirs = {
-                    '20123456789': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
-                    '20606966823': 'OTR. V ETAPA ZONA D PJ. MIGUEL GRAU MZA. 32G LOTE. 6 PAUCARPATA - AREQUIPA - AREQUIPA',
+                    '20123456789': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
+                    '20606966823': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
                     '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
                     '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
                     '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
@@ -2129,8 +2259,14 @@
             if (detraccionChecked && detraccionData) {
                 montoDetraccion = parseFloat(detraccionData.monto) || 0;
             }
-            const montoNeto = Math.max(0, totalFactura - montoDetraccion);
-            document.getElementById('credito-monto-neto').value = montoNeto.toFixed(2);
+            const defaultMontoNeto = Math.max(0, totalFactura - montoDetraccion);
+            
+            let valMontoNeto = defaultMontoNeto;
+            if (creditoData && typeof creditoData.montoNeto === 'number') {
+                valMontoNeto = creditoData.montoNeto;
+            }
+            
+            document.getElementById('credito-monto-neto').value = valMontoNeto.toFixed(2);
             
             // Populate existing rows or add one empty row
             const tbody = document.getElementById('credito-cuotas-tbody');
@@ -2150,6 +2286,100 @@
             document.getElementById('credito-form-modal').style.display = 'none';
         }
 
+        // --- DOCUMENTOS RELACIONADOS MODAL FUNCTIONS ---
+        function openDocumentosRelacionadosModal() {
+            document.getElementById('documentos-relacionados-modal').style.display = 'flex';
+            
+            // Clear fields
+            document.getElementById('doc-rel-serie').value = '';
+            document.getElementById('doc-rel-numero').value = '';
+            
+            // Populate existing rows
+            const tbody = document.getElementById('documentos-relacionados-tbody');
+            tbody.innerHTML = '';
+            documentosRelacionadosData.forEach(doc => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #eee';
+                tr.innerHTML = `
+                    <td style="text-align: center; padding: 5px;"><input type="radio" name="selected-doc-rel"></td>
+                    <td style="padding: 5px; text-align: left;">${doc.tipo}</td>
+                    <td style="padding: 5px; text-align: left;">${doc.serie}</td>
+                    <td style="padding: 5px; text-align: left;">${doc.numero}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function closeDocumentosRelacionadosModal() {
+            document.getElementById('documentos-relacionados-modal').style.display = 'none';
+        }
+
+        function addDocumentoRelacionadoRow() {
+            const tipo = document.getElementById('doc-rel-tipo').value;
+            const serie = document.getElementById('doc-rel-serie').value.trim().toUpperCase();
+            const numero = document.getElementById('doc-rel-numero').value.trim();
+            
+            if (!serie || !numero) {
+                alert('Debe ingresar la serie y el número de documento.');
+                return;
+            }
+            
+            const tbody = document.getElementById('documentos-relacionados-tbody');
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #eee';
+            tr.innerHTML = `
+                <td style="text-align: center; padding: 5px;"><input type="radio" name="selected-doc-rel"></td>
+                <td style="padding: 5px; text-align: left;">${tipo}</td>
+                <td style="padding: 5px; text-align: left;">${serie}</td>
+                <td style="padding: 5px; text-align: left;">${numero}</td>
+            `;
+            tbody.appendChild(tr);
+            
+            // Clear fields
+            document.getElementById('doc-rel-serie').value = '';
+            document.getElementById('doc-rel-numero').value = '';
+        }
+
+        function deleteSelectedDocumentoRelacionadoRow() {
+            const tbody = document.getElementById('documentos-relacionados-tbody');
+            const selected = tbody.querySelector('input[name="selected-doc-rel"]:checked');
+            if (!selected) {
+                alert('Debe seleccionar un documento para eliminar.');
+                return;
+            }
+            selected.closest('tr').remove();
+        }
+
+        function saveDocumentosRelacionadosData() {
+            const tbody = document.getElementById('documentos-relacionados-tbody');
+            const rows = tbody.rows;
+            documentosRelacionadosData = [];
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const tipo = row.cells[1].textContent;
+                const serie = row.cells[2].textContent;
+                const numero = row.cells[3].textContent;
+                documentosRelacionadosData.push({ tipo, serie, numero });
+            }
+            
+            // Update button text and style on main screen
+            const btn = document.getElementById('btn-docs-relacionados');
+            if (btn) {
+                if (documentosRelacionadosData.length > 0) {
+                    btn.innerHTML = `Documentos Relacionados (${documentosRelacionadosData.length})`;
+                    btn.style.backgroundColor = '#5cb85c';
+                    btn.style.borderColor = '#4cae4c';
+                } else {
+                    btn.innerHTML = 'Documentos Relacionados';
+                    btn.style.backgroundColor = '';
+                    btn.style.borderColor = '';
+                }
+            }
+            
+            closeDocumentosRelacionadosModal();
+        }
+
         // --- SIMULATION SUCCESS MODAL FUNCTIONS ---
         function showSimulationSuccessModal() {
             document.getElementById('simulation-success-modal').style.display = 'flex';
@@ -2161,6 +2391,13 @@
 
         function finishAndGoToStart() {
             closeSimulationSuccessModal();
+            documentosRelacionadosData = [];
+            const btn = document.getElementById('btn-docs-relacionados');
+            if (btn) {
+                btn.innerHTML = 'Documentos Relacionados';
+                btn.style.backgroundColor = '';
+                btn.style.borderColor = '';
+            }
             hideEmitirFactura();
         }
 
@@ -2209,6 +2446,15 @@
 
         function saveCreditoFormData() {
             const montoNeto = parseFloat(document.getElementById('credito-monto-neto').value) || 0;
+            const totalFactura = getInvoiceTotal();
+            if (montoNeto > totalFactura) {
+                alert(`El Monto Neto Pendiente de Pago no puede superar el Importe Total de la factura (S/ ${totalFactura.toFixed(2)}).`);
+                return;
+            }
+            if (montoNeto < 0) {
+                alert('El Monto Neto Pendiente de Pago no puede ser negativo.');
+                return;
+            }
             const tbody = document.getElementById('credito-cuotas-tbody');
             const rows = tbody.rows;
             
@@ -2384,6 +2630,28 @@
                 creditoBlock.style.display = 'none';
             }
             
+            // 10. Documentos Relacionados Block
+            const preliminarDocsBlock = document.getElementById('preliminar-documentos-relacionados-block');
+            if (preliminarDocsBlock) {
+                if (documentosRelacionadosData && documentosRelacionadosData.length > 0) {
+                    preliminarDocsBlock.style.display = 'block';
+                    const pTbody = document.getElementById('preliminar-documentos-relacionados-tbody');
+                    pTbody.innerHTML = '';
+                    documentosRelacionadosData.forEach(doc => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid #eee';
+                        tr.innerHTML = `
+                            <td style="padding: 5px; text-align: left;">${doc.tipo}</td>
+                            <td style="padding: 5px; text-align: left;">${doc.serie}</td>
+                            <td style="padding: 5px; text-align: left;">${doc.numero}</td>
+                        `;
+                        pTbody.appendChild(tr);
+                    });
+                } else {
+                    preliminarDocsBlock.style.display = 'none';
+                }
+            }
+            
             // Show Step 4
             document.getElementById('factura-step-3').style.display = 'none';
             document.getElementById('factura-step-4').style.display = 'block';
@@ -2448,6 +2716,17 @@
                 document.getElementById('final-credito-cuotas-tbody').innerHTML = document.getElementById('preliminar-credito-cuotas-tbody').innerHTML;
             } else {
                 finalCreditoBlock.style.display = 'none';
+            }
+            
+            // Copy related documents block if present
+            const finalDocsBlock = document.getElementById('final-documentos-relacionados-block');
+            if (finalDocsBlock) {
+                if (documentosRelacionadosData && documentosRelacionadosData.length > 0) {
+                    finalDocsBlock.style.display = 'block';
+                    document.getElementById('final-documentos-relacionados-tbody').innerHTML = document.getElementById('preliminar-documentos-relacionados-tbody').innerHTML;
+                } else {
+                    finalDocsBlock.style.display = 'none';
+                }
             }
             
             alert('Simulación: Factura emitida con éxito.');
@@ -2524,6 +2803,22 @@
             if (tipoTransaccionRadioCredito && tipoTransaccionRadioCredito.checked) {
                 document.getElementById('step3-row-credito').style.display = 'table-row';
                 document.getElementById('step3-desc-credito').style.display = 'inline';
+            }
+
+            // Event listener to validate that the credit net amount does not exceed the total invoice amount
+            const creditoMontoNetoInput = document.getElementById('credito-monto-neto');
+            if (creditoMontoNetoInput) {
+                creditoMontoNetoInput.addEventListener('change', function(e) {
+                    let val = parseFloat(this.value) || 0;
+                    const totalFactura = getInvoiceTotal();
+                    if (val < 0) {
+                        val = 0;
+                    } else if (val > totalFactura) {
+                        alert(`El Monto Neto Pendiente de Pago no puede superar el Importe Total de la factura (S/ ${totalFactura.toFixed(2)}).`);
+                        val = totalFactura;
+                    }
+                    this.value = val.toFixed(2);
+                });
             }
         });
     </script>
