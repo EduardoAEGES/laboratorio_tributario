@@ -365,7 +365,10 @@
                                 <td class="question-cell">Consigne el RUC del Contribuyente Receptor de la Factura</td>
                                 <td class="separator-cell">:</td>
                                 <td class="control-cell">
-                                    <input type="text" id="ruc-receptor" class="factura-input-text" maxlength="11" placeholder="" oninput="lookupRuc(this.value)">
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="text" id="ruc-receptor" class="factura-input-text" maxlength="11" placeholder="" oninput="lookupRuc(this.value)" style="margin-right: 0; width: 140px;">
+                                        <button type="button" class="btn-registrar-est" onclick="openNuevaEmpresaModal(); return false;" style="margin: 0; padding: 4px 10px; font-size: 11px; height: 26px;">+ Registrar Nueva Empresa</button>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -1401,6 +1404,151 @@
                     </div>
                 </div>
 
+                <!-- MODAL: NUEVO REGISTRO EMPRESA -->
+                <div id="nuevo-empresa-modal" class="modal-backdrop" style="display: none;">
+                    <div class="sunat-modal" style="width: 740px; border-color: #4F81BD;">
+                        <div class="sunat-modal-header" style="background-color: #F1F1F1; border-bottom: 1px solid #CCCCCC;">
+                            <span style="font-weight: bold; color: #1E395B; font-size: 12px;"><i class="fas fa-building"></i> Registrar Nueva Empresa</span>
+                            <button class="sunat-modal-close" onclick="closeNuevaEmpresaModal()">&times;</button>
+                        </div>
+                        <div class="sunat-modal-body" style="padding: 15px; font-family: 'Roboto', sans-serif;">
+                            <div style="display: flex; gap: 20px;">
+                                <!-- Columna Izquierda: Datos Principales -->
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="font-weight: bold; color: #1E395B; border-bottom: 1px solid #E2EDF4; padding-bottom: 4px; margin-bottom: 5px; font-size: 11.5px;">DATOS PRINCIPALES</div>
+                                    
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">RUC <span style="color: red;">*</span></label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-ruc" class="modal-input-text" maxlength="11" placeholder="RUC de 11 dígitos" style="flex: 1; padding: 3px; font-size: 11px;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Razón Social <span style="color: red;">*</span></label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-razon-social" class="modal-input-text" placeholder="Razón Social" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Nombre Comercial</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-nombre-comercial" class="modal-input-text" placeholder="Opcional" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Tipo Empresa</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <select id="new-emp-tipo-empresa" class="modal-select" style="flex: 1; padding: 2px; font-size: 11px; height: 22px; width: 100%;">
+                                            <option value="">Seleccione...</option>
+                                            <option value="Sociedad Anonima Cerrada">Sociedad Anónima Cerrada</option>
+                                            <option value="Sociedad Anonima">Sociedad Anónima</option>
+                                            <option value="Empresa Individual de Responsabilidad Limitada">Empresa Individual de Resp. Limitada</option>
+                                            <option value="Sociedad Comercial de Responsabilidad Limitada">Sociedad Comercial de Resp. Limitada</option>
+                                            <option value="Persona Natural con Negocio">Persona Natural con Negocio</option>
+                                        </select>
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Fecha Inicio Activ.</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="date" id="new-emp-fecha-inicio" class="modal-input-text" style="flex: 1; padding: 2px; font-size: 11px; height: 20px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Condición</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-condicion" class="modal-input-text" value="Activo" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Estado Domicilio</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-estado-domicilio" class="modal-input-text" value="Habido" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+                                    
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Comercio Exterior</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <select id="new-emp-comercio-exterior" class="modal-select" style="flex: 1; padding: 2px; font-size: 11px; height: 22px; width: 100%;">
+                                            <option value="">SIN ACTIVIDAD</option>
+                                            <option value="EXPORTADOR">EXPORTADOR</option>
+                                            <option value="IMPORTADOR">IMPORTADOR</option>
+                                            <option value="IMPORTADOR/EXPORTADOR">IMPORTADOR/EXPORTADOR</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Columna Derecha: Ubicación y Actividad -->
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="font-weight: bold; color: #1E395B; border-bottom: 1px solid #E2EDF4; padding-bottom: 4px; margin-bottom: 5px; font-size: 11.5px;">UBICACIÓN Y ACTIVIDAD</div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Actividad Comercial</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-actividad-comercial" class="modal-input-text" placeholder="Giro del negocio" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">CIIU</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-ciiu" class="modal-input-text" placeholder="Código CIIU" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Dirección Legal</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-direccion-legal" class="modal-input-text" placeholder="Av / Calle / Jr..." style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Urbanización</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-urbanizacion" class="modal-input-text" placeholder="Opcional" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Distrito/Ciudad</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-distrito" class="modal-input-text" placeholder="Distrito o Ciudad" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Provincia</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-provincia" class="modal-input-text" placeholder="Provincia" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Departamento</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-departamento" class="modal-input-text" placeholder="Departamento" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">País</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-pais" class="modal-input-text" value="Perú" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <label style="font-size: 11px; font-weight: bold; color: #333; width: 130px;">Código Postal</label>
+                                        <span style="font-size: 11px; color: #666; margin-right: 5px;">:</span>
+                                        <input type="text" id="new-emp-codigo-postal" class="modal-input-text" placeholder="Opcional" style="flex: 1; padding: 3px; font-size: 11px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sunat-modal-footer" style="padding: 10px; text-align: center; border-top: 1px dotted #E2EDF4; background-color: #F8F9FA; display: block;">
+                            <button class="btn-modal-action btn-modal-accept" onclick="saveNuevaEmpresa()">
+                                <i class="fas fa-check"></i> Aceptar
+                            </button>
+                            <button class="btn-modal-action btn-modal-cancel" onclick="closeNuevaEmpresaModal()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- MODAL: NUEVO ITEM -->
                 <div id="nuevo-item-modal" class="modal-backdrop" style="display: none;">
                     <div class="sunat-modal">
@@ -1692,6 +1840,113 @@
             document.getElementById('nuevo-item-modal').style.display = 'none';
         }
 
+        const localEmpresas = {};
+
+        function openNuevaEmpresaModal() {
+            // Reset values to defaults
+            document.getElementById('new-emp-ruc').value = '';
+            document.getElementById('new-emp-razon-social').value = '';
+            document.getElementById('new-emp-nombre-comercial').value = '';
+            document.getElementById('new-emp-tipo-empresa').value = '';
+            document.getElementById('new-emp-fecha-inicio').value = '';
+            document.getElementById('new-emp-condicion').value = 'Activo';
+            document.getElementById('new-emp-estado-domicilio').value = 'Habido';
+            document.getElementById('new-emp-comercio-exterior').value = '';
+            
+            document.getElementById('new-emp-actividad-comercial').value = '';
+            document.getElementById('new-emp-ciiu').value = '';
+            document.getElementById('new-emp-direccion-legal').value = '';
+            document.getElementById('new-emp-urbanizacion').value = '';
+            document.getElementById('new-emp-distrito').value = '';
+            document.getElementById('new-emp-provincia').value = '';
+            document.getElementById('new-emp-departamento').value = '';
+            document.getElementById('new-emp-pais').value = 'Perú';
+            document.getElementById('new-emp-codigo-postal').value = '';
+
+            // If there is already a RUC written in the main input, copy it over!
+            const rucVal = document.getElementById('ruc-receptor').value.trim();
+            if (rucVal && rucVal.length === 11 && !isNaN(rucVal)) {
+                document.getElementById('new-emp-ruc').value = rucVal;
+            }
+            
+            document.getElementById('nuevo-empresa-modal').style.display = 'flex';
+        }
+
+        function closeNuevaEmpresaModal() {
+            document.getElementById('nuevo-empresa-modal').style.display = 'none';
+        }
+
+        async function saveNuevaEmpresa() {
+            const ruc = document.getElementById('new-emp-ruc').value.trim();
+            const razonSocial = document.getElementById('new-emp-razon-social').value.trim();
+            
+            if (!ruc || ruc.length !== 11 || isNaN(ruc)) {
+                alert('Por favor, ingrese un RUC válido de 11 dígitos.');
+                return;
+            }
+            if (!razonSocial) {
+                alert('Por favor, ingrese la Razón Social.');
+                return;
+            }
+            
+            const newCompany = {
+                ruc: ruc,
+                razon_social: razonSocial,
+                nombre_comercial: document.getElementById('new-emp-nombre-comercial').value.trim() || null,
+                tipo_empresa: document.getElementById('new-emp-tipo-empresa').value || null,
+                condicion: document.getElementById('new-emp-condicion').value.trim() || 'Activo',
+                estado_domicilio: document.getElementById('new-emp-estado-domicilio').value.trim() || 'Habido',
+                fecha_inicio_actividades: document.getElementById('new-emp-fecha-inicio').value || null,
+                actividad_comercial: document.getElementById('new-emp-actividad-comercial').value.trim() || null,
+                ciiu: document.getElementById('new-emp-ciiu').value.trim() || null,
+                direccion_legal: document.getElementById('new-emp-direccion-legal').value.trim() || null,
+                urbanizacion: document.getElementById('new-emp-urbanizacion').value.trim() || null,
+                distrito_ciudad: document.getElementById('new-emp-distrito').value.trim() || null,
+                provincia: document.getElementById('new-emp-provincia').value.trim() || null,
+                departamento: document.getElementById('new-emp-departamento').value.trim() || null,
+                pais: document.getElementById('new-emp-pais').value.trim() || 'Perú',
+                codigo_postal: document.getElementById('new-emp-codigo-postal').value.trim() || null,
+                comercio_exterior: document.getElementById('new-emp-comercio-exterior').value || null
+            };
+
+            // Guardar en caché local siempre
+            localEmpresas[ruc] = newCompany;
+
+            if (supabaseClient) {
+                const acceptBtn = document.querySelector('#nuevo-empresa-modal .btn-modal-accept');
+                const originalText = acceptBtn.innerHTML;
+                acceptBtn.disabled = true;
+                acceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('empresas')
+                        .insert([newCompany]);
+                        
+                    if (error) {
+                        console.error('Error al insertar en Supabase:', error);
+                        alert('Empresa guardada localmente. Error al sincronizar con Supabase: ' + error.message);
+                    } else {
+                        alert('Empresa registrada con éxito en Supabase.');
+                    }
+                } catch (err) {
+                    console.error('Error de red al conectar con Supabase:', err);
+                    alert('Empresa guardada localmente. (Error de red con Supabase)');
+                } finally {
+                    acceptBtn.disabled = false;
+                    acceptBtn.innerHTML = originalText;
+                }
+            } else {
+                alert('Empresa registrada localmente para la simulación actual (Supabase no conectado).');
+            }
+
+            closeNuevaEmpresaModal();
+            
+            // Poner el RUC en el buscador y disparar la búsqueda
+            document.getElementById('ruc-receptor').value = ruc;
+            lookupRuc(ruc);
+        }
+
         function calculateItemModalValues() {
             const cant = parseFloat(document.getElementById('modal-cantidad').value) || 0;
             
@@ -1972,6 +2227,19 @@
                 return;
             }
             
+            // Intentar buscar primero en el caché de empresas registradas localmente en esta sesión
+            if (localEmpresas[ruc]) {
+                const data = localEmpresas[ruc];
+                display.innerText = data.razon_social;
+                display.style.backgroundColor = '#E2EDF4';
+                display.style.color = '#1E395B';
+                
+                currentReceptorData.ruc = ruc;
+                currentReceptorData.razon_social = data.razon_social;
+                currentReceptorData.direccion_legal = data.direccion_legal || 'AV. MOCK RECEPTOR S/N';
+                return;
+            }
+            
             // Intentar buscar en Supabase si está configurado
             if (supabaseClient) {
                 try {
@@ -2021,37 +2289,43 @@
             
             // Si por alguna razón no se han cargado los datos del RUC actual o hay desfase asíncrono
             if (currentReceptorData.ruc !== rucVal) {
-                const rucs = {
-                    '20123456789': 'EMPRESA DEMO S.A.C.',
-                    '20606966823': 'EMPRESA DEMO S.A.C.',
-                    '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
-                    '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
-                    '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
-                    '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
-                    '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
-                    '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
-                    '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
-                    '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
-                    '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
-                };
-                
-                const dirs = {
-                    '20123456789': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
-                    '20606966823': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
-                    '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
-                    '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
-                    '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
-                    '20606927283': 'Jr. Lima Nro. 264, Barranca',
-                    '20613448706': 'Av. Huancayo Nro. 198, Jauja',
-                    '20517941507': 'PJ. VILLAC UMO URB. SALAMANCA DE MONTERRICO 176 ATE, LIMA',
-                    '20448190740': 'Mza. H Lote. H-1, Municipal Taparachi, Juliaca',
-                    '20562707108': 'Av. Coronel Samuel Alcazar Nro. 1280, Rimac',
-                    '20611979828': 'Cal. Principal Mza. e Lote. 6 Apv. las Casuarinas de Nieveri, Lurigancho'
-                };
-                
-                currentReceptorData.ruc = rucVal;
-                currentReceptorData.razon_social = rucs[rucVal] || document.getElementById('ruc-nombre-display').innerText || 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
-                currentReceptorData.direccion_legal = dirs[rucVal] || 'AV. MOCK RECEPTOR S/N';
+                if (localEmpresas[rucVal]) {
+                    currentReceptorData.ruc = rucVal;
+                    currentReceptorData.razon_social = localEmpresas[rucVal].razon_social;
+                    currentReceptorData.direccion_legal = localEmpresas[rucVal].direccion_legal || 'AV. MOCK RECEPTOR S/N';
+                } else {
+                    const rucs = {
+                        '20123456789': 'EMPRESA DEMO S.A.C.',
+                        '20606966823': 'EMPRESA DEMO S.A.C.',
+                        '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
+                        '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
+                        '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
+                        '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
+                        '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
+                        '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
+                        '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
+                        '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
+                        '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
+                    };
+                    
+                    const dirs = {
+                        '20123456789': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
+                        '20606966823': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
+                        '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
+                        '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
+                        '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
+                        '20606927283': 'Jr. Lima Nro. 264, Barranca',
+                        '20613448706': 'Av. Huancayo Nro. 198, Jauja',
+                        '20517941507': 'PJ. VILLAC UMO URB. SALAMANCA DE MONTERRICO 176 ATE, LIMA',
+                        '20448190740': 'Mza. H Lote. H-1, Municipal Taparachi, Juliaca',
+                        '20562707108': 'Av. Coronel Samuel Alcazar Nro. 1280, Rimac',
+                        '20611979828': 'Cal. Principal Mza. e Lote. 6 Apv. las Casuarinas de Nieveri, Lurigancho'
+                    };
+                    
+                    currentReceptorData.ruc = rucVal;
+                    currentReceptorData.razon_social = rucs[rucVal] || document.getElementById('ruc-nombre-display').innerText || 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
+                    currentReceptorData.direccion_legal = dirs[rucVal] || 'AV. MOCK RECEPTOR S/N';
+                }
             }
             
             // Populate Step 2 Fields
