@@ -585,108 +585,147 @@ body {
 }
 
 .factura-sidebar {
-    width: 280px;
-    border-right: 1.5px solid #D9D9D9;
-    background-color: #FFFFFF;
+    width: 290px;
+    border-right: 1px solid #E2E8F0;
+    background-color: #FAFBFC;
     flex-shrink: 0;
     padding: 0;
+    overflow-y: auto;
 }
 
 .factura-sidebar-header {
-    background-color: #9c0c1b; /* Dark SUNAT Red */
-    padding: 12px 15px;
+    background: linear-gradient(135deg, #9c0c1b 0%, #b81224 100%);
+    padding: 14px 16px;
+    box-shadow: 0 2px 6px rgba(156,12,27,0.25);
 }
 
 .factura-sidebar-header a {
     color: #FFFFFF;
     text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.2px;
 }
 
 .factura-sidebar-header a i {
-    margin-right: 5px;
+    font-size: 12px;
+    opacity: 0.85;
 }
 
 .factura-sidebar-menu {
-    padding: 15px 10px;
+    padding: 12px 8px 20px;
 }
 
 .factura-sidebar-menu h3 {
-    color: #006699;
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 12px;
-    padding-left: 5px;
+    color: #1a5276;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin: 16px 0 6px 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #E2E8F0;
 }
 
 .factura-sidebar-menu ul {
     list-style: none;
     padding-left: 0;
+    margin: 0;
 }
 
 .factura-sidebar-menu li {
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .factura-sidebar-menu a.menu-item-link {
     display: flex;
-    align-items: flex-start;
-    padding: 6px 8px;
-    color: #333333;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 10px;
+    color: #374151;
     text-decoration: none;
     font-size: 12.5px;
-    line-height: 1.3;
+    line-height: 1.4;
+    border-radius: 6px;
+    transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 .factura-sidebar-menu a.menu-item-link:hover {
-    background-color: #F0F4F8;
+    background-color: #EBF4FB;
     color: #006699;
 }
 
-.factura-sidebar-menu a.menu-item-link i {
-    margin-right: 6px;
-    margin-top: 3px;
-    font-size: 11px;
-    color: #555;
+.factura-sidebar-menu a.menu-item-link i.fa-caret-down,
+.factura-sidebar-menu a.menu-item-link i.fa-caret-right {
+    font-size: 10px;
+    color: #9CA3AF;
+    margin-top: 0;
+    flex-shrink: 0;
+    transition: color 0.18s ease;
 }
 
+.factura-sidebar-menu a.menu-item-link:hover i {
+    color: #006699;
+}
+
+/* --- Submenú nivel 1 (SEE-SOL) --- */
 .submenu-list-factura {
     list-style: none;
-    padding-left: 12px;
+    padding-left: 14px;
     margin-top: 2px;
-    display: block !important; /* Force open in this view */
+    margin-bottom: 2px;
+    display: block !important;
+    border-left: 2px solid #E2E8F0;
+    margin-left: 12px;
 }
 
 .submenu-list-factura li {
     margin-bottom: 1px;
 }
 
+/* --- Submenú nivel 2 (items finales Factura Electrónica) --- */
 .submenu-list-factura.last-level-factura {
-    padding-left: 15px;
+    padding-left: 10px;
+    border-left: 2px solid #BFD9EC;
+    margin-left: 8px;
+    margin-top: 4px;
 }
 
 .submenu-list-factura.last-level-factura li a {
-    color: #006699;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #1D4E7A;
     font-weight: 400;
     font-size: 12px;
-    display: block;
-    width: 100%;
+    padding: 7px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.18s ease, color 0.18s ease, padding-left 0.18s ease;
+}
+
+.submenu-list-factura.last-level-factura li a:hover {
+    background-color: #EBF4FB;
+    color: #006699;
+    padding-left: 14px;
 }
 
 .submenu-list-factura.last-level-factura li.active-factura {
-    background-color: #E2EBF2;
-    border-left: 3px solid #006699;
+    background-color: #DBEEFF;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .submenu-list-factura.last-level-factura li.active-factura a {
     color: #006699;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-right: 10px;
+    font-weight: 600;
+    padding-left: 14px;
+    background: transparent;
+    border-left: 3px solid #006699;
+    border-radius: 0 5px 5px 0;
 }
 
 /* Factura Content Area */
