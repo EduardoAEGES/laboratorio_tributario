@@ -12,6 +12,430 @@ document.addEventListener('DOMContentLoaded', function () {
         if (acceptModalBtn) acceptModalBtn.addEventListener('click', closeModal);
     }
 
+    // =============================================
+    // FLUJO: Aceptar Propuesta → Modales en cadena
+    // =============================================
+    const modalConfirmar = document.getElementById('modal-confirmar-propuesta');
+    const modalTicket = document.getElementById('modal-ticket-generado');
+    const modalAviso12h = document.getElementById('modal-aviso-12h');
+
+    function showModal(el) {
+        if (el) { el.style.display = 'flex'; }
+    }
+    function hideModal(el) {
+        if (el) { el.style.display = 'none'; }
+    }
+
+    // Exponer función globalmente para el onclick inline del botón (respaldo)
+    window.abrirConfirmarPropuesta = function() {
+        showModal(modalConfirmar);
+    };
+
+    // Paso 1: Event delegation desde document - captura el click sin importar cuándo se registró
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('#btn-aceptar-propuesta');
+        if (btn) {
+            e.preventDefault();
+            showModal(modalConfirmar);
+        }
+    });
+
+
+    // Botón "No" del modal confirmación → cierra
+    const btnNoPropuesta = document.getElementById('btn-no-propuesta');
+    if (btnNoPropuesta) {
+        btnNoPropuesta.addEventListener('click', () => hideModal(modalConfirmar));
+    }
+    const closeConfirmar = document.getElementById('close-confirmar-propuesta');
+    if (closeConfirmar) {
+        closeConfirmar.addEventListener('click', () => hideModal(modalConfirmar));
+    }
+
+    // Paso 2: Click "Sí" → cierra confirmación, abre modal ticket
+    const btnSiPropuesta = document.getElementById('btn-si-propuesta');
+    if (btnSiPropuesta) {
+        btnSiPropuesta.addEventListener('click', () => {
+            hideModal(modalConfirmar);
+            showModal(modalTicket);
+        });
+    }
+    const closeTicket = document.getElementById('close-ticket-generado');
+    if (closeTicket) {
+        closeTicket.addEventListener('click', () => hideModal(modalTicket));
+    }
+
+    // Paso 3: Click "Aceptar" en modal ticket → abre aviso 12h Y muestra vista Generación de Registros
+    const btnAceptarTicket = document.getElementById('btn-aceptar-ticket');
+    if (btnAceptarTicket) {
+        btnAceptarTicket.addEventListener('click', () => {
+            hideModal(modalTicket);
+            // Registrar la aceptación del RVIE (persiste hasta pulsar "Salir")
+            guardarAceptacionRVIE(obtenerPeriodoSeleccionadoRVIE());
+            mostrarVistaGeneracionRegistros();
+            showModal(modalAviso12h);
+        });
+    }
+    const closeAviso = document.getElementById('close-aviso-12h');
+    if (closeAviso) {
+        closeAviso.addEventListener('click', () => hideModal(modalAviso12h));
+    }
+
+    // Paso 4: Click "Aceptar" en aviso 12h → cierra modal, queda en vista Generación de Registros
+    const btnAceptarAviso = document.getElementById('btn-aceptar-aviso');
+    if (btnAceptarAviso) {
+        btnAceptarAviso.addEventListener('click', () => {
+            hideModal(modalAviso12h);
+        });
+    }
+
+    // =============================================
+    // Estado de aceptación compartido (RCE / RVIE)
+    // Se guarda en sessionStorage con la clave 'sire_aceptado'
+    // y se conserva hasta que el usuario pulse "Salir".
+    // Formato: { rce: '2026-07', rvie: '2026-05' }
+    // =============================================
+    function obtenerEstadoAceptacion() {
+        try {
+            return JSON.parse(sessionStorage.getItem('sire_aceptado') || '{}');
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function guardarAceptacionRVIE(periodo) {
+        const estado = obtenerEstadoAceptacion();
+        estado.rvie = periodo;
+        sessionStorage.setItem('sire_aceptado', JSON.stringify(estado));
+    }
+
+    // Lee el período elegido en los selects personalizados de rvie.html (ej. '2026-05')
+    function obtenerPeriodoSeleccionadoRVIE() {
+        const mesMap = {
+            'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
+            'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+            'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
+        };
+        const pSel = document.querySelector('#periodo-select span');
+        const mSel = document.querySelector('#mes-select span');
+        if (pSel && mSel &&
+            pSel.textContent !== 'Seleccionar' &&
+            mSel.textContent !== 'Seleccionar') {
+            const year = pSel.textContent.split('-')[0].trim();
+            const mes = mesMap[mSel.textContent.split('-')[0].trim()];
+            if (year && mes) return year + '-' + mes;
+        }
+        return '2026-05';
+    }
+
+    // Función que transforma el contenido principal a la vista "Generación de Registros".
+    // Muestra una fila por cada registro aceptado previamente (RCE y/o RVIE),
+    // según el estado guardado en sessionStorage.
+    function mostrarVistaGeneracionRegistros() {
+        const contentArea = document.querySelector('.content-area');
+        if (!contentArea) return;
+
+        const estado = obtenerEstadoAceptacion();
+        // Fallback defensivo: si no hay nada aceptado, mostrar solo el RVIE
+        if (!estado.rce && !estado.rvie) estado.rvie = '2026-05';
+
+        function filaRegistro(nombre, periodo, indicador) {
+            return `
+                                <tr>
+                                    <td>${nombre}</td>
+                                    <td>${periodo}</td>
+                                    <td>${indicador}</td>
+                                    <td><a href="#" class="link-registrado"><i class="fas fa-search"></i> Registrado</a></td>
+                                    <td style="text-align:center;"><span class="btn-eliminar-prelim"><i class="fas fa-times-circle"></i></span></td>
+                                    <td>Actualizado</td>
+                                    <td>No Generado</td>
+                                    <td style="text-align:center;"><input type="checkbox" class="gen-check-registro"></td>
+                                </tr>`;
+        }
+
+        let filas = '';
+        if (estado.rce)  filas += filaRegistro('Registro de compras', estado.rce, 'Con Información');
+        if (estado.rvie) filas += filaRegistro('Registro de Ventas e Ingresos', estado.rvie, 'Con Información');
+
+        const periodo = estado.rvie || estado.rce;
+
+        contentArea.innerHTML = `
+            <div class="page-header">
+                <h1>Generación de Registros</h1>
+            </div>
+            <div class="gen-registros-container">
+                <div class="gen-table-section">
+                    <div class="gen-table-wrapper">
+                        <table class="gen-table">
+                            <thead>
+                                <tr>
+                                    <th>REGISTRO</th>
+                                    <th>PERIODO</th>
+                                    <th>INDICADOR DE CONTENIDO</th>
+                                    <th>DETALLE DEL PRELIMINAR</th>
+                                    <th>ELIMINACIÓN DEL PRELIMINAR</th>
+                                    <th>ESTADO DE ACTUALIZACIÓN</th>
+                                    <th>ESTADO DE GENERACIÓN</th>
+                                    <th style="text-align:center;">SELECCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>${filas}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="gen-table-section mt-3">
+                    <table class="gen-table">
+                        <thead>
+                            <tr>
+                                <th>PROPUESTA DE CASILLAS</th>
+                                <th>PERIODO</th>
+                                <th>INDICADOR DE CONTENIDO</th>
+                                <th>DETALLE DE CASILLAS DE REC.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Casilla FV621</td>
+                                <td>${periodo}</td>
+                                <td>Sin Información</td>
+                                <td><a href="#" class="link-registrado">Ver Casillas</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="gen-action-buttons">
+                    <button class="btn-gen btn-gen-dark-blue" onclick="window.location.href='rvie.html'">Ir al RVIE</button>
+                    <button class="btn-gen btn-gen-dark-blue" onclick="window.location.href='rce.html'">Ir al RCE</button>
+                    <button class="btn-gen btn-gen-green" id="btn-generar-registro-vista"><i class="fas fa-check"></i> Generar registro</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Vista final tras generar los registros: tablas vacías + botón Terminar simulación
+    function mostrarVistaGeneracionVacia() {
+        const contentArea = document.querySelector('.content-area');
+        if (!contentArea) return;
+
+        contentArea.innerHTML = `
+            <div class="page-header">
+                <h1>Generación de Registros</h1>
+            </div>
+            <div class="gen-registros-container">
+                <div class="gen-table-section">
+                    <div class="gen-table-wrapper">
+                        <table class="gen-table">
+                            <thead>
+                                <tr>
+                                    <th>REGISTRO</th>
+                                    <th>PERIODO</th>
+                                    <th>INDICADOR DE CONTENIDO</th>
+                                    <th>DETALLE DEL PRELIMINAR</th>
+                                    <th>ELIMINACIÓN DEL PRELIMINAR</th>
+                                    <th>ESTADO DE ACTUALIZACIÓN</th>
+                                    <th>ESTADO DE GENERACIÓN</th>
+                                    <th style="text-align:center;">SELECCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" style="text-align:center; padding:14px;">Ningún registro encontrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="gen-table-section mt-3">
+                    <table class="gen-table">
+                        <thead>
+                            <tr>
+                                <th>PROPUESTA DE CASILLAS</th>
+                                <th>PERIODO</th>
+                                <th>INDICADOR DE CONTENIDO</th>
+                                <th>DETALLE DE CASILLAS DE REC.</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="gen-action-buttons">
+                    <button class="btn-gen btn-gen-dark-blue" onclick="window.location.href='rvie.html'">Ir al RVIE</button>
+                    <button class="btn-gen btn-gen-dark-blue" onclick="window.location.href='rce.html'">Ir al RCE</button>
+                    <button class="btn-gen btn-gen-green"><i class="fas fa-check"></i> Generar registro</button>
+                </div>
+
+                <div style="display:flex; justify-content:center; margin-top:35px;">
+                    <button class="btn-gen" id="btn-terminar-simulacion" style="background:#C00000; color:#fff;">
+                        <i class="fas fa-flag-checkered"></i> Terminar simulación
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // =============================================
+    // FLUJO: Generar registro → Alerta → Proceso → Vista vacía
+    // =============================================
+    const modalGenAlerta = document.getElementById('modal-gen-alerta');
+    const modalGenProceso = document.getElementById('modal-gen-proceso');
+
+    // Click en "Generar registro" de la vista Generación de Registros
+    // (botón dinámico: se usa delegación). Requiere marcar todos los checks.
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#btn-generar-registro-vista')) return;
+        e.preventDefault();
+
+        const checks = document.querySelectorAll('.gen-check-registro');
+        if (checks.length === 0) return;
+        const todosMarcados = Array.from(checks).every(c => c.checked);
+        if (!todosMarcados) return; // deben marcarse todos los registros listados
+
+        // Texto dinámico según los registros aceptados
+        const estado = obtenerEstadoAceptacion();
+        const regSpan = document.getElementById('gen-alerta-registros');
+        if (regSpan) {
+            if (estado.rce && estado.rvie) regSpan.textContent = 'los RCE Y RVIE';
+            else if (estado.rce)           regSpan.textContent = 'el RCE';
+            else                           regSpan.textContent = 'el RVIE';
+        }
+        const perSpan = document.getElementById('gen-alerta-periodo');
+        if (perSpan) perSpan.textContent = estado.rvie || estado.rce || '2026-05';
+
+        showModal(modalGenAlerta);
+    });
+
+    // Modal 1 (Alerta): Cancelar / cerrar
+    const closeGenAlerta = document.getElementById('close-gen-alerta');
+    if (closeGenAlerta) closeGenAlerta.addEventListener('click', () => hideModal(modalGenAlerta));
+    const btnGenAlertaCancelar = document.getElementById('btn-gen-alerta-cancelar');
+    if (btnGenAlertaCancelar) btnGenAlertaCancelar.addEventListener('click', () => hideModal(modalGenAlerta));
+
+    // Modal 1 (Alerta): Aceptar → abre modal de proceso de generación
+    const btnGenAlertaAceptar = document.getElementById('btn-gen-alerta-aceptar');
+    if (btnGenAlertaAceptar) {
+        btnGenAlertaAceptar.addEventListener('click', () => {
+            hideModal(modalGenAlerta);
+            showModal(modalGenProceso);
+        });
+    }
+
+    // Modal 2 (Proceso): cerrar
+    const closeGenProceso = document.getElementById('close-gen-proceso');
+    if (closeGenProceso) closeGenProceso.addEventListener('click', () => hideModal(modalGenProceso));
+
+    // Modal 2 (Proceso): Continuar → limpia la aceptación y muestra la vista vacía
+    const btnGenContinuar = document.getElementById('btn-gen-continuar');
+    if (btnGenContinuar) {
+        btnGenContinuar.addEventListener('click', () => {
+            hideModal(modalGenProceso);
+            sessionStorage.removeItem('sire_aceptado');
+            mostrarVistaGeneracionVacia();
+            window.scrollTo(0, 0);
+        });
+    }
+
+    // Botón "Terminar simulación": limpia el estado y vuelve al inicio
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#btn-terminar-simulacion')) return;
+        e.preventDefault();
+        sessionStorage.removeItem('sire_aceptado');
+        sessionStorage.removeItem('rce_nav_generacion');
+        sessionStorage.removeItem('rce_gen_periodo');
+        window.location.href = 'tramites.html';
+    });
+
+    // =============================================
+    // Modal: Agregar comprobante de pago
+    // =============================================
+    const modalAgregarCp = document.getElementById('modal-agregar-cp');
+
+    function prellenarDatosGenerales() {
+        // RUC y Razón social desde la sesión (si existe)
+        let ruc = '20123456789';
+        let razon = 'EMPRESA DEMO S.A.C.';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.ruc) ruc = auth.ruc;
+            if (auth.denominacion) razon = auth.denominacion;
+        } catch (e) { /* usar valores por defecto */ }
+
+        const rucInput = document.getElementById('cp-ruc');
+        const razonInput = document.getElementById('cp-razon-social');
+        const periodoInput = document.getElementById('cp-periodo');
+        if (rucInput) rucInput.value = ruc;
+        if (razonInput) razonInput.value = razon;
+
+        // Periodo desde los selectores (AAAA/MM) si están elegidos
+        if (periodoInput) {
+            const periodoSel = document.querySelector('#periodo-select span');
+            const mesSel = document.querySelector('#mes-select span');
+            const mesMap = {
+                'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
+                'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+                'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
+            };
+            let periodoTxt = '';
+            if (periodoSel && mesSel &&
+                periodoSel.textContent !== 'Seleccionar' &&
+                mesSel.textContent !== 'Seleccionar') {
+                const year = periodoSel.textContent.split('-')[0];
+                const mes = mesMap[mesSel.textContent.split('-')[0]] || '';
+                periodoTxt = mes ? `${year}/${mes}` : year;
+            }
+            periodoInput.value = periodoTxt;
+        }
+    }
+
+    function abrirModalAgregarCp() {
+        prellenarDatosGenerales();
+        showModal(modalAgregarCp);
+    }
+
+    // El botón "Agregar" se renderiza dentro de la vista de Propuesta.
+    // Usamos delegación para capturar el click de forma robusta.
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#btn-agregar-cp')) {
+            e.preventDefault();
+            abrirModalAgregarCp();
+        }
+    });
+
+    const closeAgregarCp = document.getElementById('close-agregar-cp');
+    const btnCancelarCp = document.getElementById('btn-cancelar-cp');
+    const btnGuardarCp = document.getElementById('btn-guardar-cp');
+
+    if (closeAgregarCp) closeAgregarCp.addEventListener('click', () => hideModal(modalAgregarCp));
+    if (btnCancelarCp) btnCancelarCp.addEventListener('click', () => hideModal(modalAgregarCp));
+
+    // Cerrar al hacer clic fuera del formulario
+    if (modalAgregarCp) {
+        modalAgregarCp.addEventListener('click', (e) => {
+            if (e.target === modalAgregarCp) hideModal(modalAgregarCp);
+        });
+    }
+
+    if (btnGuardarCp) {
+        btnGuardarCp.addEventListener('click', () => {
+            const tipoDoc = document.getElementById('cp-tipo-doc');
+            const serie = document.getElementById('cp-serie');
+            // Validación mínima de simulación
+            if (tipoDoc && !tipoDoc.value) {
+                alert('Seleccione el Tipo CP / DOC.');
+                return;
+            }
+            if (serie && !serie.value.trim()) {
+                alert('Ingrese la Serie del CDP.');
+                return;
+            }
+            hideModal(modalAgregarCp);
+            alert('Comprobante agregado correctamente (simulación).');
+        });
+    }
+
     // La lógica de cambio de pestaña se puede agregar aquí
     console.log('SUNAT Interface Loaded');
 
@@ -698,4 +1122,333 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // =============================================
+    // Datepicker Personalizado para campos de fecha
+    // =============================================
+    class CustomDatePicker {
+        constructor(inputElement) {
+            this.input = inputElement;
+            this.wrapper = inputElement.parentElement;
+            this.icon = this.wrapper.querySelector('i');
+            
+            this.currentDate = new Date();
+            this.parseInputValue();
+
+            this.popup = null;
+            this.init();
+        }
+
+        parseInputValue() {
+            const val = this.input.value.trim();
+            const parts = val.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10);
+                if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                    this.currentDate = new Date(year, month, day);
+                }
+            }
+        }
+
+        init() {
+            this.input.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggle();
+            });
+
+            if (this.icon) {
+                this.icon.style.cursor = 'pointer';
+                this.icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+            }
+        }
+
+        toggle() {
+            document.querySelectorAll('.custom-calendar-popup').forEach(p => {
+                if (p !== this.popup) p.style.display = 'none';
+            });
+
+            if (!this.popup) {
+                this.createPopup();
+            }
+
+            if (this.popup.style.display === 'none') {
+                this.parseInputValue();
+                this.render();
+                this.popup.style.display = 'block';
+            } else {
+                this.popup.style.display = 'none';
+            }
+        }
+
+        createPopup() {
+            this.popup = document.createElement('div');
+            this.popup.className = 'custom-calendar-popup';
+            this.popup.style.display = 'none';
+            
+            this.popup.addEventListener('click', (e) => e.stopPropagation());
+            this.wrapper.appendChild(this.popup);
+        }
+
+        render() {
+            const year = this.currentDate.getFullYear();
+            const month = this.currentDate.getMonth();
+
+            let headerHtml = `
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn prev-month" type="button"><i class="fas fa-chevron-left"></i></button>
+                    <select class="calendar-select-month">
+            `;
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            months.forEach((m, idx) => {
+                headerHtml += `<option value="${idx}" ${idx === month ? 'selected' : ''}>${m}</option>`;
+            });
+            headerHtml += `
+                    </select>
+                    <select class="calendar-select-year">
+            `;
+            for (let y = year - 10; y <= year + 10; y++) {
+                headerHtml += `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`;
+            }
+            headerHtml += `
+                    </select>
+                    <button class="calendar-nav-btn next-month" type="button"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-weekdays">
+                    <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sa</span><span>Do</span>
+                </div>
+                <div class="calendar-days"></div>
+            `;
+
+            this.popup.innerHTML = headerHtml;
+
+            this.popup.querySelector('.prev-month').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.changeMonth(-1);
+            });
+            this.popup.querySelector('.next-month').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.changeMonth(1);
+            });
+            this.popup.querySelector('.calendar-select-month').addEventListener('change', (e) => {
+                this.currentDate.setMonth(parseInt(e.target.value, 10));
+                this.render();
+            });
+            this.popup.querySelector('.calendar-select-year').addEventListener('change', (e) => {
+                this.currentDate.setFullYear(parseInt(e.target.value, 10));
+                this.render();
+            });
+
+            const daysContainer = this.popup.querySelector('.calendar-days');
+            const firstDay = new Date(year, month, 1);
+            let startDay = firstDay.getDay(); 
+            let startDayIndex = startDay === 0 ? 6 : startDay - 1; 
+
+            const currentMonthDays = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+
+            for (let i = startDayIndex; i > 0; i--) {
+                const dayNum = prevMonthDays - i + 1;
+                const span = document.createElement('span');
+                span.className = 'prev-month';
+                span.textContent = dayNum;
+                span.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectDate(dayNum, -1);
+                });
+                daysContainer.appendChild(span);
+            }
+
+            let selDay = -1;
+            const valParts = this.input.value.trim().split('/');
+            if (valParts.length === 3) {
+                const d = parseInt(valParts[0], 10);
+                const m = parseInt(valParts[1], 10) - 1;
+                const y = parseInt(valParts[2], 10);
+                if (d && m === month && y === year) {
+                    selDay = d;
+                }
+            }
+
+            for (let i = 1; i <= currentMonthDays; i++) {
+                const span = document.createElement('span');
+                span.className = 'current-month';
+                if (i === selDay) {
+                    span.classList.add('selected');
+                }
+                span.textContent = i;
+                span.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectDate(i, 0);
+                });
+                daysContainer.appendChild(span);
+            }
+
+            const totalRendered = startDayIndex + currentMonthDays;
+            const remaining = 42 - totalRendered;
+            for (let i = 1; i <= remaining; i++) {
+                const span = document.createElement('span');
+                span.className = 'next-month';
+                span.textContent = i;
+                span.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectDate(i, 1);
+                });
+                daysContainer.appendChild(span);
+            }
+        }
+
+        changeMonth(delta) {
+            this.currentDate.setMonth(this.currentDate.getMonth() + delta);
+            this.render();
+        }
+
+        selectDate(day, monthOffset) {
+            let year = this.currentDate.getFullYear();
+            let month = this.currentDate.getMonth() + monthOffset;
+            
+            const finalDate = new Date(year, month, day);
+            const dayStr = String(finalDate.getDate()).padStart(2, '0');
+            const monthStr = String(finalDate.getMonth() + 1).padStart(2, '0');
+            const yearStr = finalDate.getFullYear();
+
+            this.input.value = `${dayStr}/${monthStr}/${yearStr}`;
+            this.popup.style.display = 'none';
+
+            this.input.dispatchEvent(new Event('input', { bubbles: true }));
+            this.input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    // Inicializar Datepickers
+    const emisionInput = document.getElementById('cp-fecha-emision');
+    const vctoInput = document.getElementById('cp-fecha-vcto');
+    if (emisionInput) new CustomDatePicker(emisionInput);
+    if (vctoInput) new CustomDatePicker(vctoInput);
+
+    // Cerrar calendarios al hacer clic fuera
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.custom-calendar-popup').forEach(p => {
+            p.style.display = 'none';
+        });
+    });
+
+    // =============================================
+    // Custom Dropdown para Tipo CP / DOC (Lista grande)
+    // =============================================
+    const docTypes = [
+        { code: '00', text: '00 - Otros' },
+        { code: '01', text: '01 - Factura' },
+        { code: '03', text: '03 - Boleta de Venta' },
+        { code: '04', text: '04 - Liquidación de Compra' },
+        { code: '05', text: '05 - Boletos de Transporte Aéreo...' },
+        { code: '06', text: '06 - Carta de porte aéreo' },
+        { code: '07', text: '07 - Nota de Crédito' },
+        { code: '08', text: '08 - Nota de Débito' },
+        { code: '11', text: '11 - Póliza emitida por la Bolsa...' },
+        { code: '12', text: '12 - Ticket de máquina registradora...' },
+        { code: '13', text: '13 - Documento Bajo Control...' },
+        { code: '14', text: '14 - Recibo de Servicios Públicos...' },
+        { code: '15', text: '15 - Boletos emitidos por servicios...' },
+        { code: '16', text: '16 - Boleto de viaje de transporte...' },
+        { code: '17', text: '17 - Documentos emitidos por las empresas del sistema financiero...' },
+        { code: '18', text: '18 - Documentos emitidos por las empresas de seguros...' },
+        { code: '21', text: '21 - Conocimiento de embarque...' },
+        { code: '24', text: '24 - Certificado de pago PERT...' },
+        { code: '27', text: '27 - Seguro Complementario...' },
+        { code: '28', text: '28 - Etiquetas por el pago de...' },
+        { code: '30', text: '30 - Documentos emitidos por...' },
+        { code: '32', text: '32 - Documentos emitidos g...' },
+        { code: '34', text: '34 - Documento Electrónico ...' },
+        { code: '35', text: '35 - Documento Electrónico ...' },
+        { code: '36', text: '36 - Recibo de Distribución d...' },
+        { code: '37', text: '37 - Documentos emitidos por...' },
+        { code: '42', text: '42 - Documentos emitidos p...' },
+        { code: '43', text: '43 - Boleto de aviación trans...' },
+        { code: '44', text: '44 - Billetes de lotería, rifas y...' },
+        { code: '45', text: '45 - Documentos emitidos p...' },
+        { code: '48', text: '48 - Comprobantes de Operación...' },
+        { code: '49', text: '49 - Constancia de Depósito...' },
+        { code: '55', text: '55 - BVME para transporte fe...' },
+        { code: '56', text: '56 - Comprobante de pago ...' },
+        { code: '87', text: '87 - Nota de Crédito Especial' },
+        { code: '88', text: '88 - Nota de Débito Especial' },
+        { code: '89', text: '89 - Nota de Ajuste de Oper...' }
+    ];
+
+    const cpTipoDocSelect = document.getElementById('tipo-cp-select');
+    const cpTipoDocOptions = document.getElementById('cp-tipo-doc-options');
+    const cpTipoDocHidden = document.getElementById('cp-tipo-doc');
+
+    if (cpTipoDocSelect && cpTipoDocOptions) {
+        cpTipoDocOptions.innerHTML = '';
+
+        docTypes.forEach(doc => {
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.textContent = doc.text;
+            div.setAttribute('data-value', doc.code);
+            cpTipoDocOptions.appendChild(div);
+        });
+
+        cpTipoDocSelect.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cpTipoDocOptions.classList.toggle('show');
+        });
+
+        cpTipoDocOptions.querySelectorAll('.option-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const selectedVal = item.getAttribute('data-value');
+                const selectedText = item.textContent;
+
+                const span = cpTipoDocSelect.querySelector('span');
+                if (span) span.textContent = selectedText;
+
+                if (cpTipoDocHidden) {
+                    cpTipoDocHidden.value = selectedVal;
+                    cpTipoDocHidden.dispatchEvent(new Event('input', { bubbles: true }));
+                    cpTipoDocHidden.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                cpTipoDocOptions.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('click', () => {
+            cpTipoDocOptions.classList.remove('show');
+        });
+    }
+
+    // ===================================================
+    // NAVEGACIÓN DESDE RCE – Mostrar Generación de Registros
+    // ===================================================
+    if (sessionStorage.getItem('rce_nav_generacion') === '1') {
+        sessionStorage.removeItem('rce_nav_generacion');
+        sessionStorage.removeItem('rce_gen_periodo'); // clave legada, ya no se usa
+
+        // No mostrar los modales informativos al venir del RCE:
+        // ni el "Mensaje Informativo" (SIRE) ni el aviso de 12 horas
+        if (infoModal) infoModal.style.display = 'none';
+        const modal12h = document.getElementById('rvie-modal-12h');
+        if (modal12h) modal12h.style.display = 'none';
+
+        // Mostrar directamente la vista "Generación de Registros";
+        // las filas salen del estado de aceptación (RCE y/o RVIE)
+        mostrarVistaGeneracionRegistros();
+        window.scrollTo(0, 0);
+    }
 });
+
+/* ================================================
+   MODAL AVISO 12 HORAS (en rvie.html)
+   ================================================ */
+function cerrarModal12hRVIE() {
+    const m = document.getElementById('rvie-modal-12h');
+    if (m) m.style.display = 'none';
+}
+

@@ -239,6 +239,20 @@ body {
     color: var(--sunat-dark-blue);
 }
 
+/* Los trámites aún no implementados se muestran en gris */
+.menu-list > li > a {
+    color: #9AA0A6;
+}
+
+.menu-list > li > a i {
+    color: #9AA0A6;
+}
+
+.menu-list > li > a.menu-item-implemented,
+.menu-list > li > a.menu-item-implemented i {
+    color: var(--sunat-dark-blue);
+}
+
 /* Submenu Styles */
 .submenu-list {
     list-style: none;

@@ -1111,3 +1111,866 @@ ul {
     to { opacity: 1; transform: scale(1); }
 }
 
+/* ============================================
+   Modal: Agregar comprobante de pago (formulario)
+   ============================================ */
+.modal-content-form {
+    width: 92%;
+    max-width: 1100px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.cp-form-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+}
+
+.cp-fieldset {
+    border: 1px solid #d9e2ec;
+    border-radius: 4px;
+    padding: 16px 18px 18px;
+    margin-bottom: 18px;
+}
+
+.cp-fieldset legend {
+    color: #005691;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 8px;
+}
+
+.cp-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 18px;
+}
+
+.cp-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cp-field-wide {
+    grid-column: span 2;
+}
+
+.cp-field label {
+    font-size: 12.5px;
+    color: #555;
+}
+
+.cp-field input,
+.cp-field select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #cfd8e3;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    outline: none;
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+.cp-field input:focus,
+.cp-field select:focus {
+    border-color: #00AEEF;
+    box-shadow: 0 0 0 2px rgba(0, 174, 239, 0.12);
+}
+
+.cp-field input.cp-num {
+    text-align: right;
+}
+
+.cp-field .field-readonly {
+    background-color: #e9edf1;
+    color: #6b7683;
+    cursor: not-allowed;
+}
+
+.cp-field .input-icon-wrapper {
+    position: relative;
+}
+
+.cp-field .input-icon-wrapper input {
+    padding-right: 34px;
+}
+
+.cp-field .input-icon-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a97a6;
+    pointer-events: none;
+    font-size: 14px;
+}
+
+.cp-form-footer {
+    padding: 14px 22px;
+    gap: 10px;
+    border-top: 1px solid #e5e5e5;
+    background: #fafbfc;
+}
+
+.btn-cp-guardar {
+    background-color: #2e9e5b;
+    color: #fff;
+    border: none;
+    padding: 9px 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background-color 0.2s;
+}
+.btn-cp-guardar:hover { background-color: #278049; }
+
+.btn-cp-cancelar {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 9px 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background-color 0.2s;
+}
+.btn-cp-cancelar:hover { background-color: #c33f3b; }
+
+@media (max-width: 900px) {
+    .cp-grid { grid-template-columns: repeat(2, 1fr); }
+    .cp-field-wide { grid-column: span 2; }
+}
+
+@media (max-width: 560px) {
+    .cp-grid { grid-template-columns: 1fr; }
+    .cp-field-wide { grid-column: span 1; }
+}
+
+/* ============================================
+   Botones adicionales para modales de propuesta
+   ============================================ */
+.modal-footer-right {
+    padding: 12px 20px 18px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal-content-sm {
+    width: 420px;
+    max-width: 95vw;
+}
+
+.modal-content-md {
+    width: 520px;
+    max-width: 95vw;
+}
+
+.btn-modal-no {
+    background-color: #e9ecef;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 7px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-modal-no:hover {
+    background-color: #d0d4d8;
+}
+
+.btn-modal-si {
+    background-color: #005691;
+    color: #fff;
+    border: none;
+    padding: 7px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-modal-si:hover {
+    background-color: #004471;
+}
+
+/* ============================================
+   Vista: Generación de Registros
+   ============================================ */
+.gen-registros-container {
+    padding: 20px;
+    background: #fff;
+}
+
+.gen-table-section {
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-bottom: 4px;
+}
+
+.gen-table-section.mt-3 {
+    margin-top: 16px;
+}
+
+.gen-table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.gen-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 900px;
+    white-space: nowrap;
+}
+
+.gen-table thead tr {
+    background-color: #f2f2f2;
+}
+
+.gen-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+    white-space: nowrap;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.gen-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+    color: #444;
+    font-size: 13px;
+}
+
+.gen-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.link-registrado {
+    color: #005691;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+}
+.link-registrado:hover {
+    color: #003366;
+}
+
+.btn-eliminar-prelim {
+    color: #cc0000;
+    cursor: pointer;
+    font-size: 16px;
+}
+.btn-eliminar-prelim:hover {
+    color: #990000;
+}
+
+.gen-scroll-bar {
+    height: 4px;
+    background: linear-gradient(to right, #005691 60%, #eee 60%);
+    border-radius: 2px;
+    margin: 4px 0;
+}
+
+.gen-action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.btn-gen {
+    padding: 9px 22px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.btn-gen:hover {
+    transform: translateY(-1px);
+}
+.btn-gen:active {
+    transform: translateY(0);
+}
+
+.btn-gen-dark-blue {
+    background-color: #005691;
+    color: #fff;
+}
+.btn-gen-dark-blue:hover {
+    background-color: #004471;
+}
+
+.btn-gen-green {
+    background-color: #2e7d32;
+    color: #fff;
+}
+.btn-gen-green:hover {
+    background-color: #1b5e20;
+}
+
+/* Custom Datepicker Styles */
+.custom-calendar-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10000;
+    background: #fff;
+    border: 1px solid #cfd8e3;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 260px;
+    padding: 12px;
+    margin-top: 5px;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.calendar-header select {
+    border: 1px solid #cfd8e3;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 13px;
+    background-color: #fff;
+    outline: none;
+    cursor: pointer;
+    flex-grow: 1;
+    text-align: center;
+    color: #333;
+    font-family: inherit;
+}
+
+.calendar-nav-btn {
+    background: none;
+    border: none;
+    color: #005691;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.calendar-nav-btn:hover {
+    background-color: #f0f4f8;
+    color: #00AEEF;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+}
+
+.calendar-weekdays span {
+    font-size: 11px;
+    font-weight: bold;
+    color: #00aeff;
+    font-style: italic;
+    text-transform: capitalize;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 5px;
+    column-gap: 2px;
+}
+
+.calendar-days span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.1s, color 0.1s;
+}
+
+.calendar-days span.prev-month,
+.calendar-days span.next-month {
+    color: #cbd5e1;
+}
+
+.calendar-days span.current-month {
+    color: #334155;
+    font-weight: 500;
+}
+
+.calendar-days span:hover {
+    background-color: #f1f5f9;
+}
+
+.calendar-days span.selected {
+    background-color: #005691 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* ================================================
+   PROPUESTA DEL RCE - Nueva Barra de Herramientas
+   ================================================ */
+
+/* Toolbar superior con Filtros / Datos FV621 / Tipo Cambio */
+.propuesta-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid #dde3ea;
+    background: #f4f7fa;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.toolbar-group-right {
+    display: flex;
+    gap: 8px;
+}
+.btn-toolbar {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+.btn-toolbar-dark {
+    background: #1a5a96;
+    color: #fff;
+}
+.btn-toolbar-dark:hover {
+    background: #154b80;
+}
+.btn-toolbar-teal {
+    background: #2a8fc4;
+    color: #fff;
+}
+.btn-toolbar-teal:hover {
+    background: #247aab;
+}
+
+/* Panel de Filtros expandible */
+.filtros-panel {
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid #dde3ea;
+    border-top: 1px solid #dde3ea;
+    animation: slideDown 0.2s ease;
+}
+.filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 18px;
+    align-items: start;
+}
+.filtros-grid.mt-2 {
+    margin-top: 12px;
+}
+.filtro-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.filtro-group label {
+    font-size: 12px;
+    color: #2a6098;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.filtro-input {
+    border: 1px solid #c8d4e0;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #333;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    background: #f9fbfd;
+}
+.filtro-input:focus {
+    border-color: #1a5a96;
+    background: #fff;
+}
+.filtro-input-full {
+    width: 100%;
+}
+.filtro-select {
+    border: 1px solid #c8d4e0;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #333;
+    background: #f9fbfd;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+}
+.range-inputs-inline {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.range-inputs-inline .filtro-input {
+    flex: 1;
+}
+.input-cal-wrapper {
+    flex: 1;
+    position: relative;
+}
+.input-cal-wrapper .filtro-input {
+    padding-right: 28px;
+}
+.cal-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 13px;
+    pointer-events: none;
+}
+.filtros-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eef2f7;
+}
+.btn-filtro-buscar {
+    background: #1a7fd4;
+    color: #fff;
+    border: none;
+    padding: 7px 22px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-filtro-buscar:hover {
+    background: #155fa0;
+}
+.btn-filtro-limpiar {
+    background: #fff;
+    color: #555;
+    border: 1px solid #ccc;
+    padding: 7px 22px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-filtro-limpiar:hover {
+    background: #f0f0f0;
+}
+
+/* Panel FV621 expandible */
+.fv621-panel {
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid #dde3ea;
+    border-top: 1px solid #dde3ea;
+    animation: slideDown 0.2s ease;
+}
+.fv621-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 18px;
+    margin-bottom: 14px;
+}
+.fv621-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.fv621-field label {
+    font-size: 12px;
+    color: #2a6098;
+    font-weight: 600;
+}
+.fv621-input {
+    border: 1px solid #c8d4e0;
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-size: 13px;
+    color: #333;
+    background: #f4f7fa;
+    text-align: right;
+    outline: none;
+}
+.fv621-info-msg {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* Mensaje informativo de la propuesta */
+.propuesta-info-msg {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+    margin: 10px 0;
+}
+
+/* Barra de botones de acción inferiores */
+.propuesta-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 4px 4px;
+    flex-wrap: wrap;
+}
+.btn-pa {
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+}
+.btn-pa-blue {
+    background: #1a5a96;
+    color: #fff;
+}
+.btn-pa-blue:hover {
+    background: #154b80;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.btn-pa-green {
+    background: #27a244;
+    color: #fff;
+}
+.btn-pa-green:hover {
+    background: #1e8836;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.btn-pa-outline {
+    background: #fff;
+    color: #1a5a96;
+    border: 1px solid #1a5a96;
+}
+.btn-pa-outline:hover {
+    background: #f0f5fc;
+}
+
+/* Dropdown de botones de acción */
+.btn-pa-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.btn-pa-dropdown-menu {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0;
+    background: #fff;
+    border: 1px solid #c8d4e0;
+    border-radius: 4px;
+    min-width: 200px;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.btn-pa-dropdown:hover .btn-pa-dropdown-menu {
+    display: block;
+}
+.btn-pa-dropdown-item {
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-pa-dropdown-item:hover {
+    background: #f0f5fc;
+    color: #1a5a96;
+}
+
+/* Animación de apertura de paneles */
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================
+   MODALES CADENA ACEPTAR PROPUESTA RCE
+   ================================================ */
+
+.rce-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+.rce-modal-box {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    width: 90%;
+    overflow: hidden;
+    animation: fadeInScale 0.22s ease;
+}
+
+.rce-modal-header {
+    background: #1a5a96;
+    color: #fff;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.rce-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 2px;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+}
+.rce-modal-close:hover {
+    opacity: 1;
+}
+
+.rce-modal-body {
+    padding: 22px 22px 16px;
+    font-size: 13.5px;
+    color: #333;
+    line-height: 1.6;
+}
+.rce-modal-body p {
+    margin: 0;
+}
+
+.rce-modal-footer {
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #eef2f7;
+    background: #f9fbfd;
+}
+
+.rce-btn {
+    padding: 8px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+}
+
+.rce-btn-primary {
+    background: #1a7fd4;
+    color: #fff;
+}
+.rce-btn-primary:hover {
+    background: #155fa0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.rce-btn-outline {
+    background: #fff;
+    color: #555;
+    border: 1px solid #bbb;
+}
+.rce-btn-outline:hover {
+    background: #f0f0f0;
+}
+
+.rce-btn-outline-gray {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.rce-btn-outline-gray:hover {
+    background: #e0e0e0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.94) translateY(-10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}

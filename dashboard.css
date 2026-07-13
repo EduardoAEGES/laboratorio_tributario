@@ -31,13 +31,13 @@ body {
 }
 
 .top-logo-bar {
-    padding: 10px 20px;
+    padding: 4px 20px;
     background-color: var(--white);
     border-bottom: 1px solid var(--border-grey);
 }
 
 .sunat-logo {
-    height: 35px;
+    height: 24px;
 }
 
 .blue-info-bar {

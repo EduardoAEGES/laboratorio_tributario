@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - Mis Declaraciones y Pagos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <style>
+        :root {
+            --sunat-blue: #0056A3;
+            --sunat-dark-blue: #004B91;
+            --sunat-red: #A6001A;
+            --sunat-teal: #00A5B5;
+            --bar-blue: #0068B3;
+            --border-grey: #D9D9D9;
+            --text-dark: #333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F4F4F4;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== Header blanco superior ===== */
+        .decl-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 20px;
+            background: #fff;
+        }
+
+        .decl-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .decl-logo-area img { height: 40px; }
+
+        .decl-logo-area .lab-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1E395B;
+            border-left: 2px solid #006699;
+            padding-left: 10px;
+        }
+
+        .decl-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .decl-header-actions a {
+            color: var(--sunat-red);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .decl-header-actions a i { margin-right: 4px; }
+
+        .btn-bandeja {
+            background: var(--sunat-red);
+            color: #fff !important;
+            padding: 12px 18px;
+            font-weight: 700;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-bandeja .badge-count {
+            position: absolute;
+            top: 4px;
+            left: 10px;
+            background: #fff;
+            color: var(--sunat-red);
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== Barra azul de usuario ===== */
+        .decl-user-bar {
+            background: var(--bar-blue);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .user-info-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info-right .domicilio { font-weight: 700; }
+
+        .btn-salir {
+            background: #fff;
+            color: var(--bar-blue);
+            padding: 6px 20px;
+            border-radius: 3px;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* ===== Layout general ===== */
+        .decl-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ===== Sidebar ===== */
+        .decl-sidebar {
+            width: 275px;
+            flex-shrink: 0;
+            background: #fff;
+            border-right: 1px solid var(--border-grey);
+            padding-bottom: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 110px);
+        }
+
+        .sidebar-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-grey);
+        }
+
+        .sidebar-top-row a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-top-row a i { color: var(--sunat-red); margin-right: 4px; }
+
+        .sidebar-top-row .collapse-arrow { color: var(--sunat-red); cursor: pointer; }
+
+        .sidebar-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            padding: 15px 15px 8px 15px;
+            line-height: 1.3;
+        }
+
+        /* Árbol colapsable */
+        .decl-tree, .decl-tree ul { list-style: none; }
+
+        .decl-tree { font-size: 13.5px; }
+
+        .tree-toggle {
+            display: block;
+            padding: 7px 12px;
+            font-weight: 700;
+            color: var(--text-dark);
+            cursor: pointer;
+            user-select: none;
+            line-height: 1.35;
+        }
+
+        .tree-toggle:hover { background: #F5F9FC; }
+
+        .tree-toggle i.caret {
+            margin-right: 6px;
+            font-size: 12px;
+            width: 10px;
+        }
+
+        .tree-branch > ul { display: none; }
+
+        .tree-branch.open > ul { display: block; }
+
+        /* Indentación por nivel */
+        .lvl-1 > li > .tree-toggle { padding-left: 12px; }
+        .lvl-2 > li > .tree-toggle { padding-left: 28px; }
+        .lvl-2 > li.tree-leaf > a { padding-left: 44px; }
+        .lvl-3 > li.tree-leaf > a { padding-left: 48px; }
+
+        .tree-leaf > a {
+            display: block;
+            padding: 8px 26px 8px 44px;
+            color: var(--sunat-blue);
+            text-decoration: none;
+            line-height: 1.35;
+        }
+
+        .tree-leaf > a:hover { background: #F0F6FB; text-decoration: underline; }
+
+        .tree-leaf.active > a {
+            background: #E3E3E3;
+            color: var(--text-dark);
+            font-weight: 700;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .tree-leaf.active > a::after {
+            content: "\f054";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--sunat-blue);
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+        }
+
+        /* ===== Panel principal ===== */
+        .decl-main {
+            flex: 1;
+            padding: 15px 20px 30px 20px;
+            min-width: 0;
+        }
+
+        .decl-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stepper { display: flex; }
+
+        .stepper .step {
+            background: #E8E8E8;
+            color: #555;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 18px 10px 28px;
+            position: relative;
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+            margin-left: -10px;
+        }
+
+        .stepper .step:first-child {
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+            margin-left: 0;
+            padding-left: 18px;
+        }
+
+        .stepper .step.active {
+            background: var(--sunat-teal);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .decl-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .importe-total {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .importe-total strong {
+            font-size: 19px;
+            color: var(--text-dark);
+            margin-left: 5px;
+        }
+
+        .decl-top-icons .circle-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #666;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-ayuda-general {
+            background: var(--sunat-red);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 14px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Paso 2 bar */
+        .paso-bar {
+            background: #F2F2F2;
+            border: 1px solid var(--border-grey);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .paso-bar-actions { display: flex; gap: 6px; }
+
+        .btn-paso {
+            background: var(--sunat-blue);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .btn-paso i { margin-right: 5px; }
+
+        .btn-paso:hover { background: #004583; }
+
+        /* Aviso amarillo */
+        .aviso-amarillo {
+            background: #FDF6DC;
+            border: 1px solid #F0E6C0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            font-size: 14px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .aviso-amarillo .aviso-text { flex: 1; }
+
+        .aviso-amarillo i.check { color: #D8CFA8; font-size: 22px; }
+
+        /* Cabecera de formulario */
+        .form-dark-header {
+            background: #6D6E71;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .form-dark-header .fa-star { cursor: pointer; }
+
+        /* Tabs (solo 621) */
+        .form-tabs {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            background: #E8E8E8;
+            border: 1px solid var(--border-grey);
+            border-top: none;
+        }
+
+        .form-tabs-left { display: flex; }
+
+        .form-tab {
+            padding: 12px 22px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            cursor: pointer;
+            line-height: 1.3;
+        }
+
+        .form-tab.active {
+            background: #fff;
+            font-weight: 700;
+            color: var(--text-dark);
+            border-top: 1px solid var(--border-grey);
+            border-right: 1px solid var(--border-grey);
+        }
+
+        .gear-dropdown {
+            padding: 0 18px 8px 0;
+            color: #444;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Cuerpo del formulario */
+        .form-body {
+            background: #fff;
+            border: 1px solid var(--border-grey);
+            border-top: none;
+            padding: 25px 20px 35px 20px;
+        }
+
+        .fieldset-row {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        fieldset.sunat-fieldset {
+            border: 1px solid #C9C9C9;
+            border-radius: 3px;
+            padding: 18px 20px;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        fieldset.sunat-fieldset legend {
+            color: #767676;
+            font-size: 14px;
+            padding: 0 8px;
+        }
+
+        .field-inline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .field-inline label { font-weight: 700; }
+
+        .field-inline input[type="text"] {
+            border: 1px solid #BBB;
+            padding: 8px 10px;
+            font-size: 14px;
+            width: 130px;
+            background: #F7F7F7;
+        }
+
+        .field-inline select {
+            border: 1px solid #BBB;
+            padding: 8px 10px;
+            font-size: 14px;
+            min-width: 150px;
+            background: #fff;
+        }
+
+        .help-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #666;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Afectación / regímenes (621) */
+        .afectacion-box {
+            border: 1px solid #C9C9C9;
+            border-radius: 3px;
+            margin-top: 25px;
+            padding: 18px 20px 25px 20px;
+            position: relative;
+        }
+
+        .afectacion-box .box-legend {
+            position: absolute;
+            top: -10px;
+            left: 12px;
+            background: #fff;
+            padding: 0 8px;
+            color: #767676;
+            font-size: 14px;
+        }
+
+        .afectacion-cols {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .afectacion-col { flex: 1; min-width: 260px; }
+
+        .afectacion-col h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .afectacion-col h4.mt { margin-top: 22px; }
+
+        .radio-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .radio-line input { accent-color: var(--sunat-blue); }
+
+        /* ===== Formulario 1611 (filas con casilla numerada) ===== */
+        .rus-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .rus-label {
+            width: 300px;
+            font-weight: 700;
+            font-size: 14px;
+            padding-right: 15px;
+            line-height: 1.35;
+        }
+
+        .rus-code {
+            background: #E8E8E8;
+            border: 1px solid #C9C9C9;
+            border-right: none;
+            padding: 9px 12px;
+            font-size: 13px;
+            color: #555;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .rus-input-wrap {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            max-width: 560px;
+            gap: 10px;
+        }
+
+        .rus-input-wrap input[type="text"] {
+            flex: 1;
+            border: 1px solid #C9C9C9;
+            background: #EFEFEF;
+            padding: 9px 12px;
+            font-size: 14px;
+        }
+
+        .rus-input-wrap input.placeholder-right { text-align: right; color: #333; }
+
+        .rus-input-wrap input.placeholder-right::placeholder { text-align: right; }
+
+        .rus-input-wrap select {
+            flex: 1;
+            border: 1px solid #C9C9C9;
+            background: #fff;
+            padding: 9px 12px;
+            font-size: 14px;
+        }
+
+        .rus-radios {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .rus-radios label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+        .rus-radios strong { font-weight: 700; }
+
+        /* Botonera inferior */
+        .form-bottom-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-agregar-bandeja {
+            background: var(--sunat-teal);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-agregar-bandeja:hover { background: #00909E; }
+
+        /* Footer */
+        .decl-footer {
+            background: #222;
+            color: #CCC;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 11px;
+            border-top: 1px solid #444;
+        }
+
+        .decl-footer strong { color: #fff; }
+
+        .decl-footer i { color: #00AEEF; margin-right: 5px; }
+
+        .decl-footer a { color: #CCC; text-decoration: none; }
+
+        .decl-footer a:hover { color: #fff; text-decoration: underline; }
+
+        @media (max-width: 900px) {
+            .decl-sidebar { display: none; }
+            .decl-header-actions { gap: 10px; }
+            .rus-label { width: 100%; margin-bottom: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header blanco -->
+    <header class="decl-header-top">
+        <div class="decl-logo-area">
+            <a href="sol.html"><img src="LOGO_SUNAT.png" alt="SUNAT Logo"></a>
+            <span class="lab-text">LABORATORIO TRIBUTARIO CERTUS</span>
+        </div>
+        <div class="decl-header-actions">
+            <a href="#" class="btn-bandeja" onclick="alert('Bandeja de Presentación/Pagos vacía'); return false;">
+                <span class="badge-count">0</span>
+                <i class="fas fa-shopping-cart"></i> Bandeja de Presentación/Pagos <i class="fas fa-caret-down"></i>
+            </a>
+            <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-envelope"></i> Buzón Electrónico</a>
+            <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-star"></i> Favoritos <i class="fas fa-caret-down"></i></a>
+            <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-print"></i> Imprimir</a>
+        </div>
+    </header>
+
+    <!-- Barra azul -->
+    <div class="decl-user-bar">
+        <span id="current-datetime">13/07/2026 12:39</span>
+        <div class="user-info-right">
+            <span>Bienvenido, EMPRESA DEMO S.A.C. <i class="fas fa-caret-down"></i></span>
+            <span class="domicilio">Domicilio: Habido</span>
+            <a href="index.html" class="btn-salir">Salir</a>
+        </div>
+    </div>
+
+    <div class="decl-layout">
+        <!-- Sidebar -->
+        <aside class="decl-sidebar">
+            <div class="sidebar-top-row">
+                <a href="tramites.html"><i class="fas fa-home"></i> Ir al inicio</a>
+                <i class="fas fa-chevron-left collapse-arrow"></i>
+            </div>
+
+            <h3 class="sidebar-section-title">MIS DECLARACIONES Y PAGOS</h3>
+
+            <ul class="decl-tree lvl-1">
+                <li class="tree-branch open">
+                    <span class="tree-toggle" onclick="toggleBranch(this)"><i class="fas fa-caret-down caret"></i> Presentación y Pago</span>
+                    <ul class="lvl-2">
+                        <li class="tree-branch open">
+                            <span class="tree-toggle" onclick="toggleBranch(this)"><i class="fas fa-caret-down caret"></i> Declara Fácil</span>
+                            <ul class="lvl-3">
+                                <li class="tree-leaf active" id="leaf-621"><a href="#" onclick="mostrarVista('621'); return false;">IGV Renta Mensual - 621</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Agentes de Retención IGV - 626</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Agentes de Percepción IGV Hidrocarburos - 633</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Juegos y Apuestas Deportivas a Distancia e ISC - FV 696</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Agentes de Percepción IGV Ventas internas - 697</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Impuesto a las Transacciones Financieras (ITF) - 695</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Otras Retenciones - Formulario 0617</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Impuesto Temporal a los Activos Netos - 0648</a></li>
+                            </ul>
+                        </li>
+                        <li class="tree-branch">
+                            <span class="tree-toggle" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-caret-right caret"></i> Presentación PDT</span>
+                        </li>
+                        <li class="tree-branch">
+                            <span class="tree-toggle" onclick="toggleBranch(this)"><i class="fas fa-caret-right caret"></i> Pago y presentación de otras declaraciones</span>
+                            <ul class="lvl-3">
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Arrendamiento - 1683</a></li>
+                                <li class="tree-leaf" id="leaf-1611"><a href="#" onclick="mostrarVista('1611'); return false;">Nuevo RUS - 1611</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Trabajadores del Hogar - 1676</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Trabajadores Independientes - 616</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Pago de Detracciones</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Entrega de Importes Retenidos - 1661</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Impuesto al Consumo de Bolsas de Plástico - 1670</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Renta Segunda Categoría - 1665</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Ganancias de Capital - 1666</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Fondo extraordinario del pescador - 1674</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Responsables Solidarios - 1672</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Nulidad de Afiliación - 0605</a></li>
+                                <li class="tree-leaf"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Plame Web - 0601</a></li>
+                            </ul>
+                        </li>
+                        <li class="tree-branch">
+                            <span class="tree-toggle" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-caret-right caret"></i> Boletas de Pago</span>
+                        </li>
+                        <li class="tree-branch">
+                            <span class="tree-toggle" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-caret-right caret"></i> Pago de Aduanas</span>
+                        </li>
+                        <li class="tree-branch">
+                            <span class="tree-toggle" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-caret-right caret"></i> Declaraciones Anuales</span>
+                        </li>
+                    </ul>
+                </li>
+                <li class="tree-branch">
+                    <span class="tree-toggle" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-caret-right caret"></i> Consultas</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Panel principal -->
+        <main class="decl-main">
+
+            <div class="decl-top-row">
+                <div class="stepper">
+                    <div class="step">Seleccione</div>
+                    <div class="step active">Complete</div>
+                    <div class="step">Presente/Pague</div>
+                    <div class="step">Constancia</div>
+                </div>
+                <div class="decl-top-icons">
+                    <span class="importe-total">Importe Total a pagar <strong id="importe-total">s/. 0.00</strong></span>
+                    <span class="circle-icon" onclick="alert('Ayuda del formulario');"><i class="fas fa-question"></i></span>
+                    <span class="circle-icon" onclick="alert('Cambiar idioma');"><i class="fas fa-globe-americas"></i></span>
+                    <button class="btn-ayuda-general" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Ayuda General <i class="fas fa-caret-down"></i></button>
+                </div>
+            </div>
+
+            <div class="paso-bar">
+                <span><strong>Paso 2:</strong> Complete o revise los datos del formulario seleccionado. Luego agréguelo a la bandeja de Declaración y Pago.</span>
+                <div class="paso-bar-actions">
+                    <button class="btn-paso" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-th"></i> Recuperar</button>
+                    <button class="btn-paso" onclick="alert('EN PROCESO DE IMPLEMENTACION');"><i class="fas fa-upload"></i> Importar</button>
+                    <button class="btn-paso" onclick="limpiarFormulario();"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                </div>
+            </div>
+
+            <div class="aviso-amarillo">
+                <span class="aviso-text"><strong>Sr. Contribuyente,</strong> luego de llenar el formulario, asegúrese de agregarlo a la <strong>bandeja.</strong></span>
+                <i class="fas fa-check check"></i>
+            </div>
+
+            <!-- ================= VISTA 0621 IGV RENTA MENSUAL ================= -->
+            <div id="view-621">
+                <div class="form-dark-header">
+                    <span>0621 IGV Renta Mensual <i class="fas fa-question-circle" style="font-size: 14px; cursor: pointer;" onclick="alert('Formulario Declara Fácil 621 IGV - Renta Mensual');"></i></span>
+                    <i class="far fa-star" onclick="alert('Agregado a favoritos'); this.classList.remove('far'); this.classList.add('fas');"></i>
+                </div>
+
+                <div class="form-tabs">
+                    <div class="form-tabs-left">
+                        <div class="form-tab active">Información<br>General</div>
+                        <div class="form-tab" onclick="alert('Complete primero la Información General.');">Detalle de<br>Declaración</div>
+                        <div class="form-tab" onclick="alert('Complete primero la Información General.');">Determinación<br>de la Deuda</div>
+                    </div>
+                    <div class="gear-dropdown" onclick="alert('Opciones del formulario');">
+                        <i class="fas fa-cog"></i> <i class="fas fa-caret-down"></i>
+                    </div>
+                </div>
+
+                <div class="form-body">
+                    <div class="fieldset-row">
+                        <fieldset class="sunat-fieldset">
+                            <legend>Período Tributario</legend>
+                            <div class="field-inline">
+                                <label for="periodo-input">Período:</label>
+                                <input type="text" id="periodo-input" placeholder="mm/aaaa" maxlength="7">
+                                <span class="help-circle" onclick="alert('Ingrese el período en formato mm/aaaa. Ejemplo: 06/2026');"><i class="fas fa-question"></i></span>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="sunat-fieldset">
+                            <legend>Tipo de Declaración:</legend>
+                            <div class="field-inline">
+                                <label for="tipo-declaracion">Declaración:</label>
+                                <select id="tipo-declaracion">
+                                    <option value="">Seleccionar</option>
+                                    <option value="original">Original</option>
+                                    <option value="sustitutoria">Sustitutoria</option>
+                                    <option value="rectificatoria">Rectificatoria</option>
+                                </select>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="sunat-fieldset">
+                            <legend>Tipo de Moneda:</legend>
+                            <div class="field-inline">
+                                <label for="tipo-moneda">Moneda:</label>
+                                <select id="tipo-moneda">
+                                    <option value="soles" selected>Soles</option>
+                                </select>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="afectacion-box">
+                        <span class="box-legend">Afectación/Régimen de Renta/convenio:</span>
+                        <div class="afectacion-cols">
+                            <div class="afectacion-col">
+                                <h4>Impuesto general a las Ventas:</h4>
+                                <label class="radio-line"><input type="radio" name="igv-afectacion" value="cuenta-propia"> IGV - Cuenta propia</label>
+                                <label class="radio-line"><input type="radio" name="igv-afectacion" value="convenio"> Con convenio de estabilidad</label>
+                                <h4 class="mt">Impuesto a las Ventas al arroz Pilado:</h4>
+                                <label class="radio-line"><input type="radio" name="igv-afectacion" value="ivap"> IVAP</label>
+                            </div>
+                            <div class="afectacion-col">
+                                <h4>Impuesto a la Renta/Régimen de Renta:</h4>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="general"> Régimen General</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="especial"> Régimen Especial</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="mype"> Régimen Tributario MYPE</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="agrario"> Sector Agraria / Agricultura</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="amazonia"> Regimen Amazonía</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="convenio-renta"> Con convenio de Estabilidad - Pagos a cuenta de Renta</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="agrario-31110"> Régimen Agrario – Ley 31110</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="acuicultura"> Acuicultura – Ley 31666</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="empresa-agraria"> Régimen Empresa Agraria - Ley 32434</label>
+                                <label class="radio-line"><input type="radio" name="renta-regimen" value="pequeno-agrario"> Régimen Pequeño Agrario - Ley 32434</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="afectacion-box">
+                        <span class="box-legend">Ventas no grav con IGV</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+                            <span style="font-size: 14px;">¿Ha realizado ventas no gravadas con el IGV en los últimos 12 meses?</span>
+                            <div class="rus-radios">
+                                <label><input type="radio" name="ventas-no-grav" value="si"> <strong>Si</strong></label>
+                                <label><input type="radio" name="ventas-no-grav" value="no"> <strong>No</strong></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-bottom-actions">
+                        <button class="btn-agregar-bandeja" onclick="siguiente621();">Siguiente <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VISTA 1611 NUEVO RUS ================= -->
+            <div id="view-1611" style="display: none;">
+                <div class="form-dark-header">
+                    <span>Formulario Virtual Nº 1611 - NUEVO RUS <i class="fas fa-question-circle" style="font-size: 14px; cursor: pointer;" onclick="alert('Formulario Virtual 1611 - Declaración y pago del Nuevo Régimen Único Simplificado');"></i></span>
+                    <i class="far fa-star" onclick="alert('Agregado a favoritos'); this.classList.remove('far'); this.classList.add('fas');"></i>
+                </div>
+
+                <div class="form-body" style="border-top: none;">
+                    <div class="rus-row">
+                        <div class="rus-label">Período Tributario:</div>
+                        <div class="rus-input-wrap">
+                            <span class="rus-code">007</span>
+                            <select id="rus-periodo" style="margin-left: -10px; text-align: right; background: #fff;">
+                                <option value="">mm/aaaa</option>
+                            </select>
+                            <span class="help-circle" onclick="alert('Seleccione el período tributario a declarar (mes/año).');"><i class="fas fa-question"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="rus-row">
+                        <div class="rus-label">¿Es una declaracion rectificatoria?:</div>
+                        <div class="rus-radios">
+                            <label><strong>Si</strong> <input type="radio" name="rus-rectificatoria" value="si"></label>
+                            <label><strong>No</strong> <input type="radio" name="rus-rectificatoria" value="no" checked></label>
+                        </div>
+                    </div>
+
+                    <div class="rus-row">
+                        <div class="rus-label">Total de ingresos brutos:</div>
+                        <div class="rus-input-wrap">
+                            <span class="rus-code">507</span>
+                            <input type="text" id="rus-ingresos" inputmode="numeric" style="margin-left: -10px; background: #fff;">
+                            <span class="help-circle" onclick="alert('Ingrese el total de sus ingresos brutos del mes en soles (sin decimales).');"><i class="fas fa-question"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="rus-row">
+                        <div class="rus-label">Total de adquisiciones o compras:</div>
+                        <div class="rus-input-wrap">
+                            <span class="rus-code">607</span>
+                            <input type="text" id="rus-compras" inputmode="numeric" style="margin-left: -10px; background: #fff;">
+                            <span class="help-circle" onclick="alert('Ingrese el total de sus adquisiciones o compras del mes en soles (sin decimales).');"><i class="fas fa-question"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="rus-row">
+                        <div class="rus-label">Categoría:</div>
+                        <div class="rus-input-wrap">
+                            <span class="rus-code">400</span>
+                            <select id="rus-categoria" style="margin-left: -10px; background: #EFEFEF; pointer-events: none;" tabindex="-1">
+                                <option value="">Seleccione Categoría</option>
+                                <option value="1">Categoría 1</option>
+                                <option value="2">Categoría 2</option>
+                            </select>
+                            <span class="help-circle" onclick="alert('La categoría se determina automáticamente según sus ingresos y compras:\nCategoría 1: hasta S/ 5,000 (cuota S/ 20).\nCategoría 2: más de S/ 5,000 y hasta S/ 8,000 (cuota S/ 50).');"><i class="fas fa-question"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="rus-row">
+                        <div class="rus-label">Monto de cuota mensual:</div>
+                        <div class="rus-input-wrap">
+                            <span class="rus-code">503</span>
+                            <input type="text" id="rus-cuota" readonly style="margin-left: -10px;">
+                            <span class="help-circle" onclick="alert('La cuota mensual se calcula automáticamente según la categoría: Categoría 1 = S/ 20, Categoría 2 = S/ 50.');"><i class="fas fa-question"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="rus-row">
+                        <div class="rus-label">Interés moratorio:</div>
+                        <div class="rus-input-wrap">
+                            <span class="rus-code">504</span>
+                            <input type="text" id="rus-interes" inputmode="numeric" style="margin-left: -10px;">
+                            <span class="help-circle" onclick="alert('Solo si paga fuera de plazo. Interés moratorio calculado a la fecha de pago.');"><i class="fas fa-question"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="form-bottom-actions">
+                        <button class="btn-agregar-bandeja" onclick="agregarBandejaRUS();">Agregar a Bandeja <i class="fas fa-caret-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Equipo Académico CERTUS -->
+    <footer class="decl-footer">
+        <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank">Aprende en la página oficial de SUNAT</a>
+    </footer>
+
+    <script>
+        // ===== Reloj en vivo =====
+        function actualizarReloj() {
+            const ahora = new Date();
+            const dd = String(ahora.getDate()).padStart(2, '0');
+            const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+            const yyyy = ahora.getFullYear();
+            const hh = String(ahora.getHours()).padStart(2, '0');
+            const mi = String(ahora.getMinutes()).padStart(2, '0');
+            document.getElementById('current-datetime').textContent = `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+        }
+        actualizarReloj();
+        setInterval(actualizarReloj, 30000);
+
+        // ===== Árbol lateral colapsable =====
+        function toggleBranch(el) {
+            const branch = el.parentElement;
+            branch.classList.toggle('open');
+            const caret = el.querySelector('i.caret');
+            if (branch.classList.contains('open')) {
+                caret.classList.remove('fa-caret-right');
+                caret.classList.add('fa-caret-down');
+            } else {
+                caret.classList.remove('fa-caret-down');
+                caret.classList.add('fa-caret-right');
+            }
+        }
+
+        // ===== Cambio de vista entre formularios =====
+        function mostrarVista(codigo) {
+            document.getElementById('view-621').style.display = (codigo === '621') ? 'block' : 'none';
+            document.getElementById('view-1611').style.display = (codigo === '1611') ? 'block' : 'none';
+
+            document.querySelectorAll('.tree-leaf.active').forEach(li => li.classList.remove('active'));
+            const leaf = document.getElementById('leaf-' + codigo);
+            if (leaf) leaf.classList.add('active');
+
+            document.getElementById('importe-total').textContent = 's/. 0.00';
+        }
+
+        // ===== Utilidades =====
+        function formatearPeriodo(input) {
+            input.addEventListener('input', function () {
+                let v = this.value.replace(/[^\d]/g, '');
+                if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2, 6);
+                this.value = v;
+            });
+        }
+        formatearPeriodo(document.getElementById('periodo-input'));
+
+        // Poblar la lista de períodos del 1611 (últimos 24 meses)
+        (function () {
+            const select = document.getElementById('rus-periodo');
+            const hoy = new Date();
+            for (let i = 0; i < 24; i++) {
+                const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+                const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                const valor = mm + '/' + fecha.getFullYear();
+                const opt = document.createElement('option');
+                opt.value = valor;
+                opt.textContent = valor;
+                select.appendChild(opt);
+            }
+        })();
+
+        function soloNumeros(id) {
+            const input = document.getElementById(id);
+            input.addEventListener('input', function () {
+                this.value = this.value.replace(/[^\d]/g, '');
+            });
+        }
+        ['rus-ingresos', 'rus-compras', 'rus-interes'].forEach(soloNumeros);
+
+        function periodoValido(valor) {
+            if (!/^\d{2}\/\d{4}$/.test(valor)) return false;
+            const mes = parseInt(valor.slice(0, 2), 10);
+            return mes >= 1 && mes <= 12;
+        }
+
+        // ===== Formulario 621 =====
+        function siguiente621() {
+            const periodo = document.getElementById('periodo-input').value.trim();
+            const declaracion = document.getElementById('tipo-declaracion').value;
+            const igv = document.querySelector('input[name="igv-afectacion"]:checked');
+            const renta = document.querySelector('input[name="renta-regimen"]:checked');
+            const ventas = document.querySelector('input[name="ventas-no-grav"]:checked');
+
+            if (!periodoValido(periodo)) { alert('Ingrese un período válido en formato mm/aaaa.'); return; }
+            if (!declaracion) { alert('Seleccione el tipo de declaración.'); return; }
+            if (!igv || !renta) { alert('Seleccione la afectación del IGV y el régimen de renta.'); return; }
+            if (!ventas) { alert('Indique si ha realizado ventas no gravadas con el IGV en los últimos 12 meses.'); return; }
+
+            alert('Información General registrada.\n\nPeríodo: ' + periodo + '\nDeclaración: ' + declaracion + '\n\n(Simulador - Detalle de Declaración EN PROCESO DE IMPLEMENTACION)');
+        }
+
+        // ===== Formulario 1611 Nuevo RUS =====
+        // La categoría y la cuota se determinan automáticamente según ingresos/compras
+        function calcularCategoriaRUS() {
+            const ingresos = parseInt(document.getElementById('rus-ingresos').value, 10) || 0;
+            const compras = parseInt(document.getElementById('rus-compras').value, 10) || 0;
+            const mayor = Math.max(ingresos, compras);
+            const categoria = document.getElementById('rus-categoria');
+            const cuota = document.getElementById('rus-cuota');
+
+            if (ingresos === 0 && compras === 0) {
+                categoria.value = '';
+                cuota.value = '';
+            } else if (mayor <= 5000) {
+                categoria.value = '1';
+                cuota.value = '20';
+            } else if (mayor <= 8000) {
+                categoria.value = '2';
+                cuota.value = '50';
+            } else {
+                categoria.value = '';
+                cuota.value = '';
+            }
+            actualizarImporteRUS();
+        }
+        document.getElementById('rus-ingresos').addEventListener('input', calcularCategoriaRUS);
+        document.getElementById('rus-compras').addEventListener('input', calcularCategoriaRUS);
+
+        function actualizarImporteRUS() {
+            const cuota = parseInt(document.getElementById('rus-cuota').value, 10) || 0;
+            const interes = parseInt(document.getElementById('rus-interes').value, 10) || 0;
+            document.getElementById('importe-total').textContent = 's/. ' + (cuota + interes).toFixed(2);
+        }
+        document.getElementById('rus-interes').addEventListener('input', actualizarImporteRUS);
+
+        function agregarBandejaRUS() {
+            const periodo = document.getElementById('rus-periodo').value.trim();
+            const ingresos = document.getElementById('rus-ingresos').value.trim();
+            const compras = document.getElementById('rus-compras').value.trim();
+            const categoria = document.getElementById('rus-categoria').value;
+            const cuota = document.getElementById('rus-cuota').value.trim();
+
+            if (!periodo) { alert('Seleccione el período tributario (casilla 007).'); return; }
+            if (!ingresos) { alert('Ingrese el total de ingresos brutos (casilla 507).'); return; }
+            if (!compras) { alert('Ingrese el total de adquisiciones o compras (casilla 607).'); return; }
+            if (!categoria) {
+                alert('Sus ingresos o compras superan el límite de S/ 8,000 del Nuevo RUS. No puede declarar en este régimen; deberá migrar a otro régimen tributario.');
+                return;
+            }
+
+            const interes = parseInt(document.getElementById('rus-interes').value, 10) || 0;
+            const total = (parseInt(cuota, 10) + interes).toFixed(2);
+            alert('Formulario 1611 - NUEVO RUS agregado a la bandeja.\n\nPeríodo: ' + periodo + '\nCategoría: ' + categoria + '\nCuota: S/ ' + cuota + '\nInterés moratorio: S/ ' + interes + '\nTotal a pagar: S/ ' + total + '\n\n(Simulador - siguiente paso EN PROCESO DE IMPLEMENTACION)');
+        }
+
+        // ===== Limpiar (según vista activa) =====
+        function limpiarFormulario() {
+            if (document.getElementById('view-621').style.display !== 'none') {
+                document.getElementById('periodo-input').value = '';
+                document.getElementById('tipo-declaracion').value = '';
+                document.querySelectorAll('input[name="igv-afectacion"], input[name="renta-regimen"], input[name="ventas-no-grav"]').forEach(r => r.checked = false);
+            } else {
+                document.getElementById('rus-periodo').value = '';
+                document.getElementById('rus-ingresos').value = '';
+                document.getElementById('rus-compras').value = '';
+                document.getElementById('rus-categoria').value = '';
+                document.getElementById('rus-cuota').value = '';
+                document.getElementById('rus-interes').value = '';
+                document.querySelector('input[name="rus-rectificatoria"][value="no"]').checked = true;
+            }
+            document.getElementById('importe-total').textContent = 's/. 0.00';
+        }
+    </script>
+</body>
+</html>

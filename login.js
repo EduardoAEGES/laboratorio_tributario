@@ -5,6 +5,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const userField = document.getElementById('user-field');
     const passField = document.getElementById('pass-field');
     const btnSubmit = document.querySelector('.btn-entrar-simple');
+    const togglePass = document.getElementById('toggle-pass');
+
+    // Mostrar / ocultar contraseña
+    if (togglePass && passField) {
+        togglePass.addEventListener('click', () => {
+            const oculto = passField.type === 'password';
+            passField.type = oculto ? 'text' : 'password';
+            togglePass.setAttribute('aria-label', oculto ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            const icono = togglePass.querySelector('i');
+            if (icono) {
+                icono.classList.toggle('fa-eye', !oculto);
+                icono.classList.toggle('fa-eye-slash', oculto);
+            }
+        });
+    }
 
     // Tab Logic
     tabRuc.addEventListener('click', () => {
@@ -22,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Login Logic
-    btnSubmit.addEventListener('click', () => {
+    btnSubmit.addEventListener('click', async () => {
         const ruc = rucField.value.trim();
         const user = userField.value.trim();
         const pass = passField.value.trim();
@@ -32,28 +47,59 @@ document.addEventListener('DOMContentLoaded', () => {
         const referrer = sessionStorage.getItem('loginReferrer');
         let redirectUrl = urlParams.get('redirect') || referrer || 'dashboard.html';
 
-        // Validation based on user request
+        const irADashboard = () => {
+            if (referrer) {
+                sessionStorage.removeItem('loginReferrer');
+            }
+            window.location.href = redirectUrl;
+        };
+
         if (tabRuc.classList.contains('active')) {
-            if ((ruc === '20123456789' || ruc === '20606966823') && user === 'SIST' && pass === 'NORTON') {
-                sessionStorage.setItem('sunat_auth', JSON.stringify({ ruc, usuario: user, denominacion: 'EMPRESA EJEMPLO S.A.C.' }));
-                if (referrer) {
-                    sessionStorage.removeItem('loginReferrer');
+            if (!ruc || !user || !pass) {
+                alert('Por favor complete RUC, usuario y contraseña.');
+                return;
+            }
+
+            // Deshabilitar el botón mientras se valida contra Supabase
+            btnSubmit.disabled = true;
+            const textoOriginal = btnSubmit.textContent;
+            btnSubmit.textContent = 'Verificando...';
+
+            try {
+                const ok = await loginConSupabase(ruc, user, pass);
+                if (ok) {
+                    irADashboard();
+                } else {
+                    alert('Credenciales incorrectas. Verifique los datos.');
                 }
-                window.location.href = redirectUrl;
-            } else {
-                alert('Credenciales incorrectas. Verifique los datos.');
+            } catch (e) {
+                console.error('Error al iniciar sesión:', e);
+                alert('No se pudo conectar con el servidor. Intente nuevamente.');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = textoOriginal;
             }
         } else {
-            // DNI login (optional but good to have a generic check if they try DNI)
+            // DNI login (validación genérica)
             if (ruc !== '' && pass !== '') {
                 sessionStorage.setItem('sunat_auth', JSON.stringify({ ruc: '00000000', usuario: ruc, denominacion: 'EMPRESA EJEMPLO S.A.C.' }));
-                if (referrer) {
-                    sessionStorage.removeItem('loginReferrer');
-                }
-                window.location.href = redirectUrl;
+                irADashboard();
             } else {
                 alert('Por favor complete los campos.');
             }
+        }
+    });
+
+    // Iniciar sesión al presionar la tecla ENTER en cualquiera de los inputs
+    const inputs = [rucField, userField, passField];
+    inputs.forEach(input => {
+        if (input) {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnSubmit.click();
+                }
+            });
         }
     });
 });

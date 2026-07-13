@@ -13,10 +13,12 @@
     <script src="auth.js"></script>
 </head>
 <body>
+
     <header class="tramites-header">
         <div class="header-top">
-            <div class="logo-container">
+            <div class="logo-container" style="display:flex; align-items:center; gap:10px;">
                 <img src="LOGO_SUNAT.png" alt="SUNAT" class="sunat-logo">
+                <span style="font-family:'Roboto',sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
             </div>
             <div class="header-actions">
                 <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-envelope"></i> Buzón Electrónico</a>
@@ -83,7 +85,7 @@
                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Perfil de Cumplimiento</a></li>
                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Propuesta Información para declaración jurada</a></li>
                         <li class="has-submenu">
-                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Comprobantes de pago</a>
+                            <a href="#" class="toggle-submenu menu-item-implemented"><i class="fas fa-caret-right"></i> Comprobantes de pago</a>
                             <ul class="submenu-list">
                                 <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobantes de Pago</a></li>
                                 <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Comprobantes de Pago Físico</a></li>
@@ -146,7 +148,7 @@
                             </ul>
                         </li>
                         <li class="has-submenu">
-                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Sistema Integrado de Registros Electronicos</a>
+                            <a href="#" class="toggle-submenu menu-item-implemented"><i class="fas fa-caret-right"></i> Sistema Integrado de Registros Electronicos</a>
                             <ul class="submenu-list">
                                 <li class="has-submenu">
                                     <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Registros Electronicos</a>
@@ -8128,5 +8130,12 @@
             }
         });
     </script>
+
+    <!-- Footer Equipo Académico CERTUS -->
+    <footer style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; width:100%; box-sizing:border-box; font-family:'Roboto',Arial,sans-serif;">
+        <span style="display:flex; align-items:center; gap:5px;"><i class="fas fa-laptop-code" style="color:#00AEEF;"></i> Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+
 </body>
 </html>

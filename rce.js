@@ -1,4 +1,1184 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Fallback de datos de compras extraídos de Excel si Supabase retorna vacío (debido a RLS o falta de conexión)
+    const rceLocalFallback = [
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-02",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F002",
+    "Numero": 2595,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20534596686",
+    "Apellidos y Nombres o Razón social": "NEGOCIACIONES EL GENIO S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 48.95,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 8.81,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 57.760000000000005,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Utiles de oficina (lote) - OC 800958",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00000"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-02",
+    "Fecha Vcto/Pago": "2025-04-02",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F500",
+    "Numero": 2062,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20600860535",
+    "Apellidos y Nombres o Razón social": "SERVICIOS ESPECIALIZADOS EN SALUD O-MEDIC S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 5096.28,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 917.33,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 6013.61,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Laptop Core i5 8GB/512GB SSD (costo) - OC 181414",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00001"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-03",
+    "Fecha Vcto/Pago": "2025-02-02",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F003",
+    "Numero": 1893,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20199954297",
+    "Apellidos y Nombres o Razón social": "SERVICIOS ENDOSCOPICOS E.I.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 1731.4,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 311.65,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 2043.0500000000002,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Servidor Torre Xeon (costo) - OC 198314",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00002"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-05",
+    "Fecha Vcto/Pago": "2025-02-04",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F001",
+    "Numero": 2939,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20525526721",
+    "Apellidos y Nombres o Razón social": "CONSTRUCTORA C.E.M.CONTRATISTAS GENERALES S.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 1747.38,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 314.53,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 2061.91,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Computadora de escritorio Core i5 (costo) - OC 319278",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00003"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-06",
+    "Fecha Vcto/Pago": "2025-02-05",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F001",
+    "Numero": 2940,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20600697146",
+    "Apellidos y Nombres o Razón social": "INVERSIONES Y FINANZAS JIREH E.I.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 2455.37,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 441.97,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": -0.01,
+    "Total CP (S/)": 2897.33,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Impresora multifuncional laser (costo) - OC 521659 + Servidor Torre Xeon (costo) - OC 521659",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00004"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-06",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F002",
+    "Numero": 2596,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20534596686",
+    "Apellidos y Nombres o Razón social": "NEGOCIACIONES EL GENIO S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 1605.07,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 288.91,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 1893.98,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Repuestos varios para mantenimiento - OC 842353 + Servidor Torre Xeon (costo) - OC 842353",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00005"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-09",
+    "Fecha Vcto/Pago": "2025-02-08",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F001",
+    "Numero": 2941,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20525526721",
+    "Apellidos y Nombres o Razón social": "CONSTRUCTORA C.E.M.CONTRATISTAS GENERALES S.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 927.78,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 167,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": -0.01,
+    "Total CP (S/)": 1094.77,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Disco duro / memoria RAM (costo, lote) - OC 341796 + Utiles de oficina (lote) - OC 341796",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00006"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-09",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F500",
+    "Numero": 2063,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20600860535",
+    "Apellidos y Nombres o Razón social": "SERVICIOS ESPECIALIZADOS EN SALUD O-MEDIC S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 3132.54,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 563.86,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 3696.4,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Servidor Torre Xeon (costo) - OC 444071 + Licencia de software (costo, lote) - OC 444071",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00007"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-11",
+    "Fecha Vcto/Pago": "2025-02-10",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "FN01",
+    "Numero": 837,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20491198959",
+    "Apellidos y Nombres o Razón social": "J.J. TRACTION 4X4 E.I.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 308.39,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 55.51,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": -0.01,
+    "Total CP (S/)": 363.89,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de transporte y flete de mercaderia",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00008"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-12",
+    "Fecha Vcto/Pago": "2025-02-11",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F002",
+    "Numero": 2597,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20538417751",
+    "Apellidos y Nombres o Razón social": "MARCE SERVICES S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 239.24,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 43.06,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 282.3,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de transporte y flete de mercaderia",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00009"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-12",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F500",
+    "Numero": 2064,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20456345078",
+    "Apellidos y Nombres o Razón social": "H & M INGENIERIA, TOPOGRAFIA Y CONSTRUCCION S.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 79.84,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 14.37,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 94.21000000000001,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Repuestos varios para mantenimiento - OC 724710 + Utiles de oficina (lote) - OC 724710",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00010"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-13",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F010",
+    "Numero": 2277,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20454264917",
+    "Apellidos y Nombres o Razón social": "PATHO DIAGNOSTICO S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 1831.9,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 329.74,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 2161.6400000000003,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Computadora de escritorio Core i5 (costo) - OC 997586",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00011"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-18",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F500",
+    "Numero": 2065,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20456345078",
+    "Apellidos y Nombres o Razón social": "H & M INGENIERIA, TOPOGRAFIA Y CONSTRUCCION S.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 291.06,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 52.39,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 343.45,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Disco duro / memoria RAM (costo, lote) - OC 868798",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00012"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-18",
+    "Fecha Vcto/Pago": "2025-02-17",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "FN01",
+    "Numero": 838,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20541316311",
+    "Apellidos y Nombres o Razón social": "INVERSIONES COMERCIALES MACTOR SOCIEDAD ANONIMA CERRADA",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 547.99,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 98.64,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 646.63,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de transporte y flete de mercaderia",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": true,
+    "Tipo (Detracción / Retención Renta 4ta)": "Detraccion",
+    "% Aplicado": 0.04,
+    "Monto Detracción/Retención": 25.87,
+    "N° Constancia Depósito": "44-7954463040",
+    "src_key": "C00013"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-19",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F050",
+    "Numero": 1026,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20512176594",
+    "Apellidos y Nombres o Razón social": "INVERSIONES ARAKAKI S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 2603.7,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 468.67,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 3072.37,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Computadora de escritorio Core i5 (costo) - OC 857498",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00014"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-19",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "FN01",
+    "Numero": 839,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20541316311",
+    "Apellidos y Nombres o Razón social": "INVERSIONES COMERCIALES MACTOR SOCIEDAD ANONIMA CERRADA",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 1001.75,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 180.32,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 1182.07,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Accesorios y perifericos (costo, lote) - OC 540568 + Licencia de software (costo, lote) - OC 540568",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00015"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-21",
+    "Fecha Vcto/Pago": "2025-02-20",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "E001",
+    "Numero": 2239,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20603321821",
+    "Apellidos y Nombres o Razón social": "MAM BUSINESS CENTER S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 2255.76,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 406.04,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 2661.8,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Computadora de escritorio Core i5 (costo) - OC 803254",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00016"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-25",
+    "Fecha Vcto/Pago": "2025-02-24",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F003",
+    "Numero": 1894,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20556626490",
+    "Apellidos y Nombres o Razón social": "CONSORCIO FUTBOL PERU",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 2775.4,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 499.57,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 3274.9700000000003,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Servidor Torre Xeon (costo) - OC 542939",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00017"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-26",
+    "Fecha Vcto/Pago": "2025-02-25",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "E001",
+    "Numero": 2240,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20498640941",
+    "Apellidos y Nombres o Razón social": "MARVE E.I.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 598.6,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 107.75,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": -0.03,
+    "Total CP (S/)": 706.32,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de transporte y flete de mercaderia",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": true,
+    "Tipo (Detracción / Retención Renta 4ta)": "Detraccion",
+    "% Aplicado": 0.04,
+    "Monto Detracción/Retención": 28.25,
+    "N° Constancia Depósito": "30-4266096147",
+    "src_key": "C00018"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-27",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F500",
+    "Numero": 2066,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20456345078",
+    "Apellidos y Nombres o Razón social": "H & M INGENIERIA, TOPOGRAFIA Y CONSTRUCCION S.R.L.",
+    "Tipo de Proveedor": "Nacional - Servicio Fijo",
+    "BI Gravada (S/)": 1200,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 216,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 1416,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de alquiler de local comercial",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00019"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-28",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F009",
+    "Numero": 4167,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20100188628",
+    "Apellidos y Nombres o Razón social": "SOCIEDAD ELECTRICA DEL SUR OESTE S.A. - SEAL",
+    "Tipo de Proveedor": "Nacional - Servicio Fijo",
+    "BI Gravada (S/)": 397.29,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 71.51,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 468.8,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de energia electrica",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00020"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-29",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F004",
+    "Numero": 4749,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20100211034",
+    "Apellidos y Nombres o Razón social": "SEDAPAR S.A.",
+    "Tipo de Proveedor": "Nacional - Servicio Fijo",
+    "BI Gravada (S/)": 129.68,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 23.34,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 153.02,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de agua potable y alcantarillado",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00021"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-30",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F179",
+    "Numero": 538732,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20467534026",
+    "Apellidos y Nombres o Razón social": "AMERICA MOVIL PERU S.A.C. - CLARO",
+    "Tipo de Proveedor": "Nacional - Servicio Fijo",
+    "BI Gravada (S/)": 372.96,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 67.13,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 440.09,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de telefonia e internet",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00022"
+  },
+  {
+    "Periodo": 202501,
+    "Fecha de emisión": "2025-01-31",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "02",
+    "Comprobante": "Recibo por Honorarios",
+    "Serie del CDP": "FE01",
+    "Numero": 49,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "10098537771",
+    "Apellidos y Nombres o Razón social": "CHONG FLORES JORGE ANTONIO",
+    "Tipo de Proveedor": "Servicios Profesionales",
+    "BI Gravada (S/)": 969.51,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 174.51,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 1144.02,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de Asesoria Legal",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00023"
+  },
+  {
+    "Periodo": 202502,
+    "Fecha de emisión": "2025-02-01",
+    "Fecha Vcto/Pago": "2025-03-03",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F010",
+    "Numero": 2278,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20554137971",
+    "Apellidos y Nombres o Razón social": "CESPEDESGRAF S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 179.9,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 32.38,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 212.28,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Disco duro / memoria RAM (costo, lote) - OC 407362",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00024"
+  },
+  {
+    "Periodo": 202502,
+    "Fecha de emisión": "2025-02-02",
+    "Fecha Vcto/Pago": "2025-03-04",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F002",
+    "Numero": 2598,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20538417751",
+    "Apellidos y Nombres o Razón social": "MARCE SERVICES S.A.C.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 522.12,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 93.98,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0.04,
+    "Total CP (S/)": 616.14,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Servicios",
+    "Descripción": "Servicio de transporte y flete de mercaderia",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": true,
+    "Tipo (Detracción / Retención Renta 4ta)": "Detraccion",
+    "% Aplicado": 0.04,
+    "Monto Detracción/Retención": 24.64,
+    "N° Constancia Depósito": "29-3268914270",
+    "src_key": "C00025"
+  },
+  {
+    "Periodo": 202502,
+    "Fecha de emisión": "2025-02-03",
+    "Fecha Vcto/Pago": "2025-03-05",
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "F003",
+    "Numero": 1895,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20556626490",
+    "Apellidos y Nombres o Razón social": "CONSORCIO FUTBOL PERU",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 1959.2,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 352.66,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": -0.01,
+    "Total CP (S/)": 2311.85,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Laptop Core i5 8GB/512GB SSD (costo) - OC 873102",
+    "Forma de Pago": "Credito",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00026"
+  },
+  {
+    "Periodo": 202502,
+    "Fecha de emisión": "2025-02-04",
+    "Fecha Vcto/Pago": null,
+    "Tipo CP/Doc.": "01",
+    "Comprobante": "Factura",
+    "Serie del CDP": "FN01",
+    "Numero": 840,
+    "Tipo Doc Identidad": "6",
+    "Nro Doc Identidad": "20491198959",
+    "Apellidos y Nombres o Razón social": "J.J. TRACTION 4X4 E.I.R.L.",
+    "Tipo de Proveedor": "Nacional - Bienes/Servicios",
+    "BI Gravada (S/)": 869.39,
+    "Dscto BI (S/)": 0,
+    "IGV/IPM (S/)": 156.49,
+    "Dscto IGV/IPM (S/)": 0,
+    "Mto Exonerado (S/)": 0,
+    "Mto Inafecto (S/)": 0,
+    "ISC (S/)": 0,
+    "ICBPER (S/)": 0,
+    "Otros Tributos (S/)": 0,
+    "Anticipos (S/)": 0,
+    "Otros Cargos (S/)": 0,
+    "Monto de Redondeo (S/)": 0,
+    "Total CP (S/)": 1025.88,
+    "Moneda": "PEN",
+    "Tipo de Cambio": 1,
+    "Fecha Emision Doc. Modificado": null,
+    "Tipo CP Modificado": null,
+    "Serie CP Modificado": null,
+    "Nro CP Modificado": null,
+    "Motivo Nota de Credito": null,
+    "Detalle de la Operación": "Bienes",
+    "Descripción": "Monitor LED 24 pulgadas (costo) - OC 568093 + Disco duro / memoria RAM (costo, lote) - OC 568093",
+    "Forma de Pago": "Contado",
+    "Sujeto a Detracción / Retención": false,
+    "Tipo (Detracción / Retención Renta 4ta)": null,
+    "% Aplicado": 0,
+    "Monto Detracción/Retención": 0,
+    "N° Constancia Depósito": null,
+    "src_key": "C00027"
+  }
+];
+
     // Modal closure logic
     const infoModal = document.getElementById('info-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -413,7 +1593,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const parts = searchPeriod.split('/');
                         const searchPeriodBigInt = parseInt(parts[1] + parts[0]); // '01/2025' -> 202501
 
-                        const { data, error } = await authSupabaseClient
+                        let { data, error } = await authSupabaseClient
                             .from('registro_compras')
                             .select('*')
                             .eq('Periodo', searchPeriodBigInt);
@@ -430,14 +1610,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             return dateStr;
                         }
 
-                        if (data && data.length > 0) {
+                        function processData(rows) {
                             // Calculate Totals for the Dashboard and group by tipo_cp
                             const groups = {};
                             let grandTotals = {
                                 docs: 0, biGrav: 0, mtoIgv: 0, valNoGrav: 0, otros: 0, total: 0
                             };
 
-                            data.forEach(row => {
+                            rows.forEach(row => {
                                 const rawType = row['Tipo CP/Doc.'] || row['Tipo CP/Doc'] || '01';
                                 const type = String(rawType).trim().padStart(2, '0');
                                 if (!groups[type]) {
@@ -534,7 +1714,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
 
                             // Pass the data to the detailed table
-                            renderTable(data.map(d => ({
+                            renderTable(rows.map(d => ({
                                 ruc: d['RUC'] || d['Ruc'] || '20123456789',
                                 razon_social: d['Razon Social'] || 'EMPRESA DEMO S.A.C.',
                                 periodo: d['Periodo'],
@@ -589,17 +1769,183 @@ document.addEventListener('DOMContentLoaded', function () {
                                 dam: '',
                                 clu: d['CLU'] || ''
                             })));
+                        }
+
+                        if (data && data.length > 0) {
+                            processData(data);
                         } else {
-                            if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center">No se encontraron registros para el periodo ${searchPeriod}.</td></tr>`;
+                            // Fallback local con los datos de compras extraídos
+                            const fallbackData = rceLocalFallback.filter(d => d.Periodo === searchPeriodBigInt);
+                            if (fallbackData.length > 0) {
+                                console.log("Cargando desde fallback local para el periodo:", searchPeriodBigInt);
+                                processData(fallbackData);
+                            } else {
+                                if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center">No se encontraron registros para el periodo ${searchPeriod}.</td></tr>`;
+                            }
                         }
                     } catch (err) {
                         console.error("Error fetching data:", err);
-                        if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger">Error de conexión con Supabase.</td></tr>`;
+                        // En caso de error, intentar también cargar desde el fallback
+                        const parts = searchPeriod.split('/');
+                        const searchPeriodBigInt = parseInt(parts[1] + parts[0]);
+                        const fallbackData = rceLocalFallback.filter(d => d.Periodo === searchPeriodBigInt);
+                        if (fallbackData.length > 0) {
+                            console.log("Cargando desde fallback local tras error en la BD.");
+                            processData(fallbackData);
+                        } else {
+                            if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger">Error de conexión con la base de datos.</td></tr>`;
+                        }
                     }
-                } else {
+                 } else {
                     if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center">Supabase no está configurado o conectado.</td></tr>`;
                 }
             }
         });
     }
 });
+
+/* ================================================
+   Funciones globales – Propuesta del RCE
+   ================================================ */
+
+// Toggle del panel de Filtros
+function toggleFiltrosPanel() {
+    const panel = document.getElementById('filtros-panel');
+    const caret = document.getElementById('filtros-caret');
+    const isVisible = panel.style.display !== 'none';
+    panel.style.display = isVisible ? 'none' : 'block';
+    caret.className = isVisible ? 'fas fa-caret-down' : 'fas fa-caret-up';
+    // Cerrar el otro panel si está abierto
+    if (!isVisible) {
+        document.getElementById('fv621-panel').style.display = 'none';
+        document.getElementById('fv621-caret').className = 'fas fa-caret-down';
+    }
+}
+
+// Toggle del panel Datos FV621
+function toggleFV621Panel() {
+    const panel = document.getElementById('fv621-panel');
+    const caret = document.getElementById('fv621-caret');
+    const isVisible = panel.style.display !== 'none';
+    panel.style.display = isVisible ? 'none' : 'block';
+    caret.className = isVisible ? 'fas fa-caret-down' : 'fas fa-caret-up';
+    // Cerrar el otro panel si está abierto
+    if (!isVisible) {
+        document.getElementById('filtros-panel').style.display = 'none';
+        document.getElementById('filtros-caret').className = 'fas fa-caret-down';
+    }
+}
+
+// Abrir modal Tipo de Cambio
+function openTipoCambioModal() {
+    const modal = document.getElementById('tipo-cambio-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+// Cerrar modal Tipo de Cambio
+function closeTipoCambioModal() {
+    const modal = document.getElementById('tipo-cambio-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Cerrar modal al hacer clic en el overlay
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('tipo-cambio-modal');
+    if (modal && e.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+
+/* ================================================
+   CADENA DE MODALES - ACEPTAR PROPUESTA RCE
+   ================================================ */
+
+/**
+ * Abre el Modal 1 (Info FV621) al hacer clic en "Aceptar" en la Propuesta del RCE.
+ * Es la función que se llama directamente desde el botón.
+ */
+function abrirConfirmarPropuesta() {
+    cerrarTodosModalesRCE();
+    const m1 = document.getElementById('rce-modal-1');
+    if (m1) m1.style.display = 'flex';
+}
+
+/**
+ * Navega del modal actual al siguiente en la cadena.
+ * @param {number} desde - número del modal actual (1-4)
+ * @param {number} hacia - número del modal siguiente
+ */
+function rceModalSiguiente(desde, hacia) {
+    // Ocultar el modal de origen
+    const mDesde = document.getElementById('rce-modal-' + desde);
+    if (mDesde) mDesde.style.display = 'none';
+
+    // Mostrar el modal destino
+    const mHacia = document.getElementById('rce-modal-' + hacia);
+    if (mHacia) mHacia.style.display = 'flex';
+}
+
+/**
+ * Cierra todos los modales del flujo Aceptar Propuesta (1-4).
+ */
+function cerrarTodosModalesRCE() {
+    [1, 2, 3, 4].forEach(function(n) {
+        const m = document.getElementById('rce-modal-' + n);
+        if (m) m.style.display = 'none';
+    });
+    const genOverlay = document.getElementById('rce-generacion-overlay');
+    if (genOverlay) genOverlay.style.display = 'none';
+}
+
+/**
+ * Al aceptar el Modal 4 (Ticket generado), cierra el modal 4
+ * y redirige a rvie.html mostrando la sección Generación de Registros.
+ */
+function rceAceptarTicket() {
+    const m4 = document.getElementById('rce-modal-4');
+    if (m4) m4.style.display = 'none';
+
+    // Guardar el período seleccionado en sessionStorage para que rvie.html lo use
+    // (los selects son divs personalizados: se lee el texto de su <span>)
+    const anioSpan = document.querySelector('#periodo-select span');
+    const mesSpan  = document.querySelector('#mes-select span');
+    const mesMap = {
+        'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
+        'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+        'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
+    };
+    let anio = '2026';
+    let mes  = '01';
+    if (anioSpan && anioSpan.textContent !== 'Seleccionar') {
+        anio = anioSpan.textContent.split('-')[0].trim();
+    }
+    if (mesSpan && mesSpan.textContent !== 'Seleccionar') {
+        mes = mesMap[mesSpan.textContent.split('-')[0].trim()] || '01';
+    }
+    const periodoTexto = anio + '-' + mes;
+
+    // Registrar la aceptación del RCE en el estado compartido.
+    // Se conserva en sessionStorage hasta que el usuario pulse "Salir".
+    let estadoAceptado = {};
+    try {
+        estadoAceptado = JSON.parse(sessionStorage.getItem('sire_aceptado') || '{}');
+    } catch (e) { /* estado corrupto: se reinicia */ }
+    estadoAceptado.rce = periodoTexto;
+    sessionStorage.setItem('sire_aceptado', JSON.stringify(estadoAceptado));
+
+    // Marca de navegación: rvie.html mostrará la vista Generación de Registros
+    sessionStorage.setItem('rce_nav_generacion', '1');
+
+    // Navegar a rvie.html; allí se mostrará la vista completa de Generación de Registros
+    window.location.href = 'rvie.html';
+}
+
+/**
+ * Cierra el modal de aviso de 12 horas (Modal 5, obsoleto - ya no se usa desde rce.html).
+ */
+function cerrarModalAviso12h() {
+    const m5 = document.getElementById('rce-modal-5');
+    if (m5) m5.style.display = 'none';
+    const genOverlay = document.getElementById('rce-generacion-overlay');
+    if (genOverlay) genOverlay.style.display = 'none';
+}

@@ -15,6 +15,7 @@
 </head>
 
 <body>
+
     <!-- Modal Informativo -->
     <div id="info-modal" class="modal-overlay">
         <div class="modal-content">
@@ -34,8 +35,9 @@
     <div class="app-container">
         <!-- Encabezado -->
         <header class="main-header">
-            <div class="logo-area">
-                <a href="tramites.html"><img src="favicon.png" alt="SUNAT Logo" class="logo"></a>
+            <div class="logo-area" style="display:flex; align-items:center; gap:10px;">
+                <a href="tramites.html"><img src="LOGO_SUNAT.png" alt="SUNAT Logo" class="logo"></a>
+                <span style="font-family:'Roboto',sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
             </div>
             <div class="header-right">
                 <div class="top-links">
@@ -304,62 +306,107 @@
                                 <button class="proposal-tab">No Incluidos</button>
                             </div>
 
-                            <div class="content-header-blue">
-                                <h2>Propuesta del RCE</h2>
+                            <!-- Barra de botones superiores -->
+                            <div class="propuesta-toolbar">
+                                <!-- Botón Filtros (toggle) -->
+                                <button class="btn-toolbar btn-toolbar-dark" id="btn-toggle-filtros" onclick="toggleFiltrosPanel()">
+                                    <i class="fas fa-caret-down" id="filtros-caret"></i> Filtros
+                                </button>
+
+                                <!-- Botón Datos FV621 (toggle) + Tipo Cambio -->
+                                <div class="toolbar-group-right">
+                                    <button class="btn-toolbar btn-toolbar-dark" id="btn-toggle-fv621" onclick="toggleFV621Panel()">
+                                        <i class="fas fa-caret-down" id="fv621-caret"></i> Datos FV621
+                                    </button>
+                                    <button class="btn-toolbar btn-toolbar-teal" id="btn-tipo-cambio" onclick="openTipoCambioModal()">
+                                        Tipo Cambio
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="search-form-container">
-                                <div class="search-title">Buscar por</div>
-
-                                <div class="form-grid">
-                                    <!-- Fila 1 -->
-                                    <div class="form-group">
-                                        <label>Montos</label>
-                                        <div class="range-inputs">
-                                            <input type="text" placeholder="Desde">
-                                            <input type="text" placeholder="Hasta">
+                            <!-- Panel de Filtros (colapsable) -->
+                            <div class="filtros-panel" id="filtros-panel" style="display:none;">
+                                <div class="filtros-grid">
+                                    <div class="filtro-group">
+                                        <label>Monto Total</label>
+                                        <div class="range-inputs-inline">
+                                            <input type="text" placeholder="Desde" class="filtro-input">
+                                            <input type="text" placeholder="Hasta" class="filtro-input">
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Fecha del documento</label>
-                                        <div class="range-inputs">
-                                            <div class="input-icon-wrapper">
-                                                <input type="text" placeholder="Desde">
-                                                <i class="far fa-calendar-alt"></i>
+                                    <div class="filtro-group">
+                                        <label>Fecha de emisión</label>
+                                        <div class="range-inputs-inline">
+                                            <div class="input-cal-wrapper">
+                                                <input type="text" placeholder="Desde" class="filtro-input">
+                                                <i class="far fa-calendar-alt cal-icon"></i>
                                             </div>
-                                            <div class="input-icon-wrapper">
-                                                <input type="text" placeholder="Hasta">
-                                                <i class="far fa-calendar-alt"></i>
+                                            <div class="input-cal-wrapper">
+                                                <input type="text" placeholder="Hasta" class="filtro-input">
+                                                <i class="far fa-calendar-alt cal-icon"></i>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Fila 2 -->
-                                    <div class="form-group">
-                                        <label>RUC del Proveedor</label>
-                                        <input type="text">
+                                    <div class="filtro-group">
+                                        <label>RUC Proveedor</label>
+                                        <input type="text" class="filtro-input filtro-input-full">
                                     </div>
-                                    <div class="form-group">
-                                        <label>CAR SUNAT (0/27)</label>
-                                        <input type="text">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Tipo de documento</label>
-                                        <select>
+                                </div>
+                                <div class="filtros-grid mt-2">
+                                    <div class="filtro-group">
+                                        <label>Tipo de Documento</label>
+                                        <select class="filtro-select">
                                             <option>Seleccionar</option>
+                                            <option>01 - Factura</option>
+                                            <option>03 - Boleta de Venta</option>
+                                            <option>07 - Nota de Crédito</option>
+                                            <option>08 - Nota de Débito</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="filtro-group">
+                                        <label>Comprobante</label>
+                                        <div class="range-inputs-inline">
+                                            <input type="text" placeholder="SERIE" class="filtro-input">
+                                            <input type="text" placeholder="NRO. DE CP" class="filtro-input">
+                                        </div>
+                                    </div>
+                                    <div class="filtro-group">
+                                        <label>CAR SUNAT (0/27)</label>
+                                        <input type="text" placeholder="Nro. de CAR" class="filtro-input filtro-input-full">
+                                    </div>
+                                </div>
+                                <div class="filtros-grid mt-2">
+                                    <div class="filtro-group" style="grid-column: 1 / 2;">
                                         <label>Inconsistencias</label>
-                                        <select>
+                                        <select class="filtro-select">
                                             <option>Seleccionar</option>
                                         </select>
                                     </div>
                                 </div>
+                                <div class="filtros-actions">
+                                    <button class="btn-filtro-buscar"><i class="fas fa-search"></i> Buscar</button>
+                                    <button class="btn-filtro-limpiar"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                                </div>
+                            </div>
 
-                                <div class="form-actions">
-                                    <button class="btn-search"><i class="fas fa-search"></i> Buscar</button>
-                                    <button class="btn-clear"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                            <!-- Panel Datos FV621 (colapsable) -->
+                            <div class="fv621-panel" id="fv621-panel" style="display:none;">
+                                <div class="fv621-grid">
+                                    <div class="fv621-field">
+                                        <label>Coeficiente de la prorrata:</label>
+                                        <input type="text" value="0.0000" class="fv621-input" readonly>
+                                    </div>
+                                    <div class="fv621-field">
+                                        <label>Reintegro del Crédito Fiscal:</label>
+                                        <input type="text" value="0.00" class="fv621-input" readonly>
+                                    </div>
+                                    <div class="fv621-field">
+                                        <label>Crédito Fiscal Especial:</label>
+                                        <input type="text" value="0.00" class="fv621-input" readonly>
+                                    </div>
+                                </div>
+                                <div class="fv621-info-msg">
+                                    Estimado contribuyente, si usted ha obtenido ingresos mayores a 1500 UIT en el ejercicio anterior debe informar la clasificación de los bienes y servicios adquiridos.
                                 </div>
                             </div>
 
@@ -498,17 +545,46 @@
                                     </div>
                                 </div>
 
-                                <div class="action-buttons-row">
-                                    <button class="btn-action btn-blue"><i class="fas fa-plus-circle"></i> Agregar</button>
-                                    <button class="btn-action btn-blue-light"><i class="fas fa-pen"></i> Editar</button>
-                                    <button class="btn-action btn-blue-light"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                                    <div class="spacer"></div>
-                                    <button class="btn-action btn-blue-light">Comparar documentos</button>
-                                    <button class="btn-action btn-dark-blue"><i class="fas fa-file-upload"></i> Importación de CP</button>
-                                    <button class="btn-action btn-dark-blue"><i class="fas fa-file-upload"></i> Carga masiva de complemento</button>
-                                    <button class="btn-action btn-dark-blue"><i class="fas fa-sync"></i> Actualizar CP</button>
-                                    <button class="btn-action btn-green"><i class="fas fa-check"></i> Aceptar Propuesta</button>
-                                    <button class="btn-action btn-red"><i class="fas fa-times"></i> Reemplazar Propuesta</button>
+                                <!-- Mensaje informativo -->
+                                <div class="propuesta-info-msg">
+                                    Estimado contribuyente, por defecto todas sus adquisiciones gravadas serán consideradas con destino a operaciones gravadas y/o de exportación; de corresponder, podrá modificar el tipo de destino de su adquisición.
+                                </div>
+
+                                <!-- Botones de acción inferiores (estilo SUNAT) -->
+                                <div class="propuesta-action-bar">
+                                    <button class="btn-pa btn-pa-blue" id="btn-actualizar-propuesta" onclick="this.innerHTML='<i class=\'fas fa-sync fa-spin\'></i> Actualizando...'; setTimeout(()=>{this.innerHTML='<i class=\'fas fa-sync\'></i> Actualizar';},1500)">
+                                        <i class="fas fa-sync"></i> Actualizar
+                                    </button>
+
+                                    <div class="btn-pa-dropdown">
+                                        <button class="btn-pa btn-pa-outline" id="btn-complementar">
+                                            Complementar Propuesta <i class="fas fa-caret-up"></i>
+                                        </button>
+                                        <div class="btn-pa-dropdown-menu" id="menu-complementar">
+                                            <div class="btn-pa-dropdown-item">Agregar CP</div>
+                                            <div class="btn-pa-dropdown-item">Importación de CP</div>
+                                            <div class="btn-pa-dropdown-item">Carga masiva de complemento</div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-pa btn-pa-blue" id="btn-excluidos">
+                                        <i class="fas fa-check"></i> Excluidos
+                                    </button>
+
+                                    <div class="btn-pa-dropdown">
+                                        <button class="btn-pa btn-pa-outline" id="btn-comparar-exportar">
+                                            Comparar Reemplazar Exportar <i class="fas fa-caret-up"></i>
+                                        </button>
+                                        <div class="btn-pa-dropdown-menu" id="menu-comparar">
+                                            <div class="btn-pa-dropdown-item">Comparar documentos</div>
+                                            <div class="btn-pa-dropdown-item">Reemplazar Propuesta</div>
+                                            <div class="btn-pa-dropdown-item">Exportar</div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-pa btn-pa-green" id="btn-aceptar-propuesta-rce" onclick="abrirConfirmarPropuesta()">
+                                        <i class="fas fa-check"></i> Aceptar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -531,7 +607,190 @@
             </main>
         </div>
     </div>
+
+    <!-- Footer Equipo Académico CERTUS -->
+    <footer style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; width:100%; box-sizing:border-box; font-family:'Roboto',Arial,sans-serif;">
+        <span style="display:flex; align-items:center; gap:5px;"><i class="fas fa-laptop-code" style="color:#00AEEF;"></i> Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+
+    <!-- Modal Tipo de Cambio -->
+    <div id="tipo-cambio-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:560px; width:90%;">
+            <div class="modal-header" style="background:#1a5a96; color:#fff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:600; font-size:15px;">Agregar Tipo de Cambio</span>
+                <button onclick="closeTipoCambioModal()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                        <tr style="background:#e8edf2;">
+                            <th style="padding:10px 12px; text-align:center; font-weight:700; border-bottom:1px solid #ccc; text-transform:uppercase; font-size:12px;">FECHA DE EMISIÓN</th>
+                            <th style="padding:10px 12px; text-align:center; font-weight:700; border-bottom:1px solid #ccc; text-transform:uppercase; font-size:12px;">TIPO DE MONEDA</th>
+                            <th style="padding:10px 12px; text-align:center; font-weight:700; border-bottom:1px solid #ccc; text-transform:uppercase; font-size:12px;">TIPO DE CAMBIO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tipo-cambio-tbody">
+                        <tr>
+                            <td colspan="3" style="text-align:center; padding:20px; color:#555;">Ningún registro encontrado</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="padding:10px 14px; border-top:1px solid #ddd;">
+                    <button style="background:#1a5a96; color:#fff; border:none; padding:6px 14px; border-radius:4px; font-size:13px; cursor:pointer;">Acciones</button>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding:10px 14px; display:flex; gap:8px; justify-content:flex-start; border-top:1px solid #ddd; background:#f9f9f9;">
+                <button style="background:#e0e0e0; color:#444; border:none; padding:7px 16px; border-radius:4px; font-size:13px; cursor:not-allowed; opacity:0.6;" disabled>Grabar</button>
+                <button style="background:#e0e0e0; color:#1a5a96; border:none; padding:7px 16px; border-radius:4px; font-size:13px; cursor:pointer;"><i class="fas fa-plus-circle"></i> Descargar</button>
+                <button style="background:#e0e0e0; color:#1a5a96; border:none; padding:7px 16px; border-radius:4px; font-size:13px; cursor:pointer;"><i class="fas fa-plus-circle"></i> Importar</button>
+                <button onclick="closeTipoCambioModal()" style="background:#1a5a96; color:#fff; border:none; padding:7px 18px; border-radius:4px; font-size:13px; font-weight:600; cursor:pointer; margin-left:auto;">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         CADENA DE MODALES ACEPTAR PROPUESTA RCE
+         ========================================================= -->
+
+    <!-- MODAL 1: Info FV621 -->
+    <div id="rce-modal-1" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:480px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente, para aceptar la propuesta debe ingresar la información de los Datos FV621: Coeficiente de la prorrata del crédito fiscal, Reintegro del Crédito Fiscal y Crédito Fiscal Especial, de corresponder</p>
+            </div>
+            <div class="rce-modal-footer">
+                <button class="rce-btn rce-btn-outline" onclick="cerrarTodosModalesRCE()">Regresar</button>
+                <button class="rce-btn rce-btn-primary" onclick="rceModalSiguiente(1, 2)">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ¿Operaciones con No Domiciliados? -->
+    <div id="rce-modal-2" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:480px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente ¿tiene operaciones con sujetos No Domiciliados?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn rce-btn-outline-gray" onclick="rceModalSiguiente(2, 3)">No</button>
+                <button class="rce-btn rce-btn-primary" onclick="rceModalSiguiente(2, 3)">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Confirmación generar Preliminar -->
+    <div id="rce-modal-3" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:520px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado Contribuyente, ¿está seguro que desea generar el Preliminar Registrado del RCE con movimiento y RC Operaciones con No Domiciliados sin movimiento?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn rce-btn-outline-gray" onclick="cerrarTodosModalesRCE()">No</button>
+                <button class="rce-btn rce-btn-primary" onclick="rceModalSiguiente(3, 4)">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Ticket generado -->
+    <div id="rce-modal-4" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:500px;">
+            <div class="rce-modal-header">
+                <span>Mensaje Informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>El número de ticket generado es <strong>20260100000005</strong>, por favor verificar que el estado de ticket sea diferente a "En Proceso". Puede consultar el ticket a través de la sub opción Estado de envío de Ticket de la opción Consultas y Descargas de la pestaña Información de Gestión.</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="rceAceptarTicket()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA: Generación de Registros (RCE) + Modal 5 de 12 horas -->
+    <div id="rce-generacion-overlay" class="rce-modal-overlay" style="display:none; align-items:flex-start; padding-top:0; background:rgba(0,0,0,0.55);">
+        <!-- Vista de fondo: Generación de Registros -->
+        <div style="position:fixed; inset:0; background:#f0f4f8; z-index:0; pointer-events:none; overflow:hidden;">
+            <div style="background:#1a5a96; color:#fff; padding:14px 24px; font-size:17px; font-weight:700; letter-spacing:.3px;">
+                Generación de Registros
+            </div>
+            <div style="padding:20px 24px; font-size:13px;">
+                <!-- Tabla Registros -->
+                <table style="width:100%; border-collapse:collapse; margin-bottom:24px; font-size:12px;">
+                    <thead>
+                        <tr style="background:#dce6f0; color:#1a5a96; font-weight:700;">
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">REGISTRO</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">PERIODO</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:center;">VALIDACIÓN DEL PRELIMINAR</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background:#fff;">
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Registro de compras</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;" id="rce-gen-periodo-1">2025-01</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0; text-align:center;"><span style="color:#c00; font-size:16px;">&#10060;</span></td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Actualizado</td>
+                        </tr>
+                        <tr style="background:#f7fafd;">
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Registro de Ventas e Ingresos</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;" id="rce-gen-periodo-2">2025-01</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0; text-align:center;"><span style="color:#c00; font-size:16px;">&#10060;</span></td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Actualizado</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Tabla Propuesta de Casillas -->
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="background:#dce6f0; color:#1a5a96; font-weight:700;">
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">PROPUESTA DE CASILLAS</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">PERIODO</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">INCLUYE CASILLA FV621</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background:#fff;">
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Casilla FV621</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;" id="rce-gen-periodo-3">2025-01</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Sí</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MODAL 5: Aviso 12 horas (superpuesto sobre la vista) -->
+        <div id="rce-modal-5" class="rce-modal-box" style="max-width:520px; position:relative; z-index:10; margin:100px auto 0; animation: fadeInScale 0.25s ease;">
+            <div class="rce-modal-header">
+                <span>Mensaje</span>
+                <button class="rce-modal-close" onclick="cerrarModalAviso12h()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente habiendo transcurrido más de 12 horas desde el Registro de su Preliminar, le recomendamos revisar la opción "Inconsistencias" y verificar si existe alguna actualización. De encontrarse alguna inconsistencia actualizada, le sugerimos eliminar su Preliminar Registrado para volverlo a registrar, considerando que el "Reporte de Inconsistencias" a generarse con su RCE se mostrará actualizados.</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModalAviso12h()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="rce.js"></script>
+
+
 </body>
 
 </html>

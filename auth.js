@@ -19,12 +19,6 @@ if (typeof window.supabase !== 'undefined' && AUTH_SUPABASE_URL !== 'URL_DE_SUPA
  * Asume una tabla pública en Supabase llamada 'usuarios' con columnas: ruc, usuario, clave
  */
 async function loginConSupabase(ruc, usuario, clave) {
-    // Si el usuario ingresa datos de prueba por defecto, acceder directamente.
-    if ((ruc === '20123456789' || ruc === '201234569789') && usuario === 'ADMIN' && clave === '123') {
-        sessionStorage.setItem('sunat_auth', JSON.stringify({ ruc, usuario, denominacion: 'EMPRESA EJEMPLO S.A.C.' }));
-        return true;
-    }
-
     // Si no hay cliente de Supabase (por falta de credenciales)
     if (!authSupabaseClient) {
         console.warn("Supabase no está configurado.");
@@ -73,6 +67,10 @@ function checkAuth() {
  */
 function logout() {
     sessionStorage.removeItem('sunat_auth');
+    // Limpiar el estado temporal de aceptación de registros (RCE/RVIE)
+    sessionStorage.removeItem('sire_aceptado');
+    sessionStorage.removeItem('rce_nav_generacion');
+    sessionStorage.removeItem('rce_gen_periodo');
     window.location.href = 'login.html';
 }
 
@@ -136,6 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 nameDisplays.forEach(el => {
                     const hasCaret = el.innerHTML.includes('fa-caret-down');
                     el.innerHTML = `Bienvenido, ${userData.denominacion} ${hasCaret ? '<i class="fas fa-caret-down"></i>' : ''}`;
+                });
+            }
+
+            // Mostrar el tipo de usuario (rol) junto al estado de domicilio
+            const domicilioEls = document.querySelectorAll('.domicilio, .user-status, .status-badge');
+            if (domicilioEls.length > 0 && userData.rol) {
+                domicilioEls.forEach(el => {
+                    if (!el.parentElement.querySelector('.user-tipo-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'user-tipo-badge';
+                        badge.style.cssText = 'margin-left:15px; padding:2px 10px; background:rgba(255,255,255,0.15); border-radius:3px; font-size:12px; font-weight:600;';
+                        badge.textContent = `Perfil: ${userData.rol}`;
+                        el.insertAdjacentElement('afterend', badge);
+                    }
                 });
             }
         } catch (e) { }

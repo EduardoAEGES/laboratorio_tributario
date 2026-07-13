@@ -15,6 +15,7 @@
 </head>
 
 <body>
+
     <!-- Modal Informativo -->
     <div id="info-modal" class="modal-overlay">
         <div class="modal-content">
@@ -31,11 +32,316 @@
         </div>
     </div>
 
+    <!-- Modal 1: Confirmación Aceptar Propuesta -->
+    <div id="modal-confirmar-propuesta" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-sm">
+            <div class="modal-header">
+                <h2>Mensaje</h2>
+                <button class="close-btn" id="close-confirmar-propuesta">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea Aceptar la Propuesta sin movimiento?</p>
+            </div>
+            <div class="modal-footer modal-footer-right">
+                <button class="btn-modal-no" id="btn-no-propuesta">No</button>
+                <button class="btn-modal-si" id="btn-si-propuesta">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Éxito - Ticket generado -->
+    <div id="modal-ticket-generado" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-md">
+            <div class="modal-header">
+                <h2>Mensaje</h2>
+                <button class="close-btn" id="close-ticket-generado">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Se ha enviado correctamente el archivo. El número de ticket generado es <strong>20260300000005</strong>, para verificar el estado del ticket puede consultarlo a través de la opción <strong>Estado de envío de ticket RVIE.</strong></p>
+            </div>
+            <div class="modal-footer modal-footer-right">
+                <button class="btn-modal-si" id="btn-aceptar-ticket">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Aviso 12 horas Generación de Registros -->
+    <div id="modal-aviso-12h" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-md">
+            <div class="modal-header">
+                <h2>Mensaje</h2>
+                <button class="close-btn" id="close-aviso-12h">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Estimado contribuyente habiendo transcurrido más de 12 horas desde el Registro de su Preliminar, le recomendamos revisar la opción "Inconsistencias" y verificar si existe alguna actualización. De encontrarse alguna inconsistencia actualizada, le sugerimos eliminar su Preliminar Registrado para volverlo a registrar, considerando que el "Reporte de Inconsistencias" a generarse con su RCE se mostrará actualizados.</p>
+            </div>
+            <div class="modal-footer modal-footer-right">
+                <button class="btn-modal-si" id="btn-aceptar-aviso">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar comprobante de pago -->
+    <div id="modal-agregar-cp" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-form">
+            <div class="modal-header">
+                <h2>Agregar comprobante de pago</h2>
+                <button class="close-btn" id="close-agregar-cp">&times;</button>
+            </div>
+            <div class="modal-body cp-form-body">
+
+                <!-- Datos generales -->
+                <fieldset class="cp-fieldset">
+                    <legend>Datos generales</legend>
+                    <div class="cp-grid">
+                        <div class="cp-field">
+                            <label>RUC</label>
+                            <input type="text" id="cp-ruc" class="field-readonly" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Razón social</label>
+                            <input type="text" id="cp-razon-social" class="field-readonly" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Periodo</label>
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="cp-periodo" class="field-readonly" readonly>
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="cp-field">
+                            <label>CAR SUNAT</label>
+                            <input type="text" id="cp-car-sunat" class="field-readonly" readonly>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Datos del CP -->
+                <fieldset class="cp-fieldset">
+                    <legend>Datos del CP</legend>
+                    <div class="cp-grid">
+                        <div class="cp-field">
+                            <label>Fecha de emisión</label>
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="cp-fecha-emision" placeholder="dd/mm/aaaa">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="cp-field">
+                            <label>Fecha Vcto / Pago</label>
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="cp-fecha-vcto" placeholder="dd/mm/aaaa">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="cp-field">
+                            <label>Tipo CP / DOC</label>
+                            <div class="custom-select-container" style="width: 100%;">
+                                <div class="custom-select" id="tipo-cp-select" style="width: 100%; min-width: 0; padding: 9px 10px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Seleccionar</span>
+                                    <i class="fas fa-caret-down"></i>
+                                </div>
+                                <div class="dropdown-options" id="cp-tipo-doc-options" style="width: 100%; max-height: 200px; overflow-y: auto; z-index: 10005;">
+                                    <!-- populated dynamically via JS -->
+                                </div>
+                            </div>
+                            <input type="hidden" id="cp-tipo-doc" value="">
+                        </div>
+                        <div class="cp-field">
+                            <label>Serie del CDP</label>
+                            <input type="text" id="cp-serie">
+                        </div>
+                        <div class="cp-field">
+                            <label>Nro CP o Doc Nro inicial (Rango)</label>
+                            <input type="text" id="cp-nro-inicial">
+                        </div>
+                        <div class="cp-field">
+                            <label>Nro Final (Rango)</label>
+                            <input type="text" id="cp-nro-final">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Datos del adquiriente -->
+                <fieldset class="cp-fieldset">
+                    <legend>Datos del adquiriente</legend>
+                    <div class="cp-grid">
+                        <div class="cp-field">
+                            <label>Tipo Doc Identidad</label>
+                            <select id="cp-tipo-doc-id">
+                                <option value="">Seleccionar</option>
+                                <option value="6">6 - RUC</option>
+                                <option value="1">1 - DNI</option>
+                                <option value="4">4 - Carné de Extranjería</option>
+                                <option value="7">7 - Pasaporte</option>
+                                <option value="0">0 - Sin documento</option>
+                            </select>
+                        </div>
+                        <div class="cp-field">
+                            <label>Nro Doc Identidad</label>
+                            <input type="text" id="cp-nro-doc-id">
+                        </div>
+                        <div class="cp-field cp-field-wide">
+                            <label>Apellidos Nombres / Razón Social</label>
+                            <input type="text" id="cp-adquiriente">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Otros datos del CP -->
+                <fieldset class="cp-fieldset">
+                    <legend>Otros datos del CP</legend>
+                    <div class="cp-grid">
+                        <div class="cp-field">
+                            <label>Valor Facturado exportación</label>
+                            <input type="text" id="cp-valor-export" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>BI Gravada</label>
+                            <input type="text" id="cp-bi-gravada" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>Dscto BI</label>
+                            <input type="text" id="cp-dscto-bi" class="cp-num field-readonly" value="0.00" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>IGV / IPM</label>
+                            <input type="text" id="cp-igv" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>Dscto IGV / IPM</label>
+                            <input type="text" id="cp-dscto-igv" class="cp-num field-readonly" value="0.00" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Mto Exonerado</label>
+                            <input type="text" id="cp-mto-exonerado" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>Mto Inafecto</label>
+                            <input type="text" id="cp-mto-inafecto" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>ISC</label>
+                            <input type="text" id="cp-isc" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>BI Grav IVAP</label>
+                            <input type="text" id="cp-bi-ivap" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>IVAP</label>
+                            <input type="text" id="cp-ivap" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>ICBPER</label>
+                            <input type="text" id="cp-icbper" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>Otros tributos</label>
+                            <input type="text" id="cp-otros-tributos" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>Total CP</label>
+                            <input type="text" id="cp-total" class="cp-num" value="0.00">
+                        </div>
+                        <div class="cp-field">
+                            <label>Moneda</label>
+                            <select id="cp-moneda">
+                                <option value="">Seleccionar</option>
+                                <option value="PEN">PEN - Soles</option>
+                                <option value="USD">USD - Dólares</option>
+                                <option value="EUR">EUR - Euros</option>
+                            </select>
+                        </div>
+                        <div class="cp-field">
+                            <label>Tipo cambio</label>
+                            <input type="text" id="cp-tipo-cambio" class="cp-num" value="1.000">
+                        </div>
+                        <div class="cp-field">
+                            <label>Fecha Emisión Doc Modificado</label>
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="cp-fecha-doc-mod" class="field-readonly" readonly>
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="cp-field">
+                            <label>Tipo CP Modificado</label>
+                            <select id="cp-tipo-cp-mod">
+                                <option value="">Seleccionar</option>
+                                <option value="01">01 - Factura</option>
+                                <option value="03">03 - Boleta de Venta</option>
+                                <option value="07">07 - Nota de Crédito</option>
+                                <option value="08">08 - Nota de Débito</option>
+                            </select>
+                        </div>
+                        <div class="cp-field">
+                            <label>Serie CP Modificado</label>
+                            <input type="text" id="cp-serie-mod">
+                        </div>
+                        <div class="cp-field">
+                            <label>Nro CP Modificado</label>
+                            <input type="text" id="cp-nro-mod">
+                        </div>
+                        <div class="cp-field">
+                            <label>ID Proyecto Operadores Atribución</label>
+                            <input type="text" id="cp-id-proyecto">
+                        </div>
+                        <div class="cp-field">
+                            <label>Tipo de Nota</label>
+                            <input type="text" id="cp-tipo-nota" class="field-readonly" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Est. Comp</label>
+                            <input type="text" id="cp-est-comp" class="field-readonly" value="1" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Valor FOB Embarcado</label>
+                            <input type="text" id="cp-valor-fob" class="cp-num field-readonly" value="0.00" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Valor OP Gratuitas</label>
+                            <input type="text" id="cp-valor-gratuitas" class="cp-num field-readonly" value="0.00" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>Tipo Operación</label>
+                            <select id="cp-tipo-operacion">
+                                <option value="">Seleccionar</option>
+                                <option value="0101">0101 - Venta interna</option>
+                                <option value="0200">0200 - Exportación</option>
+                                <option value="1001">1001 - Anticipos</option>
+                            </select>
+                        </div>
+                        <div class="cp-field">
+                            <label>DAM / CP</label>
+                            <input type="text" id="cp-dam" class="field-readonly" readonly>
+                        </div>
+                        <div class="cp-field">
+                            <label>CLU</label>
+                            <input type="text" id="cp-clu">
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="modal-footer cp-form-footer">
+                <button class="btn-cp-guardar" id="btn-guardar-cp"><i class="fas fa-check"></i> Guardar</button>
+                <button class="btn-cp-cancelar" id="btn-cancelar-cp"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista: Generación de Registros (oculta inicialmente) -->
+    <div id="vista-generacion-registros" class="modal-overlay" style="display:none;">
+        <div class="gen-registros-wrapper">
+            <!-- Esta vista se superpone al contenido principal -->
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Encabezado -->
         <header class="main-header">
-            <div class="logo-area">
-                <a href="tramites.html"><img src="favicon.png" alt="SUNAT Logo" class="logo"></a>
+            <div class="logo-area" style="display:flex; align-items:center; gap:10px;">
+                <a href="tramites.html"><img src="LOGO_SUNAT.png" alt="SUNAT Logo" class="logo"></a>
+                <span style="font-family:'Roboto',sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
             </div>
             <div class="header-right">
                 <div class="top-links">
@@ -571,7 +877,7 @@
                                 </div>
 
                                 <div class="action-buttons-row">
-                                    <button class="btn-action btn-blue"><i class="fas fa-plus-circle"></i>
+                                    <button class="btn-action btn-blue" id="btn-agregar-cp"><i class="fas fa-plus-circle"></i>
                                         Agregar</button>
                                     <button class="btn-action btn-blue-light"><i class="fas fa-pen"></i> Editar</button>
                                     <button class="btn-action btn-blue-light"><i class="fas fa-trash-alt"></i>
@@ -588,18 +894,184 @@
                                         de complemento</button>
                                     <button class="btn-action btn-dark-blue"><i class="fas fa-sync"></i> Actualizar
                                         CP</button>
-                                    <button class="btn-action btn-green"><i class="fas fa-check"></i> Aceptar
+                                    <button class="btn-action btn-green" id="btn-aceptar-propuesta" onclick="abrirConfirmarPropuesta()"><i class="fas fa-check"></i> Aceptar
                                         Propuesta</button>
                                     <button class="btn-action btn-red"><i class="fas fa-times"></i> Reemplazar
                                         Propuesta</button>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- ===== GENERACIÓN DEL RVIE ===== -->
+                        <div id="generacion-rvie" class="sub-content-view" style="display:none;">
+                            <div class="gen-registros-container">
+
+                                <!-- Encabezado azul -->
+                                <div class="gen-header-bar">Generación de Registros</div>
+
+                                <!-- Tabla principal: Registros -->
+                                <div class="gen-table-wrapper">
+                                    <div class="table-responsive" style="overflow-x:auto;">
+                                        <table class="gen-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>REGISTRO</th>
+                                                    <th>PERIODO</th>
+                                                    <th>INDICADOR DE CONTENIDO</th>
+                                                    <th>DETALLE DEL PRELIMINAR</th>
+                                                    <th>ELIMINACIÓN DEL PRELIMINAR</th>
+                                                    <th>ESTADO DE ACTUALIZACIÓN</th>
+                                                    <th>ESTADO DE GEN.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Registro de compras</td>
+                                                    <td class="gen-periodo-cell" id="gen-periodo-rce">2025-01</td>
+                                                    <td>Con Información</td>
+                                                    <td><a href="#" class="gen-link"><i class="fas fa-search" style="font-size:12px;"></i> Registrado</a></td>
+                                                    <td style="text-align:center;"><button class="gen-btn-elim" title="Eliminar Preliminar">&#10008;</button></td>
+                                                    <td>Actualizado</td>
+                                                    <td>No Generado</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Registro de Ventas e Ingresos</td>
+                                                    <td class="gen-periodo-cell" id="gen-periodo-rvie">2025-01</td>
+                                                    <td>Sin Información</td>
+                                                    <td><a href="#" class="gen-link"><i class="fas fa-search" style="font-size:12px;"></i> Registrado</a></td>
+                                                    <td style="text-align:center;"><button class="gen-btn-elim" title="Eliminar Preliminar">&#10008;</button></td>
+                                                    <td>Actualizado</td>
+                                                    <td>No Generado</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="gen-scrollbar-hint"><i></i><i></i></div>
+                                </div>
+
+                                <!-- Tabla secundaria: Propuesta de Casillas -->
+                                <div class="gen-table-wrapper" style="margin-top:24px;">
+                                    <div class="table-responsive" style="overflow-x:auto;">
+                                        <table class="gen-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>PROPUESTA DE CASILLAS</th>
+                                                    <th>PERIODO</th>
+                                                    <th>INDICADOR DE CONTENIDO</th>
+                                                    <th>DETALLE DE CASILLAS DE REC.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Casilla FV621</td>
+                                                    <td class="gen-periodo-cell" id="gen-periodo-fv621">2025-01</td>
+                                                    <td>Sin Información</td>
+                                                    <td><a href="#" class="gen-link">Ver Casillas</a></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="gen-action-btns">
+                                    <button class="gen-btn gen-btn-blue" onclick="window.location.href='rvie.html'">Ir al RVIE</button>
+                                    <button class="gen-btn gen-btn-blue" onclick="window.location.href='rce.html'">Ir al RCE</button>
+                                    <button class="gen-btn gen-btn-green" id="btn-generar-registro">
+                                        <i class="fas fa-check"></i> Generar registro
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- FIN GENERACIÓN DEL RVIE -->
+
                     </div>
             </main>
         </div>
     </div>
+
+
+    <!-- Footer Equipo Académico CERTUS -->
+    <footer style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; width:100%; box-sizing:border-box; font-family:'Roboto',Arial,sans-serif;">
+        <span style="display:flex; align-items:center; gap:5px;"><i class="fas fa-laptop-code" style="color:#00AEEF;"></i> Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+
+    <!-- Modal aviso 12 horas (aparece al venir del RCE) -->
+    <div id="rvie-modal-12h" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:550px;">
+            <div class="rce-modal-header">
+                <span>Mensaje</span>
+                <button class="rce-modal-close" onclick="cerrarModal12hRVIE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente habiendo transcurrido más de 12 horas desde el Registro de su Preliminar, le recomendamos revisar la opción "Inconsistencias" y verificar si existe alguna actualización. De encontrarse alguna inconsistencia actualizada, le sugerimos eliminar su Preliminar Registrado para volverlo a registrar, considerando que el "Reporte de Inconsistencias" a generarse con su RCE se mostrará actualizados.</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModal12hRVIE()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Alerta Inicio de Generación de Registro (paso 1) -->
+    <div id="modal-gen-alerta" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:620px;">
+            <div class="rce-modal-header">
+                <span>Alerta Inicio de Generación de Registro</span>
+                <button class="rce-modal-close" id="close-gen-alerta">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado Contribuyente</p>
+                <p>Se procederá a generar <span id="gen-alerta-registros">los RCE Y RVIE</span> del periodo <span id="gen-alerta-periodo">2026-05</span></p>
+                <p>Asegúrese de que no haya comprobantes duplicados que estén anotados en otros registros generados</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:8px;">
+                <button class="rce-btn rce-btn-primary" id="btn-gen-alerta-aceptar">Aceptar</button>
+                <button class="rce-btn rce-btn-primary" id="btn-gen-alerta-cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Registro en proceso de generación (paso 2) -->
+    <div id="modal-gen-proceso" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:900px; width:92%;">
+            <div class="rce-modal-header">
+                <span>Alerta Inicio de Generación de Registro</span>
+                <button class="rce-modal-close" id="close-gen-proceso">&times;</button>
+            </div>
+            <div class="rce-modal-body" style="max-height:70vh; overflow-y:auto;">
+                <p style="color:#C00000; font-weight:700; text-align:center; font-size:15px;">El Registro se encuentra en proceso de generación</p>
+                <p>Se ha registrado el proceso de Generación de Registro con el siguiente número de ticket N° (<strong>20260200000005</strong>), finalizado el proceso de generación se enviará la Constancia de Recepción al buzón SOL del contribuyente con la relación de documentos generados por el proceso:</p>
+                <p style="margin-bottom:0;">
+                    Constancia de Recepción RVIE PDF<br>
+                    Archivo del RVIE<br>
+                    Reporte de Inconsistencias<br>
+                    Reporte de Exportadores<br>
+                    Archivo XML de la Constancia de Recepción
+                </p>
+                <p>
+                    Constancia de Recepción RCE PDF<br>
+                    Archivo del RCE<br>
+                    Archivo del RC Operaciones con Sujetos No Domiciliados<br>
+                    Reporte de Inconsistencias<br>
+                    Archivo XML de la Constancia de Recepción<br>
+                    Propuesta de Casillas del Formulario Virtual 621
+                </p>
+                <p><strong style="color:#C00000;">Opcional:</strong> <strong>Puede adicionar correos electrónicos a donde desea que se le envíe la Información.</strong></p>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <label for="gen-correos" style="white-space:nowrap;">Correos</label>
+                    <input type="text" id="gen-correos" placeholder="Ingresar un correo" style="flex:1; padding:9px 12px; border:1px solid #7aa7d8; border-radius:6px; font-size:13px;">
+                </div>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" id="btn-gen-continuar"><i class="fas fa-arrow-circle-right"></i> Continuar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="rvie.js"></script>
+
 </body>
 
 </html>
