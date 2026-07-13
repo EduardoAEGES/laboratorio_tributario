@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
 </head>
 <body>
     <header class="tramites-header">
@@ -144,7 +145,30 @@
                                 <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Consulta de Validez de Comprobante de Pago</a></li>
                             </ul>
                         </li>
-                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Sistema Integrado de Registros Electronicos</a></li>
+                        <li class="has-submenu">
+                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Sistema Integrado de Registros Electronicos</a>
+                            <ul class="submenu-list">
+                                <li class="has-submenu">
+                                    <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Registros Electronicos</a>
+                                    <ul class="submenu-list">
+                                        <li class="has-submenu">
+                                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Registro de Ventas e Ingresos Electronico</a>
+                                            <ul class="submenu-list last-level">
+                                                <li><a href="rvie.html"><i class="fas fa-caret-right"></i> Gestión de Ventas e Ingresos Electrónicos</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="has-submenu">
+                                            <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Registro de Compras Electronico</a>
+                                            <ul class="submenu-list last-level">
+                                                <li><a href="rce.html"><i class="fas fa-caret-right"></i> Gestión de Compras</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Generacion de Registros Electronicos</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Modulo de reportes</a></li>
+                            </ul>
+                        </li>
                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Sistema de Libros y Registros Electrónicos</a></li>
                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Mis declaraciones informativas</a></li>
                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Portal del Operador de Comercio Exterior</a></li>

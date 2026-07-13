@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - Comprobantes de Pago</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="comprobantes.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+</head>
+
+<body>
+
+    <header class="sol-header">
+        <div class="header-content">
+            <div class="logo-area">
+                <a href="tramites.html">
+                    <img src="favicon.png" alt="SUNAT Logo" class="logo">
+                </a>
+            </div>
+            <div class="user-actions">
+                <a href="#"><i class="fas fa-envelope"></i> Buzón Electrónico</a>
+                <a href="#"><i class="fas fa-star"></i> Favoritos <i class="fas fa-caret-down"></i></a>
+                <a href="#"><i class="fas fa-print"></i> Imprimir</a>
+            </div>
+        </div>
+        <div class="user-bar-blue">
+            <div class="date-display">15/02/2026 20:03</div>
+            <div class="user-info-right">
+                <span>Bienvenido, EMPRESA EJEMPLO S.A.C. <i class="fas fa-caret-down"></i></span>
+                <span class="domicilio">Domicilio: Habido</span>
+                <a href="index.html" class="btn-salir">Salir</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="left-sidebar">
+            <div class="sidebar-header">
+                <a href="tramites.html" class="home-link"><i class="fas fa-home"></i> Ir al inicio</a>
+                <i class="fas fa-chevron-left"></i>
+            </div>
+
+            <div class="sidebar-menu">
+                <h3 class="menu-title">COMPROBANTES DE PAGO</h3>
+
+                <ul class="menu-items">
+                    <li><a href="#"><i class="fas fa-caret-right"></i> Comprobantes de Pago</a></li>
+                    <li><a href="#"><i class="fas fa-caret-right"></i> Comprobantes de Pago Físico</a></li>
+                    <li><a href="#"><i class="fas fa-caret-right"></i> Certificado Digital Tributario - CDT</a></li>
+                    <li><a href="#"><i class="fas fa-caret-right"></i> Otros Sistemas de Emisión Electrónica</a></li>
+                    <li class="active-parent">
+                        <a href="#"><i class="fas fa-caret-down"></i> SEE - SOL</a>
+                        <ul class="submenu">
+                            <li><a href="#"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a>
+                            </li>
+                            <li class="active-parent">
+                                <a href="#"><i class="fas fa-caret-down"></i> Factura Electrónica</a>
+                                <ul class="sub-submenu">
+                                    <li class="active-item"><a href="#">Emitir Factura</a></li>
+                                    <li><a href="#">Emitir Nota de Crédito</a></li>
+                                    <li><a href="#">Emitir Nota de Débito</a></li>
+                                    <li><a href="#">Rechazar Factura</a></li>
+                                    <li><a href="#">Catalogo de productos</a></li>
+                                    <li><a href="#">Consultar Factura y Nota</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Emision FE Simplificada</a></li>
+                            <li><a href="#">Emision BVE Simplificada</a></li>
+                            <li><a href="#">Consulta Simplificada</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            <div class="form-container">
+                <form>
+                    <div class="form-row">
+                        <div class="label-col">Indique el Tipo de Transacción</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="transaccion" checked> Al Contado</label>
+                            <label><input type="radio" name="transaccion"> Al Crédito</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si existen operaciones sujetas a Detracción</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="detraccion"> Sí</label>
+                            <label><input type="radio" name="detraccion" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si es una Factura de Exportación</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="exportacion"> Sí</label>
+                            <label><input type="radio" name="exportacion" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Consigne el RUC del Contribuyente Receptor de la Factura</div>
+                        <div class="input-col">
+                            <input type="text" class="input-text" id="ruc-input" maxlength="11">
+                        </div>
+                    </div>
+                    <div class="form-row empty-row">
+                        <div class="label-col"></div>
+                        <div class="input-col grey-box" id="razon-social-display"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura está vinculada a un contrato de Colaboración
+                            Empresarial Sin Contabilidad Independiente</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="colaboracion"> Sí</label>
+                            <label><input type="radio" name="colaboracion" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura se emite por un Pago Anticipado</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="anticipado"> Sí</label>
+                            <label><input type="radio" name="anticipado" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la factura la emite un Emisor Itinerante</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="itinerante"> Sí</label>
+                            <label><input type="radio" name="itinerante" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique el Establecimiento del Emisor donde entregue el bien o preste el
+                            servicio</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="establecimiento" checked> Sí</label>
+                            <label><input type="radio" name="establecimiento"> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Consigne la dirección donde entregue el bien o preste el servicio</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="direccion"> Sí</label>
+                            <label><input type="radio" name="direccion" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura se emite por venta de combustible y/o mantenimiento
+                            de un vehículo</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="combustible"> Sí</label>
+                            <label><input type="radio" name="combustible" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique el Tipo de Moneda de la Factura</div>
+                        <div class="input-col">
+                            <select class="input-select">
+                                <option>SOLES</option>
+                                <option>EURO</option>
+                                <option>DOLAR AMERICANO</option>
+                                <option>DOLAR CANADIENSE</option>
+                                <option>LIBRA ESTERLINA</option>
+                                <option>YEN</option>
+                                <option>CORONA SUECA</option>
+                                <option>FRANCO SUIZO</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura tiene Descuentos o Deduce Anticipos</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="descuentos"> Sí</label>
+                            <label><input type="radio" name="descuentos" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura tiene ISC</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="isc"> Sí</label>
+                            <label><input type="radio" name="isc" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura tiene Operaciones Gratuitas</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="gratuitas"> Sí</label>
+                            <label><input type="radio" name="gratuitas" checked> No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label-col">Indique si la Factura tiene Cargos u Otros Tributos que no forman parte
+                            de la base imponible del IGV</div>
+                        <div class="input-col">
+                            <label><input type="radio" name="otros"> Sí</label>
+                            <label><input type="radio" name="otros" checked> No</label>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="form-actions">
+                    <button class="btn-continuar"><i class="fas fa-play-circle"></i> Continuar</button>
+                    <button class="btn-cancelar"><i class="fas fa-times"></i> Cancelar</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="comprobantes.js"></script>
+</body>
+
+</html>

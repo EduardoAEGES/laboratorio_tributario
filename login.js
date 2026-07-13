@@ -27,17 +27,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = userField.value.trim();
         const pass = passField.value.trim();
 
+        // Get redirect parameter or fallback
+        const urlParams = new URLSearchParams(window.location.search);
+        const referrer = sessionStorage.getItem('loginReferrer');
+        let redirectUrl = urlParams.get('redirect') || referrer || 'dashboard.html';
+
         // Validation based on user request
         if (tabRuc.classList.contains('active')) {
             if ((ruc === '20123456789' || ruc === '20606966823') && user === 'SIST' && pass === 'NORTON') {
-                window.location.href = 'dashboard.html';
+                sessionStorage.setItem('sunat_auth', JSON.stringify({ ruc, usuario: user, denominacion: 'EMPRESA EJEMPLO S.A.C.' }));
+                if (referrer) {
+                    sessionStorage.removeItem('loginReferrer');
+                }
+                window.location.href = redirectUrl;
             } else {
                 alert('Credenciales incorrectas. Verifique los datos.');
             }
         } else {
             // DNI login (optional but good to have a generic check if they try DNI)
             if (ruc !== '' && pass !== '') {
-                window.location.href = 'dashboard.html';
+                sessionStorage.setItem('sunat_auth', JSON.stringify({ ruc: '00000000', usuario: ruc, denominacion: 'EMPRESA EJEMPLO S.A.C.' }));
+                if (referrer) {
+                    sessionStorage.removeItem('loginReferrer');
+                }
+                window.location.href = redirectUrl;
             } else {
                 alert('Por favor complete los campos.');
             }
