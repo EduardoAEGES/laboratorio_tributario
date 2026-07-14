@@ -15,4 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.transform = 'translateY(0)';
         }, 100);
     });
+
+    // Botón "Reiniciar simulación": borra el estado temporal de la simulación
+    // (aceptaciones, periodos presentados y resumen del reporte)
+    const btnReiniciar = document.getElementById('btn-reiniciar-simulacion');
+    if (btnReiniciar) {
+        btnReiniciar.addEventListener('click', () => {
+            ['sire_aceptado', 'sire_presentado', 'sire_resumen',
+             'rce_nav_generacion', 'rce_gen_periodo', 'sire_export_tickets'].forEach((k) => {
+                sessionStorage.removeItem(k);
+            });
+            alert('Simulación reiniciada: se borró la información temporal de los registros.');
+        });
+    }
 });

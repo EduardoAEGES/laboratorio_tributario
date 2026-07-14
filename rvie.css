@@ -1835,9 +1835,11 @@ ul {
     min-width: 200px;
     z-index: 100;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    overflow: hidden;
+    /* overflow visible para que el submenú lateral (Exportar > CSV/TXT) no quede recortado */
+    overflow: visible;
 }
-.btn-pa-dropdown:hover .btn-pa-dropdown-menu {
+/* El menú se abre con clic (clase .open) y permanece abierto hasta seleccionar o hacer clic fuera */
+.btn-pa-dropdown.open .btn-pa-dropdown-menu {
     display: block;
 }
 .btn-pa-dropdown-item {
@@ -1850,6 +1852,27 @@ ul {
 .btn-pa-dropdown-item:hover {
     background: #f0f5fc;
     color: #1a5a96;
+}
+
+/* Submenú lateral (Exportar > CSV / TXT) */
+.btn-pa-submenu-parent {
+    position: relative;
+}
+.btn-pa-submenu {
+    display: none;
+    position: absolute;
+    left: calc(100% - 4px); /* leve solape con el ítem padre para no perder el hover al cruzar */
+    top: -1px;
+    background: #fff;
+    border: 1px solid #c8d4e0;
+    border-radius: 4px;
+    min-width: 90px;
+    z-index: 110;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.btn-pa-submenu-parent.open .btn-pa-submenu {
+    display: block;
 }
 
 /* Animación de apertura de paneles */
@@ -1973,4 +1996,192 @@ ul {
 @keyframes fadeInScale {
     from { opacity: 0; transform: scale(0.94) translateY(-10px); }
     to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* =============================================
+   EXPORTAR DROPDOWN
+   ============================================= */
+.exportar-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.exportar-dropdown {
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 110px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    z-index: 9999;
+    overflow: hidden;
+    animation: fadeIn 0.12s ease;
+}
+.exportar-option {
+    padding: 9px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    transition: background 0.15s;
+}
+.exportar-option:hover,
+.exportar-option-hover:hover {
+    background: #e8f0fe;
+    color: #1E395B;
+}
+
+/* =============================================
+   INFORMACIÓN DE GESTIÓN – VISTA PRINCIPAL
+   ============================================= */
+.info-gestion-main {
+    padding: 0;
+}
+
+/* Sub-tabs de Información de Gestión */
+.info-gestion-subtabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #c5d5e8;
+    background: #f7f9fc;
+    padding: 0 12px;
+    flex-wrap: wrap;
+}
+.info-gestion-tab {
+    padding: 10px 18px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 13px;
+    font-family: 'Roboto', sans-serif;
+    color: #3a6ea5;
+    cursor: pointer;
+    font-weight: 500;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+.info-gestion-tab:hover {
+    color: #1E395B;
+    border-bottom-color: #7aa7d8;
+}
+.info-gestion-tab.active {
+    color: #1E395B;
+    border-bottom-color: #1E395B;
+    font-weight: 700;
+}
+
+/* Sub-views de IG */
+.ig-subview {
+    padding: 16px 16px 0 16px;
+    animation: fadeIn 0.15s ease;
+}
+
+/* Lista de menú items */
+.ig-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #d0dce8;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 16px;
+}
+.ig-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #e8eef5;
+    transition: background 0.15s;
+    font-size: 13px;
+    color: #1E395B;
+}
+.ig-menu-item:last-child {
+    border-bottom: none;
+}
+.ig-menu-item:hover {
+    background: #eaf0f8;
+}
+.ig-menu-item.ig-item-active {
+    background: #d6e4f7;
+    font-weight: 700;
+}
+.ig-arrow {
+    color: #1E395B;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+/* Panel de contenido (Estado de ticket, etc.) */
+.ig-panel {
+    border: 1px solid #d0dce8;
+    border-radius: 4px;
+    background: #fff;
+    padding: 0;
+    margin-bottom: 16px;
+    animation: fadeIn 0.15s ease;
+}
+
+/* Grid de búsqueda en IG */
+.ig-search-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+    margin-top: 10px;
+}
+.ig-search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+}
+.ig-search-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+}
+.ig-input {
+    padding: 7px 10px;
+    border: 1px solid #b0c4d8;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background: #fff;
+}
+.ig-input:focus {
+    outline: none;
+    border-color: #1E395B;
+}
+.ig-search-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-bottom: 1px;
+}
+
+/* Tabla de tickets */
+.ig-ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.ig-ticket-table th {
+    background: #1E395B;
+    color: #fff;
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.ig-ticket-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #e4eaf2;
+    color: #333;
+}
+.ig-ticket-table tr:hover td {
+    background: #f0f5fb;
 }

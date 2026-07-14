@@ -1318,7 +1318,7 @@
                                 </button>
                             </div>
 
-                            <table class="factura-totals-table">
+                            <table class="factura-totals-table" id="factura-totals-table">
                                 <tr>
                                     <td class="label-cell">Sub Total Ventas :</td>
                                     <td><input type="text" class="factura-totals-input" value="S/ 0.00" readonly></td>
@@ -6166,7 +6166,9 @@
             const formatVal = (num) => `S/ ${num.toFixed(2)}`;
 
             // Populate the totals table input values
-            const totalsTable = document.querySelector('.factura-totals-table');
+            // Buscar por id: existen varias tablas .factura-totals-table (boleta y factura),
+            // y querySelector devolvía siempre la primera del DOM (la de boleta oculta).
+            const totalsTable = document.getElementById('factura-totals-table');
             if (totalsTable) {
                 const inputs = totalsTable.querySelectorAll('input.factura-totals-input');
                 if (inputs.length >= 11) {

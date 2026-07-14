@@ -1256,8 +1256,16 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Últimos comprobantes mostrados en la Propuesta del RCE (fuente del archivo exportado)
+    let comprobantesActualesRce = [];
+
+    // Referencia a processData (se asigna al consultar un período) para reutilizarla
+    // desde el flujo "Reemplazar Propuesta"
+    let procesarDatosRce = null;
+
     // Render detailed table rows
     function renderTable(dataRows) {
+        comprobantesActualesRce = dataRows;
         const tbody = document.querySelector('.results-table tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -1495,6 +1503,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Si el periodo fue generado en la simulación (guardado en 'sire_presentado'),
+    // la etiqueta del mes pasa de "No Presentado" a "Presentado"
+    function etiquetaMesPresentado(yearKey, month) {
+        try {
+            const presentados = JSON.parse(sessionStorage.getItem('sire_presentado') || '{}');
+            const mesMapEtiqueta = {
+                'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
+                'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+                'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
+            };
+            const abrev = month.split('-')[0];
+            const periodo = yearKey + '-' + mesMapEtiqueta[abrev];
+            if (presentados[periodo]) return abrev + '-Presentado';
+        } catch (e) { /* estado corrupto: se ignora */ }
+        return month;
+    }
+
     function updateMonthOptions(yearKey) {
         if (!mesOptionsBox || !mesSpan) return;
 
@@ -1504,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', function () {
         months.forEach(month => {
             const div = document.createElement('div');
             div.className = 'option-item';
-            div.textContent = month;
+            div.textContent = etiquetaMesPresentado(yearKey, month);
             mesOptionsBox.appendChild(div);
         });
 
@@ -1550,6 +1575,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const periodoSeleccionado = periodoSpan.textContent;
             if (periodoSeleccionado !== 'Seleccionar') {
+                // Reconstruir opciones al abrir para reflejar periodos ya Presentados
+                if (!mesOptionsBox.classList.contains('show')) {
+                    const seleccionActual = mesSpan.textContent;
+                    updateMonthOptions(periodoSeleccionado.split('-')[0]);
+                    mesSpan.textContent = seleccionActual;
+                }
                 mesOptionsBox.classList.toggle('show');
             }
         });
@@ -1614,7 +1645,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             // Calculate Totals for the Dashboard and group by tipo_cp
                             const groups = {};
                             let grandTotals = {
-                                docs: 0, biGrav: 0, mtoIgv: 0, valNoGrav: 0, otros: 0, total: 0
+                                docs: 0, biGrav: 0, mtoIgv: 0, biGravDGNG: 0, igvDGNG: 0, biGravDNG: 0, igvDNG: 0, valNoGrav: 0, otros: 0, total: 0
                             };
 
                             rows.forEach(row => {
@@ -1622,19 +1653,31 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const type = String(rawType).trim().padStart(2, '0');
                                 if (!groups[type]) {
                                     groups[type] = {
-                                        docs: 0, biGrav: 0, mtoIgv: 0, valNoGrav: 0, otros: 0, total: 0
+                                        docs: 0, biGrav: 0, mtoIgv: 0, biGravDGNG: 0, igvDGNG: 0, biGravDNG: 0, igvDNG: 0, valNoGrav: 0, otros: 0, total: 0
                                     };
                                 }
 
-                                const biGravVal = parseFloat(row['BI Gravada (S/)'] || row['BI Gravada'] || row.bi_gravada || 0);
-                                const mtoIgvVal = parseFloat(row['IGV/IPM (S/)'] || row['IGV / IPM'] || row.igv_ipm || 0);
-                                const valNoGravVal = parseFloat(row['Mto Exonerado (S/)'] || row.mto_exonerado || 0) + parseFloat(row['Mto Inafecto (S/)'] || row.mto_inafecto || 0);
-                                const otrosVal = parseFloat(row['Otros Tributos (S/)'] || row.otros_tributos || 0) + parseFloat(row['ICBPER (S/)'] || row.icbper || 0) + parseFloat(row['Otros Cargos (S/)'] || row.otros_cargos || 0);
+                                const biGravVal = parseFloat(row['BI Gravado DG'] || row['BI Gravada (S/)'] || row['BI Gravada'] || row.bi_gravada || 0);
+                                const mtoIgvVal = parseFloat(row['IGV / IPM DG'] || row['IGV/IPM (S/)'] || row['IGV / IPM'] || row.igv_ipm || 0);
+                                const biGravDGNGVal = parseFloat(row['BI Gravado DGNG'] || 0);
+                                const igvDGNGVal = parseFloat(row['IGV / IPM DGNG'] || row['IGV/IPM DGNG'] || 0);
+                                const biGravDNGVal = parseFloat(row['BI Gravado DNG'] || 0);
+                                const igvDNGVal = parseFloat(row['IGV / IPM DNG'] || row['IGV/IPM DNG'] || 0);
+                                const valNoGravVal = ('Valor Adq. NG' in row)
+                                    ? parseFloat(row['Valor Adq. NG'] || 0)
+                                    : parseFloat(row['Mto Exonerado (S/)'] || row.mto_exonerado || 0) + parseFloat(row['Mto Inafecto (S/)'] || row.mto_inafecto || 0);
+                                const otrosVal = ('Otros Trib/ Cargos' in row)
+                                    ? parseFloat(row['Otros Trib/ Cargos'] || 0)
+                                    : parseFloat(row['Otros Tributos (S/)'] || row.otros_tributos || 0) + parseFloat(row['ICBPER (S/)'] || row.icbper || 0) + parseFloat(row['Otros Cargos (S/)'] || row.otros_cargos || 0);
                                 const totalVal = parseFloat(row['Total CP (S/)'] || row['Total CP'] || row.total_cp || 0);
 
                                 groups[type].docs += 1;
                                 groups[type].biGrav += biGravVal;
                                 groups[type].mtoIgv += mtoIgvVal;
+                                groups[type].biGravDGNG += biGravDGNGVal;
+                                groups[type].igvDGNG += igvDGNGVal;
+                                groups[type].biGravDNG += biGravDNGVal;
+                                groups[type].igvDNG += igvDNGVal;
                                 groups[type].valNoGrav += valNoGravVal;
                                 groups[type].otros += otrosVal;
                                 groups[type].total += totalVal;
@@ -1642,6 +1685,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                 grandTotals.docs += 1;
                                 grandTotals.biGrav += biGravVal;
                                 grandTotals.mtoIgv += mtoIgvVal;
+                                grandTotals.biGravDGNG += biGravDGNGVal;
+                                grandTotals.igvDGNG += igvDGNGVal;
+                                grandTotals.biGravDNG += biGravDNGVal;
+                                grandTotals.igvDNG += igvDNGVal;
                                 grandTotals.valNoGrav += valNoGravVal;
                                 grandTotals.otros += otrosVal;
                                 grandTotals.total += totalVal;
@@ -1668,10 +1715,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <td>${g.docs}</td>
                                             <td>${g.biGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${g.mtoIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
+                                            <td>${g.biGravDGNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${g.igvDGNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${g.biGravDNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${g.igvDNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${g.valNoGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${g.otros.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${g.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -1688,10 +1735,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <td>${grandTotals.docs}</td>
                                             <td>${grandTotals.biGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${grandTotals.mtoIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
+                                            <td>${grandTotals.biGravDGNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${grandTotals.igvDGNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${grandTotals.biGravDNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${grandTotals.igvDNG.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${grandTotals.valNoGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${grandTotals.otros.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                             <td>${grandTotals.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -1713,10 +1760,20 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (chartAmount) chartAmount.textContent = grandTotals.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                             }
 
+                            // Datos de la sesión para completar RUC / razón social del contribuyente
+                            let authData = {};
+                            try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+
                             // Pass the data to the detailed table
-                            renderTable(rows.map(d => ({
-                                ruc: d['RUC'] || d['Ruc'] || '20123456789',
-                                razon_social: d['Razon Social'] || 'EMPRESA DEMO S.A.C.',
+                            renderTable(rows.map(d => {
+                                // Esquema SIRE (tabla registro_compras con las columnas del CSV de SUNAT):
+                                // "Apellidos Nombres/ Razón  Social" (doble espacio) = proveedor y
+                                // "Apellidos y Nombres o Razón social" = contribuyente. En el fallback
+                                // local antiguo, esta última columna contiene al proveedor.
+                                const esSire = ('Apellidos Nombres/ Razón  Social' in d);
+                                return {
+                                ruc: d['RUC'] || d['Ruc'] || authData.ruc || '20123456789',
+                                razon_social: (esSire ? d['Apellidos y Nombres o Razón social'] : d['Razon Social']) || authData.denominacion || 'EMPRESA DEMO S.A.C.',
                                 periodo: d['Periodo'],
                                 src_key: d['CAR SUNAT'] || d['src_key'] || '',
                                 fecha_emision: formatDate(d['Fecha de emisión'] || d['Fecha de Emision'] || d['Fecha de emision']),
@@ -1724,29 +1781,30 @@ document.addEventListener('DOMContentLoaded', function () {
                                 tipo_cp: d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] ? String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc']).trim().padStart(2, '0') : '01',
                                 comprobante: d['Comprobante'] || (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '01' ? 'Factura' : (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '03' ? 'Boleta de Venta' : (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '07' ? 'Nota de Crédito' : (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '08' ? 'Nota de Débito' : 'Otro')))),
                                 serie: d['Serie del CDP'] || d['Serie del cdp'] || d['serie'],
+                                anio: d['Año'] || '',
                                 numero: d['Numero'] || d['numero'] || d['Nro CP o Doc. Nro Inicial (Rango)'],
                                 nro_final: d['Nro Final (Rango)'] || '',
                                 tipo_doc_identidad: d['Tipo Doc Identidad'] || d['Tipo Doc\nIdentidad'] || d['tipo_doc_identidad'],
                                 nro_doc_identidad: d['Nro Doc Identidad'] || d['Nro Doc\nIdentidad'] || d['nro_doc_identidad'],
-                                proveedor: d['Apellidos y Nombres o Razón social'] || d['Razon Social/ Nombre Proveedor'] || d['proveedor'] || '',
+                                proveedor: (esSire ? d['Apellidos Nombres/ Razón  Social'] : (d['Apellidos y Nombres o Razón social'] || d['Razon Social/ Nombre Proveedor'] || d['proveedor'])) || '',
                                 tipo_proveedor: d['Tipo de Proveedor'] || 'Nacional - Bienes/Servicios',
-                                bi_gravada: d['BI Gravada (S/)'] || d['BI Gravada'] || 0.00,
-                                igv_ipm: d['IGV/IPM (S/)'] || d['IGV / IPM'] || 0.00,
+                                bi_gravada: d['BI Gravado DG'] || d['BI Gravada (S/)'] || d['BI Gravada'] || 0.00,
+                                igv_ipm: d['IGV / IPM DG'] || d['IGV/IPM (S/)'] || d['IGV / IPM'] || 0.00,
                                 bi_gravada_dgng: d['BI Gravado DGNG'] || 0.00,
-                                igv_ipm_dgng: d['IGV/IPM DGNG'] || 0.00,
+                                igv_ipm_dgng: d['IGV / IPM DGNG'] || d['IGV/IPM DGNG'] || 0.00,
                                 bi_gravada_dng: d['BI Gravado DNG'] || 0.00,
-                                igv_ipm_dng: d['IGV/IPM DNG'] || 0.00,
-                                adquisiciones_no_gravadas: d['Valor de las Adquisiciones No Gravadas'] || (parseFloat(d['Mto Exonerado (S/)'] || d['mto_exonerado'] || 0) + parseFloat(d['Mto Inafecto (S/)'] || d['mto_inafecto'] || 0)).toFixed(2),
-                                isc: d['ISC (S/)'] || d['isc'] || 0.00,
-                                icbper: d['ICBPER (S/)'] || d['icbper'] || 0.00,
-                                otros_tributos_cargos: (parseFloat(d['Otros Tributos (S/)'] || d['otros_tributos'] || 0) + parseFloat(d['Otros Cargos (S/)'] || d['otros_cargos'] || 0)).toFixed(2),
+                                igv_ipm_dng: d['IGV / IPM DNG'] || d['IGV/IPM DNG'] || 0.00,
+                                adquisiciones_no_gravadas: d['Valor Adq. NG'] || d['Valor de las Adquisiciones No Gravadas'] || (parseFloat(d['Mto Exonerado (S/)'] || d['mto_exonerado'] || 0) + parseFloat(d['Mto Inafecto (S/)'] || d['mto_inafecto'] || 0)).toFixed(2),
+                                isc: (esSire ? d['ISC'] : (d['ISC (S/)'] || d['isc'])) || 0.00,
+                                icbper: (esSire ? d['ICBPER'] : (d['ICBPER (S/)'] || d['icbper'])) || 0.00,
+                                otros_tributos_cargos: d['Otros Trib/ Cargos'] || (parseFloat(d['Otros Tributos (S/)'] || d['otros_tributos'] || 0) + parseFloat(d['Otros Cargos (S/)'] || d['otros_cargos'] || 0)).toFixed(2),
                                 anticipos: d['Anticipos (S/)'] || d['anticipos'] || 0.00,
                                 otros_cargos: d['Otros Cargos (S/)'] || d['otros_cargos'] || 0.00,
                                 monto_redondeo: d['Monto de Redondeo (S/)'] || d['monto_redondeo'] || 0.00,
-                                total_cp: d['Total CP (S/)'] || d['total_cp'] || 0.00,
+                                total_cp: d['Total CP'] || d['Total CP (S/)'] || d['total_cp'] || 0.00,
                                 moneda: d['Moneda'],
                                 tipo_cambio: d['Tipo de Cambio'] || d['tipo_cambio'] || 1.000,
-                                doc_mod_fecha_emision: formatDate(d['Fecha Emisión Doc. Modificado'] || d['Fecha Emision Doc. Modificado']),
+                                doc_mod_fecha_emision: formatDate(d['Fecha Emisión Doc Modificado'] || d['Fecha Emisión Doc. Modificado'] || d['Fecha Emision Doc. Modificado']),
                                 doc_mod_tipo_cp: d['Tipo CP Modificado'] || d['doc_mod_tipo_cp'],
                                 doc_mod_serie: d['Serie CP Modificado'] || d['doc_mod_serie'],
                                 doc_mod_numero: d['Nro CP Modificado'] || d['doc_mod_numero'],
@@ -1757,19 +1815,27 @@ document.addEventListener('DOMContentLoaded', function () {
                                 sujeto_detrac_retenc: d['Sujeto a Detracción / Retención'] || d['sujeto_detrac_retenc'] || false,
                                 tipo_carga: d['Tipo (Detracción / Retención Renta 4ta)'] || d['tipo_carga'] || '',
                                 pct_aplicado: d['% Aplicado'] || d['pct_aplicado'] || 0,
-                                monto_detrac_retenc: d['Monto Detracción/Retención'] || d['monto_detrac_retenc'] || 0.00,
+                                monto_detrac_retenc: d['Detracción'] || d['Monto Detracción/Retención'] || d['monto_detrac_retenc'] || 0.00,
                                 nro_constancia_deposito: d['N° Constancia Depósito'] || d['nro_constancia_deposito'] || '',
-                                id_proyecto: d['ID Proyecto Operadores Atribución'] || '',
+                                id_proyecto: d['ID Proyecto Operadores'] || d['ID Proyecto Operadores Atribución'] || '',
+                                clasif_bss: d['Clasif de Bss y Sss'] || '',
+                                porcpart: d['PorcPart'] || '',
+                                imb: d['IMB'],
+                                car_orig: d['CAR Orig/ Ind E o I'] || '',
+                                incal: d['Incal'],
                                 tipo_nota: d['Tipo de Nota'] || '',
-                                est_comp: d['Est. Comp'] || '1',
+                                est_comp: d['Est. Comp.'] || d['Est. Comp'] || '1',
                                 desc_comp: 'ACTIVO',
                                 valor_fob: '0.00',
                                 valor_op_gratuitas: '0.00',
                                 tipo_operacion: '0101',
-                                dam: '',
+                                dam: d['COD. DAM O DSI'] || '',
                                 clu: d['CLU'] || ''
-                            })));
+                                };
+                            }));
                         }
+
+                        procesarDatosRce = processData;
 
                         if (data && data.length > 0) {
                             processData(data);
@@ -1800,6 +1866,466 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center">Supabase no está configurado o conectado.</td></tr>`;
                 }
             }
+        });
+    }
+
+    // =============================================
+    // DROPDOWNS DE LA BARRA DE ACCIONES (Complementar / Comparar Reemplazar Exportar)
+    // Se abren con clic y permanecen abiertos hasta seleccionar una opción o hacer clic fuera
+    // =============================================
+    function cerrarDropdownsPa() {
+        document.querySelectorAll('.btn-pa-dropdown.open, .btn-pa-submenu-parent.open')
+            .forEach(el => el.classList.remove('open'));
+    }
+
+    document.addEventListener('click', function (e) {
+        // 1) Selección de una opción de exportación: cerrar todo (la exportación la maneja su propio listener)
+        if (e.target.closest('.rce-exportar-option')) {
+            cerrarDropdownsPa();
+            return;
+        }
+        // 2) Clic en "Exportar": abrir/cerrar el submenú sin cerrar el menú principal
+        const submenuParent = e.target.closest('.btn-pa-submenu-parent');
+        if (submenuParent) {
+            submenuParent.classList.toggle('open');
+            return;
+        }
+        // 3) Clic en el botón del dropdown: alternar su menú (cerrando el resto)
+        const dropdownBtn = e.target.closest('.btn-pa-dropdown > .btn-pa');
+        if (dropdownBtn) {
+            const dd = dropdownBtn.parentElement;
+            const estabaAbierto = dd.classList.contains('open');
+            cerrarDropdownsPa();
+            if (!estabaAbierto) dd.classList.add('open');
+            return;
+        }
+        // 4) Cualquier otro clic (incluidas las demás opciones del menú): cerrar todo
+        cerrarDropdownsPa();
+    });
+
+    // =============================================
+    // REEMPLAZAR PROPUESTA RCE (importación de zip con txt plano)
+    // =============================================
+    const itemReemplazarRce = document.getElementById('item-reemplazar-rce');
+    if (itemReemplazarRce) {
+        itemReemplazarRce.addEventListener('click', function () {
+            const inp = document.getElementById('rce-reemplazo-file');
+            if (inp) inp.value = '';
+            const nameBox = document.getElementById('rce-reemplazo-filename');
+            if (nameBox) nameBox.value = '';
+            const m = document.getElementById('rce-modal-reemplazo');
+            if (m) m.style.display = 'flex';
+        });
+    }
+
+    // Mostrar el nombre del zip elegido con "Examinar"
+    const fileInputReemplazoRce = document.getElementById('rce-reemplazo-file');
+    if (fileInputReemplazoRce) {
+        fileInputReemplazoRce.addEventListener('change', function () {
+            const nameBox = document.getElementById('rce-reemplazo-filename');
+            if (nameBox) nameBox.value = this.files.length ? this.files[0].name : '';
+        });
+    }
+
+    /**
+     * Convierte el contenido del archivo plano (txt SIRE separado por "|" o csv exportado)
+     * en objetos con las columnas del esquema SIRE que entiende processData.
+     */
+    function parsearArchivoPlanoRce(texto) {
+        let authData = {};
+        try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        const rucSesion = authData.ruc || '20606966823';
+        const razonSesion = authData.denominacion || 'EMPRESA DEMO S.A.C.';
+
+        const lineas = texto.replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim() !== '');
+        const filas = [];
+
+        lineas.forEach(linea => {
+            const esPipe = linea.includes('|');
+            const f = linea.split(esPipe ? '|' : ',').map(v => String(v).trim());
+
+            // El txt SIRE no lleva cabecera; el csv exportado sí (primer campo "RUC")
+            let base, ruc, razon;
+            if (esPipe) {
+                if (f.length < 24) return; // línea incompleta
+                base = 0;
+                ruc = rucSesion;
+                razon = razonSesion;
+            } else {
+                if (!/^\d{8,11}$/.test(f[0])) return; // cabecera u otra línea no válida
+                if (f.length < 26) return;
+                base = 2;
+                ruc = f[0];
+                razon = f[1];
+            }
+
+            const g = i => (f[base + i] !== undefined ? f[base + i] : '');
+            // El periodo del txt viene como YYYYMM00
+            const periodoRaw = g(0);
+            const periodo = (periodoRaw.length === 8 && periodoRaw.endsWith('00')) ? periodoRaw.slice(0, 6) : periodoRaw;
+
+            filas.push({
+                'RUC': ruc,
+                'Apellidos y Nombres o Razón social': razon,
+                'Periodo': periodo,
+                'CAR SUNAT': g(1),
+                'Fecha de emisión': g(2),
+                'Fecha Vcto/Pago': g(3),
+                'Tipo CP/Doc.': g(4),
+                'Serie del CDP': g(5),
+                'Año': g(6),
+                'Nro CP o Doc. Nro Inicial (Rango)': g(7),
+                'Nro Final (Rango)': g(8),
+                'Tipo Doc Identidad': g(9),
+                'Nro Doc Identidad': g(10),
+                'Apellidos Nombres/ Razón  Social': g(11),
+                'BI Gravado DG': g(12),
+                'IGV / IPM DG': g(13),
+                'BI Gravado DGNG': g(14),
+                'IGV / IPM DGNG': g(15),
+                'BI Gravado DNG': g(16),
+                'IGV / IPM DNG': g(17),
+                'Valor Adq. NG': g(18),
+                'ISC': g(19),
+                'ICBPER': g(20),
+                'Otros Trib/ Cargos': g(21),
+                'Total CP': g(22),
+                'Moneda': g(23) || 'PEN',
+                'Tipo de Cambio': g(24) || '1.000',
+                'Fecha Emisión Doc Modificado': g(25),
+                'Tipo CP Modificado': g(26),
+                'Serie CP Modificado': g(27),
+                'COD. DAM O DSI': g(28),
+                'Nro CP Modificado': g(29),
+                'Clasif de Bss y Sss': g(30),
+                'ID Proyecto Operadores': g(31),
+                'PorcPart': g(32),
+                'IMB': g(33),
+                'CAR Orig/ Ind E o I': g(34),
+                'Detracción': g(35),
+                'Tipo de Nota': g(36),
+                'Est. Comp.': g(37) || '1',
+                'Incal': g(38) || '0'
+            });
+        });
+
+        return filas;
+    }
+
+    // Botón "Cargar archivo": lee el zip, reemplaza la propuesta y genera el ticket
+    const btnCargarArchivoRce = document.getElementById('btn-cargar-archivo-rce');
+    if (btnCargarArchivoRce) {
+        btnCargarArchivoRce.addEventListener('click', async function () {
+            const inp = document.getElementById('rce-reemplazo-file');
+            if (!inp || !inp.files.length) {
+                alert('Seleccione el archivo zip a importar con la opción Examinar.');
+                return;
+            }
+            if (typeof JSZip === 'undefined') {
+                alert('La librería de compresión JSZip no se ha cargado.');
+                return;
+            }
+
+            const file = inp.files[0];
+            try {
+                const zip = await JSZip.loadAsync(file);
+                let entry = null;
+                zip.forEach(function (path, zipFile) {
+                    if (!entry && /\.(txt|csv)$/i.test(path)) entry = zipFile;
+                });
+                if (!entry) {
+                    alert('El zip no contiene un archivo de texto (.txt).');
+                    return;
+                }
+
+                const texto = await entry.async('string');
+                const filas = parsearArchivoPlanoRce(texto);
+                if (!filas.length) {
+                    alert('El archivo no contiene comprobantes con la estructura del RCE.');
+                    return;
+                }
+
+                // Reemplazar la información de la Propuesta del RCE (tabla y resumen)
+                if (typeof procesarDatosRce === 'function') {
+                    procesarDatosRce(filas);
+                } else {
+                    alert('Primero seleccione un período y pulse Aceptar.');
+                    return;
+                }
+
+                // Registrar el ticket del reemplazo
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const randStr = String(Math.floor(Math.random() * 84) + 10);
+                const ticketNum = now.getFullYear() + '01000000' + randStr;
+
+                let tickets = [];
+                try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+                tickets.unshift({
+                    numero: ticketNum,
+                    fecha: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' +
+                           pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
+                    archivo: file.name,
+                    tipo: 'Reemplazar propuesta',
+                    estado: 'Terminado'
+                });
+                sessionStorage.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
+
+                // Cerrar el modal de reemplazo y mostrar "Ticket Generado"
+                cerrarModalReemplazoRce();
+                const numEl = document.getElementById('rce-ticket-reemplazo-numero');
+                if (numEl) numEl.textContent = ticketNum;
+                const mTicket = document.getElementById('rce-modal-ticket-reemplazo');
+                if (mTicket) mTicket.style.display = 'flex';
+            } catch (err) {
+                console.error('Error al leer el zip de reemplazo:', err);
+                alert('No se pudo leer el archivo zip. Verifique que sea un zip válido con el txt del RCE.');
+            }
+        });
+    }
+
+    // =============================================
+    // EXPORTAR PROPUESTA RCE (CSV) + ESTADO DE ENVÍO DE TICKET
+    // =============================================
+    function obtenerRucRce() {
+        let ruc = '20606966823';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.ruc) ruc = auth.ruc;
+        } catch (e) {}
+        return ruc;
+    }
+
+    // Genera el CSV con la estructura exacta del archivo "propuesta" del SIRE RCE
+    function generarCSVPropuestaRce() {
+        const fix2 = v => (parseFloat(v) || 0).toFixed(2);
+        const clus = [];
+        for (let i = 1; i <= 39; i++) clus.push('CLU' + i);
+        // Cabecera exacta del archivo que genera el SIRE de SUNAT (incluye doble espacio en "Razón  Social")
+        const headers = ["RUC","Apellidos y Nombres o Razón social","Periodo","CAR SUNAT","Fecha de emisión","Fecha Vcto/Pago","Tipo CP/Doc.","Serie del CDP","Año","Nro CP o Doc. Nro Inicial (Rango)","Nro Final (Rango)","Tipo Doc Identidad","Nro Doc Identidad","Apellidos Nombres/ Razón  Social","BI Gravado DG","IGV / IPM DG","BI Gravado DGNG","IGV / IPM DGNG","BI Gravado DNG","IGV / IPM DNG","Valor Adq. NG","ISC","ICBPER","Otros Trib/ Cargos","Total CP","Moneda","Tipo de Cambio","Fecha Emisión Doc Modificado","Tipo CP Modificado","Serie CP Modificado","COD. DAM O DSI","Nro CP Modificado","Clasif de Bss y Sss","ID Proyecto Operadores","PorcPart","IMB","CAR Orig/ Ind E o I","Detracción","Tipo de Nota","Est. Comp.","Incal"].concat(clus);
+        let csvContent = headers.join(",") + "\r\n";
+
+        const dataRows = (comprobantesActualesRce && comprobantesActualesRce.length > 0) ? comprobantesActualesRce : [];
+        dataRows.forEach(row => {
+            const detrac = (parseFloat(row.monto_detrac_retenc) || 0) > 0 ? fix2(row.monto_detrac_retenc) : "";
+            const line = [
+                row.ruc || "",
+                row.razon_social || "",
+                row.periodo || "",
+                row.src_key || "",
+                row.fecha_emision || "",
+                row.fecha_vcto_pago || "",
+                row.tipo_cp || "",
+                row.serie || "",
+                row.anio || "",                 // Año (solo DUA/DSI)
+                row.numero || "",
+                row.nro_final || "",
+                row.tipo_doc_identidad || "",
+                row.nro_doc_identidad || "",
+                row.proveedor || "",
+                fix2(row.bi_gravada),
+                fix2(row.igv_ipm),
+                fix2(row.bi_gravada_dgng),
+                fix2(row.igv_ipm_dgng),
+                fix2(row.bi_gravada_dng),
+                fix2(row.igv_ipm_dng),
+                fix2(row.adquisiciones_no_gravadas),
+                fix2(row.isc),
+                fix2(row.icbper),
+                fix2(row.otros_tributos_cargos),
+                fix2(row.total_cp),
+                row.moneda || "PEN",
+                Number(row.tipo_cambio || 1).toFixed(3),
+                row.doc_mod_fecha_emision || "",
+                row.doc_mod_tipo_cp || "",
+                row.doc_mod_serie || "",
+                row.dam || "",                  // COD. DAM O DSI
+                row.doc_mod_numero || "",
+                row.clasif_bss || "",           // Clasif de Bss y Sss
+                row.id_proyecto || "",
+                row.porcpart || "",             // PorcPart
+                fix2(row.imb),                  // IMB
+                row.car_orig || "",             // CAR Orig/ Ind E o I
+                detrac,                         // Detracción
+                row.tipo_nota || "",
+                row.est_comp || "1",
+                (row.incal !== undefined && row.incal !== null && row.incal !== "") ? String(row.incal) : "0"
+            ];
+            for (let i = 0; i < 39; i++) line.push(""); // CLU1..CLU39
+            csvContent += line.join(",") + "\r\n";
+        });
+        return csvContent;
+    }
+
+    // Clic en Exportar > CSV / TXT de la Propuesta del RCE
+    document.addEventListener('click', function (e) {
+        const opt = e.target.closest('.rce-exportar-option');
+        if (!opt) return;
+        e.stopPropagation();
+        if (opt.getAttribute('data-format') !== 'CSV') return; // TXT: sin acción en el simulador
+
+        const ruc = obtenerRucRce();
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const fechaStr = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate());
+        const hhmm = pad(now.getHours()) + pad(now.getMinutes());
+        const hhmmss = hhmm + pad(now.getSeconds());
+
+        const randStr = String(Math.floor(Math.random() * 34) + 1).padStart(2, '0');
+        const ticketNum = now.getFullYear() + '03000000' + randStr;
+
+        const ticketData = {
+            numero: ticketNum,
+            fecha: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' +
+                   pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
+            archivo: ruc + '-' + fechaStr + '-' + hhmm + '-propuesta.csv',
+            zip: ruc + '-' + fechaStr + '-' + hhmmss + '-propuesta.zip',
+            tipo: 'Generar archivo exportar propuesta',
+            estado: 'Terminado',
+            // El contenido se genera al momento de exportar para reflejar la tabla actual
+            csv: generarCSVPropuestaRce()
+        };
+
+        let tickets = [];
+        try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+        tickets.unshift(ticketData);
+        sessionStorage.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
+
+        const ticketEl = document.getElementById('rce-export-ticket-number');
+        if (ticketEl) ticketEl.textContent = ticketNum;
+        const modal = document.getElementById('rce-modal-exportar-csv');
+        if (modal) modal.style.display = 'flex';
+    });
+
+    function poblarTablaTicketsRce(filtroNro) {
+        const tbody = document.getElementById('ig-rce-ticket-tbody');
+        if (!tbody) return;
+
+        let tickets = [];
+        try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+
+        if (filtroNro) {
+            tickets = tickets.filter(t => t.numero.includes(filtroNro));
+        }
+
+        tbody.innerHTML = '';
+        if (tickets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:14px; color:#666;">No se encontraron registros.</td></tr>';
+            return;
+        }
+
+        tickets.forEach(function (t) {
+            const tr = document.createElement('tr');
+            const downloadCell = t.zip
+                ? `<a href="#" class="ig-rce-download-link" data-numero="${t.numero}" style="color:#005691; text-decoration:underline; font-weight:600;">${t.zip}</a>`
+                : '';
+            tr.innerHTML = `
+                <td style="font-weight:700; color:#1E395B;">${t.numero}</td>
+                <td>${t.fecha}</td>
+                <td>${t.archivo || ''}</td>
+                <td>${t.tipo}</td>
+                <td><span style="color:#217a21; font-weight:600;">${t.estado}</span></td>
+                <td style="text-align:center;"><i class="far fa-file-alt" style="color:#005691; font-size:16px;"></i></td>
+                <td style="text-align:center;">${downloadCell}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function descargarZipPropuestaRce(numeroTicket) {
+        if (typeof JSZip === "undefined") {
+            alert("La librería de compresión JSZip no se ha cargado.");
+            return;
+        }
+        let tickets = [];
+        try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+        const ticket = tickets.find(t => t.numero === numeroTicket);
+        if (!ticket) return;
+
+        try {
+            const zip = new JSZip();
+            // BOM UTF-8 para que Excel muestre correctamente las tildes
+            zip.file(ticket.archivo, "\uFEFF" + (ticket.csv || generarCSVPropuestaRce()));
+            const content = await zip.generateAsync({ type: "blob" });
+
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(content);
+            link.download = ticket.zip;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error al generar el archivo ZIP:", error);
+            alert("Ocurrió un error al generar la descarga.");
+        }
+    }
+
+    // Descarga del zip desde la tabla de tickets
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('.ig-rce-download-link');
+        if (link) {
+            e.preventDefault();
+            descargarZipPropuestaRce(link.getAttribute('data-numero'));
+        }
+    });
+
+    // Buscar / Limpiar en Estado de envío de Ticket
+    const igRceBtnBuscar = document.getElementById('ig-rce-btn-buscar');
+    if (igRceBtnBuscar) {
+        igRceBtnBuscar.addEventListener('click', function () {
+            const nro = (document.getElementById('ig-rce-nro-ticket') || {}).value || '';
+            poblarTablaTicketsRce(nro.trim());
+        });
+    }
+    const igRceBtnLimpiar = document.getElementById('ig-rce-btn-limpiar');
+    if (igRceBtnLimpiar) {
+        igRceBtnLimpiar.addEventListener('click', function () {
+            const nroInput = document.getElementById('ig-rce-nro-ticket');
+            if (nroInput) nroInput.value = '';
+            poblarTablaTicketsRce();
+        });
+    }
+
+    // =============================================
+    // TABS PRINCIPALES RCE: Generación de Registro / Información de Gestión
+    // =============================================
+    const mainTabGeneracionRce = document.getElementById('main-tab-generacion-rce');
+    const mainTabInfoGestionRce = document.getElementById('main-tab-info-gestion-rce');
+    const subTabsContainerRce = document.querySelector('.sub-tabs-container');
+    const infoGestionViewRce = document.getElementById('info-gestion-view-rce');
+
+    if (mainTabInfoGestionRce) {
+        mainTabInfoGestionRce.addEventListener('click', function () {
+            if (subTabsContainerRce) subTabsContainerRce.style.display = 'none';
+            document.querySelectorAll('.sub-content-view').forEach(v => {
+                if (v.id !== 'info-gestion-view-rce') v.style.display = 'none';
+            });
+            if (infoGestionViewRce) infoGestionViewRce.style.display = 'block';
+            const mainContent = document.getElementById('main-content-display');
+            if (mainContent) mainContent.style.display = 'block';
+
+            // Períodos por defecto del filtro: mes actual
+            const now = new Date();
+            const per = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0');
+            const desde = document.getElementById('ig-rce-desde');
+            const hasta = document.getElementById('ig-rce-hasta');
+            if (desde && !desde.value) desde.value = per;
+            if (hasta && !hasta.value) hasta.value = per;
+
+            poblarTablaTicketsRce();
+        });
+    }
+
+    if (mainTabGeneracionRce) {
+        mainTabGeneracionRce.addEventListener('click', function () {
+            if (subTabsContainerRce) subTabsContainerRce.style.display = '';
+            if (infoGestionViewRce) infoGestionViewRce.style.display = 'none';
+            // Restaurar la sub-vista activa
+            document.querySelectorAll('.sub-content-view').forEach(v => v.style.display = 'none');
+            const activeSub = document.querySelector('.sub-tab-btn.active');
+            const targetId = activeSub ? activeSub.getAttribute('data-target') : 'resumen-cp';
+            const targetView = document.getElementById(targetId);
+            if (targetView) targetView.style.display = 'block';
         });
     }
 });
@@ -1938,6 +2464,30 @@ function rceAceptarTicket() {
 
     // Navegar a rvie.html; allí se mostrará la vista completa de Generación de Registros
     window.location.href = 'rvie.html';
+}
+
+/**
+ * Cierra el modal del ticket de exportación de propuesta (CSV).
+ */
+function cerrarModalExportarCsvRce() {
+    const m = document.getElementById('rce-modal-exportar-csv');
+    if (m) m.style.display = 'none';
+}
+
+/**
+ * Cierra el modal "Reemplazo de la Propuesta del RCE".
+ */
+function cerrarModalReemplazoRce() {
+    const m = document.getElementById('rce-modal-reemplazo');
+    if (m) m.style.display = 'none';
+}
+
+/**
+ * Cierra el modal "Ticket Generado" del reemplazo de propuesta.
+ */
+function cerrarModalTicketReemplazoRce() {
+    const m = document.getElementById('rce-modal-ticket-reemplazo');
+    if (m) m.style.display = 'none';
 }
 
 /**

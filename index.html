@@ -198,5 +198,13 @@
         </div>
     </footer>
     <script src="script.js"></script>
+    <script>
+        // Al llegar a index se borra el estado temporal de la simulación
+        // (aceptaciones, periodos presentados, resumen del reporte)
+        ['sire_aceptado', 'sire_presentado', 'sire_resumen',
+         'rce_nav_generacion', 'rce_gen_periodo', 'sire_export_tickets'].forEach(function (k) {
+            sessionStorage.removeItem(k);
+        });
+    </script>
 </body>
 </html>

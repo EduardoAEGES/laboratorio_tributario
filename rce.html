@@ -11,6 +11,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="auth.js"></script>
 </head>
 
@@ -130,6 +131,11 @@
                     </li>
                     </li>
                     </ul>
+
+                    <a href="reemplazo.html" target="_blank" id="btn-abrir-reemplazo"
+                        style="display:flex; align-items:center; justify-content:center; gap:8px; margin:20px 12px 12px; padding:10px 12px; background:#1E395B; color:#fff; border-radius:6px; text-decoration:none; font-size:12px; font-weight:700; text-align:center;">
+                        <i class="fas fa-table"></i> ABRIR APLICATIVO DE REEMPLAZO
+                    </a>
                     </nav>
             </aside>
 
@@ -172,8 +178,8 @@
 
                 <div class="tabs-container">
                     <div class="main-tabs">
-                        <button class="tab-btn active">Generación de Registro</button>
-                        <button class="tab-btn">Información de Gestión</button>
+                        <button class="tab-btn active" id="main-tab-generacion-rce">Generación de Registro</button>
+                        <button class="tab-btn" id="main-tab-info-gestion-rce">Información de Gestión</button>
                     </div>
 
                     <div class="sub-tabs-container">
@@ -577,8 +583,14 @@
                                         </button>
                                         <div class="btn-pa-dropdown-menu" id="menu-comparar">
                                             <div class="btn-pa-dropdown-item">Comparar documentos</div>
-                                            <div class="btn-pa-dropdown-item">Reemplazar Propuesta</div>
-                                            <div class="btn-pa-dropdown-item">Exportar</div>
+                                            <div class="btn-pa-dropdown-item" id="item-reemplazar-rce">Reemplazar Propuesta</div>
+                                            <div class="btn-pa-dropdown-item btn-pa-submenu-parent">
+                                                Exportar <i class="fas fa-caret-right" style="float:right; margin-top:2px;"></i>
+                                                <div class="btn-pa-submenu">
+                                                    <div class="btn-pa-dropdown-item rce-exportar-option" data-format="CSV">CSV</div>
+                                                    <div class="btn-pa-dropdown-item rce-exportar-option" data-format="TXT">TXT</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -601,6 +613,77 @@
                         </div>
                         <div id="ajustes-rce" class="sub-content-view" style="display: none;">
                             <div class="p-4 text-center text-muted">Vista de Ajustes Posteriores en desarrollo.</div>
+                        </div>
+
+                        <!-- INFORMACIÓN DE GESTIÓN (RCE): Estado de envío de Ticket -->
+                        <div id="info-gestion-view-rce" class="sub-content-view info-gestion-main" style="display: none;">
+                            <div class="info-gestion-subtabs">
+                                <button class="info-gestion-tab active">Consultas y Descargas</button>
+                                <button class="info-gestion-tab">Gestión de Información Estadística</button>
+                                <button class="info-gestion-tab">Reporte de Cumplimiento</button>
+                            </div>
+
+                            <div id="ig-estado-ticket-panel-rce" class="ig-panel" style="display:block;">
+                                <div class="content-header-blue" style="margin-bottom:16px;">
+                                    <h2>Estado de envío de Ticket - RCE</h2>
+                                </div>
+                                <div class="search-form-container" style="padding:12px 16px;">
+                                    <div class="search-title">Buscar por:</div>
+                                    <div class="ig-search-grid">
+                                        <div class="ig-search-field">
+                                            <label>Desde</label>
+                                            <div class="input-icon-wrapper">
+                                                <input type="text" id="ig-rce-desde" class="ig-input">
+                                                <i class="far fa-calendar-alt"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ig-search-field">
+                                            <label>Hasta</label>
+                                            <div class="input-icon-wrapper">
+                                                <input type="text" id="ig-rce-hasta" class="ig-input">
+                                                <i class="far fa-calendar-alt"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ig-search-field">
+                                            <label>Número de Ticket</label>
+                                            <input type="text" id="ig-rce-nro-ticket" class="ig-input" placeholder="Número de Ticket">
+                                        </div>
+                                        <div class="ig-search-actions">
+                                            <button class="btn-search" id="ig-rce-btn-buscar"><i class="fas fa-search"></i> Buscar</button>
+                                            <button class="btn-clear" id="ig-rce-btn-limpiar"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="results-container" style="margin-top:12px;">
+                                    <div class="show-rows" style="padding:8px 0; font-size:13px;">
+                                        Mostrar:
+                                        <select id="ig-rce-show-rows" style="padding:2px 6px;">
+                                            <option>20</option>
+                                            <option>50</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="summary-table ig-ticket-table" style="width:100%;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Número Ticket</th>
+                                                    <th>Fecha y Hora de Envío</th>
+                                                    <th>Nombre Archivo</th>
+                                                    <th>Tipo de Proceso</th>
+                                                    <th>Estado Proceso</th>
+                                                    <th>Detalle Ticket</th>
+                                                    <th>Reportes y descargas</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ig-rce-ticket-tbody">
+                                                <!-- Filas generadas por JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -716,6 +799,66 @@
             </div>
             <div class="rce-modal-footer" style="justify-content:center;">
                 <button class="rce-btn rce-btn-primary" onclick="rceAceptarTicket()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Reemplazo de la Propuesta del RCE -->
+    <div id="rce-modal-reemplazo" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:880px; width:92%;">
+            <div class="rce-modal-header">
+                <span>Reemplazo de la Propuesta del RCE</span>
+                <button class="rce-modal-close" onclick="cerrarModalReemplazoRce()">&times;</button>
+            </div>
+            <div class="rce-modal-body" style="font-size:13px; line-height:1.55;">
+                <p>Señor contribuyente:</p>
+                <p style="margin-top:10px;">Usted va a reemplazar la propuesta de información elaborada por la Administración Tributaria - SUNAT para la generación del Registro de Compras Electrónico.</p>
+                <p style="margin-top:10px;">Mediante la siguiente opción de carga de datos, podrá importar el archivo plano conteniendo la estructura del Registro de Compras Electrónico que haya elaborado de acuerdo a las instrucciones sobre el contenido, señalado en .... (link Guía de carga)</p>
+                <p style="margin-top:10px;">El contenido numérico de cada línea de información referida a importes debe expresarse en Moneda Nacional (Soles) a excepción de los contribuyentes que lleven su contabilidad en moneda extranjera.</p>
+                <p style="margin-top:10px;">Se efectuarán validaciones a la información importada verificando su consistencia, y la existencia de los comprobantes de pago consignados en ella, seguidamente le mostrará examinar archivo y la sub opción importar. Cuando importe el archivo el sistema mostrará la información de su txt en la Opción "Preliminar del RCE".</p>
+                <p style="margin-top:18px;">El archivo de texto (txt) a importar debe estar comprimido en formato zip.</p>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                    <label style="white-space:nowrap; font-weight:600;">Archivo a importar</label>
+                    <input type="text" id="rce-reemplazo-filename" readonly placeholder="Ningún archivo seleccionado" style="flex:1; padding:7px 10px; border:1px solid #ccc; border-radius:3px; background:#f5f5f5; font-size:13px;">
+                    <button class="rce-btn rce-btn-primary" onclick="document.getElementById('rce-reemplazo-file').click()"><i class="fas fa-search"></i> Examinar</button>
+                    <input type="file" id="rce-reemplazo-file" accept=".zip" style="display:none;">
+                </div>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="btn-cargar-archivo-rce" style="background:#4caf50; color:#fff;"><i class="fas fa-check"></i> Cargar archivo</button>
+                <button class="rce-btn" onclick="cerrarModalReemplazoRce()" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket Generado (reemplazo de propuesta) -->
+    <div id="rce-modal-ticket-reemplazo" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:480px;">
+            <div class="rce-modal-header">
+                <span>Ticket Generado</span>
+                <button class="rce-modal-close" onclick="cerrarModalTicketReemplazoRce()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p><strong>Estimado Contribuyente,</strong> nos encontramos procesando su archivo. El número de ticket generado es <strong id="rce-ticket-reemplazo-numero">20260100000015</strong>, para verificar el estado del ticket puede consultarlo a través de la sub opción <strong>Estado de Envío de Ticket RCE</strong> de la opción "Consultas y Descargas" de la pestaña "Información de Gestión".</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModalTicketReemplazoRce()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket de exportación de propuesta (CSV) -->
+    <div id="rce-modal-exportar-csv" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:540px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarModalExportarCsvRce()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>"Se ha generado un ticket para realizar la exportación. El número de ticket generado es <strong id="rce-export-ticket-number">20260300000001</strong>, para verificar el estado del ticket puede consultarlo a través de la opción <strong>Estado de envío de ticket</strong> de la opción <strong>Consultas y Descargas</strong>"</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModalExportarCsvRce()">Aceptar</button>
             </div>
         </div>
     </div>

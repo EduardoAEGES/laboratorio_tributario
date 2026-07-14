@@ -327,25 +327,151 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeGenProceso = document.getElementById('close-gen-proceso');
     if (closeGenProceso) closeGenProceso.addEventListener('click', () => hideModal(modalGenProceso));
 
-    // Modal 2 (Proceso): Continuar → limpia la aceptación y muestra la vista vacía
+    // Modal 2 (Proceso): Continuar → marca los periodos como Presentados,
+    // limpia la aceptación y muestra la vista vacía
     const btnGenContinuar = document.getElementById('btn-gen-continuar');
     if (btnGenContinuar) {
         btnGenContinuar.addEventListener('click', () => {
             hideModal(modalGenProceso);
+
+            // Registrar los periodos generados como "Presentado"
+            // (los dropdowns de mes de RVIE y RCE lo reflejan)
+            const estado = obtenerEstadoAceptacion();
+            let presentados = {};
+            try {
+                presentados = JSON.parse(sessionStorage.getItem('sire_presentado') || '{}');
+            } catch (e) { /* estado corrupto: se reinicia */ }
+            if (estado.rce)  presentados[estado.rce]  = true;
+            if (estado.rvie) presentados[estado.rvie] = true;
+            sessionStorage.setItem('sire_presentado', JSON.stringify(presentados));
+
+            // Guardar el resumen de la generación para el reporte PDF final
+            const correoInput = document.getElementById('gen-correos');
+            const resumen = {
+                ticket: '2026020000005',
+                generadoEn: new Date().toLocaleString('es-PE'),
+                rce: estado.rce || null,
+                rvie: estado.rvie || null,
+                correo: (correoInput && correoInput.value.trim()) || null
+            };
+            sessionStorage.setItem('sire_resumen', JSON.stringify(resumen));
+
             sessionStorage.removeItem('sire_aceptado');
             mostrarVistaGeneracionVacia();
             window.scrollTo(0, 0);
         });
     }
 
-    // Botón "Terminar simulación": limpia el estado y vuelve al inicio
+    // Genera el reporte PDF de la simulación con jsPDF
+    function generarReporteSimulacionPDF() {
+        if (typeof window.jspdf === 'undefined') return false;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Datos del usuario (sesión) y resumen de la generación
+        let usuario = {};
+        try { usuario = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        let resumen = {};
+        try { resumen = JSON.parse(sessionStorage.getItem('sire_resumen') || '{}'); } catch (e) {}
+
+        const ahora = new Date();
+        const fechaHora = ahora.toLocaleString('es-PE');
+        const azul = [30, 57, 91];
+
+        // Encabezado
+        doc.setFillColor(azul[0], azul[1], azul[2]);
+        doc.rect(0, 0, 210, 26, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(15);
+        doc.text('LABORATORIO TRIBUTARIO CERTUS', 105, 11, { align: 'center' });
+        doc.setFontSize(11);
+        doc.text('Reporte de Simulación – SIRE (RVIE / RCE)', 105, 19, { align: 'center' });
+
+        doc.setTextColor(40, 40, 40);
+        let y = 38;
+
+        // Datos del usuario
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Datos del usuario', 15, y);
+        doc.setLineWidth(0.4);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.text('RUC: ' + (usuario.ruc || '—'), 15, y); y += 6.5;
+        doc.text('Razón social: ' + (usuario.denominacion || 'EMPRESA DEMO S.A.C.'), 15, y); y += 6.5;
+        doc.text('Usuario: ' + (usuario.usuario || '—'), 15, y); y += 6.5;
+        doc.text('Perfil: ' + (usuario.rol || '—'), 15, y); y += 6.5;
+        doc.text('Fecha y hora del reporte: ' + fechaHora, 15, y); y += 12;
+
+        // Resumen de la simulación
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Resumen de la simulación', 15, y);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.text('Número de ticket de generación: ' + (resumen.ticket || '—'), 15, y); y += 6.5;
+        doc.text('Fecha y hora de la generación: ' + (resumen.generadoEn || '—'), 15, y); y += 6.5;
+        doc.text('Registro de Compras (RCE): ' + (resumen.rce ? 'Generado – periodo ' + resumen.rce : 'No generado'), 15, y); y += 6.5;
+        doc.text('Registro de Ventas e Ingresos (RVIE): ' + (resumen.rvie ? 'Generado – periodo ' + resumen.rvie : 'No generado'), 15, y); y += 6.5;
+        if (resumen.correo) {
+            doc.text('Correo adicional para envío: ' + resumen.correo, 15, y); y += 6.5;
+        }
+        y += 5.5;
+
+        // Documentos generados por el proceso
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Documentos generados por el proceso', 15, y);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        const docs = [];
+        if (resumen.rvie) {
+            docs.push('Constancia de Recepción RVIE PDF', 'Archivo del RVIE',
+                      'Reporte de Inconsistencias (RVIE)', 'Reporte de Exportadores',
+                      'Archivo XML de la Constancia de Recepción (RVIE)');
+        }
+        if (resumen.rce) {
+            docs.push('Constancia de Recepción RCE PDF', 'Archivo del RCE',
+                      'Archivo del RC Operaciones con Sujetos No Domiciliados',
+                      'Reporte de Inconsistencias (RCE)',
+                      'Archivo XML de la Constancia de Recepción (RCE)',
+                      'Propuesta de Casillas del Formulario Virtual 621');
+        }
+        docs.forEach(function (d) {
+            doc.text('•  ' + d, 18, y);
+            y += 6;
+        });
+
+        // Pie de página
+        doc.setFontSize(9);
+        doc.setTextColor(120, 120, 120);
+        doc.text('Simulador de prueba | Elaborado por el Equipo Académico de Contabilidad CERTUS', 105, 285, { align: 'center' });
+
+        const stamp = ahora.toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
+        doc.save('Reporte_Simulacion_SIRE_' + stamp + '.pdf');
+        return true;
+    }
+
+    // Botón "Terminar simulación": descarga el reporte PDF y va a sol.html.
+    // El estado temporal (periodos presentados, resumen) se CONSERVA;
+    // solo se borra al llegar a index o con "Reiniciar simulación" en SOL.
     document.addEventListener('click', function (e) {
         if (!e.target.closest('#btn-terminar-simulacion')) return;
         e.preventDefault();
-        sessionStorage.removeItem('sire_aceptado');
-        sessionStorage.removeItem('rce_nav_generacion');
-        sessionStorage.removeItem('rce_gen_periodo');
-        window.location.href = 'tramites.html';
+
+        generarReporteSimulacionPDF();
+
+        // Pequeña espera para que inicie la descarga antes de navegar
+        setTimeout(function () {
+            window.location.href = 'sol.html';
+        }, 800);
     });
 
     // =============================================
@@ -439,14 +565,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // La lógica de cambio de pestaña se puede agregar aquí
     console.log('SUNAT Interface Loaded');
 
-    // Implementación simple de pestañas para demostración
-    const mainTabs = document.querySelectorAll('.tab-btn');
-    mainTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            mainTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-        });
-    });
+    // Nota: la lógica de las main-tabs (Generación de Registro / Información de Gestión)
+    // se maneja abajo con los manejadores específicos de mainTabGeneracion / mainTabInfoGestion.
 
     const subTabs = document.querySelectorAll('.sub-tab-btn');
     subTabs.forEach(tab => {
@@ -587,7 +707,11 @@ document.addEventListener('DOMContentLoaded', function () {
         clu: row[39] || ''
     }));
 
+    // Últimos comprobantes mostrados en la tabla de propuesta (fuente del archivo exportado)
+    let comprobantesActuales = [];
+
     function renderTable(dataRows) {
+        comprobantesActuales = dataRows;
         const tbody = document.querySelector('.results-table tbody');
         tbody.innerHTML = '';
 
@@ -826,6 +950,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Si el periodo fue generado en la simulación (guardado en 'sire_presentado'),
+    // la etiqueta del mes pasa de "No Presentado" a "Presentado"
+    function etiquetaMesPresentado(yearKey, month) {
+        try {
+            const presentados = JSON.parse(sessionStorage.getItem('sire_presentado') || '{}');
+            const mesMap = {
+                'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
+                'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+                'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
+            };
+            const abrev = month.split('-')[0];
+            const periodo = yearKey + '-' + mesMap[abrev];
+            if (presentados[periodo]) return abrev + '-Presentado';
+        } catch (e) { /* estado corrupto: se ignora */ }
+        return month;
+    }
+
     function updateMonthOptions(yearKey) {
         if (!mesOptionsBox || !mesSpan) return;
 
@@ -836,7 +977,7 @@ document.addEventListener('DOMContentLoaded', function () {
         months.forEach(month => {
             const div = document.createElement('div');
             div.className = 'option-item';
-            div.textContent = month;
+            div.textContent = etiquetaMesPresentado(yearKey, month);
             mesOptionsBox.appendChild(div);
         });
 
@@ -886,6 +1027,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // Only show months if year is selected
             const periodoSeleccionado = periodoSpan.textContent;
             if (periodoSeleccionado !== 'Seleccionar') {
+                // Reconstruir opciones al abrir para reflejar periodos ya Presentados
+                if (!mesOptionsBox.classList.contains('show')) {
+                    const seleccionActual = mesSpan.textContent;
+                    updateMonthOptions(periodoSeleccionado.split('-')[0]);
+                    mesSpan.textContent = seleccionActual;
+                }
                 mesOptionsBox.classList.toggle('show');
             }
         });
@@ -941,174 +1088,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         if (error) throw error;
 
-                        function formatDate(dateStr) {
-                            if (!dateStr) return '';
-                            if (dateStr.includes('/')) return dateStr;
-                            const parts = String(dateStr).split('-');
-                            if (parts.length === 3) {
-                                return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                            }
-                            return dateStr;
-                        }
-
                         if (data && data.length > 0) {
-                            // Calculate Totals for the Dashboard
-                            const groups = {};
-                            let grandTotals = {
-                                docs: 0, valExp: 0, biGrav: 0, dsctoBi: 0, mtoIgv: 0, icbper: 0, total: 0
-                            };
-
-                            data.forEach(row => {
-                                const rawType = row['Tipo CP/Doc.'] || row['Tipo CP/Doc'] || '01';
-                                const type = String(rawType).trim().padStart(2, '0');
-                                if (!groups[type]) {
-                                    groups[type] = {
-                                        docs: 0, valExp: 0, biGrav: 0, dsctoBi: 0, mtoIgv: 0, icbper: 0, total: 0
-                                    };
-                                }
-
-                                const valExpVal = parseFloat(row['Valor Facturado Exportación'] || row.valor_facturado_export || 0);
-                                const biGravVal = parseFloat(row['BI Gravada'] || row.bi_gravada || 0);
-                                const dsctoBiVal = parseFloat(row['Dscto BI'] || row.dscto_bi || 0);
-                                const mtoIgvVal = parseFloat(row['IGV / IPM'] || row.igv_ipm || 0);
-                                const icbperVal = parseFloat(row['ICBPER'] || row.icbper || 0);
-                                const totalVal = parseFloat(row['Total CP'] || row.total_cp || 0);
-
-                                groups[type].docs += 1;
-                                groups[type].valExp += valExpVal;
-                                groups[type].biGrav += biGravVal;
-                                groups[type].dsctoBi += dsctoBiVal;
-                                groups[type].mtoIgv += mtoIgvVal;
-                                groups[type].icbper += icbperVal;
-                                groups[type].total += totalVal;
-
-                                grandTotals.docs += 1;
-                                grandTotals.valExp += valExpVal;
-                                grandTotals.biGrav += biGravVal;
-                                grandTotals.dsctoBi += dsctoBiVal;
-                                grandTotals.mtoIgv += mtoIgvVal;
-                                grandTotals.icbper += icbperVal;
-                                grandTotals.total += totalVal;
-                            });
-
-                            const cpTypesMap = {
-                                '01': '01 - Factura',
-                                '03': '03 - Boleta de Venta',
-                                '07': '07 - Nota de Crédito',
-                                '08': '08 - Nota de Débito'
-                            };
-
-                            // Update Table
-                            if (tbody) {
-                                tbody.innerHTML = '';
-
-                                Object.keys(groups).sort().forEach(type => {
-                                    const g = groups[type];
-                                    const label = cpTypesMap[type] || `${type} - Otro`;
-
-                                    tbody.innerHTML += `
-                                        <tr>
-                                            <td class="text-left">${label}</td>
-                                            <td>${g.docs}</td>
-                                            <td>${g.valExp.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${g.biGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${g.dsctoBi.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${g.mtoIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${g.icbper.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${g.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                        </tr>
-                                    `;
-                                });
-
-                                // Update Footer
-                                const tfoot = document.getElementById('summary-table-foot');
-                                if (tfoot) {
-                                    tfoot.innerHTML = `
-                                        <tr class="totals-row totals-row-red">
-                                            <td class="text-left">TOTAL:</td>
-                                            <td>${grandTotals.docs}</td>
-                                            <td>${grandTotals.valExp.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${grandTotals.biGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${grandTotals.dsctoBi.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${grandTotals.mtoIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${grandTotals.icbper.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td>${grandTotals.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                        </tr>
-                                    `;
-                                }
-
-                                // Update summary pagination text
-                                const sumPagInfo = document.getElementById('summary-pagination-info');
-                                if (sumPagInfo) {
-                                    const sumCount = Object.keys(groups).length;
-                                    sumPagInfo.textContent = `Mostrando del 1 al ${sumCount} de un total ${sumCount} registros`;
-                                }
-
-                                // Update Ring Charts
-                                const chartQty = document.getElementById('chart-qty');
-                                const chartAmount = document.getElementById('chart-amount');
-                                if (chartQty) chartQty.textContent = grandTotals.docs;
-                                if (chartAmount) chartAmount.textContent = grandTotals.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                            }
-
-                            // Pass the data to the old 'Propuesta' detailed table
-                            renderTable(data.map(d => ({
-                                ruc: d['Ruc'] || '20123456789',
-                                razon_social: d['Razon Social'] || 'EMPRESA DEMO S.A.C.',
-                                periodo: d['Periodo'],
-                                src_key: d['CAR SUNAT'] || '',
-                                fecha_emision: formatDate(d['Fecha de emisión']),
-                                fecha_vcto_pago: formatDate(d['Fecha Vcto/Pago']),
-                                tipo_cp: d['Tipo CP/Doc.'] ? String(d['Tipo CP/Doc.']).trim().padStart(2, '0') : '01',
-                                comprobante: d['Comprobante'] || (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '01' ? 'Factura' : (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '03' ? 'Boleta de Venta' : (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '07' ? 'Nota de Crédito' : (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '08' ? 'Nota de Débito' : 'Otro')))),
-                                serie: d['Serie del CDP'],
-                                numero: d['Nro CP o Doc. Nro Inicial (Rango)'],
-                                nro_final: d['Nro Final (Rango)'] || '',
-                                tipo_doc_identidad: d['Tipo Doc Identidad'],
-                                nro_doc_identidad: d['Nro Doc Identidad'],
-                                cliente: d['Apellidos Nombres/ Razón Social'],
-                                tipo_cliente: d['Tipo de Cliente'] || 'Empresa Nacional',
-                                valor_facturado_export: d['Valor Facturado Exportación'],
-                                bi_gravada: d['BI Gravada'],
-                                dscto_bi: d['Dscto BI'],
-                                igv_ipm: d['IGV / IPM'],
-                                dscto_igv_ipm: d['Dscto IGV / IPM'],
-                                mto_exonerado: d['Mto Exonerado'],
-                                mto_inafecto: d['Mto Inafecto'],
-                                isc: d['ISC'],
-                                bi_grav_ivap: d['BI Grav IVAP'],
-                                ivap: d['IVAP'],
-                                icbper: d['ICBPER'],
-                                otros_tributos: d['Otros Tributos'],
-                                anticipos: d['Anticipos'] || d['Anticipos (S/)'] || 0.00,
-                                otros_cargos: d['Otros Cargos'] || d['Otros Cargos (S/)'] || 0.00,
-                                monto_redondeo: d['Monto de Redondeo'] || d['Monto de Redondeo (S/)'] || 0.00,
-                                total_cp: d['Total CP'],
-                                moneda: d['Moneda'],
-                                tipo_cambio: d['Tipo Cambio'],
-                                doc_mod_fecha_emision: formatDate(d['Fecha Emisión Doc Modificado']),
-                                doc_mod_tipo_cp: d['Tipo CP Modificado'],
-                                doc_mod_serie: d['Serie CP Modificado'],
-                                doc_mod_numero: d['Nro CP Modificado'],
-                                detalle_operacion: d['Detalle de la Operación'] || d['Detalle de la operacion'] || '',
-                                descripcion: d['Descripción'] || d['Descripcion'] || '',
-                                forma_pago: d['Forma de Pago'] || d['Forma de pago'] || '',
-                                nro_cuotas: d['N° de Cuotas'] || d['Nro de cuotas'] || '',
-                                motivo_nota_credito: d['Motivo Nota de Crédito'] || d['Motivo nota de credito'] || '',
-                                sujeto_detraccion: d['Sujeto a Detracción'] || d['Sujeto a detraccion'] || false,
-                                pct_detraccion: d['% de Detracción'] || d['% de detraccion'] || 0,
-                                monto_detraccion: d['Monto Detracción'] || d['Monto detraccion'] || 0.00,
-                                nro_constancia_detrac: d['N° Constancia Depósito Detracción'] || d['Nro constancia deposito detraccion'] || '',
-                                id_proyecto: d['ID Proyecto Operadores Atribución'] || '',
-                                tipo_nota: d['Tipo de Nota'] || '',
-                                est_comp: d['Est. Comp'] || '1',
-                                desc_comp: 'ACTIVO',
-                                valor_fob: d['Valor FOB Embarcado'] || '0.00',
-                                valor_op_gratuitas: d['Valor OP Gratuitas'] || '0.00',
-                                tipo_operacion: d['Tipo Operación'] || '0101',
-                                dam: d['DAM / CP'] || '',
-                                clu: d['CLU'] || ''
-                            })));
+                            procesarDatosRvie(data);
                         } else {
                             if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center">No se encontraron registros para el periodo ${searchPeriod}.</td></tr>`;
                         }
@@ -1424,9 +1405,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ===================================================
+    // =============================================
     // NAVEGACIÓN DESDE RCE – Mostrar Generación de Registros
-    // ===================================================
+    // =============================================
     if (sessionStorage.getItem('rce_nav_generacion') === '1') {
         sessionStorage.removeItem('rce_nav_generacion');
         sessionStorage.removeItem('rce_gen_periodo'); // clave legada, ya no se usa
@@ -1442,6 +1423,1012 @@ document.addEventListener('DOMContentLoaded', function () {
         mostrarVistaGeneracionRegistros();
         window.scrollTo(0, 0);
     }
+
+    // =============================================
+    // PROCESAR DATOS DE LA PROPUESTA DEL RVIE (resumen + tabla detallada)
+    // Reutilizado tanto por la consulta a Supabase como por "Reemplazar Propuesta"
+    // =============================================
+    function procesarDatosRvie(data) {
+        const tbody = document.getElementById('summary-table-body');
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            if (String(dateStr).includes('/')) return dateStr;
+            const parts = String(dateStr).split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return dateStr;
+        }
+
+        // Calculate Totals for the Dashboard
+        const groups = {};
+        let grandTotals = {
+            docs: 0, valExp: 0, biGrav: 0, dsctoBi: 0, mtoIgv: 0, icbper: 0, total: 0
+        };
+
+        data.forEach(row => {
+            const rawType = row['Tipo CP/Doc.'] || row['Tipo CP/Doc'] || '01';
+            const type = String(rawType).trim().padStart(2, '0');
+            if (!groups[type]) {
+                groups[type] = {
+                    docs: 0, valExp: 0, biGrav: 0, dsctoBi: 0, mtoIgv: 0, icbper: 0, total: 0
+                };
+            }
+
+            const valExpVal = parseFloat(row['Valor Facturado Exportación'] || row.valor_facturado_export || 0);
+            const biGravVal = parseFloat(row['BI Gravada'] || row.bi_gravada || 0);
+            const dsctoBiVal = parseFloat(row['Dscto BI'] || row.dscto_bi || 0);
+            const mtoIgvVal = parseFloat(row['IGV / IPM'] || row.igv_ipm || 0);
+            const icbperVal = parseFloat(row['ICBPER'] || row.icbper || 0);
+            const totalVal = parseFloat(row['Total CP'] || row.total_cp || 0);
+
+            groups[type].docs += 1;
+            groups[type].valExp += valExpVal;
+            groups[type].biGrav += biGravVal;
+            groups[type].dsctoBi += dsctoBiVal;
+            groups[type].mtoIgv += mtoIgvVal;
+            groups[type].icbper += icbperVal;
+            groups[type].total += totalVal;
+
+            grandTotals.docs += 1;
+            grandTotals.valExp += valExpVal;
+            grandTotals.biGrav += biGravVal;
+            grandTotals.dsctoBi += dsctoBiVal;
+            grandTotals.mtoIgv += mtoIgvVal;
+            grandTotals.icbper += icbperVal;
+            grandTotals.total += totalVal;
+        });
+
+        const cpTypesMap = {
+            '01': '01 - Factura',
+            '03': '03 - Boleta de Venta',
+            '07': '07 - Nota de Crédito',
+            '08': '08 - Nota de Débito'
+        };
+
+        // Update Table
+        if (tbody) {
+            tbody.innerHTML = '';
+
+            Object.keys(groups).sort().forEach(type => {
+                const g = groups[type];
+                const label = cpTypesMap[type] || `${type} - Otro`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-left">${label}</td>
+                        <td>${g.docs}</td>
+                        <td>${g.valExp.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${g.biGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${g.dsctoBi.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${g.mtoIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${g.icbper.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${g.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    </tr>
+                `;
+            });
+
+            // Update Footer
+            const tfoot = document.getElementById('summary-table-foot');
+            if (tfoot) {
+                tfoot.innerHTML = `
+                    <tr class="totals-row totals-row-red">
+                        <td class="text-left">TOTAL:</td>
+                        <td>${grandTotals.docs}</td>
+                        <td>${grandTotals.valExp.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${grandTotals.biGrav.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${grandTotals.dsctoBi.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${grandTotals.mtoIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${grandTotals.icbper.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td>${grandTotals.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    </tr>
+                `;
+            }
+
+            // Update summary pagination text
+            const sumPagInfo = document.getElementById('summary-pagination-info');
+            if (sumPagInfo) {
+                const sumCount = Object.keys(groups).length;
+                sumPagInfo.textContent = `Mostrando del 1 al ${sumCount} de un total ${sumCount} registros`;
+            }
+
+            // Update Ring Charts
+            const chartQty = document.getElementById('chart-qty');
+            const chartAmount = document.getElementById('chart-amount');
+            if (chartQty) chartQty.textContent = grandTotals.docs;
+            if (chartAmount) chartAmount.textContent = grandTotals.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Pass the data to the old 'Propuesta' detailed table
+        renderTable(data.map(d => ({
+            ruc: d['Ruc'] || '20123456789',
+            razon_social: d['Razon Social'] || 'EMPRESA DEMO S.A.C.',
+            periodo: d['Periodo'],
+            src_key: d['CAR SUNAT'] || '',
+            fecha_emision: formatDate(d['Fecha de emisión']),
+            fecha_vcto_pago: formatDate(d['Fecha Vcto/Pago']),
+            tipo_cp: d['Tipo CP/Doc.'] ? String(d['Tipo CP/Doc.']).trim().padStart(2, '0') : '01',
+            comprobante: d['Comprobante'] || (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '01' ? 'Factura' : (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '03' ? 'Boleta de Venta' : (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '07' ? 'Nota de Crédito' : (String(d['Tipo CP/Doc.']).trim().padStart(2, '0') === '08' ? 'Nota de Débito' : 'Otro')))),
+            serie: d['Serie del CDP'],
+            numero: d['Nro CP o Doc. Nro Inicial (Rango)'],
+            nro_final: d['Nro Final (Rango)'] || '',
+            tipo_doc_identidad: d['Tipo Doc Identidad'],
+            nro_doc_identidad: d['Nro Doc Identidad'],
+            cliente: d['Apellidos Nombres/ Razón Social'],
+            tipo_cliente: d['Tipo de Cliente'] || 'Empresa Nacional',
+            valor_facturado_export: d['Valor Facturado Exportación'],
+            bi_gravada: d['BI Gravada'],
+            dscto_bi: d['Dscto BI'],
+            igv_ipm: d['IGV / IPM'],
+            dscto_igv_ipm: d['Dscto IGV / IPM'],
+            mto_exonerado: d['Mto Exonerado'],
+            mto_inafecto: d['Mto Inafecto'],
+            isc: d['ISC'],
+            bi_grav_ivap: d['BI Grav IVAP'],
+            ivap: d['IVAP'],
+            icbper: d['ICBPER'],
+            otros_tributos: d['Otros Tributos'],
+            anticipos: d['Anticipos'] || d['Anticipos (S/)'] || 0.00,
+            otros_cargos: d['Otros Cargos'] || d['Otros Cargos (S/)'] || 0.00,
+            monto_redondeo: d['Monto de Redondeo'] || d['Monto de Redondeo (S/)'] || 0.00,
+            total_cp: d['Total CP'],
+            moneda: d['Moneda'],
+            tipo_cambio: d['Tipo Cambio'],
+            doc_mod_fecha_emision: formatDate(d['Fecha Emisión Doc Modificado']),
+            doc_mod_tipo_cp: d['Tipo CP Modificado'],
+            doc_mod_serie: d['Serie CP Modificado'],
+            doc_mod_numero: d['Nro CP Modificado'],
+            detalle_operacion: d['Detalle de la Operación'] || d['Detalle de la operacion'] || '',
+            descripcion: d['Descripción'] || d['Descripcion'] || '',
+            forma_pago: d['Forma de Pago'] || d['Forma de pago'] || '',
+            nro_cuotas: d['N° de Cuotas'] || d['Nro de cuotas'] || '',
+            motivo_nota_credito: d['Motivo Nota de Crédito'] || d['Motivo nota de credito'] || '',
+            sujeto_detraccion: d['Sujeto a Detracción'] || d['Sujeto a detraccion'] || false,
+            pct_detraccion: d['% de Detracción'] || d['% de detraccion'] || 0,
+            monto_detraccion: d['Monto Detracción'] || d['Monto detraccion'] || 0.00,
+            nro_constancia_detrac: d['N° Constancia Depósito Detracción'] || d['Nro constancia deposito detraccion'] || '',
+            id_proyecto: d['ID Proyecto Operadores Atribución'] || '',
+            tipo_nota: d['Tipo de Nota'] || '',
+            est_comp: d['Est. Comp'] || '1',
+            desc_comp: 'ACTIVO',
+            valor_fob: d['Valor FOB Embarcado'] || '0.00',
+            valor_op_gratuitas: d['Valor OP Gratuitas'] || '0.00',
+            tipo_operacion: d['Tipo Operación'] || '0101',
+            dam: d['DAM / CP'] || '',
+            clu: d['CLU'] || ''
+        })));
+    }
+
+    // =============================================
+    // REEMPLAZAR PROPUESTA RVIE (importación de zip con txt plano)
+    // =============================================
+    /**
+     * Convierte el contenido del archivo plano (txt SIRE separado por "|" o csv exportado)
+     * en objetos con las columnas del esquema del RVIE que entiende procesarDatosRvie.
+     */
+    function parsearArchivoPlanoRvie(texto) {
+        let authData = {};
+        try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        const rucSesion = authData.ruc || '20606966823';
+        const razonSesion = authData.denominacion || 'EMPRESA DEMO S.A.C.';
+
+        const lineas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim() !== '');
+        const filas = [];
+
+        lineas.forEach(linea => {
+            const esPipe = linea.includes('|');
+            const f = linea.split(esPipe ? '|' : ',').map(v => String(v).trim());
+
+            // El txt SIRE no lleva cabecera ni RUC/Razón (van de la sesión); el csv exportado sí
+            let base, ruc, razon;
+            if (esPipe) {
+                if (f.length < 20) return; // línea incompleta
+                base = 0;
+                ruc = rucSesion;
+                razon = razonSesion;
+            } else {
+                if (!/^\d{8,11}$/.test(f[0])) return; // cabecera u otra línea no válida
+                if (f.length < 26) return;
+                base = 2;
+                ruc = f[0];
+                razon = f[1];
+            }
+
+            const g = i => (f[base + i] !== undefined ? f[base + i] : '');
+            // El periodo del txt viene como YYYYMM00
+            const periodoRaw = g(0);
+            const periodo = (periodoRaw.length === 8 && periodoRaw.endsWith('00')) ? periodoRaw.slice(0, 6) : periodoRaw;
+
+            filas.push({
+                'Ruc': ruc,
+                'Razon Social': razon,
+                'Periodo': periodo,
+                'CAR SUNAT': g(1),
+                'Fecha de emisión': g(2),
+                'Fecha Vcto/Pago': g(3),
+                'Tipo CP/Doc.': g(4),
+                'Serie del CDP': g(5),
+                'Nro CP o Doc. Nro Inicial (Rango)': g(6),
+                'Nro Final (Rango)': g(7),
+                'Tipo Doc Identidad': g(8),
+                'Nro Doc Identidad': g(9),
+                'Apellidos Nombres/ Razón Social': g(10),
+                'Valor Facturado Exportación': g(11),
+                'BI Gravada': g(12),
+                'Dscto BI': g(13),
+                'IGV / IPM': g(14),
+                'Dscto IGV / IPM': g(15),
+                'Mto Exonerado': g(16),
+                'Mto Inafecto': g(17),
+                'ISC': g(18),
+                'BI Grav IVAP': g(19),
+                'IVAP': g(20),
+                'ICBPER': g(21),
+                'Otros Tributos': g(22),
+                'Total CP': g(23),
+                'Moneda': g(24) || 'PEN',
+                'Tipo Cambio': g(25) || '1.000',
+                'Fecha Emisión Doc Modificado': g(26),
+                'Tipo CP Modificado': g(27),
+                'Serie CP Modificado': g(28),
+                'Nro CP Modificado': g(29),
+                'ID Proyecto Operadores Atribución': g(30),
+                'Tipo de Nota': g(31),
+                'Est. Comp': g(32) || '1',
+                'Valor FOB Embarcado': g(33),
+                'Valor OP Gratuitas': g(34),
+                'Tipo Operación': g(35) || '0101',
+                'DAM / CP': g(36),
+                'CLU': g(37)
+            });
+        });
+
+        return filas;
+    }
+
+    // Abrir el modal "Reemplazo de la Propuesta del RVIE"
+    const btnReemplazarRvie = document.getElementById('btn-reemplazar-propuesta-rvie');
+    if (btnReemplazarRvie) {
+        btnReemplazarRvie.addEventListener('click', function () {
+            const inp = document.getElementById('rvie-reemplazo-file');
+            if (inp) inp.value = '';
+            const nameBox = document.getElementById('rvie-reemplazo-filename');
+            if (nameBox) nameBox.value = '';
+            const m = document.getElementById('rvie-modal-reemplazo');
+            if (m) m.style.display = 'flex';
+        });
+    }
+
+    // Mostrar el nombre del zip elegido con "Examinar"
+    const fileInputReemplazoRvie = document.getElementById('rvie-reemplazo-file');
+    if (fileInputReemplazoRvie) {
+        fileInputReemplazoRvie.addEventListener('change', function () {
+            const nameBox = document.getElementById('rvie-reemplazo-filename');
+            if (nameBox) nameBox.value = this.files.length ? this.files[0].name : '';
+        });
+    }
+
+    // Botón "Cargar archivo": lee el zip, reemplaza la propuesta y genera el ticket
+    const btnCargarArchivoRvie = document.getElementById('btn-cargar-archivo-rvie');
+    if (btnCargarArchivoRvie) {
+        btnCargarArchivoRvie.addEventListener('click', async function () {
+            const inp = document.getElementById('rvie-reemplazo-file');
+            if (!inp || !inp.files.length) {
+                alert('Seleccione el archivo zip a importar con la opción Examinar.');
+                return;
+            }
+            if (typeof JSZip === 'undefined') {
+                alert('La librería de compresión JSZip no se ha cargado.');
+                return;
+            }
+
+            const file = inp.files[0];
+            try {
+                const zip = await JSZip.loadAsync(file);
+                let entry = null;
+                zip.forEach(function (path, zipFile) {
+                    if (!entry && /\.(txt|csv)$/i.test(path)) entry = zipFile;
+                });
+                if (!entry) {
+                    alert('El zip no contiene un archivo de texto (.txt).');
+                    return;
+                }
+
+                const texto = await entry.async('string');
+                const filas = parsearArchivoPlanoRvie(texto);
+                if (!filas.length) {
+                    alert('El archivo no contiene comprobantes con la estructura del RVIE.');
+                    return;
+                }
+
+                // Reemplazar la información de la Propuesta del RVIE (tabla y resumen)
+                procesarDatosRvie(filas);
+
+                // Asegurar que se vea la Propuesta con los datos reemplazados
+                const mainContent = document.getElementById('main-content-display');
+                if (mainContent) mainContent.style.display = 'block';
+
+                // Registrar el ticket del reemplazo
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const randStr = String(Math.floor(Math.random() * 84) + 10);
+                const ticketNum = now.getFullYear() + '01000000' + randStr;
+
+                let ruc = rucFromSession();
+                const per = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']) : '';
+                const yyyy = per.slice(0, 4) || String(now.getFullYear());
+                const mm = per.slice(4, 6) || pad(now.getMonth() + 1);
+
+                let tickets = [];
+                try { tickets = JSON.parse(sessionStorage.getItem('sire_export_tickets') || '[]'); } catch (err) {}
+                tickets.unshift({
+                    numero: ticketNum,
+                    fecha: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' +
+                           pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
+                    archivo: file.name,
+                    tipo: 'Reemplazar propuesta',
+                    estado: 'Terminado'
+                });
+                sessionStorage.setItem('sire_export_tickets', JSON.stringify(tickets));
+
+                // Cerrar el modal de reemplazo y mostrar "Mensaje" con el ticket
+                cerrarModalReemplazoRvie();
+                const numEl = document.getElementById('rvie-ticket-reemplazo-numero');
+                if (numEl) numEl.textContent = ticketNum;
+                const mTicket = document.getElementById('rvie-modal-ticket-reemplazo');
+                if (mTicket) mTicket.style.display = 'flex';
+            } catch (err) {
+                console.error('Error al leer el zip de reemplazo:', err);
+                alert('No se pudo leer el archivo zip. Verifique que sea un zip válido con el txt del RVIE.');
+            }
+        });
+    }
+
+    function rucFromSession() {
+        let ruc = '20606966823';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.ruc) ruc = auth.ruc;
+        } catch (e) {}
+        return ruc;
+    }
+
+    // =============================================
+    // EXPORTAR DROPDOWN (TXT / CSV)
+    // =============================================
+    function setupExportarDropdown(btnId, dropdownId) {
+        const btn = document.getElementById(btnId);
+        const dropdown = document.getElementById(dropdownId);
+        if (!btn || !dropdown) return;
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            // Cerrar otros dropdowns
+            document.querySelectorAll('.exportar-dropdown').forEach(d => {
+                if (d !== dropdown) d.style.display = 'none';
+            });
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    setupExportarDropdown('btn-exportar-resumen', 'dropdown-exportar-resumen');
+    setupExportarDropdown('btn-exportar-propuesta', 'dropdown-exportar-propuesta');
+
+    // Cerrar dropdowns de exportar al hacer clic fuera
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.exportar-dropdown').forEach(d => d.style.display = 'none');
+    });
+
+    // Lógica al elegir una opción (TXT o CSV)
+    document.addEventListener('click', function (e) {
+        const opt = e.target.closest('.exportar-option');
+        if (!opt) return;
+        e.stopPropagation();
+
+        const format = opt.getAttribute('data-format');
+        // Cerrar dropdown
+        document.querySelectorAll('.exportar-dropdown').forEach(d => d.style.display = 'none');
+
+        if (format === 'CSV') {
+            const periodoSel = obtenerPeriodoSeleccionadoRVIE() || '2026-05';
+            const parts = periodoSel.split('-');
+            const year = parts[0];
+            const mes = parts[1];
+
+            let ruc = '20606966823';
+            try {
+                const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+                if (auth.ruc) ruc = auth.ruc;
+            } catch (e) {}
+
+            const randVal = Math.floor(Math.random() * 34) + 1;
+            const randStr = String(randVal).padStart(2, '0');
+            const ticketNum = year + '03000000' + randStr;
+
+            const filename = 'LE' + ruc + year + mes + '014040001EXP2.zip';
+
+            const ticketEl = document.getElementById('export-ticket-number');
+            if (ticketEl) ticketEl.textContent = ticketNum;
+
+            const now = new Date();
+            // Guardar ticket para la tabla de Estado de envío
+            const ticketData = {
+                numero: ticketNum,
+                fecha: now.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+                       now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                archivo: filename,
+                tipo: 'Generar archivo exportar propuesta',
+                estado: 'Terminado'
+            };
+            // Guardar en sessionStorage para persistir
+            let tickets = [];
+            try { tickets = JSON.parse(sessionStorage.getItem('sire_export_tickets') || '[]'); } catch (err) {}
+            tickets.unshift(ticketData);
+            sessionStorage.setItem('sire_export_tickets', JSON.stringify(tickets));
+
+            // Mostrar modal de ticket
+            const modalCsv = document.getElementById('modal-exportar-csv');
+            if (modalCsv) modalCsv.style.display = 'flex';
+        }
+        // TXT: no hace nada especial en este simulador
+    });
+
+    // Cerrar modal exportar CSV con la X
+    const closeCsvModal = document.getElementById('close-exportar-csv');
+    if (closeCsvModal) {
+        closeCsvModal.addEventListener('click', function () {
+            const m = document.getElementById('modal-exportar-csv');
+            if (m) m.style.display = 'none';
+        });
+    }
+
+    // ACEPTAR en modal exportar CSV → solo se cierra la ventana flotante
+    const btnAceptarCsv = document.getElementById('btn-aceptar-exportar-csv');
+    if (btnAceptarCsv) {
+        btnAceptarCsv.addEventListener('click', function () {
+            const m = document.getElementById('modal-exportar-csv');
+            if (m) m.style.display = 'none';
+        });
+    }
+
+    // =============================================
+    // TABS PRINCIPALES: Generación de Registro / Información de Gestión
+    // =============================================
+    const mainTabGeneracion = document.getElementById('main-tab-generacion');
+    const mainTabInfoGestion = document.getElementById('main-tab-info-gestion');
+    const subTabsContainer = document.querySelector('.sub-tabs-container');
+    const infoGestionView = document.getElementById('info-gestion-view');
+
+    function activarGeneracionTab() {
+        if (mainTabGeneracion) mainTabGeneracion.classList.add('active');
+        if (mainTabInfoGestion) mainTabInfoGestion.classList.remove('active');
+        if (subTabsContainer) subTabsContainer.style.display = '';
+        if (infoGestionView) infoGestionView.style.display = 'none';
+        // Mostrar la sub-vista activa de Generación de Registro
+        const mainContent = document.getElementById('main-content-display');
+        if (mainContent) mainContent.style.display = 'block';
+    }
+
+    function activarInfoGestion() {
+        if (mainTabGeneracion) mainTabGeneracion.classList.remove('active');
+        if (mainTabInfoGestion) mainTabInfoGestion.classList.add('active');
+        if (subTabsContainer) subTabsContainer.style.display = 'none';
+        // Ocultar todas las sub-vistas de Generación
+        document.querySelectorAll('.sub-content-view').forEach(v => {
+            if (v.id !== 'info-gestion-view') v.style.display = 'none';
+        });
+        if (infoGestionView) infoGestionView.style.display = 'block';
+        const mainContent = document.getElementById('main-content-display');
+        if (mainContent) mainContent.style.display = 'block';
+    }
+
+    if (mainTabGeneracion) {
+        mainTabGeneracion.addEventListener('click', function () {
+            activarGeneracionTab();
+        });
+    }
+
+    if (mainTabInfoGestion) {
+        mainTabInfoGestion.addEventListener('click', function () {
+            activarInfoGestion();
+            // Mostrar solo el menú, sin panel expandido
+            const panel = document.getElementById('ig-estado-ticket-panel');
+            const otrosPanel = document.getElementById('ig-otros-panel');
+            if (panel) panel.style.display = 'none';
+            if (otrosPanel) otrosPanel.style.display = 'none';
+            // Resetear items activos
+            document.querySelectorAll('.ig-menu-item').forEach(i => i.classList.remove('ig-item-active'));
+        });
+    }
+
+    // =============================================
+    // INFO GESTIÓN: Sub-tabs (Consultas y Descargas, etc.)
+    // =============================================
+    document.querySelectorAll('.info-gestion-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.info-gestion-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.getAttribute('data-ig-target');
+            document.querySelectorAll('.ig-subview').forEach(v => v.style.display = 'none');
+            const targetView = document.getElementById(target);
+            if (targetView) targetView.style.display = 'block';
+        });
+    });
+
+    // =============================================
+    // INFO GESTIÓN: Items del menú "Consultas y Descargas"
+    // =============================================
+    function mostrarEstadoTicketPanel() {
+        // Marcar item activo
+        document.querySelectorAll('.ig-menu-item').forEach(i => i.classList.remove('ig-item-active'));
+        const itemTicket = document.getElementById('ig-item-estado-ticket');
+        if (itemTicket) itemTicket.classList.add('ig-item-active');
+
+        // Ocultar otros paneles
+        const otrosPanel = document.getElementById('ig-otros-panel');
+        if (otrosPanel) otrosPanel.style.display = 'none';
+
+        // Mostrar panel de estado de ticket
+        const panel = document.getElementById('ig-estado-ticket-panel');
+        if (panel) panel.style.display = 'block';
+
+        // Poblar la tabla con los tickets guardados
+        poblarTablaTickets();
+    }
+
+    function generarCSVComprobantes() {
+        // Cabeceras exactas del archivo EXP2 que genera el SIRE de SUNAT (con tildes)
+        const headers = ["Ruc","Razon Social","Periodo","CAR SUNAT","Fecha de emisión","Fecha Vcto/Pago","Tipo CP/Doc.","Serie del CDP","Nro CP o Doc. Nro Inicial (Rango)","Nro Final (Rango)","Tipo Doc Identidad","Nro Doc Identidad","Apellidos Nombres/ Razón Social","Valor Facturado Exportación","BI Gravada","Dscto BI","IGV / IPM","Dscto IGV / IPM","Mto Exonerado","Mto Inafecto","ISC","BI Grav IVAP","IVAP","ICBPER","Otros Tributos","Total CP","Moneda","Tipo Cambio","Fecha Emisión Doc Modificado","Tipo CP Modificado","Serie CP Modificado","Nro CP Modificado","ID Proyecto Operadores Atribución","Tipo de Nota","Est. Comp","Valor FOB Embarcado","Valor OP Gratuitas","Tipo Operación","DAM / CP","CLU"];
+        let csvContent = headers.join(",") + "\r\n";
+
+        // Exportar lo que muestra la tabla (datos de Supabase si se consultó un período); si no, los de ejemplo
+        const dataRows = (comprobantesActuales && comprobantesActuales.length > 0)
+            ? comprobantesActuales
+            : ((typeof mockObjects !== "undefined" && mockObjects) ? mockObjects : []);
+        dataRows.forEach(row => {
+            const line = [
+                row.ruc || "",
+                row.razon_social || "",
+                row.periodo || "",
+                row.src_key || "",
+                row.fecha_emision || "",
+                row.fecha_vcto_pago || "",
+                row.tipo_cp || "",
+                row.serie || "",
+                row.numero || "",
+                row.nro_final || "",
+                row.tipo_doc_identidad || "",
+                row.nro_doc_identidad || "",
+                row.cliente || "",
+                row.valor_facturado_export || 0,
+                row.bi_gravada || 0,
+                row.dscto_bi || 0,
+                row.igv_ipm || 0,
+                row.dscto_igv_ipm || 0,
+                row.mto_exonerado || 0,
+                row.mto_inafecto || 0,
+                row.isc || 0,
+                row.bi_grav_ivap || 0,
+                row.ivap || 0,
+                row.icbper || 0,
+                row.otros_tributos || 0,
+                row.total_cp || 0,
+                row.moneda || "PEN",
+                Number(row.tipo_cambio || 1).toFixed(3),
+                row.doc_mod_fecha_emision || "",
+                row.doc_mod_tipo_cp || "",
+                row.doc_mod_serie || "",
+                row.doc_mod_numero || "",
+                row.id_proyecto || "",
+                row.tipo_nota || "",
+                row.est_comp || "1",
+                row.valor_fob || 0,
+                row.valor_op_gratuitas || 0,
+                row.tipo_operacion || "0101",
+                row.dam || "",
+                row.clu || ""
+            ];
+            csvContent += line.join(",") + "\r\n";
+        });
+        return csvContent;
+    }
+
+    async function descargarZipComprobantes(filename) {
+        if (typeof JSZip === "undefined") {
+            alert("La librería de compresión JSZip no se ha cargado.");
+            return;
+        }
+        
+        try {
+            const zip = new JSZip();
+            const csvContent = generarCSVComprobantes();
+            const csvFilename = filename.replace(".zip", ".csv");
+
+            // BOM UTF-8 para que Excel muestre correctamente las tildes
+            zip.file(csvFilename, "\uFEFF" + csvContent);
+            
+            const content = await zip.generateAsync({ type: "blob" });
+            
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(content);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error al generar el archivo ZIP:", error);
+            alert("Ocurrió un error al generar la descarga.");
+        }
+    }
+
+    // Delegación de eventos para la descarga del ticket zip o PDF
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('.ig-download-link');
+        if (link) {
+            e.preventDefault();
+            const filename = link.getAttribute('data-filename');
+            descargarZipComprobantes(filename);
+            return;
+        }
+
+        const pdfBtn = e.target.closest('.ig-pdf-download-btn');
+        if (pdfBtn) {
+            e.preventDefault();
+            const ticketNum = pdfBtn.getAttribute('data-ticket');
+            descargarConstanciaRecepcionPDF(ticketNum);
+            return;
+        }
+    });
+
+    function poblarTablaTickets() {
+        const tbody = document.getElementById('ig-ticket-tbody');
+        if (!tbody) return;
+
+        let tickets = [];
+        try { tickets = JSON.parse(sessionStorage.getItem('sire_export_tickets') || '[]'); } catch (err) {}
+
+        // Auto-populate based on simulation state
+        let estadoAceptado = {};
+        try { estadoAceptado = JSON.parse(sessionStorage.getItem('sire_aceptado') || '{}'); } catch (e) {}
+        let estadoResumen = {};
+        try { estadoResumen = JSON.parse(sessionStorage.getItem('sire_resumen') || '{}'); } catch (e) {}
+
+        let ruc = '20606966823';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.ruc) ruc = auth.ruc;
+        } catch (e) {}
+
+        const period = estadoAceptado.rvie || (estadoResumen ? estadoResumen.rvie : null) || '2026-05';
+        const parts = period.split('-');
+        const year = parts[0];
+        const mes = parts[1];
+        const filename = 'LE' + ruc + year + mes + '0014040003EXP2.zip';
+
+        let modified = false;
+
+        // If RVIE proposal has been accepted or registers generated, ensure "Aceptar propuesta" ticket exists
+        if (estadoAceptado.rvie || (estadoResumen && estadoResumen.rvie)) {
+            if (!tickets.some(t => t.numero === '2026030000008')) {
+                tickets.push({
+                    numero: '2026030000008',
+                    fecha: '16/06/2026 21:57:42',
+                    archivo: '',
+                    tipo: 'Aceptar propuesta',
+                    estado: 'Terminado'
+                });
+                modified = true;
+            }
+        }
+
+        // If registers are generated, ensure "Generación de Registros" ticket exists
+        if (estadoResumen && estadoResumen.rvie) {
+            if (!tickets.some(t => t.numero === '2026020000005')) {
+                // Generación de Registros should be at the top
+                tickets.unshift({
+                    numero: '2026020000005',
+                    fecha: '16/06/2026 21:58:34',
+                    archivo: filename,
+                    tipo: 'Generación de Registros',
+                    estado: 'Terminado'
+                });
+                modified = true;
+            }
+        }
+
+        if (modified) {
+            sessionStorage.setItem('sire_export_tickets', JSON.stringify(tickets));
+        }
+
+        tbody.innerHTML = '';
+        if (tickets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:14px; color:#666;">No se encontraron registros.</td></tr>';
+            return;
+        }
+
+        tickets.forEach(function (t) {
+            const tr = document.createElement('tr');
+            
+            let downloadCell = '';
+            if (t.tipo === 'Generación de Registros') {
+                downloadCell = `<a href="#" class="ig-pdf-download-btn" data-ticket="${t.numero}" style="color:#005691; text-decoration:none; font-size:18px; cursor:pointer;" title="Descargar Constancia PDF"><i class="far fa-file-alt"></i></a>`;
+            } else if (t.tipo === 'Aceptar propuesta') {
+                downloadCell = '';
+            } else {
+                downloadCell = `<a href="#" class="ig-download-link" data-filename="${t.archivo}" style="color:#005691; text-decoration:underline; font-weight:600;">${t.archivo}</a>`;
+            }
+
+            tr.innerHTML = `
+                <td style="font-weight:700; color:#1E395B;">${t.numero}</td>
+                <td>${t.fecha}</td>
+                <td>${t.archivo || ''}</td>
+                <td>${t.tipo}</td>
+                <td><span style="color:#217a21; font-weight:600;">${t.estado}</span></td>
+                <td></td>
+                <td style="text-align:center;">${downloadCell}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function descargarConstanciaRecepcionPDF(ticketNum) {
+        if (typeof window.jspdf === 'undefined') {
+            alert("No se pudo cargar la librería jsPDF.");
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        // Header logo
+        let logoLoaded = false;
+        const logoImg = document.querySelector('img[src="LOGO_SUNAT.png"]') || document.querySelector('.logo');
+        if (logoImg && logoImg.complete && logoImg.naturalWidth !== 0) {
+            try {
+                doc.addImage(logoImg, 'PNG', 15, 12, 35, 10);
+                logoLoaded = true;
+            } catch (e) {
+                console.error("Error drawing logo:", e);
+            }
+        }
+        if (!logoLoaded) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(12, 86, 145);
+            doc.text('SUNAT', 15, 20);
+        }
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Constancia de Recepción del Registro de Ventas e Ingresos', 15, 30);
+        
+        let y = 38;
+
+        // Section 1: Transacción
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.text('Transacción', 15, y);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 7;
+
+        let tickets = [];
+        try { tickets = JSON.parse(sessionStorage.getItem('sire_export_tickets') || '[]'); } catch (err) {}
+        const currentTicket = tickets.find(t => t.numero === ticketNum) || {
+            numero: '2026020000005',
+            fecha: '16/06/2026 21:58:34',
+            archivo: 'LE206069668232026050014040003EXP2.zip'
+        };
+
+        function drawField(label, value, yPos) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.5);
+            doc.setTextColor(60, 60, 60);
+            doc.text(label, 15, yPos);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(0, 0, 0);
+            doc.text(value, 65, yPos);
+        }
+
+        drawField('Nombre:', 'Generación del RVIE', y); y += 5;
+        drawField('Nro. de Operación:', currentTicket.numero, y); y += 5;
+        drawField('Fecha y hora:', currentTicket.fecha, y); y += 8;
+
+        // Section 2: Datos del Contribuyente
+        let ruc = '20606966823';
+        let denominacion = 'FABRINSUR GROUP S.R.L.';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.ruc) ruc = auth.ruc;
+            if (auth.denominacion) denominacion = auth.denominacion;
+        } catch (e) {}
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.text('Datos del Contribuyente', 15, y);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 7;
+
+        drawField('Número de RUC:', ruc, y); y += 5;
+        drawField('Nombre o Razón Social:', denominacion, y); y += 8;
+
+        // Section 3: Datos del Registro
+        let periodText = '2026/05';
+        let year = '2026';
+        let mes = '05';
+
+        if (currentTicket && currentTicket.archivo) {
+            const match = currentTicket.archivo.match(/LE\d{11}(\d{4})(\d{2})/);
+            if (match && match[1] && match[2]) {
+                year = match[1];
+                mes = match[2];
+                periodText = year + '/' + mes;
+            }
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.text('Datos del Registro', 15, y);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 7;
+
+        drawField('Registro:', 'RVIE', y); y += 5;
+        drawField('Período:', periodText, y); y += 5;
+        drawField('Anotación:', 'Propuesta Aceptada', y); y += 5;
+
+        let cantRegistros = '5';
+        const tbodyRows = document.querySelectorAll('#detailed-table-body tr');
+        if (tbodyRows && tbodyRows.length > 0) {
+            const firstRowText = tbodyRows[0].textContent;
+            if (!firstRowText.includes('No se encontraron') && !firstRowText.includes('Ningún registro')) {
+                cantRegistros = String(tbodyRows.length);
+            }
+        }
+        drawField('Cantidad de registros:', cantRegistros, y); y += 8;
+
+        // Section 4: Datos Totales
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.text('Datos Totales', 15, y);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 7;
+
+        // Draw Table Header
+        doc.setFillColor(235, 235, 235);
+        doc.rect(15, y, 180, 6, 'F');
+        doc.setDrawColor(180, 180, 180);
+        doc.rect(15, y, 180, 6, 'D');
+        doc.line(145, y, 145, y + 6);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Descripción', 18, y + 4.2);
+        doc.text('Monto', 192, y + 4.2, { align: 'right' });
+        y += 6;
+
+        function getVal(id, def) {
+            const el = document.getElementById(id);
+            if (el && el.textContent.trim()) {
+                return el.textContent.trim();
+            }
+            return def;
+        }
+
+        const valExp = getVal('total-val-exp', '0.00');
+        const biGrav = getVal('total-bi-grav', '6,711.97');
+        const dsctoBi = getVal('total-dscto-bi', '0.00');
+        const igv = getVal('total-igv', '1,208.15');
+        const dsctoIgv = getVal('total-dscto-igv', '0.00');
+        const mtoExo = getVal('total-mto-exo', '0.00');
+        const mtoIna = getVal('total-mto-ina', '0.00');
+        const isc = getVal('total-isc', '0.00');
+        const biIvap = getVal('total-bi-ivap', '0.00');
+        const ivap = getVal('total-ivap', '0.00');
+        const icbper = getVal('total-icbper', '0.00');
+        const otros = getVal('total-otros', '0.00');
+        const totalCp = getVal('total-total-cp', '7,920.12');
+
+        const rows = [
+            { desc: 'Monto Total facturado de la exportación', val: valExp },
+            { desc: 'Monto Total de la base imponible de la operación gravada', val: biGrav },
+            { desc: 'Sumatoria de descuentos de base Imponible', val: dsctoBi },
+            { desc: 'Monto Total del IGV y/o IPM', val: igv },
+            { desc: 'Sumatoria de descuentos de IGV', val: dsctoIgv },
+            { desc: 'Monto Total de la operación exonerada', val: mtoExo },
+            { desc: 'Monto Total de la operación inafecta', val: mtoIna },
+            { desc: 'Monto Total del ISC', val: isc },
+            { desc: 'Monto Total de la base imponible del IVAP', val: biIvap },
+            { desc: 'Monto Total del IVAP', val: ivap },
+            { desc: 'Sumatoria de Impuesto al Consumo Bolsas de Plástico', val: icbper },
+            { desc: 'Monto Total de otros tributos y cargos que no forman parte de la base imponible', val: otros },
+            { desc: 'Monto Total del comprobante de pago', val: totalCp }
+        ];
+
+        rows.forEach((row, index) => {
+            if (index === rows.length - 1) {
+                doc.setFont('helvetica', 'bold');
+            } else {
+                doc.setFont('helvetica', 'normal');
+            }
+            doc.setFontSize(7.5);
+            doc.rect(15, y, 180, 5.2, 'D');
+            doc.line(145, y, 145, y + 5.2);
+            doc.text(row.desc, 18, y + 3.7);
+            
+            let displayVal = row.val;
+            if (typeof displayVal === 'number') {
+                displayVal = displayVal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            doc.text(displayVal, 192, y + 3.7, { align: 'right' });
+            y += 5.2;
+        });
+
+        // Footer message
+        y += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Gracias por cumplir con sus obligaciones tributarias.', 105, y, { align: 'center' });
+
+        // Save PDF
+        const filenamePdf = 'LE' + ruc + year + mes + '001404000111120.pdf';
+        doc.save(filenamePdf);
+    }
+
+    // Click en "Estado de envío de Ticket" desde el menú
+    const igItemEstadoTicket = document.getElementById('ig-item-estado-ticket');
+    if (igItemEstadoTicket) {
+        igItemEstadoTicket.addEventListener('click', function () {
+            mostrarEstadoTicketPanel();
+        });
+    }
+
+    // Click en otros items del menú → mostrar panel genérico
+    ['ig-item-constancias', 'ig-item-descarga', 'ig-item-inconsistencias', 'ig-item-car', 'ig-item-exportadores'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', function () {
+            document.querySelectorAll('.ig-menu-item').forEach(i => i.classList.remove('ig-item-active'));
+            el.classList.add('ig-item-active');
+
+            const panel = document.getElementById('ig-estado-ticket-panel');
+            if (panel) panel.style.display = 'none';
+
+            const otrosPanel = document.getElementById('ig-otros-panel');
+            const otrosTitulo = document.getElementById('ig-otros-titulo');
+            if (otrosPanel) otrosPanel.style.display = 'block';
+            if (otrosTitulo) {
+                const label = el.querySelector('strong');
+                if (label) otrosTitulo.textContent = label.textContent;
+            }
+        });
+    });
+
+    // Botón Buscar en Estado de envío de Ticket
+    const igBtnBuscar = document.getElementById('ig-btn-buscar');
+    if (igBtnBuscar) {
+        igBtnBuscar.addEventListener('click', function () {
+            poblarTablaTickets();
+        });
+    }
+
+    // Botón Limpiar
+    const igBtnLimpiar = document.getElementById('ig-btn-limpiar');
+    if (igBtnLimpiar) {
+        igBtnLimpiar.addEventListener('click', function () {
+            const piInput = document.getElementById('ig-periodo-inicio');
+            const pfInput = document.getElementById('ig-periodo-fin');
+            const nrInput = document.getElementById('ig-nro-ticket');
+            if (piInput) piInput.value = '';
+            if (pfInput) pfInput.value = '';
+            if (nrInput) nrInput.value = '';
+        });
+    }
+
 });
 
 /* ================================================
@@ -1449,6 +2436,19 @@ document.addEventListener('DOMContentLoaded', function () {
    ================================================ */
 function cerrarModal12hRVIE() {
     const m = document.getElementById('rvie-modal-12h');
+    if (m) m.style.display = 'none';
+}
+
+/* ================================================
+   MODALES REEMPLAZO DE PROPUESTA RVIE
+   ================================================ */
+function cerrarModalReemplazoRvie() {
+    const m = document.getElementById('rvie-modal-reemplazo');
+    if (m) m.style.display = 'none';
+}
+
+function cerrarModalTicketReemplazoRvie() {
+    const m = document.getElementById('rvie-modal-ticket-reemplazo');
     if (m) m.style.display = 'none';
 }
 

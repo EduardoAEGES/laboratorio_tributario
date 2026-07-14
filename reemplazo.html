@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de Comprobantes para Reemplazo</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 25px;
+            background: #f4f6f9;
+            font-size: 12px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin: 4px;
+            border: none;
+            background: #1a73e8;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #1558b0;
+        }
+
+        .info-box {
+            background: white;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1a73e8;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CONTENEDOR CON SCROLL */
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #ccc;
+            background: white;
+        }
+
+        /* TABLA */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1200px;
+            font-size: 11px;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 6px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+
+        /* FILAS ALTERNADAS */
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #e9edf3;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+
+<body>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <img src="LOGO_SUNAT.png" alt="Logo" style="height:50px;">
+        <span style="font-family:'Roboto',Arial,sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
+    </div>
+
+    <h2 id="tituloPrincipal">Editor de Comprobantes para Reemplazo de RCE</h2>
+
+    <div style="margin-top: 15px; margin-bottom: 20px;">
+        <label style="margin-right: 20px; font-weight: bold; cursor: pointer;">
+            <input type="radio" name="mode" value="RCE" checked onchange="cambiarModo()"> Reemplazo RCE (Compras)
+        </label>
+        <label style="font-weight: bold; cursor: pointer;">
+            <input type="radio" name="mode" value="RVIE" onchange="cambiarModo()"> Reemplazo RVIE (Ventas)
+        </label>
+    </div>
+
+    <input type="file" id="csvFile" accept=".csv, .txt">
+    <button onclick="agregarFila()">Agregar Fila</button>
+    <button onclick="eliminarFilas()" style="background:#d93025;">Eliminar Fila(s)</button>
+    <button onclick="exportarArchivo()">Exportar</button>
+
+    <span style="margin-left: 20px;">Formato:</span>
+    <select id="selFormato">
+        <option value="txt">TXT</option>
+        <option value="csv">CSV</option>
+    </select>
+
+    <span>Separador:</span>
+    <select id="selSeparador">
+        <option value="|">Pipe ( | )</option>
+        <option value=";">Punto y coma ( ; )</option>
+        <option value=",">Coma ( , )</option>
+    </select>
+
+    <!-- CONTENEDOR DE METADATOS EDITABLES -->
+    <div class="info-box" style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
+
+        <div>
+            <label><strong>RUC:</strong></label>
+            <input type="text" id="txtRuc" placeholder="Ej: 20100123456" style="padding:4px;">
+        </div>
+
+        <div>
+            <label><strong>Denominación:</strong></label>
+            <input type="text" id="txtDenom" placeholder="Ej: EMPRESA S.A.C" style="padding:4px; width:250px;">
+        </div>
+
+        <div>
+            <label><strong>Periodo:</strong></label>
+            <select id="selMes" style="padding:4px;">
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+            <select id="selAnio" style="padding:4px;"></select>
+        </div>
+
+        <button onclick="actualizarTodo()" style="background:#f39c12;">Actualizar RUC/Periodo</button>
+
+    </div>
+
+    <div class="table-container">
+        <table id="tabla">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+
+        // CONFIGURACION DE COLUMNAS
+        const COLUMNS = {
+            RCE: [
+                "RUC", "Apellidos y Nombres o Razón Social", "Periodo", "CAR SUNAT", "Fecha de emisión",
+                "Fecha Vcto/Pago", "Tipo CP/Doc.", "Serie del CDP", "Año", "Nro CP o Doc. Nro Inicial (Rango)",
+                "Nro Final (Rango)", "Tipo Doc Identidad", "Nro Doc Identidad", "Apellidos Nombres/ Razón Social",
+                "BI Gravado DG", "IGV / IPM DG", "BI Gravado DGNG", "IGV / IPM DGNG", "BI Gravado DNG",
+                "IGV / IPM DNG", "Valor Adq. NG", "ISC", "ICBPER", "Otros Trib/ Cargos", "Total CP",
+                "Moneda", "Tipo de Cambio", "Fecha Emisión Doc Modificado", "Tipo CP Modificado",
+                "Serie CP Modificado", "COD. DAM O DSI", "Nro CP Modificado", "Clasif de Bss y Sss",
+                "ID Proyecto Operadores", "PorcPart", "IMB", "CAR Orig/ Ind E o I", "Detracción",
+                "Tipo de Nota", "Est. Comp.", "Incal"
+            ],
+            RVIE: [
+                "RUC", "Apellidos y Nombres o Razón Social", "Periodo", "CAR SUNAT", "Fecha de emisión",
+                "Fecha Vcto/Pago", "Tipo CP/Doc.", "Serie del CDP", "Nro CP o Doc. Nro Inicial (Rango)",
+                "Nro Final (Rango)", "Tipo Doc Identidad", "Nro Doc Identidad", "Apellidos Nombres/ Razón Social",
+                "Valor Facturado Exportación", "BI Gravada", "Dscto BI", "IGV / IPM", "Dscto IGV / IPM",
+                "Mto Exonerado", "Mto Inafecto", "ISC", "BI Grav IVAP", "IVAP", "ICBPER", "Otros Tributos",
+                "Total CP", "Moneda", "Tipo de Cambio", "Fecha Emisión Doc Modificado", "Tipo CP Modificado",
+                "Serie CP Modificado", "Nro CP Modificado", "ID Proyecto Operadores Atribución", "Tipo de Nota",
+                "Est. Comp", "Valor FOB Embarcado", "Valor OP Gratuitas", "Tipo Operación", "DAM / CP", "CLU"
+            ]
+        };
+
+        // Agregar CLU1-39 a RCE
+        for (let i = 1; i <= 39; i++) COLUMNS.RCE.push("CLU" + i);
+
+        let currentMode = "RCE";
+
+        // INICIALIZACION
+        window.onload = function () {
+            // Llenar Select de Años (Año actual - 5 a Año actual + 5)
+            const currentYear = new Date().getFullYear();
+            const selAnio = document.getElementById("selAnio");
+            for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.innerText = y;
+                if (y === currentYear) opt.selected = true;
+                selAnio.appendChild(opt);
+            }
+
+            // Crear Tabla por Defecto
+            crearTablaDefault();
+        };
+
+        function cambiarModo() {
+            const radios = document.getElementsByName('mode');
+            for (const r of radios) {
+                if (r.checked) {
+                    currentMode = r.value;
+                    break;
+                }
+            }
+
+            // Actualizar Titulo
+            document.getElementById("tituloPrincipal").innerText =
+                currentMode === "RCE" ? "Editor de Comprobantes para Reemplazo de RCE" : "Editor de Comprobantes para Reemplazo RVIE";
+
+            // Limpiar y resetear la tabla con las columnas correctas
+            crearTablaDefault();
+        }
+
+        function crearTablaDefault() {
+            const tabla = document.getElementById("tabla");
+            const thead = tabla.querySelector("thead");
+            const tbody = tabla.querySelector("tbody");
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+
+            // Headers especificos segun modo
+            const headers = COLUMNS[currentMode];
+
+            const trHead = document.createElement("tr");
+
+            // Checkbox
+            const thCheck = document.createElement("th");
+            thCheck.innerText = "Sel.";
+            trHead.appendChild(thCheck);
+
+            // N°
+            const thNum = document.createElement("th");
+            thNum.innerText = "N°";
+            trHead.appendChild(thNum);
+
+            headers.forEach(h => {
+                const th = document.createElement("th");
+                th.innerText = h;
+                th.style.minWidth = "100px";
+                th.style.height = "20px";
+                trHead.appendChild(th);
+            });
+
+            thead.appendChild(trHead);
+
+            // Crear 1 fila vacia
+            agregarFilaVaciaInicial(tbody, headers.length + 2);
+        }
+
+        function agregarFilaVaciaInicial(tbody, totalCols) {
+            const tr = document.createElement("tr");
+
+            // Checkbox
+            const tdCheck = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            tdCheck.appendChild(checkbox);
+            tdCheck.style.textAlign = "center";
+            tr.appendChild(tdCheck);
+
+            // Numero
+            const tdNum = document.createElement("td");
+            tdNum.innerText = "1";
+            tdNum.style.fontWeight = "bold";
+            tdNum.contentEditable = false;
+            tr.appendChild(tdNum);
+
+            // Datos
+            for (let k = 2; k < totalCols; k++) {
+                const td = document.createElement("td");
+                td.contentEditable = true;
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        }
+
+
+        document.getElementById('csvFile').addEventListener('change', function (e) {
+            if (!e.target.files.length) return;
+
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                crearTablaDesdeArchivo(event.target.result);
+            };
+            reader.readAsText(file);
+
+            // Reset input value to allow re-uploading same file
+            e.target.value = '';
+        });
+
+        function crearTablaDesdeArchivo(texto) {
+            if (!texto || !texto.trim()) return;
+
+            const lineas = texto.trim().split(/\r?\n/);
+            if (lineas.length === 0) return;
+
+            // 1. DETECTAR SEPARADOR
+            // Check first line
+            const linea1 = lineas[0];
+            const pipes = (linea1.match(/\|/g) || []).length;
+            const comas = (linea1.match(/,/g) || []).length;
+            const puntosycoma = (linea1.match(/;/g) || []).length;
+
+            let separador = "|";
+            if (puntosycoma > pipes && puntosycoma > comas) separador = ";";
+            if (comas > pipes && comas > puntosycoma) separador = ",";
+
+            // 2. VALIDACION DE ESTRUCTURA Y CABECERA INTELIGENTE
+            let dataStartIndex = 0;
+            const cols1 = linea1.split(separador);
+            const regexRUC = /^\d{11}$/;
+            const regexPeriodo = /^\d{6}$/;
+
+            // Verificamos Linea 1
+            const esValidoL1 = (cols1.length >= 3) && regexRUC.test(cols1[0]) && regexPeriodo.test(cols1[2]);
+
+            if (!esValidoL1) {
+                // Si Linea 1 falla, verificamos Linea 2 (por si L1 es Header)
+                if (lineas.length > 1) {
+                    const linea2 = lineas[1];
+                    const cols2 = linea2.split(separador);
+                    const esValidoL2 = (cols2.length >= 3) && regexRUC.test(cols2[0]) && regexPeriodo.test(cols2[2]);
+
+                    if (esValidoL2) {
+                        // Linea 1 era Header, empezamos desde Linea 2
+                        dataStartIndex = 1;
+                    } else {
+                        // Ni linea 1 ni linea 2 validas -> Error
+                        alert("Archivo inválido o archivo no cumple con la estructura mínima.\n\nEstructura requerida:\nRUC (11 dígitos) | Denominación (Texto) | Periodo (AAAAMM, 6 dígitos)");
+                        document.getElementById('csvFile').value = '';
+                        return;
+                    }
+                } else {
+                    // Solo hay 1 linea y es invalida -> Error
+                    alert("Archivo inválido o archivo no cumple con la estructura mínima.\n\nEstructura requerida:\nRUC (11 dígitos) | Denominación (Texto) | Periodo (AAAAMM, 6 dígitos)");
+                    document.getElementById('csvFile').value = '';
+                    return;
+                }
+            }
+
+            // 3. NO TOCAR EL HEADER (thead)
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            tbody.innerHTML = "";
+
+            // 4. PROCESAR LINEAS
+            let rucDetectado = "", denominacionDetectada = "", periodoDetectado = "";
+            let rowCounter = 0;
+
+            for (let i = dataStartIndex; i < lineas.length; i++) {
+                const linea = lineas[i];
+                if (!linea.trim()) continue;
+
+                rowCounter++;
+                const tr = document.createElement("tr");
+                const columnas = linea.split(separador);
+
+                // 1. Checkbox Column
+                const tdCheck = document.createElement("td");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                tdCheck.appendChild(checkbox);
+                tdCheck.style.textAlign = "center";
+                tr.appendChild(tdCheck);
+
+                // 2. Columna Numero de Registro
+                const tdRegistro = document.createElement("td");
+                tdRegistro.innerText = rowCounter;
+                tdRegistro.style.fontWeight = "bold";
+                tdRegistro.contentEditable = false;
+                tr.appendChild(tdRegistro);
+
+                // 3. Data Columns
+                // Detectar metadata en la primera fila de DATOS
+                if (i === dataStartIndex) {
+                    if (columnas.length > 0) rucDetectado = columnas[0];
+                    if (columnas.length > 1) denominacionDetectada = columnas[1];
+                    if (columnas.length > 2) periodoDetectado = columnas[2];
+                }
+
+                // Llenar datos
+                const totalHeaders = tabla.querySelectorAll("thead th").length - 2; // -chk -num
+
+                for (let k = 0; k < totalHeaders; k++) {
+                    const td = document.createElement("td");
+                    td.contentEditable = true;
+
+                    // Forzar columna 3 (CAR SUNAT) vacia en ambos modos
+                    if (k === 3) {
+                        td.innerText = "";
+                    } else if (k < columnas.length) {
+                        td.innerText = columnas[k];
+                    } else {
+                        td.innerText = "";
+                    }
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            }
+
+            // 5. ACTUALIZAR METADATOS
+            if (rucDetectado) document.getElementById("txtRuc").value = rucDetectado;
+            if (denominacionDetectada) document.getElementById("txtDenom").value = denominacionDetectada;
+
+            if (periodoDetectado && periodoDetectado.length >= 6) {
+                // Formato esperado YYYYMM
+                const anio = periodoDetectado.substring(0, 4);
+                const mes = periodoDetectado.substring(4, 6);
+                document.getElementById("selAnio").value = anio;
+                document.getElementById("selMes").value = mes;
+            }
+        }
+
+        function actualizarTodo() {
+            const txtRuc = document.getElementById("txtRuc").value;
+            const txtDenom = document.getElementById("txtDenom").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const periodoFull = anio + mes;
+
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const filas = tbody.rows;
+
+            for (let i = 0; i < filas.length; i++) {
+                const celdas = filas[i].cells;
+                // Indices en TBODY: 0=chk, 1=Num, 2=RUC, 3=Denom, 4=Periodo
+                if (celdas.length > 4) {
+                    celdas[2].innerText = txtRuc;
+                    celdas[3].innerText = txtDenom;
+                    celdas[4].innerText = periodoFull;
+                }
+            }
+        }
+
+        function agregarFila() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+
+            // Calculate columns based on header
+            const headerCells = tabla.querySelector("thead tr").cells;
+            const totalColumns = headerCells.length;
+
+            const tr = document.createElement("tr");
+
+            // 1. Checkbox
+            const tdCheck = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            tdCheck.appendChild(checkbox);
+            tdCheck.style.textAlign = "center";
+            tr.appendChild(tdCheck);
+
+            // 2. Número automático
+            const numeroActual = tbody.rows.length + 1;
+            const tdRegistro = document.createElement("td");
+            tdRegistro.innerText = numeroActual;
+            tdRegistro.style.fontWeight = "bold";
+            tdRegistro.contentEditable = false;
+            tr.appendChild(tdRegistro);
+
+            // OBTENER VALORES ACTUALES
+            const currentRuc = document.getElementById("txtRuc").value;
+            const currentDenom = document.getElementById("txtDenom").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const currentPeriodo = anio + mes;
+
+            // 3. Data Columns
+            // Empezamos desde i=2 (que corresponde a la columna de datos 0)
+            for (let i = 2; i < totalColumns; i++) {
+                const td = document.createElement("td");
+                td.contentEditable = true;
+
+                // Auto-fill logic based on column index
+                // i=2 -> RUC
+                // i=3 -> Denom
+                // i=4 -> Periodo
+
+                if (i == 2) td.innerText = currentRuc;
+                else if (i == 3) td.innerText = currentDenom;
+                else if (i == 4) td.innerText = currentPeriodo;
+                else td.innerText = "";
+
+                tr.appendChild(td);
+            }
+
+            tbody.appendChild(tr);
+        }
+
+        function eliminarFilas() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const filas = Array.from(tbody.rows);
+
+            filas.forEach(fila => {
+                const checkbox = fila.cells[0].querySelector("input[type='checkbox']");
+                if (checkbox && checkbox.checked) {
+                    tbody.removeChild(fila);
+                }
+            });
+
+            // Reordenar Numeros
+            Array.from(tbody.rows).forEach((fila, index) => {
+                fila.cells[1].innerText = index + 1;
+            });
+        }
+
+        function exportarArchivo() {
+            const tabla = document.getElementById("tabla");
+            let contenido = "";
+
+            const formato = document.getElementById("selFormato").value; // txt or csv
+            const separador = document.getElementById("selSeparador").value;
+
+            // Solo datos (sin header)
+
+            // Body
+            const filas = tabla.querySelectorAll("tbody tr");
+            filas.forEach(fila => {
+                let datos = [];
+                const celdas = fila.querySelectorAll("td");
+                // Skip index 0 (checkbox) and index 1 (number)
+                for (let i = 2; i < celdas.length; i++) {
+                    datos.push(celdas[i].innerText);
+                }
+                contenido += datos.join(separador) + "\n";
+            });
+
+            // Generar Nombre de Archivo
+            const ruc = document.getElementById("txtRuc").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const periodo = anio + mes;
+
+            let extension = "." + formato;
+            let nombreBase = "exportado";
+
+            if (ruc && periodo) {
+                // Logica de nombre segun modo
+                if (currentMode === "RCE") {
+                    // RCE: codigo de libro 08.04.00
+                    nombreBase = `LE${ruc}${periodo}00080400021112`;
+                } else {
+                    // RVIE (Ventas): codigo de libro 14.04.00
+                    nombreBase = `LE${ruc}${periodo}00140400021112`;
+                }
+            }
+
+            let nombreArchivo = nombreBase + extension;
+
+            // 1. Descargar Archivo Principal (TXT o CSV)
+            let mimeType = "text/plain";
+            if (formato === "csv") mimeType = "text/csv";
+
+            const blob = new Blob([contenido], { type: mimeType });
+            const enlace = document.createElement("a");
+            enlace.href = URL.createObjectURL(blob);
+            enlace.download = nombreArchivo;
+            enlace.click();
+
+            // 2. Descargar ZIP
+            const zip = new JSZip();
+            zip.file(nombreArchivo, contenido);
+
+            zip.generateAsync({ type: "blob" })
+                .then(function (content) {
+                    const enlaceZip = document.createElement("a");
+                    enlaceZip.href = URL.createObjectURL(content);
+                    enlaceZip.download = `${nombreBase}.zip`;
+                    enlaceZip.click();
+                });
+        }
+
+    </script>
+
+    <footer
+        style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; margin:30px -25px -25px; font-family:'Roboto',Arial,sans-serif;">
+        <span>Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+</body>
+
+</html>

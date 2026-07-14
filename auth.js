@@ -66,12 +66,11 @@ function checkAuth() {
  * Cierra la sesión
  */
 function logout() {
+    // Cierra la sesión pero CONSERVA el estado temporal de la simulación
+    // (periodos generados, etc.). Ese estado solo se borra al volver a
+    // index.html o con el botón "Reiniciar simulación" de sol.html.
     sessionStorage.removeItem('sunat_auth');
-    // Limpiar el estado temporal de aceptación de registros (RCE/RVIE)
-    sessionStorage.removeItem('sire_aceptado');
-    sessionStorage.removeItem('rce_nav_generacion');
-    sessionStorage.removeItem('rce_gen_periodo');
-    window.location.href = 'login.html';
+    window.location.href = 'sol.html';
 }
 
 /**
