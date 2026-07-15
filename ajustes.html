@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de Comprobantes para Ajustes Posteriores</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 25px;
+            background: #f4f6f9;
+            font-size: 12px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin: 4px;
+            border: none;
+            background: #1e8e3e;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #166b2e;
+        }
+
+        .info-box {
+            background: white;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1e8e3e;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CONTENEDOR CON SCROLL */
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #ccc;
+            background: white;
+        }
+
+        /* TABLA */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1200px;
+            font-size: 11px;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 6px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+
+        /* FILAS ALTERNADAS */
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #e9edf3;
+        }
+
+        /* FOQUITOS DEL CORRELATIVO */
+        .foco {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #cfd8dc;
+            border: 1px solid #b0bec5;
+            margin: 0 2px;
+            vertical-align: middle;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .foco.on {
+            background: #f1c40f;
+            border-color: #d4ac0d;
+            box-shadow: 0 0 6px #f1c40f;
+        }
+
+        .btn-contador {
+            padding: 2px 10px;
+            margin: 0 2px;
+            font-size: 14px;
+            font-weight: bold;
+            background: #607d8b;
+        }
+
+        .btn-contador:hover {
+            background: #455a64;
+        }
+
+        /* CLASIFICACION DE CASILLAS */
+        td.celda-req {
+            background: #fff6d9;
+        }
+
+        td.celda-lock {
+            background: #e3e6e8;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        th .marca-req {
+            color: #ffd54f;
+            font-weight: bold;
+        }
+
+        /* INPUT CON AUTOCOMPLETADO DENTRO DE CELDA */
+        .cell-input {
+            width: 100%;
+            min-width: 90px;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            font-family: inherit;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .cell-input:focus {
+            outline: 1px solid #1e8e3e;
+            background: #fff;
+        }
+
+        .leyenda span {
+            display: inline-block;
+            padding: 2px 10px;
+            margin-right: 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+
+<body>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <img src="LOGO_SUNAT.png" alt="Logo" style="height:50px;">
+        <span style="font-family:'Roboto',Arial,sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
+    </div>
+
+    <h2 id="tituloPrincipal">Editor de Comprobantes para Ajustes Posteriores de RCE</h2>
+
+    <div style="margin-top: 15px; margin-bottom: 20px;">
+        <label style="margin-right: 20px; font-weight: bold; cursor: pointer;">
+            <input type="radio" name="mode" value="RCE" checked onchange="cambiarModo()"> Ajustes RCE (Compras)
+        </label>
+        <label style="margin-right: 20px; font-weight: bold; cursor: pointer;">
+            <input type="radio" name="mode" value="RVIE" onchange="cambiarModo()"> Ajustes RVIE (Ventas)
+        </label>
+        <label style="font-weight: bold; cursor: pointer;">
+            <input type="radio" name="mode" value="RCE_ND" onchange="cambiarModo()"> Ajustes RCE (No Domiciliados)
+        </label>
+    </div>
+
+    <!-- LEYENDA DE CASILLAS -->
+    <div class="leyenda" style="margin-bottom: 15px;">
+        <span style="background:#fff6d9; border:1px solid #e0c96a;">Obligatorio *</span>
+        <span style="background:#fff; border:1px solid #ccc;">Opcional / según condición</span>
+        <span style="background:#e3e6e8; color:#777; border:1px solid #bbb;">&#128274; No llenar (se completa automáticamente)</span>
+    </div>
+
+    <input type="file" id="csvFile" accept=".csv, .txt">
+    <button onclick="agregarFila()">Agregar Fila</button>
+    <button onclick="eliminarFilas()" style="background:#d93025;">Eliminar Fila(s)</button>
+    <button onclick="exportarArchivo()">Exportar</button>
+
+    <span style="margin-left: 20px;">Formato:</span>
+    <select id="selFormato">
+        <option value="txt">TXT</option>
+        <option value="csv">CSV</option>
+    </select>
+
+    <span>Separador:</span>
+    <select id="selSeparador">
+        <option value="|">Pipe ( | )</option>
+        <option value=";">Punto y coma ( ; )</option>
+        <option value=",">Coma ( , )</option>
+    </select>
+
+    <!-- CONTENEDOR DE METADATOS EDITABLES -->
+    <div class="info-box" style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
+
+        <div>
+            <label><strong>RUC:</strong></label>
+            <input type="text" id="txtRuc" placeholder="Ej: 20100123456" style="padding:4px;">
+        </div>
+
+        <div>
+            <label><strong>Denominación:</strong></label>
+            <input type="text" id="txtDenom" placeholder="Ej: EMPRESA S.A.C" style="padding:4px; width:250px;">
+        </div>
+
+        <div>
+            <label><strong>Periodo:</strong></label>
+            <select id="selMes" style="padding:4px;">
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+            <select id="selAnio" style="padding:4px;"></select>
+        </div>
+
+        <button onclick="actualizarTodo()" style="background:#f39c12;">Actualizar RUC/Periodo</button>
+
+        <!-- CONTADOR DE GENERACIONES (CORRELATIVO NN) -->
+        <div style="flex-basis:100%; display:flex; flex-wrap:wrap; gap:10px; align-items:center; border-top:1px dashed #ccc; padding-top:10px;">
+            <label><strong>Generaciones del periodo:</strong></label>
+            <span id="focosCorrelativo"></span>
+            <span id="lblCorrelativo" style="font-weight:bold; color:#1e8e3e;"></span>
+            <button class="btn-contador" onclick="ajustarCorrelativo(-1)" title="Bajar contador">&minus;</button>
+            <button class="btn-contador" onclick="ajustarCorrelativo(1)" title="Subir contador">+</button>
+            <button onclick="reiniciarCorrelativo()" style="background:#d93025;">Reiniciar contador</button>
+        </div>
+
+    </div>
+
+    <div class="table-container">
+        <table id="tabla">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+
+        // CONFIGURACION DE COLUMNAS
+        // RCE: Anexo N.° 12 - Archivo plano de ajustes posteriores relativos al RCE
+        //      (campos 1 al 37 + CLU 42 al 80). Los campos 38 al 41 no informados
+        //      se completan automaticamente por SUNAT.
+        // RVIE: Anexo N.° 4 - Archivo plano de ajustes posteriores respecto a lo
+        //      anotado en el RVIE (campos 1 al 33 + CLU 41 al 57). Los campos 34
+        //      al 40 no informados se completan automaticamente por SUNAT.
+        // RCE_ND: Anexo N.° 12 (8.5) - Ajustes posteriores del Registro de Compras -
+        //      Informacion de Operaciones con Sujetos No Domiciliados (campos 1 al
+        //      35 + CLU 36 al 45). Este archivo NO lleva RUC ni Denominacion:
+        //      empieza directamente con el Periodo.
+        const COLUMNS = {
+            RCE: [
+                "RUC", "Apellidos y Nombres o Razón Social", "Periodo", "CAR SUNAT", "Fecha de emisión",
+                "Fecha Vcto/Pago", "Tipo CP/Doc.", "Serie del CDP", "Año", "Nro CP o Doc. Nro Inicial (Rango)",
+                "Nro Final (Rango)", "Tipo Doc Identidad", "Nro Doc Identidad", "Apellidos Nombres/ Razón Social",
+                "BI Gravado DG", "IGV / IPM DG", "BI Gravado DGNG", "IGV / IPM DGNG", "BI Gravado DNG",
+                "IGV / IPM DNG", "Valor Adq. NG", "ISC", "ICBPER", "Otros Trib/ Cargos", "Total CP",
+                "Moneda", "Tipo de Cambio", "Fecha Emisión Doc Modificado", "Tipo CP Modificado",
+                "Serie CP Modificado", "COD. DAM O DSI", "Nro CP Modificado", "Clasif de Bss y Sss",
+                "ID Proyecto Operadores/Partícipes", "PorcPart", "IMB", "CAR Orig", "CLU"
+            ],
+            RVIE: [
+                "RUC", "Apellidos y Nombres o Razón Social", "Periodo", "CAR SUNAT", "Fecha de emisión",
+                "Fecha Vcto/Pago", "Tipo CP/Doc.", "Serie del CDP", "Nro CP o Doc. Nro Inicial (Rango)",
+                "Nro Final (Rango)", "Tipo Doc Identidad", "Nro Doc Identidad", "Apellidos Nombres/ Razón Social",
+                "Valor Facturado Exportación", "BI Gravada", "Dscto BI", "IGV / IPM", "Dscto IGV / IPM",
+                "Mto Exonerado", "Mto Inafecto", "ISC", "BI Grav IVAP", "IVAP", "ICBPER", "Otros Tributos",
+                "Total CP", "Moneda", "Tipo Cambio", "Fecha Emisión Doc Modificado", "Tipo CP Modificado",
+                "Serie CP Modificado", "Nro CP Modificado", "ID Proyecto Operadores Atribución", "CLU"
+            ],
+            RCE_ND: [
+                "Periodo", "CAR SUNAT", "Fecha de emisión", "Tipo CP/Doc.", "Serie del CDP",
+                "Nro CP o Doc.", "Val Adquisiciones", "Otros", "Total CP", "Tipo CP CF",
+                "Serie CP CF", "Año", "Nro CP o Doc. CF", "Monto Ret", "Moneda",
+                "Tipo de Cambio", "País", "Apellidos Nombres/ Razón Social del sujeto", "Domicilio",
+                "ID sujeto", "ID beneficiario", "Apellidos Nombres/ Razón Social del beneficiario",
+                "País beneficiario", "Vínculo", "Rta Bta", "Deduc/Costo", "Rta Neta", "Tasa",
+                "Impto", "Convenio", "Exon.", "Tipo Rta", "Mod Serv", "Art. 76", "CAR Orig", "CLU"
+            ]
+        };
+
+        // Regla Global por campo (Anexo N.° 12) - se muestra como tooltip en la cabecera
+        const REGLAS_RCE = [
+            "Campo 1. Obligatorio. El RUC del generador o del sujeto obligado a llevar el Registro de Compras. Longitud 11, numérico.",
+            "Campo 2. Obligatorio. El nombre o razón social debe pertenecer al RUC del campo 1. Hasta 1500, alfanumérico.",
+            "Campo 3. Obligatorio. Formato AAAAMM (01<=MM<=12). Corresponde al periodo objeto de ajuste.",
+            "Campo 4. Código de Anotación de Registro (CAR). Consignar vacío: se completará automáticamente. Longitud 27.",
+            "Campo 5. Obligatorio. Formato DD/MM/AAAA. Menor o igual al periodo del RCE a generar. Validar con tabla 12 del Anexo N° 1.",
+            "Campo 6. Formato DD/MM/AAAA. Obligatorio cuando Tipo CP = '14','46','50','51','52','53' o '54'. Fecha menor o igual al periodo del RCE a ajustar (Tipo CP '14': hasta el mes siguiente).",
+            "Campo 7. Obligatorio. Validar con Tabla 11 del Anexo N° 1. No permite los tipos '91','97' y '98'. Longitud 2.",
+            "Campo 8. Serie del comprobante o de la máquina registradora; para DAM/DSI, código de la dependencia aduanera. Validar con Tablas 11, 4 y 12 del Anexo N° 1. Hasta 20.",
+            "Campo 9. Año de emisión de la DAM, DSI o Liquidación de Cobranza. Obligatorio si Tipo CP = '50','51','52','53' o '54': mayor a 1981 y menor o igual al año del periodo a ajustar.",
+            "Campo 10. Número del comprobante o número inicial del rango consolidado. Obligatorio excepto cuando Tipo CP = '00'. Validar con Tablas 11 y 12 del Anexo N° 1. Hasta 20.",
+            "Campo 11. Número final del rango consolidado. Solo se permite según Tipo CP, con campo 10 <> vacío y campos 15 al 20 = 0.00.",
+            "Campo 12. Tipo de Documento de Identidad del proveedor, Operador o Partícipe. Obligatorio, con excepciones según Tipo CP. Validar con Tablas 1 y 12 del Anexo N° 1. Longitud 1.",
+            "Campo 13. Número de RUC o Documento de Identidad del proveedor, Operador o Partícipe. Obligatorio, con excepciones según Tipo CP. Hasta 15.",
+            "Campo 14. Apellidos y nombres o razón social del proveedor (Ap. paterno, Ap. materno, nombres). Obligatorio, con excepciones según Tipo CP. Hasta 1500.",
+            "Campo 15. Base imponible de adquisiciones gravadas destinadas exclusivamente a operaciones gravadas y/o de exportación. Obligatorio. Acepta negativo (Tipo CP '07','87','25').",
+            "Campo 16. IGV/IPM de las adquisiciones del campo 15. Obligatorio. Mismo signo que el campo 15.",
+            "Campo 17. Base imponible de adquisiciones gravadas destinadas a operaciones gravadas y no gravadas. Obligatorio. Acepta negativo (Tipo CP '07','87','25').",
+            "Campo 18. IGV/IPM de las adquisiciones del campo 17. Obligatorio. Mismo signo que el campo 17.",
+            "Campo 19. Base imponible de adquisiciones gravadas que no dan derecho a crédito fiscal. Obligatorio. Acepta negativo (Tipo CP '07','87','25').",
+            "Campo 20. IGV/IPM de las adquisiciones del campo 19. Obligatorio. Mismo signo que el campo 19.",
+            "Campo 21. Valor de las adquisiciones no gravadas (exoneradas más inafectas). Acepta negativo (Tipo CP '07','87','25').",
+            "Campo 22. ISC deducible; su anotación no afecta la base imponible del IGV. Acepta negativo (Tipo CP '07','87','25').",
+            "Campo 23. ICBPER. Obligatorio si Tipo CP = '01','03','07','08' o '12'. Sin información: 0.00.",
+            "Campo 24. Otros conceptos, tributos, cargos y descuentos que no forman parte de la base imponible. Acepta negativo.",
+            "Campo 25. Importe total de las adquisiciones según comprobante de pago. Acepta negativos (Tipo CP '07','87','25').",
+            "Campo 26. Obligatorio. Código de la Moneda del comprobante. Validar con Tabla 2 del Anexo N° 1. Longitud 3.",
+            "Campo 27. Tipo de cambio. Obligatorio si el campo 26 es distinto a la moneda de contabilidad (PEN o USD). Formato #.### (1 entero y 3 decimales).",
+            "Campo 28. Fecha de emisión del documento que se modifica. Obligatorio solo si Tipo CP = '07','08','87' u '88'. Formato DD/MM/AAAA.",
+            "Campo 29. Tipo del comprobante que se modifica. Obligatorio solo si Tipo CP = '07','08','87' u '88'. Validar con Tabla 11 del Anexo N° 1.",
+            "Campo 30. Serie del comprobante que se modifica. Obligatorio si Tipo CP = '07','08','87' u '88'. Hasta 20.",
+            "Campo 31. Código de la dependencia aduanera de la DAM o DSI. Obligatorio si campo 29 = '50' y '52'. Validar con Tabla 4 del Anexo N° 1. Longitud 3.",
+            "Campo 32. Número del comprobante que se modifica. Obligatorio si Tipo CP = '07','08','87' u '88'. Hasta 20.",
+            "Campo 33. Clasificación de los bienes y servicios adquiridos (1 al 5). Aplicable a contribuyentes con ingresos mayores a 1,500 UIT. Validar con Tabla 23 del Anexo N° 1.",
+            "Campo 34. Identificación del Contrato o Proyecto (Operadores/Partícipes de contratos de colaboración empresarial). Obligatorio cuando Tipo CP = '25'. Formato '#-Identificador de Contrato'. Hasta 50.",
+            "Campo 35. Porcentaje de participación en el Contrato o Proyecto. Opcional. Aplicable cuando el campo 34 inicia con 1 y Tipo CP <> '25'.",
+            "Campo 36. Impuesto materia de beneficio Ley 31053. Acepta negativo cuando Tipo CP = '07' u '87'.",
+            "Campo 37. CAR del comprobante de pago a modificar. Obligatorio cuando se ajusta un comprobante previamente anotado. Longitud 27.",
+            "Campos 42 al 80. Campos de libre utilización. Si no los usa, no incluya ni la información ni los palotes."
+        ];
+
+        // Regla Global por campo (Anexo N.° 4) - se muestra como tooltip en la cabecera
+        const REGLAS_RVIE = [
+            "Campo 1. Obligatorio. El RUC del generador. Longitud 11, numérico.",
+            "Campo 2. Obligatorio. El nombre debe pertenecer al RUC del campo 1. Hasta 1500, alfanumérico.",
+            "Campo 3. Obligatorio. Formato YYYYMM (01<=MM<=12). Corresponde al periodo del RVIE a modificar. Si Tipo CP = '14', se consigna la fecha de vencimiento.",
+            "Campo 4. Código de anotación de registro (CAR). Consignar vacío: se completará automáticamente.",
+            "Campo 5. Obligatorio. Formato DD/MM/AAAA. Debe ser menor o igual al periodo del campo 3.",
+            "Campo 6. Formato DD/MM/AAAA. Obligatorio cuando Tipo CP = '14'. Menor o igual al mes siguiente del periodo del campo 3.",
+            "Campo 7. Obligatorio. Validar con tabla de Comprobantes de pago (tabla 3) del Anexo N° 1. Longitud 2.",
+            "Campo 8. Serie del comprobante o de la máquina registradora. Validar con tablas 3 y 5 del Anexo N° 1. Hasta 20.",
+            "Campo 9. Número del comprobante o número inicial del rango. Validar con tablas 3 y 5 del Anexo N° 1. Hasta 20.",
+            "Campo 10. Número final del rango. Solo se permite cuando Tipo CP = '00','03','12','13','18','87' y '88'.",
+            "Campo 11. Obligatorio, con excepciones según Tipo CP. Validar con tablas 2 y 6 del Anexo N° 1. Longitud 1.",
+            "Campo 12. Número de RUC o Documento de Identidad del cliente. Obligatorio, con excepciones según Tipo CP. Hasta 15.",
+            "Campo 13. Apellidos y nombres, denominación o razón social del cliente (Ap. paterno, Ap. materno, nombres). Hasta 1500.",
+            "Campo 14. Valor facturado de la exportación. Valor positivo; negativo si Tipo CP = '07' y '87'. Anulado: 0.00.",
+            "Campo 15. Base imponible de la operación gravada. Acepta negativo. No incluye ISC. Anulado: 0.00.",
+            "Campo 16. Descuento de la Base Imponible. Valor negativo. Solo con Tipo CP = '07' y '87' de periodos anteriores. Anulado: 0.00.",
+            "Campo 17. IGV y/o IPM. Monto positivo; acepta negativo. Anulado: 0.00.",
+            "Campo 18. Descuento del IGV y/o IPM. Valor negativo. Solo con Tipo CP = '07' y '87' de periodos anteriores. Anulado: 0.00.",
+            "Campo 19. Importe total de la operación exonerada. Acepta negativo. Anulado: 0.00.",
+            "Campo 20. Importe total de la operación inafecta. Acepta negativo. Anulado: 0.00.",
+            "Campo 21. Impuesto Selectivo al Consumo, de ser el caso. Acepta negativo. Anulado: 0.00.",
+            "Campo 22. Base imponible IVAP. Obligatorio si Tipo CP = '49'. Acepta negativos. Anulado: 0.00.",
+            "Campo 23. IVAP. Obligatorio si Tipo CP = '49'. Acepta negativos. Anulado: 0.00.",
+            "Campo 24. ICBPER. Obligatorio cuando Tipo CP = '01','03','07','08' y '12'. Sin información: 0.00.",
+            "Campo 25. Otros tributos, cargos y descuentos que no forman parte de la base imponible. Anulado: 0.00.",
+            "Campo 26. Importe total del comprobante de pago. Acepta negativos. Anulado: 0.00.",
+            "Campo 27. Código de la Moneda según ISO 4217. Validar con Tabla 3 Tipo de moneda del Anexo N° 1. Longitud 3.",
+            "Campo 28. Tipo de cambio. Obligatorio si el campo 27 es distinto a PEN. Formato #.### (1 entero y 3 decimales).",
+            "Campo 29. Fecha de emisión del documento que se modifica. Obligatorio solo si Tipo CP = '07','08','87' u '88'. Formato YYYY-MM-DD.",
+            "Campo 30. Tipo del comprobante que se modifica. Obligatorio solo si Tipo CP = '07','08','87' u '88'. Validar con tabla 3 del Anexo N° 1.",
+            "Campo 31. Serie del comprobante que se modifica o Código de la Dependencia Aduanera. Obligatorio solo si Tipo CP = '07','08','87' u '88'.",
+            "Campo 32. Número del comprobante que se modifica o Número de la DAM. Obligatorio solo si Tipo CP = '07','08','87' u '88'.",
+            "Campo 33. Identificación del Contrato o Proyecto (operadores de contratos de colaboración empresarial sin contabilidad independiente). Hasta 50.",
+            "Campos 41 al 57. Campos de libre utilización. Si no los usa, no incluya ni la información ni los palotes."
+        ];
+
+        // Regla Global por campo (Anexo N.° 12, estructura 8.5) - tooltip en la cabecera
+        const REGLAS_RCE_ND = [
+            "Campo 1. Obligatorio. Formato AAAAMM (01<=MM<=12). Corresponde al periodo objeto de ajuste.",
+            "Campo 2. Código de Anotación de Registro (CAR). Consignar vacío: se completará automáticamente. Longitud 27.",
+            "Campo 3. Obligatorio. Formato DD/MM/AAAA. Menor o igual al periodo del RC Información de Operaciones con Sujetos No Domiciliados a ajustar.",
+            "Campo 4. Obligatorio. Tipo de comprobante del sujeto no domiciliado: solo permite '00','91','97' y '98'. Validar con Tablas 11 y 12 del Anexo N° 1. Longitud 2.",
+            "Campo 5. Opcional. Serie del comprobante de pago o documento. Validar con Tablas 11 y 12 del Anexo N° 1. Hasta 20.",
+            "Campo 6. Obligatorio. Número del comprobante de pago o documento. Validar con Tablas 11 y 12 del Anexo N° 1. Hasta 20.",
+            "Campo 7. Opcional. Valor de las adquisiciones. Valor positivo; acepta negativo.",
+            "Campo 8. Opcional. Otros conceptos adicionales. Valor positivo; acepta negativo.",
+            "Campo 9. Obligatorio. Importe total de las adquisiciones registradas según comprobante de pago o documento.",
+            "Campo 10. Opcional. Tipo de comprobante que sustenta el crédito fiscal: solo permite '00','46','50','51','52' y '53' de la Tabla 11 del Anexo N° 1. Longitud 2.",
+            "Campo 11. Opcional. Serie del comprobante que sustenta el crédito fiscal; para DAM/DSI, código de la dependencia aduanera. Hasta 20.",
+            "Campo 12. Opcional. Año de emisión de la DAM o DSI que sustenta el crédito fiscal: mayor a 1981 y menor o igual al año del periodo informado. Longitud 4.",
+            "Campo 13. Opcional. Número del comprobante, formulario, DAM o DSI que sustenta el crédito fiscal. Hasta 20.",
+            "Campo 14. Opcional. Monto de retención del IGV. Valor positivo.",
+            "Campo 15. Obligatorio. Código de la Moneda. Validar con Tabla 2 del Anexo N° 1. Longitud 3.",
+            "Campo 16. Tipo de cambio. Obligatorio si el campo 15 es distinto a la moneda de contabilidad (PEN o USD). Formato #.###, valor positivo.",
+            "Campo 17. Obligatorio. País de la residencia del sujeto no domiciliado. Validar con Tabla 16 del Anexo N° 1. Longitud 4.",
+            "Campo 18. Obligatorio. Apellidos y nombres o razón social del sujeto no domiciliado (Ap. paterno, Ap. materno, nombres). Hasta 100.",
+            "Campo 19. Opcional. Domicilio en el extranjero del sujeto no domiciliado. Hasta 100.",
+            "Campo 20. Obligatorio. Número de identificación del sujeto no domiciliado. Hasta 15.",
+            "Campo 21. Opcional. Número de identificación fiscal del beneficiario efectivo de los pagos. Hasta 15.",
+            "Campo 22. Opcional. Apellidos y nombres o razón social del beneficiario efectivo de los pagos. Hasta 100.",
+            "Campo 23. Opcional. País de la residencia del beneficiario efectivo de los pagos. Validar con Tabla 16 del Anexo N° 1. Longitud 4.",
+            "Campo 24. Opcional. Vínculo entre el contribuyente y el residente en el extranjero. Validar con Tabla 17 del Anexo N° 1. Longitud 2.",
+            "Campo 25. Opcional. Renta Bruta.",
+            "Campo 26. Opcional. Deducción / Costo de enajenación de bienes de capital. Acepta negativos.",
+            "Campo 27. Opcional. Renta Neta.",
+            "Campo 28. Opcional. Tasa de retención. Hasta 3 enteros y 2 decimales.",
+            "Campo 29. Opcional. Impuesto retenido.",
+            "Campo 30. Obligatorio. Convenios para evitar la doble imposición. Validar con Tabla 18 del Anexo N° 1. Longitud 2.",
+            "Campo 31. Opcional. Exoneración aplicada. Validar con Tabla 21 del Anexo N° 1. Longitud 1.",
+            "Campo 32. Obligatorio. Tipo de Renta. Validar con Tabla 19 del Anexo N° 1. Longitud 2.",
+            "Campo 33. Opcional. Modalidad del servicio prestado por el no domiciliado. Validar con Tabla 20 del Anexo N° 1. Longitud 1.",
+            "Campo 34. Opcional. Aplicación del penúltimo párrafo del Art. 76° de la Ley del Impuesto a la Renta. Consignar 1 si aplica. Longitud 1.",
+            "Campo 35. Obligatorio. CAR del comprobante de pago a modificar, objeto de ajuste. Longitud 27.",
+            "Campos 36 al 45. Campos de libre utilización. Si no los usa, no incluya ni la información ni los palotes."
+        ];
+
+        const REGLAS = { RCE: REGLAS_RCE, RVIE: REGLAS_RVIE, RCE_ND: REGLAS_RCE_ND };
+
+        const TITULOS = {
+            RCE: "Editor de Comprobantes para Ajustes Posteriores de RCE",
+            RVIE: "Editor de Comprobantes para Ajustes Posteriores del RVIE",
+            RCE_ND: "Editor de Comprobantes para Ajustes Posteriores de RCE - No Domiciliados"
+        };
+
+        // Indice de la columna CAR SUNAT (se fuerza vacia al importar) por modo
+        const CAR_INDEX = { RCE: 3, RVIE: 3, RCE_ND: 1 };
+
+        // ===================== TABLAS SUNAT (Anexo N.° 1) =====================
+        // Tabla 1: Tipo de Documento de Identidad
+        const TABLA_DOC_IDENTIDAD = [
+            ["0", "Doc. trib. no dom. sin RUC"],
+            ["1", "DNI - Doc. Nacional de Identidad"],
+            ["4", "Carnet de extranjería"],
+            ["6", "RUC - Registro Único de Contribuyentes"],
+            ["7", "Pasaporte"],
+            ["A", "Céd. diplomática de identidad"],
+            ["B", "Doc. identidad país residencia - no dom."],
+            ["C", "TIN - Doc. trib. PP.NN."],
+            ["D", "IN - Doc. trib. PP.JJ."],
+            ["E", "TAM - Tarjeta Andina de Migración"],
+            ["F", "Permiso Temporal de Permanencia (PTP)"],
+            ["G", "Salvoconducto"]
+        ];
+
+        // Tabla 3: Tipo de Comprobante de Pago o Documento (RVIE)
+        const TABLA_CP_RVIE = [
+            ["00", "Otros"], ["01", "Factura"], ["03", "Boleta de venta"], ["04", "Liquidación de compra"],
+            ["05", "Boleto de transporte aéreo (BME)"], ["06", "Carta de porte aéreo"],
+            ["07", "Nota de crédito"], ["08", "Nota de débito"],
+            ["11", "Póliza emitida por las bolsas de valores"], ["12", "Ticket de máquina registradora o Ticket POS"],
+            ["13", "Documento de bancos y empresas supervisadas SBS"], ["14", "Recibo de servicios públicos / Recibo electrónico SP"],
+            ["15", "Boleto de transporte urbano o ferroviario de pasajeros"], ["16", "Boleto de viaje - transporte interprovincial"],
+            ["17", "Documento de la Iglesia Católica por arrendamiento"], ["18", "Documento emitido por las AFP"],
+            ["19", "Boleto por atracciones y espectáculos públicos"], ["21", "Conocimiento de embarque - carga marítima"],
+            ["23", "Póliza de adjudicación por remate"], ["24", "Certificado de pago de regalías PERUPETRO"],
+            ["27", "Seguro Complementario de Trabajo de Riesgo"], ["28", "Etiquetas TUUA"],
+            ["29", "Documentos emitidos por COFOPRI"], ["30", "Documento rol adquirente - tarjetas de crédito/débito"],
+            ["32", "Documento recaudadoras Garantía de Red Principal"], ["34", "Documento del Operador"],
+            ["35", "Documento del Partícipe"], ["36", "Recibo de distribución de gas natural"],
+            ["37", "Documento de revisiones técnicas vehiculares"], ["42", "Documento rol adquiriente - tarjetas propias"],
+            ["43", "Boleto de aviación - transporte no regular"], ["44", "Billetes de lotería, rifas y apuestas"],
+            ["45", "Documento de centros educativos y culturales"], ["48", "Comprobante de Operaciones - Ley 29972"],
+            ["49", "Constancia de depósito - IVAP"], ["55", "BVME transporte ferroviario de pasajeros"],
+            ["56", "Comprobante de pago SEAE"], ["64", "Servicios complementarios al transporte aéreo"],
+            ["87", "Nota de crédito especial"], ["88", "Nota de débito especial"],
+            ["89", "Nota de Ajuste de Operaciones - Ley 29972"]
+        ];
+
+        // Tabla 11: Tipo de Comprobante de Pago o Documento (RCE)
+        const TABLA_CP_RCE = [
+            ["00", "Otros"], ["01", "Factura"], ["02", "Recibo por honorarios"], ["03", "Boleta de venta"],
+            ["04", "Liquidación de compra"], ["05", "Boleto de transporte aéreo (BME)"], ["06", "Carta de porte aéreo"],
+            ["07", "Nota de crédito"], ["08", "Nota de débito"], ["10", "Recibo por arrendamiento (Form. 1683)"],
+            ["11", "Póliza emitida por las bolsas de valores"], ["12", "Ticket de máquina registradora o Ticket POS"],
+            ["13", "Documento de bancos y empresas supervisadas SBS"], ["14", "Recibo de servicios públicos / Recibo electrónico SP"],
+            ["15", "Boleto de transporte urbano o ferroviario de pasajeros"], ["16", "Boleto de viaje - transporte interprovincial"],
+            ["17", "Documento de la Iglesia Católica por arrendamiento"], ["18", "Documento emitido por las AFP y EPS"],
+            ["19", "Boleto por atracciones y espectáculos públicos"], ["21", "Conocimiento de embarque - carga marítima"],
+            ["22", "Formulario 820 - Operaciones no habituales"], ["23", "Póliza de adjudicación por remate"],
+            ["24", "Certificado de pago de regalías PERUPETRO"], ["25", "Documento de atribución"],
+            ["27", "Seguro Complementario de Trabajo de Riesgo"], ["28", "Documentos de servicios aeroportuarios CORPAC"],
+            ["29", "Documentos emitidos por COFOPRI"], ["30", "Documento rol adquirente - tarjetas de crédito/débito"],
+            ["32", "Documento recaudadoras Garantía de Red Principal"], ["34", "Documento del Operador"],
+            ["35", "Documento del Partícipe"], ["36", "Recibo de distribución de gas natural"],
+            ["37", "Documento de revisiones técnicas vehiculares"], ["42", "Documento rol adquiriente - tarjetas propias"],
+            ["43", "Boleto de aviación - transporte no regular"], ["44", "Billetes de lotería, rifas y apuestas"],
+            ["45", "Documento de centros educativos y culturales"], ["46", "Formulario de declaración - pago de tributos internos"],
+            ["48", "Comprobante de Operaciones - Ley 29972"], ["50", "DAM - Importación definitiva"],
+            ["51", "Póliza o DUI fraccionada"], ["52", "Despacho simplificado - Importación simplificada"],
+            ["53", "Declaración de mensajería o courier"], ["54", "Liquidación de cobranza"],
+            ["55", "BVME transporte ferroviario de pasajeros"], ["56", "Comprobante de pago SEAE"],
+            ["64", "Servicios complementarios al transporte aéreo"], ["87", "Nota de crédito especial"],
+            ["88", "Nota de débito especial"], ["89", "Nota de Ajuste de Operaciones - Ley 29972"],
+            ["91", "Comprobante emitido por sujeto no domiciliado"], ["96", "Exceso de crédito fiscal por retiro de bienes"],
+            ["97", "Nota de crédito - No domiciliado"], ["98", "Nota de débito - No domiciliado"]
+        ];
+
+        // Subconjuntos para el modo No Domiciliados (reglas del Anexo 12, 8.5)
+        const TABLA_CP_ND = TABLA_CP_RCE.filter(([c]) => ["00", "91", "97", "98"].includes(c));
+        const TABLA_CP_CF = TABLA_CP_RCE.filter(([c]) => ["00", "46", "50", "51", "52", "53"].includes(c));
+
+        // Crear los <datalist> de autocompletado (se escribe libre o se elige)
+        function crearDatalists() {
+            const defs = {
+                dl_doc_ident: TABLA_DOC_IDENTIDAD,
+                dl_cp_rvie: TABLA_CP_RVIE,
+                dl_cp_rce: TABLA_CP_RCE,
+                dl_cp_nd: TABLA_CP_ND,
+                dl_cp_cf: TABLA_CP_CF
+            };
+            for (const id in defs) {
+                const dl = document.createElement("datalist");
+                dl.id = id;
+                defs[id].forEach(([cod, desc]) => {
+                    const opt = document.createElement("option");
+                    opt.value = cod;
+                    opt.textContent = desc;
+                    dl.appendChild(opt);
+                });
+                document.body.appendChild(dl);
+            }
+        }
+
+        // Datalist que corresponde a una columna segun su nombre y el modo actual
+        function datalistParaColumna(nombre) {
+            if (nombre === "Tipo Doc Identidad") return "dl_doc_ident";
+            if (nombre === "Tipo CP CF") return "dl_cp_cf";
+            if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
+                if (currentMode === "RVIE") return "dl_cp_rvie";
+                if (currentMode === "RCE_ND") return "dl_cp_nd";
+                return "dl_cp_rce";
+            }
+            return null;
+        }
+
+        // ============== CLASIFICACION DE CASILLAS POR MODO ==============
+        // req = obligatorio | opt = opcional o segun condicion | lock = no llenar
+        const TIPOS_CAMPO = {
+            RCE: [
+                "req", "req", "req", "lock", "req", "opt", "req", "opt", "opt", "req",
+                "opt", "req", "req", "req", "req", "req", "req", "req", "req", "req",
+                "opt", "opt", "opt", "opt", "req", "req", "opt", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt"
+            ],
+            RVIE: [
+                "req", "req", "req", "lock", "req", "opt", "req", "opt", "req", "opt",
+                "req", "req", "req", "opt", "opt", "opt", "opt", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "req", "req", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt"
+            ],
+            RCE_ND: [
+                "req", "lock", "req", "req", "opt", "req", "opt", "opt", "req", "opt",
+                "opt", "opt", "opt", "opt", "req", "opt", "req", "req", "opt", "req",
+                "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "req",
+                "opt", "req", "opt", "opt", "req", "opt"
+            ]
+        };
+
+        // Configura una celda de datos segun su columna: clasificacion + autocompletado
+        function configurarCelda(td, colIdx, valor) {
+            const nombre = COLUMNS[currentMode][colIdx];
+            const tipo = TIPOS_CAMPO[currentMode][colIdx] || "opt";
+            td.className = "celda-" + tipo;
+
+            if (tipo === "lock") {
+                td.contentEditable = false;
+                td.title = "No llenar: se completa automáticamente";
+                td.innerText = "";
+                return;
+            }
+
+            const dl = datalistParaColumna(nombre);
+            if (dl) {
+                td.contentEditable = false;
+                const inp = document.createElement("input");
+                inp.setAttribute("list", dl);
+                inp.className = "cell-input";
+                inp.value = valor || "";
+                td.appendChild(inp);
+            } else {
+                td.contentEditable = true;
+                td.innerText = valor || "";
+            }
+        }
+
+        // Lee el valor de una celda (input de autocompletado o texto editable)
+        function valorCelda(td) {
+            const inp = td.querySelector("input");
+            return inp ? inp.value : td.innerText;
+        }
+
+        let currentMode = "RCE";
+
+        function cambiarModo() {
+            const radios = document.getElementsByName('mode');
+            for (const r of radios) {
+                if (r.checked) {
+                    currentMode = r.value;
+                    break;
+                }
+            }
+
+            // Actualizar Titulo
+            document.getElementById("tituloPrincipal").innerText = TITULOS[currentMode];
+
+            // Limpiar y resetear la tabla con las columnas correctas
+            crearTablaDefault();
+
+            // El contador es independiente por modo
+            renderCorrelativo();
+        }
+
+        // INICIALIZACION
+        window.onload = function () {
+            // Llenar Select de Años (Año actual - 5 a Año actual + 5)
+            const currentYear = new Date().getFullYear();
+            const selAnio = document.getElementById("selAnio");
+            for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.innerText = y;
+                if (y === currentYear) opt.selected = true;
+                selAnio.appendChild(opt);
+            }
+
+            // Listas de autocompletado de las tablas SUNAT
+            crearDatalists();
+
+            // Crear Tabla por Defecto
+            crearTablaDefault();
+
+            // Indicador de generaciones: refrescar al cambiar RUC o periodo
+            document.getElementById("txtRuc").addEventListener("input", renderCorrelativo);
+            document.getElementById("selMes").addEventListener("change", renderCorrelativo);
+            document.getElementById("selAnio").addEventListener("change", renderCorrelativo);
+            renderCorrelativo();
+        };
+
+        function crearTablaDefault() {
+            const tabla = document.getElementById("tabla");
+            const thead = tabla.querySelector("thead");
+            const tbody = tabla.querySelector("tbody");
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+
+            const trHead = document.createElement("tr");
+
+            // Checkbox
+            const thCheck = document.createElement("th");
+            thCheck.innerText = "Sel.";
+            trHead.appendChild(thCheck);
+
+            // N°
+            const thNum = document.createElement("th");
+            thNum.innerText = "N°";
+            trHead.appendChild(thNum);
+
+            const headers = COLUMNS[currentMode];
+            const reglas = REGLAS[currentMode];
+
+            headers.forEach((h, idx) => {
+                const th = document.createElement("th");
+                th.innerText = h;
+                th.title = reglas[idx] || "";
+                th.style.minWidth = "100px";
+                th.style.height = "20px";
+
+                // Marca visual segun clasificacion de la casilla
+                const tipo = TIPOS_CAMPO[currentMode][idx];
+                if (tipo === "req") {
+                    const marca = document.createElement("span");
+                    marca.className = "marca-req";
+                    marca.innerText = " *";
+                    th.appendChild(marca);
+                } else if (tipo === "lock") {
+                    th.innerText += " \u{1F512}";
+                }
+
+                trHead.appendChild(th);
+            });
+
+            thead.appendChild(trHead);
+
+            // Crear 1 fila vacia
+            agregarFilaVaciaInicial(tbody, headers.length + 2);
+        }
+
+        function agregarFilaVaciaInicial(tbody, totalCols) {
+            const tr = document.createElement("tr");
+
+            // Checkbox
+            const tdCheck = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            tdCheck.appendChild(checkbox);
+            tdCheck.style.textAlign = "center";
+            tr.appendChild(tdCheck);
+
+            // Numero
+            const tdNum = document.createElement("td");
+            tdNum.innerText = "1";
+            tdNum.style.fontWeight = "bold";
+            tdNum.contentEditable = false;
+            tr.appendChild(tdNum);
+
+            // Datos
+            for (let k = 2; k < totalCols; k++) {
+                const td = document.createElement("td");
+                configurarCelda(td, k - 2, "");
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        }
+
+
+        document.getElementById('csvFile').addEventListener('change', function (e) {
+            if (!e.target.files.length) return;
+
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                crearTablaDesdeArchivo(event.target.result);
+            };
+            reader.readAsText(file);
+
+            // Reset input value to allow re-uploading same file
+            e.target.value = '';
+        });
+
+        function crearTablaDesdeArchivo(texto) {
+            if (!texto || !texto.trim()) return;
+
+            const lineas = texto.trim().split(/\r?\n/);
+            if (lineas.length === 0) return;
+
+            // 1. DETECTAR SEPARADOR
+            // Check first line
+            const linea1 = lineas[0];
+            const pipes = (linea1.match(/\|/g) || []).length;
+            const comas = (linea1.match(/,/g) || []).length;
+            const puntosycoma = (linea1.match(/;/g) || []).length;
+
+            let separador = "|";
+            if (puntosycoma > pipes && puntosycoma > comas) separador = ";";
+            if (comas > pipes && comas > puntosycoma) separador = ",";
+
+            // 2. VALIDACION DE ESTRUCTURA Y CABECERA INTELIGENTE
+            let dataStartIndex = 0;
+            const regexRUC = /^\d{11}$/;
+            const regexPeriodo = /^\d{6}$/;
+
+            // En RCE_ND el archivo empieza con el Periodo (sin RUC ni Denominacion)
+            const esFilaValida = (cols) => {
+                if (currentMode === "RCE_ND") {
+                    return (cols.length >= 3) && regexPeriodo.test(cols[0]);
+                }
+                return (cols.length >= 3) && regexRUC.test(cols[0]) && regexPeriodo.test(cols[2]);
+            };
+
+            const msgEstructura = currentMode === "RCE_ND"
+                ? "Archivo inválido o archivo no cumple con la estructura mínima.\n\nEstructura requerida:\nPeriodo (AAAAMM, 6 dígitos) | CAR SUNAT (vacío) | Fecha de emisión (DD/MM/AAAA)"
+                : "Archivo inválido o archivo no cumple con la estructura mínima.\n\nEstructura requerida:\nRUC (11 dígitos) | Denominación (Texto) | Periodo (AAAAMM, 6 dígitos)";
+
+            // Verificamos Linea 1; si falla, verificamos Linea 2 (por si L1 es Header)
+            if (!esFilaValida(linea1.split(separador))) {
+                if (lineas.length > 1 && esFilaValida(lineas[1].split(separador))) {
+                    // Linea 1 era Header, empezamos desde Linea 2
+                    dataStartIndex = 1;
+                } else {
+                    alert(msgEstructura);
+                    document.getElementById('csvFile').value = '';
+                    return;
+                }
+            }
+
+            // 3. NO TOCAR EL HEADER (thead)
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            tbody.innerHTML = "";
+
+            // 4. PROCESAR LINEAS
+            let rucDetectado = "", denominacionDetectada = "", periodoDetectado = "";
+            let rowCounter = 0;
+
+            for (let i = dataStartIndex; i < lineas.length; i++) {
+                const linea = lineas[i];
+                if (!linea.trim()) continue;
+
+                rowCounter++;
+                const tr = document.createElement("tr");
+                const columnas = linea.split(separador);
+
+                // 1. Checkbox Column
+                const tdCheck = document.createElement("td");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                tdCheck.appendChild(checkbox);
+                tdCheck.style.textAlign = "center";
+                tr.appendChild(tdCheck);
+
+                // 2. Columna Numero de Registro
+                const tdRegistro = document.createElement("td");
+                tdRegistro.innerText = rowCounter;
+                tdRegistro.style.fontWeight = "bold";
+                tdRegistro.contentEditable = false;
+                tr.appendChild(tdRegistro);
+
+                // 3. Data Columns
+                // Detectar metadata en la primera fila de DATOS
+                if (i === dataStartIndex) {
+                    if (currentMode === "RCE_ND") {
+                        // El archivo de No Domiciliados empieza con el Periodo
+                        if (columnas.length > 0) periodoDetectado = columnas[0];
+                    } else {
+                        if (columnas.length > 0) rucDetectado = columnas[0];
+                        if (columnas.length > 1) denominacionDetectada = columnas[1];
+                        if (columnas.length > 2) periodoDetectado = columnas[2];
+                    }
+                }
+
+                // Llenar datos
+                const totalHeaders = tabla.querySelectorAll("thead th").length - 2; // -chk -num
+
+                for (let k = 0; k < totalHeaders; k++) {
+                    const td = document.createElement("td");
+                    // La columna CAR SUNAT queda bloqueada y vacia (configurarCelda)
+                    const valorImportado = (k < columnas.length) ? columnas[k] : "";
+                    configurarCelda(td, k, valorImportado);
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            }
+
+            // 5. ACTUALIZAR METADATOS
+            if (rucDetectado) document.getElementById("txtRuc").value = rucDetectado;
+            if (denominacionDetectada) document.getElementById("txtDenom").value = denominacionDetectada;
+
+            if (periodoDetectado && periodoDetectado.length >= 6) {
+                // Formato esperado YYYYMM
+                const anio = periodoDetectado.substring(0, 4);
+                const mes = periodoDetectado.substring(4, 6);
+                document.getElementById("selAnio").value = anio;
+                document.getElementById("selMes").value = mes;
+            }
+
+            // El RUC/periodo importado puede tener otro contador de generaciones
+            renderCorrelativo();
+        }
+
+        function actualizarTodo() {
+            const txtRuc = document.getElementById("txtRuc").value;
+            const txtDenom = document.getElementById("txtDenom").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const periodoFull = anio + mes;
+
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const filas = tbody.rows;
+
+            for (let i = 0; i < filas.length; i++) {
+                const celdas = filas[i].cells;
+                if (currentMode === "RCE_ND") {
+                    // Indices en TBODY: 0=chk, 1=Num, 2=Periodo (sin RUC ni Denom)
+                    if (celdas.length > 2) {
+                        celdas[2].innerText = periodoFull;
+                    }
+                } else {
+                    // Indices en TBODY: 0=chk, 1=Num, 2=RUC, 3=Denom, 4=Periodo
+                    if (celdas.length > 4) {
+                        celdas[2].innerText = txtRuc;
+                        celdas[3].innerText = txtDenom;
+                        celdas[4].innerText = periodoFull;
+                    }
+                }
+            }
+        }
+
+        function agregarFila() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+
+            // Calculate columns based on header
+            const headerCells = tabla.querySelector("thead tr").cells;
+            const totalColumns = headerCells.length;
+
+            const tr = document.createElement("tr");
+
+            // 1. Checkbox
+            const tdCheck = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            tdCheck.appendChild(checkbox);
+            tdCheck.style.textAlign = "center";
+            tr.appendChild(tdCheck);
+
+            // 2. Número automático
+            const numeroActual = tbody.rows.length + 1;
+            const tdRegistro = document.createElement("td");
+            tdRegistro.innerText = numeroActual;
+            tdRegistro.style.fontWeight = "bold";
+            tdRegistro.contentEditable = false;
+            tr.appendChild(tdRegistro);
+
+            // OBTENER VALORES ACTUALES
+            const currentRuc = document.getElementById("txtRuc").value;
+            const currentDenom = document.getElementById("txtDenom").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const currentPeriodo = anio + mes;
+
+            // 3. Data Columns
+            // Empezamos desde i=2 (que corresponde a la columna de datos 0)
+            for (let i = 2; i < totalColumns; i++) {
+                const td = document.createElement("td");
+
+                // Auto-fill logic based on column index
+                let valor = "";
+                if (currentMode === "RCE_ND") {
+                    // i=2 -> Periodo (el archivo de No Domiciliados no lleva RUC ni Denom)
+                    if (i == 2) valor = currentPeriodo;
+                } else {
+                    // i=2 -> RUC, i=3 -> Denom, i=4 -> Periodo
+                    if (i == 2) valor = currentRuc;
+                    else if (i == 3) valor = currentDenom;
+                    else if (i == 4) valor = currentPeriodo;
+                }
+
+                configurarCelda(td, i - 2, valor);
+                tr.appendChild(td);
+            }
+
+            tbody.appendChild(tr);
+        }
+
+        function eliminarFilas() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const filas = Array.from(tbody.rows);
+
+            filas.forEach(fila => {
+                const checkbox = fila.cells[0].querySelector("input[type='checkbox']");
+                if (checkbox && checkbox.checked) {
+                    tbody.removeChild(fila);
+                }
+            });
+
+            // Reordenar Numeros
+            Array.from(tbody.rows).forEach((fila, index) => {
+                fila.cells[1].innerText = index + 1;
+            });
+        }
+
+        // Identificador del libro (posiciones 22-27 del nombre) por modo
+        const LIBRO = { RCE: "080400", RCE_ND: "080500", RVIE: "140400" };
+
+        // Correlativo de los ajustes posteriores (NN): empieza en 01 y avanza en 1
+        // por cada exportacion del mismo modo + RUC + periodo. Se guarda en
+        // localStorage para persistir entre sesiones.
+        function claveCorrelativo() {
+            const ruc = document.getElementById("txtRuc").value;
+            const periodo = document.getElementById("selAnio").value + document.getElementById("selMes").value;
+            return `ajustes_correlativo_${currentMode}_${ruc}_${periodo}`;
+        }
+
+        function leerCorrelativo() {
+            return parseInt(localStorage.getItem(claveCorrelativo()) || "0", 10);
+        }
+
+        function guardarCorrelativo(valor) {
+            localStorage.setItem(claveCorrelativo(), String(valor));
+            renderCorrelativo();
+        }
+
+        function obtenerSiguienteCorrelativo() {
+            const actual = leerCorrelativo() + 1;
+            guardarCorrelativo(actual);
+            return String(actual).padStart(2, "0");
+        }
+
+        // Botones + / - : ajuste manual del contador (no baja de 0)
+        function ajustarCorrelativo(delta) {
+            guardarCorrelativo(Math.max(0, leerCorrelativo() + delta));
+        }
+
+        function reiniciarCorrelativo() {
+            localStorage.removeItem(claveCorrelativo());
+            renderCorrelativo();
+        }
+
+        // Indicador de foquitos: uno encendido por cada generacion realizada
+        const MAX_FOCOS = 10;
+        function renderCorrelativo() {
+            const veces = leerCorrelativo();
+            const cont = document.getElementById("focosCorrelativo");
+            cont.innerHTML = "";
+            for (let i = 0; i < MAX_FOCOS; i++) {
+                const foco = document.createElement("span");
+                foco.className = "foco" + (i < veces ? " on" : "");
+                foco.title = "Generación " + (i + 1);
+                cont.appendChild(foco);
+            }
+            const prox = String(veces + 1).padStart(2, "0");
+            document.getElementById("lblCorrelativo").innerText =
+                `${veces} generado(s) | Próximo correlativo: ${prox}`;
+        }
+
+        function exportarArchivo() {
+            const tabla = document.getElementById("tabla");
+            let contenido = "";
+
+            const formato = document.getElementById("selFormato").value; // txt or csv
+            const separador = document.getElementById("selSeparador").value;
+
+            // Solo datos (sin header)
+
+            // Body
+            const filas = tabla.querySelectorAll("tbody tr");
+            filas.forEach(fila => {
+                let datos = [];
+                const celdas = fila.querySelectorAll("td");
+                // Skip index 0 (checkbox) and index 1 (number)
+                for (let i = 2; i < celdas.length; i++) {
+                    datos.push(valorCelda(celdas[i]));
+                }
+                contenido += datos.join(separador) + "\n";
+            });
+
+            // Generar Nombre de Archivo
+            const ruc = document.getElementById("txtRuc").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const periodo = anio + mes;
+
+            let extension = "." + formato;
+            let nombreBase = "exportado";
+
+            if (ruc && periodo) {
+                // Nomenclatura SUNAT (Tablas 6 y 13):
+                // LE + RUC(11) + AAAAMM + DD(00) + Libro(6) + CC(03 = ajustes posteriores)
+                //    + O(1 = operativa) + I(1/0 con/sin informacion) + M(1 = soles)
+                //    + G(2 = generado por el SIRE) + NN(correlativo de ajustes)
+                const indicadorContenido = contenido.trim() ? "1" : "0";
+                const correlativo = obtenerSiguienteCorrelativo();
+                nombreBase = `LE${ruc}${periodo}00${LIBRO[currentMode]}031${indicadorContenido}12${correlativo}`;
+            }
+
+            let nombreArchivo = nombreBase + extension;
+
+            // 1. Descargar Archivo Principal (TXT o CSV)
+            let mimeType = "text/plain";
+            if (formato === "csv") mimeType = "text/csv";
+
+            const blob = new Blob([contenido], { type: mimeType });
+            const enlace = document.createElement("a");
+            enlace.href = URL.createObjectURL(blob);
+            enlace.download = nombreArchivo;
+            enlace.click();
+
+            // 2. Descargar ZIP
+            const zip = new JSZip();
+            zip.file(nombreArchivo, contenido);
+
+            zip.generateAsync({ type: "blob" })
+                .then(function (content) {
+                    const enlaceZip = document.createElement("a");
+                    enlaceZip.href = URL.createObjectURL(content);
+                    enlaceZip.download = `${nombreBase}.zip`;
+                    enlaceZip.click();
+                });
+        }
+
+    </script>
+
+    <footer
+        style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; margin:30px -25px -25px; font-family:'Roboto',Arial,sans-serif;">
+        <span>Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+</body>
+
+</html>

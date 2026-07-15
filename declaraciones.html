@@ -119,12 +119,16 @@
         .user-info-right .domicilio { font-weight: 700; }
 
         .btn-salir {
-            background: #fff;
-            color: var(--bar-blue);
+            background: #00A5B5;
+            color: #fff;
             padding: 6px 20px;
             border-radius: 3px;
             text-decoration: none;
             font-weight: 700;
+            border: 1px solid #0096A5;
+        }
+        .btn-salir:hover {
+            background: #008C9E;
         }
 
         /* ===== Layout general ===== */
@@ -366,52 +370,46 @@
 
         /* Cabecera de formulario */
         .form-dark-header {
-            background: #6D6E71;
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 18px;
-            font-size: 17px;
-            font-weight: 500;
+            display: none !important;
         }
-
-        .form-dark-header .fa-star { cursor: pointer; }
 
         /* Tabs (solo 621) */
         .form-tabs {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            background: #E8E8E8;
-            border: 1px solid var(--border-grey);
-            border-top: none;
+            background: transparent;
+            border: none;
+            margin-bottom: -1px;
+            position: relative;
+            z-index: 2;
         }
 
         .form-tabs-left { display: flex; }
 
         .form-tab {
-            padding: 12px 22px;
-            font-size: 14px;
+            padding: 10px 22px;
+            font-size: 13.5px;
             color: #555;
             text-align: center;
             cursor: pointer;
             line-height: 1.3;
+            background: #E8E8E8;
+            border: 1px solid var(--border-grey);
+            border-radius: 4px 4px 0 0;
+            margin-right: 4px;
         }
 
         .form-tab.active {
             background: #fff;
             font-weight: 700;
-            color: var(--text-dark);
-            border-top: 1px solid var(--border-grey);
-            border-right: 1px solid var(--border-grey);
+            color: var(--sunat-blue);
+            border: 1px solid var(--border-grey);
+            border-bottom: 1px solid #fff;
         }
 
         .gear-dropdown {
-            padding: 0 18px 8px 0;
-            color: #444;
-            font-size: 16px;
-            cursor: pointer;
+            display: none !important;
         }
 
         /* Cuerpo del formulario */
@@ -528,6 +526,485 @@
 
         .radio-line input { accent-color: var(--sunat-blue); }
 
+        /* ===== Detalle de Declaración / Determinación de la Deuda (621) ===== */
+        .seccion-621 {
+            border: 1px solid #C9C9C9;
+            border-radius: 3px;
+            margin-top: 22px;
+            padding: 18px 20px 12px 20px;
+            position: relative;
+        }
+
+        .seccion-621 .box-legend {
+            position: absolute;
+            top: -10px;
+            left: 12px;
+            background: #fff;
+            padding: 0 8px;
+            color: var(--sunat-blue);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .c-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .c-label {
+            flex: 1;
+            min-width: 280px;
+            font-size: 13.5px;
+            line-height: 1.35;
+        }
+
+        .c-pair {
+            display: flex;
+            align-items: center;
+        }
+
+        .c-code {
+            background: #E8E8E8;
+            border: 1px solid #C9C9C9;
+            border-right: none;
+            padding: 8px 10px;
+            font-size: 12.5px;
+            color: #555;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .c-pair input {
+            width: 130px;
+            border: 1px solid #C9C9C9;
+            background: #fff;
+            padding: 8px 10px;
+            font-size: 13.5px;
+            text-align: right;
+        }
+
+        .c-pair input[readonly] {
+            background: #EFEFEF;
+            color: #333;
+        }
+
+        .c-pair input.c-link {
+            background: #EFEFEF;
+            color: var(--sunat-blue);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .c-total-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            border-top: 1px solid #E0E0E0;
+            padding-top: 12px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .deuda-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) auto auto;
+            gap: 8px 18px;
+            align-items: center;
+            font-size: 13.5px;
+        }
+
+        .deuda-grid .dg-head {
+            font-weight: 700;
+            text-align: center;
+            padding-bottom: 4px;
+        }
+
+        .deuda-grid .dg-label { line-height: 1.3; }
+
+        .deuda-grid .dg-total { font-weight: 700; }
+
+        /* Modales asistente de casilla */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 4px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 6px 24px rgba(0,0,0,.3);
+        }
+
+        .modal-box header {
+            background: var(--sunat-blue);
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-box header i { cursor: pointer; }
+
+        .modal-body { padding: 18px 20px; font-size: 13.5px; }
+
+        .modal-body table { border-collapse: collapse; width: 100%; }
+
+        .modal-body th, .modal-body td {
+            border: 1px solid #D9D9D9;
+            padding: 6px 8px;
+            font-size: 12.5px;
+            text-align: center;
+        }
+
+        .modal-body th { background: #F0F0F0; }
+
+        .modal-body td input, .modal-body td select {
+            width: 100%;
+            min-width: 70px;
+            border: 1px solid #CCC;
+            padding: 5px 6px;
+            font-size: 12.5px;
+            text-align: right;
+            box-sizing: border-box;
+        }
+
+        .modal-body td select { text-align: left; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 20px 18px 20px;
+        }
+
+        .btn-modal-aceptar {
+            background: var(--sunat-teal);
+            color: #fff;
+            border: none;
+            padding: 9px 26px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-modal-cancelar {
+            background: #888;
+            color: #fff;
+            border: none;
+            padding: 9px 26px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .motivo-no-pago {
+            border: 1px solid #E0A800;
+            background: #FFF8E1;
+            border-radius: 3px;
+            padding: 12px 15px;
+            margin-top: 15px;
+            font-size: 13.5px;
+        }
+
+        /* Selector de período (mes/año) estilo SUNAT */
+        .periodo-wrap { position: relative; }
+
+        .periodo-picker {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: #fff;
+            border: 1px solid #C9C9C9;
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.18);
+            padding: 14px 18px;
+            z-index: 150;
+            width: 250px;
+        }
+
+        .periodo-picker.open { display: block; }
+
+        .periodo-picker .pp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .periodo-picker .pp-header i {
+            cursor: pointer;
+            color: #555;
+            padding: 4px 8px;
+        }
+
+        .periodo-picker .pp-meses {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px 6px;
+        }
+
+        .periodo-picker .pp-mes {
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 13.5px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #444;
+        }
+
+        .periodo-picker .pp-mes:hover { background: #EAF3FA; }
+
+        .periodo-picker .pp-mes.sel {
+            background: #2196F3;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* Botón azul (Siguiente del 621, como el real) */
+        .btn-sig-621 {
+            background: #3C8DBC;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-sig-621:hover { background: #337AA8; }
+
+        .pregunta-linea {
+            border: 1px solid #C9C9C9;
+            border-radius: 3px;
+            margin-top: 22px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 14px;
+        }
+
+        /* ===== Sub-pestañas del Detalle de Declaración (IGV/IVAP/Renta y Ventas/Compras/Reporte) ===== */
+        .sub-tabs-l1 {
+            display: flex;
+            gap: 28px;
+            padding: 4px 4px 0 4px;
+            font-size: 15px;
+        }
+
+        .sub-tabs-l1 .st {
+            padding: 8px 2px 10px 2px;
+            color: #999;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .sub-tabs-l1 .st.active {
+            color: #333;
+            font-weight: 700;
+            border-bottom: 3px solid var(--sunat-blue);
+        }
+
+        .sub-tabs-l2 {
+            display: flex;
+            gap: 30px;
+            background: #EDEDED;
+            padding: 0 18px;
+            font-size: 14.5px;
+            margin: 4px -20px 0 -20px;
+        }
+
+        .sub-tabs-l2 .st {
+            padding: 13px 2px;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .sub-tabs-l2 .st.active {
+            color: #333;
+            font-weight: 700;
+            border-bottom: 3px solid #555;
+        }
+
+        /* Filas de casillas estilo Declara Fácil real */
+        .det-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px 4px;
+            border-bottom: 1px solid #F0F0F0;
+            flex-wrap: wrap;
+        }
+
+        .det-label {
+            flex: 1;
+            min-width: 300px;
+            font-size: 14px;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .det-pair {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .det-code {
+            border: 1px solid #C9C9C9;
+            background: #fff;
+            padding: 8px 10px;
+            font-size: 13px;
+            color: #555;
+            min-width: 44px;
+            text-align: center;
+            border-right: none;
+            margin-right: -8px;
+        }
+
+        .det-pair input {
+            width: 170px;
+            border: 1px solid #C9C9C9;
+            background: #fff;
+            padding: 8px 12px;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .det-pair input.inp-blue {
+            background: #D9EBF7;
+            color: #333;
+        }
+
+        .det-pair input.inp-grey {
+            background: #DCDCDC;
+            color: #333;
+        }
+
+        .det-pair input.inp-green {
+            background: #A9D08E;
+            cursor: pointer;
+        }
+
+        .det-total {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            padding: 18px 4px;
+            font-weight: 700;
+            font-size: 14.5px;
+        }
+
+        .btn-ver {
+            background: #3C8DBC;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .btn-ant {
+            background: #fff;
+            color: #333;
+            border: 1px solid #C9C9C9;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-ant:hover { background: #F2F2F2; }
+
+        /* Reporte de inconsistencias */
+        .tabla-reporte {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            font-size: 13px;
+        }
+
+        .tabla-reporte th {
+            border-top: 2px solid #D9D9D9;
+            border-bottom: 2px solid #D9D9D9;
+            padding: 12px 8px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .tabla-reporte td {
+            padding: 28px 8px;
+            text-align: center;
+            color: #555;
+            border-bottom: 2px solid #D9D9D9;
+        }
+
+        /* Renta: preguntas Estado de Ganancia y Pérdida */
+        .renta-pregunta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 18px 4px;
+            border-bottom: 1px solid #F0F0F0;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+
+        .renta-pregunta .rp-texto { flex: 1; min-width: 300px; line-height: 1.45; }
+
+        .renta-pregunta .rp-texto u { font-weight: 700; }
+
+        .banner-301 {
+            background: #FDF6DC;
+            border: 1px solid #F0E6C0;
+            padding: 14px 20px;
+            font-size: 13.5px;
+            text-align: center;
+            margin-top: 18px;
+            position: relative;
+        }
+
+        .banner-301 .cerrar-banner {
+            position: absolute;
+            right: 12px;
+            top: 10px;
+            cursor: pointer;
+            color: #999;
+            font-size: 15px;
+        }
+
         /* ===== Formulario 1611 (filas con casilla numerada) ===== */
         .rus-row {
             display: flex;
@@ -642,6 +1119,163 @@
             .decl-sidebar { display: none; }
             .decl-header-actions { gap: 10px; }
             .rus-label { width: 100%; margin-bottom: 6px; }
+        }
+
+        /* ===== NUEVOS ESTILOS PARA DETERMINACION DE LA DEUDA (IMAGENES 2, 3, 4) ===== */
+        #tab621-deuda .seccion-621 {
+            border: none;
+            padding: 10px 0;
+        }
+        #tab621-deuda .seccion-621 > .box-legend {
+            display: none;
+        }
+        
+        .deuda-section-header {
+            background-color: #F2F2F2;
+            border: 1px solid #D9D9D9;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            user-select: none;
+            border-radius: 2px;
+        }
+        .deuda-section-header:hover {
+            background-color: #EAEAEA;
+        }
+        
+        .deuda-grid.collapsed .collapsible-row {
+            display: none !important;
+        }
+
+        .c-pair {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .c-pair input.inp-green {
+            background: #A9D08E !important;
+            color: #333;
+        }
+        
+        .c-pair input.inp-grey {
+            background: #EFEFEF !important;
+            color: #333;
+        }
+
+        .btn-agregar-bandeja-red {
+            background: var(--sunat-red);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-agregar-bandeja-red:hover {
+            background: #8B0014;
+        }
+
+        /* ===== PASARELA DE PAGOS (Presente/Pague) ===== */
+        .pasarela-acc-item {
+            border: 1px solid #999;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fdfdfd;
+            margin-bottom: 10px;
+        }
+
+        .pasarela-acc-header {
+            padding: 10px 15px;
+            background: linear-gradient(to bottom, #fefefe, #e8e8e8);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .pasarela-acc-header:hover {
+            background: #eee;
+        }
+
+        .pasarela-acc-body {
+            display: none;
+        }
+
+        .bank-option-minimal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+            width: 100%;
+        }
+
+        .bank-option-minimal:hover {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+
+        .bank-option-minimal input[type="radio"] {
+            margin-bottom: 5px;
+        }
+
+        .btn-pasarela-final {
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-pasarela-final:hover {
+            background-color: #0097a7;
+        }
+
+        .btn-validar-blue {
+            background: #337AB7;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-validar-blue:hover {
+            background: #286090;
+        }
+
+        .deuda-grid {
+            grid-template-columns: minmax(260px, 1fr) auto auto;
+            gap: 8px 10px;
         }
     </style>
 </head>
@@ -766,37 +1400,34 @@
                 </div>
             </div>
 
-            <div class="aviso-amarillo">
-                <span class="aviso-text"><strong>Sr. Contribuyente,</strong> luego de llenar el formulario, asegúrese de agregarlo a la <strong>bandeja.</strong></span>
-                <i class="fas fa-check check"></i>
-            </div>
-
             <!-- ================= VISTA 0621 IGV RENTA MENSUAL ================= -->
             <div id="view-621">
-                <div class="form-dark-header">
-                    <span>0621 IGV Renta Mensual <i class="fas fa-question-circle" style="font-size: 14px; cursor: pointer;" onclick="alert('Formulario Declara Fácil 621 IGV - Renta Mensual');"></i></span>
-                    <i class="far fa-star" onclick="alert('Agregado a favoritos'); this.classList.remove('far'); this.classList.add('fas');"></i>
-                </div>
-
                 <div class="form-tabs">
                     <div class="form-tabs-left">
-                        <div class="form-tab active">Información<br>General</div>
-                        <div class="form-tab" onclick="alert('Complete primero la Información General.');">Detalle de<br>Declaración</div>
-                        <div class="form-tab" onclick="alert('Complete primero la Información General.');">Determinación<br>de la Deuda</div>
-                    </div>
-                    <div class="gear-dropdown" onclick="alert('Opciones del formulario');">
-                        <i class="fas fa-cog"></i> <i class="fas fa-caret-down"></i>
+                        <div class="form-tab active" id="tab621-btn-info" onclick="cambiarTab621('info');">Información<br>General</div>
+                        <div class="form-tab" id="tab621-btn-detalle" onclick="cambiarTab621('detalle');">Detalle de<br>Declaración</div>
+                        <div class="form-tab" id="tab621-btn-deuda" onclick="cambiarTab621('deuda');">Determinación<br>de la Deuda</div>
                     </div>
                 </div>
 
                 <div class="form-body">
+                    <!-- ===== TAB 1: INFORMACIÓN GENERAL ===== -->
+                    <div id="tab621-info">
                     <div class="fieldset-row">
                         <fieldset class="sunat-fieldset">
                             <legend>Período Tributario</legend>
-                            <div class="field-inline">
+                            <div class="field-inline periodo-wrap">
                                 <label for="periodo-input">Período:</label>
-                                <input type="text" id="periodo-input" placeholder="mm/aaaa" maxlength="7">
-                                <span class="help-circle" onclick="alert('Ingrese el período en formato mm/aaaa. Ejemplo: 06/2026');"><i class="fas fa-question"></i></span>
+                                <input type="text" id="periodo-input" placeholder="mm/aaaa" readonly style="cursor: pointer;" onclick="abrirPickerPeriodo(event);">
+                                <span class="help-circle" onclick="alert('Seleccione el período al que corresponde su declaración (mes/año).');"><i class="fas fa-question"></i></span>
+                                <div class="periodo-picker" id="periodo-picker">
+                                    <div class="pp-header">
+                                        <i class="fas fa-chevron-left" onclick="cambiarAnioPicker(-1); event.stopPropagation();"></i>
+                                        <span id="pp-anio">2026</span>
+                                        <i class="fas fa-chevron-right" onclick="cambiarAnioPicker(1); event.stopPropagation();"></i>
+                                    </div>
+                                    <div class="pp-meses" id="pp-meses"><!-- generado por JS --></div>
+                                </div>
                             </div>
                         </fieldset>
 
@@ -804,7 +1435,7 @@
                             <legend>Tipo de Declaración:</legend>
                             <div class="field-inline">
                                 <label for="tipo-declaracion">Declaración:</label>
-                                <select id="tipo-declaracion">
+                                <select id="tipo-declaracion" onchange="actualizarTextoAviso();">
                                     <option value="">Seleccionar</option>
                                     <option value="original">Original</option>
                                     <option value="sustitutoria">Sustitutoria</option>
@@ -824,45 +1455,716 @@
                         </fieldset>
                     </div>
 
-                    <div class="afectacion-box">
-                        <span class="box-legend">Afectación/Régimen de Renta/convenio:</span>
-                        <div class="afectacion-cols">
-                            <div class="afectacion-col">
-                                <h4>Impuesto general a las Ventas:</h4>
-                                <label class="radio-line"><input type="radio" name="igv-afectacion" value="cuenta-propia"> IGV - Cuenta propia</label>
-                                <label class="radio-line"><input type="radio" name="igv-afectacion" value="convenio"> Con convenio de estabilidad</label>
-                                <h4 class="mt">Impuesto a las Ventas al arroz Pilado:</h4>
-                                <label class="radio-line"><input type="radio" name="igv-afectacion" value="ivap"> IVAP</label>
-                            </div>
-                            <div class="afectacion-col">
-                                <h4>Impuesto a la Renta/Régimen de Renta:</h4>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="general"> Régimen General</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="especial"> Régimen Especial</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="mype"> Régimen Tributario MYPE</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="agrario"> Sector Agraria / Agricultura</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="amazonia"> Regimen Amazonía</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="convenio-renta"> Con convenio de Estabilidad - Pagos a cuenta de Renta</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="agrario-31110"> Régimen Agrario – Ley 31110</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="acuicultura"> Acuicultura – Ley 31666</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="empresa-agraria"> Régimen Empresa Agraria - Ley 32434</label>
-                                <label class="radio-line"><input type="radio" name="renta-regimen" value="pequeno-agrario"> Régimen Pequeño Agrario - Ley 32434</label>
-                            </div>
-                        </div>
+                    <div class="aviso-amarillo" id="aviso-renta-igv" style="margin: 15px 0 20px 0;">
+                        <span class="aviso-text" id="aviso-renta-igv-text"><strong>Sr. Contribuyente,</strong> seleccione los tributos a declarar.</span>
+                        <i class="fas fa-check check"></i>
                     </div>
 
-                    <div class="afectacion-box">
-                        <span class="box-legend">Ventas no grav con IGV</span>
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
-                            <span style="font-size: 14px;">¿Ha realizado ventas no gravadas con el IGV en los últimos 12 meses?</span>
-                            <div class="rus-radios">
-                                <label><input type="radio" name="ventas-no-grav" value="si"> <strong>Si</strong></label>
-                                <label><input type="radio" name="ventas-no-grav" value="no"> <strong>No</strong></label>
+                    <!-- Estado inicial: lista completa de afectaciones -->
+                    <div id="info-inicial">
+                        <div class="afectacion-box" style="margin-top: 0;">
+                            <div class="afectacion-cols">
+                                <div class="afectacion-col">
+                                    <h4>Impuesto general a las Ventas:</h4>
+                                    <label class="radio-line"><input type="radio" id="rb-igv-cuenta-propia" name="igv-full" value="cuenta-propia" checked onchange="toggleIGVSubOptions();"> IGV - Cuenta propia</label>
+                                    <div id="sub-igv-options" style="margin-left: 25px; margin-bottom: 10px;">
+                                        <label class="radio-line" style="margin-bottom: 6px;"><input type="checkbox" id="chk-tasa18" checked> IGV - Cuenta propia tasa 18%</label>
+                                        <label class="radio-line" style="margin-bottom: 6px;"><input type="checkbox" id="chk-ley31556"> IGV Tasa Especial Ley 31556 y modificatorias</label>
+                                    </div>
+                                    <label class="radio-line"><input type="radio" id="rb-igv-convenio" name="igv-full" value="convenio" onchange="toggleIGVSubOptions();"> Con convenio de estabilidad</label>
+                                    
+                                    <h4 class="mt">Impuesto a las Ventas al arroz Pilado:</h4>
+                                    <label class="radio-line"><input type="radio" id="rb-ivap" name="ivap-full" value="ivap"> IVAP</label>
+                                </div>
+                                <div class="afectacion-col">
+                                    <h4>Impuesto a la Renta/Régimen de Renta:</h4>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="general"> Régimen General</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="especial"> Régimen Especial</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="mype" checked> Régimen Tributario MYPE</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="amazonia"> Régimen Amazonía</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="estabilidad"> Con convenio de Estabilidad - Pagos a cuenta de Renta</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="agrario-31110"> Régimen Agrario - Ley 31110</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="acuicultura"> Acuicultura - Ley 31666</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="empresa-agraria"> Régimen Empresa Agraria - Ley 32434</label>
+                                    <label class="radio-line"><input type="radio" name="renta-full" value="pequeno-agrario"> Régimen Pequeño Agrario - Ley 32434</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                        <fieldset style="border: none; border-top: 1px solid #CCC; padding-top: 18px; margin-top: 22px; width: 100%;">
+                            <legend style="font-size: 13.5px; font-weight: bold; color: #767676; padding: 0 10px;">Ventas no gravadas con IGV</legend>
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 14px;">
+                                <span>¿Ha realizado ventas no gravadas con el IGV en los últimos 12 meses?</span>
+                                <div style="display: flex; gap: 20px;">
+                                    <label class="radio-line" style="margin-bottom: 0;"><input type="radio" name="vng-full" value="si"> SI</label>
+                                    <label class="radio-line" style="margin-bottom: 0;"><input type="radio" name="vng-full" value="no" checked> No</label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div><!-- /info-inicial -->
 
                     <div class="form-bottom-actions">
-                        <button class="btn-agregar-bandeja" onclick="siguiente621();">Siguiente <i class="fas fa-chevron-right"></i></button>
+                        <button class="btn-sig-621" onclick="siguiente621();">Siguiente <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    </div><!-- /tab621-info -->
+
+                    <!-- ===== TAB 2: DETALLE DE LA DECLARACIÓN ===== -->
+                    <div id="tab621-detalle" style="display: none;">
+
+                        <div class="sub-tabs-l1">
+                            <div class="st active" id="st1-igv" onclick="mostrarSubDetalle('ventas');">IGV</div>
+                            <div class="st" id="st1-ivap" onclick="mostrarSubDetalle('ivap');">IVAP</div>
+                            <div class="st" id="st1-renta" onclick="mostrarSubDetalle('renta');">Renta</div>
+                        </div>
+
+                        <div class="sub-tabs-l2" id="subtabs-igv">
+                            <div class="st active" id="st2-ventas" onclick="mostrarSubDetalle('ventas');">Ventas</div>
+                            <div class="st" id="st2-compras" onclick="mostrarSubDetalle('compras');">Compras</div>
+                            <div class="st" id="st2-reporte" onclick="mostrarSubDetalle('reporte');">Reporte de inconsistencias</div>
+                        </div>
+
+                        <!-- ===== IGV / VENTAS ===== -->
+                        <div id="det-ventas">
+                            <div class="det-row">
+                                <div class="det-label">Ventas Netas Gravadas <button class="btn-ver" onclick="alert('Monto propuesto con la información de su Registro de Ventas e Ingresos Electrónico (RVIE).');">Ver</button></div>
+                                <div class="det-pair"><span class="det-code">100</span><input type="text" id="c100" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 100: Monto de las operaciones gravadas del período, sin incluir el impuesto (proviene de su Registro de Ventas).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">101</span><input type="text" id="c101" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 101: IGV calculado automáticamente (18% de la casilla 100).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Descuentos concedidos y/o Dev de ventas</div>
+                                <div class="det-pair"><span class="det-code">102</span><input type="text" id="c102" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 102: Descuentos concedidos y devoluciones de ventas declaradas en períodos anteriores.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">103</span><input type="text" id="c103" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 103: IGV calculado automáticamente (18% de la casilla 102).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-154" style="display: none;">
+                                <div class="det-label">Ventas Netas tasa 10% Ley N° 31556 (8% IGV + 2% IPM) Gravadas</div>
+                                <div class="det-pair"><span class="det-code">154</span><input type="text" id="c154" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 154: Ventas gravadas con la tasa especial 10% - Ley N° 31556 (restaurantes, hoteles y alojamientos turísticos).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">155</span><input type="text" id="c155" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 155: Impuesto calculado automáticamente (10% de la casilla 154).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Exportaciones facturadas en el periodo (bienes y servicios).</div>
+                                <div class="det-pair"><span class="det-code">106</span><input type="text" id="c106" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 106: Monto neto de las exportaciones facturadas en el período (proviene de su Registro de Ventas).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Exportaciones embarcadas en el periodo (incluye exportación de servicios).</div>
+                                <div class="det-pair"><span class="det-code">127</span><input type="text" id="c127" class="inp-green" readonly onclick="abrirModal('m127');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m127');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-105" style="display: none;">
+                                <div class="det-label">Ventas no gravadas (sin considerar exportaciones)</div>
+                                <div class="det-pair"><span class="det-code">105</span><input type="text" id="c105" class="inp-green" readonly onclick="abrirModal('m105');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m105');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-109" style="display: none;">
+                                <div class="det-label">Ventas no gravadas sin efecto en ratio</div>
+                                <div class="det-pair"><span class="det-code">109</span><input type="text" id="c109" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 109: Ventas no gravadas que NO se consideran para el cálculo de la prorrata del crédito fiscal (num. 6.2, Art. 6° del Reglamento del IGV).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Otras ventas (inc. ii), num 6.2 Art. 6 del Reglam</div>
+                                <div class="det-pair"><span class="det-code">112</span><input type="text" id="c112" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 112: Transferencias señaladas en el inciso ii), numeral 6.2, Art. 6° del Reglamento, que no forman parte del cálculo de la prorrata.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-total">
+                                <span>TOTAL VENTAS</span>
+                                <div class="det-pair"><span class="det-code">131</span><input type="text" id="c131" class="inp-grey" readonly><span class="help-circle" onclick="alert('Casilla 131 = Casilla 101 - Casilla 103 + Casilla 155.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="form-bottom-actions">
+                                <button class="btn-ant" onclick="cambiarTab621('info');"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                <button class="btn-sig-621" onclick="mostrarSubDetalle('compras');">Siguiente <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div><!-- /det-ventas -->
+
+                        <!-- ===== IGV / COMPRAS ===== -->
+                        <div id="det-compras" style="display: none;">
+                            <div class="det-row">
+                                <div class="det-label">Compras Netas Destinadas a vtas. gravadas <button class="btn-ver" onclick="alert('Monto propuesto con la información de su Registro de Compras Electrónico (RCE).');">Ver</button></div>
+                                <div class="det-pair"><span class="det-code">107</span><input type="text" id="c107" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 107: Adquisiciones internas gravadas destinadas exclusivamente a ventas gravadas (proviene de su Registro de Compras).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">108</span><input type="text" id="c108" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 108: IGV calculado automáticamente (18% de la casilla 107).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-156" style="display: none;">
+                                <div class="det-label">Compras Netas tasa 10% Ley N° 31556 (8% IGV + 2% IPM) destinadas a Vtas Gravadas <button class="btn-ver" onclick="alert('Monto propuesto con la información de su Registro de Compras Electrónico (RCE).');">Ver</button></div>
+                                <div class="det-pair"><span class="det-code">156</span><input type="text" id="c156" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 156: Compras gravadas con la tasa especial 10% - Ley N° 31556 destinadas a ventas gravadas.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">157</span><input type="text" id="c157" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 157: Impuesto calculado automáticamente (10% de la casilla 156).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-110" style="display: none;">
+                                <div class="det-label">Compras Netas Destinadas a vtas. gravadas y no gravadas</div>
+                                <div class="det-pair"><span class="det-code">110</span><input type="text" id="c110" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 110: Compras destinadas conjuntamente a ventas gravadas y no gravadas. El crédito fiscal se determina aplicando la prorrata (casilla 173).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">111</span><input type="text" id="c111" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 111 = 18% de la casilla 110 × coeficiente de la casilla 173.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Compras Netas Destinadas a vtas. no grav</div>
+                                <div class="det-pair"><span class="det-code">113</span><input type="text" id="c113" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 113: Compras internas gravadas destinadas exclusivamente a ventas no gravadas (no otorgan crédito fiscal).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Compras Netas Destinadas a vtas. grav - Import</div>
+                                <div class="det-pair"><span class="det-code">114</span><input type="text" id="c114" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 114: Compras importadas gravadas destinadas exclusivamente a ventas gravadas.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">115</span><input type="text" id="c115" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 115: IGV calculado automáticamente (18% de la casilla 114).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-116" style="display: none;">
+                                <div class="det-label">Compras Netas Importadas destinadas a vtas. gravadas y no gravadas</div>
+                                <div class="det-pair"><span class="det-code">116</span><input type="text" id="c116" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 116: Compras importadas destinadas conjuntamente a ventas gravadas y no gravadas (aplica prorrata).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">117</span><input type="text" id="c117" class="inp-blue" readonly><span class="help-circle" onclick="alert('Casilla 117 = 18% de la casilla 116 × coeficiente de la casilla 173.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-119" style="display: none;">
+                                <div class="det-label">Compras Netas Importadas destinadas a vtas. no gravadas</div>
+                                <div class="det-pair"><span class="det-code">119</span><input type="text" id="c119" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 119: Compras importadas destinadas exclusivamente a ventas no gravadas.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Compras Internas no gravadas</div>
+                                <div class="det-pair"><span class="det-code">120</span><input type="text" id="c120" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 120: Compras internas no gravadas con el IGV.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Compras Importadas no gravadas</div>
+                                <div class="det-pair"><span class="det-code">122</span><input type="text" id="c122" class="inp-green" readonly onclick="abrirModal('m122');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m122');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-173" style="display: none;">
+                                <div class="det-label">Coeficiente (prorrata del crédito fiscal)</div>
+                                <div class="det-pair"><span class="det-code">173</span><input type="text" id="c173" class="inp-green" readonly onclick="abrirModal('m173');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m173');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-total">
+                                <span>TOTAL COMPRAS</span>
+                                <div class="det-pair"><span class="det-code">178</span><input type="text" id="c178" class="inp-grey" readonly><span class="help-circle" onclick="alert('Casilla 178 = Casillas 108 + 157 + 111 + 115 + 117.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="form-bottom-actions">
+                                <button class="btn-ant" onclick="mostrarSubDetalle('ventas');"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                <button class="btn-sig-621" onclick="mostrarSubDetalle('reporte');">Siguiente <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div><!-- /det-compras -->
+
+                        <!-- ===== IGV / REPORTE DE INCONSISTENCIAS ===== -->
+                        <div id="det-reporte" style="display: none;">
+                            <table class="tabla-reporte">
+                                <thead>
+                                    <tr>
+                                        <th>Casilla</th>
+                                        <th>Descripción Casilla</th>
+                                        <th>Monto según RVIE/RCE</th>
+                                        <th>Propuesta SUNAT (A)</th>
+                                        <th>Monto según DDJJ (B)</th>
+                                        <th>Diferencia (A y B)</th>
+                                        <th>Inconsistencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="7">No se encontró inconsistencias en la declaración.</td></tr>
+                                </tbody>
+                            </table>
+
+                            <div class="form-bottom-actions">
+                                <button class="btn-ant" onclick="mostrarSubDetalle('compras');"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                <button class="btn-sig-621" onclick="mostrarSubDetalle('renta');">Siguiente <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div><!-- /det-reporte -->
+
+                        <!-- ===== IVAP ===== -->
+                        <div id="det-ivap" style="display: none;">
+                            <div class="aviso-amarillo" style="margin-top: 25px;">
+                                <span class="aviso-text"><strong>Sr. Contribuyente,</strong> usted no se encuentra afecto al Impuesto a las Ventas del Arroz Pilado (IVAP) para el período seleccionado.</span>
+                                <i class="fas fa-check check"></i>
+                            </div>
+                            <div class="form-bottom-actions">
+                                <button class="btn-ant" onclick="mostrarSubDetalle('ventas');"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                <button class="btn-sig-621" onclick="mostrarSubDetalle('renta');">Siguiente <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div><!-- /det-ivap -->
+
+                        <!-- ===== RENTA ===== -->
+                        <div id="det-renta" style="display: none;">
+                            <fieldset class="sunat-fieldset" style="margin-top: 20px; min-width: 0;">
+                                <legend>Estado de Ganancia y Pérdida</legend>
+
+                                <div class="renta-pregunta">
+                                    <div class="rp-texto"><u>¿Ha presentado un Formulario PDT 625</u> con estado de Ganancias y Pérdidas actualizada al <strong>31 de <span class="mes-per">julio</span></strong> de este ejercicio?</div>
+                                    <div class="rus-radios">
+                                        <label><input type="radio" name="ren-q1" value="si"> <strong>Si</strong></label>
+                                        <label><input type="radio" name="ren-q1" value="no"> <strong>No</strong></label>
+                                    </div>
+                                </div>
+
+                                <div class="renta-pregunta">
+                                    <div class="rp-texto"><u>¿Suspendió sus pagos o cuentas hasta el mes de <span class="mes-per">julio</span></u> de acuerdo con el acápite del Artículo 85° de la LIR?</div>
+                                    <div class="rus-radios">
+                                        <label><input type="radio" name="ren-q2" value="si"> <strong>Si</strong></label>
+                                        <label><input type="radio" name="ren-q2" value="no"> <strong>No</strong></label>
+                                    </div>
+                                </div>
+
+                                <div class="renta-pregunta">
+                                    <div class="rp-texto"><u>¿El coeficiente del PDT 625</u> con Estado de Ganancias y Pérdidas al 31 de <span class="mes-per">julio</span> es menor al límite previsto en la tabla II de Acápite del Artículo 85° de la LIR, correspondiente al mes en que afectuó la suspensión?</div>
+                                    <div class="rus-radios">
+                                        <label><input type="radio" name="ren-q3" value="si"> <strong>Si</strong></label>
+                                        <label><input type="radio" name="ren-q3" value="no"> <strong>No</strong></label>
+                                    </div>
+                                </div>
+
+                                <div class="renta-pregunta" style="border-bottom: none;">
+                                    <div class="rp-texto"><u>¿Ha presentado un formulario 625</u> con estado de Ganancias y Perdidas actualizadas al 31 de <span class="mes-per">julio</span> con el que suspende sus pagos a cuenta?</div>
+                                    <div class="rus-radios">
+                                        <label><input type="radio" name="ren-q4" value="si"> <strong>Si</strong></label>
+                                        <label><input type="radio" name="ren-q4" value="no"> <strong>No</strong></label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <div class="det-row" style="margin-top: 15px;">
+                                <div class="det-label">Coeficiente - Art 85° inc a</div>
+                                <div class="det-pair"><span class="det-code">380</span><input type="text" id="c380" class="inp-grey" readonly onclick="abrirModal('m380');" title="Clic para detallar" style="cursor: pointer;"><span class="help-circle" onclick="abrirModal('m380');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Porcentaje - Art 85° inc b</div>
+                                <div class="det-pair"><span class="det-code">315</span><input type="text" id="c315" class="inp-grey" readonly><span class="help-circle" onclick="alert('Porcentaje del Art. 85° inc. b): Régimen General y Especial 1.5%. Régimen MYPE: 1.0% (hasta 300 UIT de ingresos acumulados). Régimen Agrario: 0.8%.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row">
+                                <div class="det-label">Coeficiente Calculado (aplicado para el Cálculo de la Cas312):</div>
+                                <div class="det-pair"><span class="det-code">894</span><input type="text" id="c894" class="inp-grey" readonly><span class="help-circle" onclick="alert('Casilla 894: Tasa efectivamente aplicada para el pago a cuenta (el mayor entre el coeficiente de la casilla 380 y el porcentaje de la casilla 315, según el régimen).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" id="row-acum">
+                                <div class="det-label">Ingresos netos acumulados en el ejercicio (para determinar la tasa aplicable)</div>
+                                <div class="det-pair"><span class="det-code">&nbsp;</span><input type="text" id="ing-acum" inputmode="numeric"><span class="help-circle" onclick="alert('Suma de los ingresos netos mensuales declarados en el ejercicio. Si supera 300 UIT (S/ ' + formatoMiles(300 * UIT) + '), en el Régimen MYPE se aplica el coeficiente o el 1.5%, el que resulte mayor.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="det-row" style="border-bottom: none;">
+                                <div class="det-label">Ingresos Netos</div>
+                                <div class="det-pair"><span class="det-code">301</span><input type="text" id="c301" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 301: Ingresos netos del período (base imponible del pago a cuenta). Se propone con la información de su registro de ventas.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code">312</span><input type="text" id="c312" class="inp-grey" readonly><span class="help-circle" onclick="alert('Casilla 312: Pago a cuenta del Impuesto a la Renta calculado automáticamente (casilla 894 × casilla 301).');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="banner-301">
+                                <strong>Estimado(a) contribuyente,</strong> el monto de la casilla 301 se propone con información de su registro de ventas, de considerarlo necesario, ajustar el monto de acuerdo a la normativa correspondiente.
+                                <i class="fas fa-times cerrar-banner" onclick="this.parentElement.style.display='none';"></i>
+                            </div>
+
+                            <div class="form-bottom-actions">
+                                <button class="btn-ant" onclick="mostrarSubDetalle('reporte');"><i class="fas fa-chevron-left"></i> Anterior</button>
+                                <button class="btn-sig-621" onclick="cambiarTab621('deuda');">Siguiente <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div><!-- /det-renta -->
+                    </div><!-- /tab621-detalle -->
+
+                    <!-- ===== TAB 3: DETERMINACIÓN DE LA DEUDA ===== -->
+                    <div id="tab621-deuda" style="display: none;">
+
+                        <div class="seccion-621">
+                            <span class="box-legend">Determinación de la Deuda</span>
+                            
+                            <div class="deuda-section-header" onclick="toggleDeudaSection(this)">
+                                <span class="arrow-icon">▲</span> Aplicación de saldos a favor y otros créditos
+                            </div>
+
+                            <div class="deuda-grid">
+                                <div></div>
+                                <div class="dg-head">IGV</div>
+                                <div class="dg-head">RENTA</div>
+
+                                <div class="dg-label collapsible-row">Impuesto resultante o Saldo a Favor</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">140</span><input type="text" id="c140" readonly><span class="help-circle" onclick="alert('Casilla 140: Impuesto resultante o saldo a favor del período (casilla 131 - casilla 178).');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">302</span><input type="text" id="c302" readonly><span class="help-circle" onclick="alert('Casilla 302: Impuesto resultante o saldo a favor de Renta (casilla 312).');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Saldo a Favor del Período Anterior</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">145</span><input type="text" id="c145" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 145: Saldo a favor del período anterior de IGV.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">303</span><input type="text" id="c303" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 303: Saldo a favor del período anterior de Renta.');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Tributo a Pagar o Saldo a Favor</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">184</span><input type="text" id="c184" readonly><span class="help-circle" onclick="alert('Casilla 184: Tributo a pagar o saldo a favor de IGV (casilla 140 - casilla 145).');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">304</span><input type="text" id="c304" readonly><span class="help-circle" onclick="alert('Casilla 304: Tributo a pagar o saldo a favor de Renta (casilla 302 - casilla 303).');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Percepciones del Período</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">171</span><input type="text" id="c171" class="inp-green" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 171: Monto de las percepciones de IGV declaradas en el período.');"><i class="fas fa-question"></i></span></div>
+                                <div class="collapsible-row"></div>
+
+                                <div class="dg-label collapsible-row">Saldos de percepciones de períodos anteriores</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">168</span><input type="text" id="c168" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 168: Saldo de percepciones del IGV de períodos anteriores.');"><i class="fas fa-question"></i></span></div>
+                                <div class="collapsible-row"></div>
+
+                                <div class="dg-label collapsible-row">Saldo de percepciones no aplicadas</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">164</span><input type="text" id="c164" readonly><span class="help-circle" onclick="alert('Casilla 164: Saldo de percepciones no aplicadas para el período siguiente.');"><i class="fas fa-question"></i></span></div>
+                                <div class="collapsible-row"></div>
+
+                                <div class="dg-label collapsible-row">Retenciones del Período</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">179</span><input type="text" id="c179" class="inp-green" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 179: Monto de las retenciones de IGV declaradas en el período.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">326</span><input type="text" id="c326" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 326: Monto de las retenciones del Impuesto a la Renta.');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Saldos de retenciones de períodos anteriores</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">176</span><input type="text" id="c176" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 176: Saldo de retenciones del IGV de períodos anteriores.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">327</span><input type="text" id="c327" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 327: Saldo de retenciones de Renta de períodos anteriores.');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Saldo de retenciones no aplicadas</div>
+                                <div class="c-pair collapsible-row"><span class="c-code">165</span><input type="text" id="c165" readonly><span class="help-circle" onclick="alert('Casilla 165: Saldo de retenciones no aplicadas para el período siguiente.');"><i class="fas fa-question"></i></span></div>
+                                <div class="collapsible-row"></div>
+
+                                <div class="dg-label collapsible-row">Compensación de saldo a favor del exportador</div>
+                                <div class="collapsible-row"></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">305</span><input type="text" id="c305" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 305: Compensación del saldo a favor del exportador aplicable contra el pago a cuenta de Renta.');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Impuesto Temporal a los Activos Netos (ITAN)</div>
+                                <div class="collapsible-row"></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">328</span><input type="text" id="c328" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 328: Monto pagado por ITAN utilizado como crédito contra el pago a cuenta de Renta.');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label collapsible-row">Pago a cuenta en exceso del presente ejercicio</div>
+                                <div class="collapsible-row"></div>
+                                <div class="c-pair collapsible-row"><span class="c-code">336</span><input type="text" id="c336" class="c-link inp-green" readonly onclick="abrirModal('m336');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m336');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label dg-total">SUB TOTAL</div>
+                                <div class="c-pair"><span class="c-code">681</span><input type="text" id="c681" readonly><span class="help-circle" onclick="alert('Casilla 681: Subtotal de IGV (casilla 184 - percepciones - retenciones).');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair"><span class="c-code">682</span><input type="text" id="c682" readonly><span class="help-circle" onclick="alert('Casilla 682: Subtotal de Renta (casilla 304 - retenciones - compensaciones - ITAN - excesos).');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label">Pagos Previos</div>
+                                <div class="c-pair"><span class="c-code">185</span><input type="text" id="c185" class="c-link inp-green" readonly onclick="abrirModal('m185');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m185');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair"><span class="c-code">317</span><input type="text" id="c317" class="c-link inp-green" readonly onclick="abrirModal('m317');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m317');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label">Interés moratorio</div>
+                                <div class="c-pair"><span class="c-code">187</span><input type="text" id="c187" class="inp-grey" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 187: Interés moratorio aplicable al pago fuera de plazo del IGV.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair"><span class="c-code">319</span><input type="text" id="c319" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 319: Interés moratorio aplicable al pago fuera de plazo de la Renta.');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label dg-total">Total Deuda Tributaria</div>
+                                <div class="c-pair"><span class="c-code">188</span><input type="text" id="c188" readonly><span class="help-circle" onclick="alert('Casilla 188: Total Deuda Tributaria de IGV (casilla 681 - pagos previos + interés moratorio).');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair"><span class="c-code">324</span><input type="text" id="c324" readonly><span class="help-circle" onclick="alert('Casilla 324: Total Deuda Tributaria de Renta (casilla 682 - pagos previos + interés moratorio).');"><i class="fas fa-question"></i></span></div>
+
+                                <div class="dg-label dg-total">Importe a Pagar</div>
+                                <div class="c-pair"><span class="c-code">189</span><input type="text" id="c189" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 189: Importe a pagar de IGV para este período.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair"><span class="c-code">307</span><input type="text" id="c307" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 307: Importe a pagar de Renta para este período.');"><i class="fas fa-question"></i></span></div>
+                            </div>
+
+                            <div class="motivo-no-pago" id="motivo-no-pago" style="display: none;">
+                                <strong>Sr. Contribuyente:</strong> ha determinado deuda tributaria y ha consignado un importe a pagar de S/ 0. Indique el motivo:<br><br>
+                                <label class="radio-line"><input type="radio" name="motivo-pago" value="plazo"> Realizaré el pago dentro del plazo de vencimiento</label>
+                                <label class="radio-line"><input type="radio" name="motivo-pago" value="fraccionamiento"> Solicitaré aplazamiento y/o fraccionamiento de la deuda</label>
+                            </div>
+                        </div>
+
+                        <div class="form-bottom-actions">
+                            <button class="btn-ant" onclick="cambiarTab621('detalle');"><i class="fas fa-chevron-left"></i> Anterior</button>
+                            <button class="btn-agregar-bandeja-red" onclick="agregarBandeja621();"><i class="fas fa-plus"></i> Agregar a bandeja</button>
+                            <button class="btn-validar-blue" onclick="validarDeclaracion();"><i class="far fa-file-alt"></i> Validar</button>
+                        </div>
+                    </div><!-- /tab621-deuda -->
+                </div>
+            </div>
+
+            <!-- ================= PASARELA DE PAGOS 621 (Presente/Pague) ================= -->
+            <div id="view-pasarela-621" style="display: none;">
+                <div class="form-dark-header" style="background: #9E9E9E;">
+                    <span>Formulario Virtual N° 0621 IGV Renta Mensual - Presente/Pague</span>
+                </div>
+
+                <div style="padding: 20px; background-color: #f0f2f5; min-height: 600px; font-family: 'Roboto', sans-serif;">
+                    <div style="background-color: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 8px; margin-bottom: 20px; color: #7a0000; font-size: 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <strong>Sr. Contribuyente una vez que se confirme el (los) pago(s) con su entidad bancaria se le estará generando una boleta de pago por cada tributo pagado</strong>
+                    </div>
+
+                    <div style="display: flex; gap: 25px; align-items: flex-start;">
+                        <!-- Accordion Side -->
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+
+                            <!-- Section 1: Bancos -->
+                            <div class="pasarela-acc-item">
+                                <div class="pasarela-acc-header" onclick="togglePasarelaAcc(1)">
+                                    <span>Cargo en Cuenta Bancaria</span>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div id="pasarela-acc-body-1" class="pasarela-acc-body">
+                                    <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none;">
+                                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; align-items: center; justify-items: center;">
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="1.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="2.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="3.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="4.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="5.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="6.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="7.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="8.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="9.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="10.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                        </div>
+                                        <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
+                                            Previamente debe haber celebrado un convenio de afiliación con su banco. Para tal efecto contáctese con su banco o sectorista
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 2: Detracciones -->
+                            <div class="pasarela-acc-item">
+                                <div class="pasarela-acc-header" onclick="togglePasarelaAcc(2)">
+                                    <span>Cargo en Cuenta de Detracciones - Cuenta Convencional</span>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div id="pasarela-acc-body-2" class="pasarela-acc-body">
+                                    <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none; text-align: center;">
+                                        <label class="bank-option-minimal" style="width: auto; padding: 10px 40px; flex-direction: row; gap: 15px;">
+                                            <input type="radio" name="pay-method-621">
+                                            <img src="BancoNacion.png" style="height: 45px; object-fit: contain;">
+                                        </label>
+                                        <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
+                                            Servicio disponible Lunes a Sábado de 08:00 am a 08:00 pm
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Tarjetas -->
+                            <div class="pasarela-acc-item">
+                                <div class="pasarela-acc-header" onclick="togglePasarelaAcc(3)">
+                                    <span>Tarjeta de Crédito o Débito</span>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div id="pasarela-acc-body-3" class="pasarela-acc-body">
+                                    <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none; text-align: center;">
+                                        <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="TARJETA1.png" style="height: 40px; object-fit: contain;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="TARJETA2.png" style="height: 40px; object-fit: contain;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="TARJETA3.png" style="height: 40px; object-fit: contain;"></label>
+                                            <label class="bank-option-minimal"><input type="radio" name="pay-method-621"><img src="TARJETA4.png" style="height: 40px; object-fit: contain;"></label>
+                                        </div>
+                                        <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
+                                            Selecciones su tarjeta de Crédito o Débito
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 4: NPS -->
+                            <div class="pasarela-acc-item">
+                                <div class="pasarela-acc-header" onclick="togglePasarelaAcc(4)">
+                                    <span>NPS - Número de Pago SUNAT</span>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div id="pasarela-acc-body-4" class="pasarela-acc-body">
+                                    <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none; text-align: center;">
+                                        <label class="bank-option-minimal" style="width: auto; padding: 10px 40px;">
+                                            <input type="radio" name="pay-method-621">
+                                            <span style="font-weight: bold; color: #004a8e; font-size: 30px; font-style: italic; border-bottom: 2px solid #c00; border-top: 2px solid #c00; padding: 0 10px;">nps</span>
+                                        </label>
+                                        <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
+                                            NPS - Número de Pago SUNAT
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Panel -->
+                        <div style="width: 320px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                            <div style="padding: 15px; background: #eee; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 10px; color: #333; font-weight: bold; font-size: 14px;">
+                                <i class="fas fa-shopping-cart"></i> Importe Total
+                            </div>
+                            <div style="padding: 30px; text-align: center; background: white;">
+                                <div id="pasarela621-total" style="font-size: 38px; color: #00bcd4; font-weight: 700; margin-bottom: 25px;">S/ 0</div>
+                                <button class="btn-pasarela-final" onclick="procesarPago621()">Presentar/Pagar ></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background-color: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 8px; margin-top: 40px; color: #7a0000; font-size: 14px; text-align: right;">
+                        <strong>"Sr. Contribuyente verifique sus cuentas antes de realizar el pago"</strong>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; margin-top: 20px;">
+                        <button class="btn-ant" style="padding: 10px 60px;" onclick="volverDeclaracion621()"><i class="fas fa-chevron-left"></i> Atrás</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MODALES ASISTENTES DE CASILLA (621) ===== -->
+
+            <!-- Casilla 127: Exportaciones embarcadas -->
+            <div class="modal-overlay" id="m127">
+                <div class="modal-box" style="max-width: 520px;">
+                    <header style="background: #9E9E9E; color: white; padding: 10px 15px; font-weight: normal; display: flex; justify-content: space-between; align-items: center; font-size: 14.5px;">
+                        <span>Asistente de la casilla 127</span>
+                        <i class="fas fa-times" onclick="cerrarModal('m127');" style="cursor: pointer; font-size: 14px;"></i>
+                    </header>
+                    <div class="modal-body" style="padding: 15px;">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                            <thead>
+                                <tr style="background: #f5f5f5;">
+                                    <th style="border: 1px solid #ccc; font-weight: normal; color: #333; text-align: left; padding: 8px;"></th>
+                                    <th style="border: 1px solid #ccc; font-weight: normal; color: #333; width: 80px; padding: 8px; text-align: center;">CASILLA</th>
+                                    <th style="border: 1px solid #ccc; font-weight: normal; color: #333; width: 150px; padding: 8px; text-align: center;">IMPORTE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="border: 1px solid #ccc; text-align: left; padding: 8px; font-size: 13px;">Exportaciones embarcadas de Bienes</td>
+                                    <td style="border: 1px solid #ccc; text-align: center; padding: 8px; color: #666; font-size: 13px;">183</td>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;"><input type="text" id="m127-183" inputmode="numeric" style="width: 100%; text-align: right; border: 1px solid #ccc; padding: 5px;"></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid #ccc; text-align: left; padding: 8px; font-size: 13px;">Exportaciones facturadas de servicios</td>
+                                    <td style="border: 1px solid #ccc; text-align: center; padding: 8px; color: #666; font-size: 13px;">186</td>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;"><input type="text" id="m127-186" inputmode="numeric" style="width: 100%; text-align: right; border: 1px solid #ccc; padding: 5px;"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-actions" style="justify-content: flex-end; padding: 0 15px 15px 15px; border: none; display: flex; gap: 10px;">
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m127');" style="background: #fff; color: #555; border: 1px solid #ccc; padding: 6px 16px; border-radius: 3px; font-weight: normal; cursor: pointer; font-size: 13px;">Salir</button>
+                        <button class="btn-modal-aceptar" onclick="aceptarModal127();" style="background: #337ab7; color: #fff; border: none; padding: 6px 16px; border-radius: 3px; font-weight: normal; cursor: pointer; font-size: 13px;">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 105: Ventas no gravadas -->
+            <div class="modal-overlay" id="m105">
+                <div class="modal-box">
+                    <header>Asistente de la Casilla 105 - Ventas no gravadas <i class="fas fa-times" onclick="cerrarModal('m105');"></i></header>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 12px;"><strong>A. Ventas exoneradas:</strong></p>
+                        <div class="c-row">
+                            <div class="c-label">Apéndice I de la Ley del IGV (bienes)</div>
+                            <div class="c-pair"><span class="c-code">228</span><input type="text" id="m105-a1" inputmode="numeric"></div>
+                        </div>
+                        <div class="c-row">
+                            <div class="c-label">Apéndice II de la Ley del IGV (servicios)</div>
+                            <div class="c-pair"><span class="c-code">229</span><input type="text" id="m105-a2" inputmode="numeric"></div>
+                        </div>
+                        <div class="c-row">
+                            <div class="c-label">Otras ventas exoneradas</div>
+                            <div class="c-pair"><span class="c-code">230</span><input type="text" id="m105-a3" inputmode="numeric"></div>
+                        </div>
+                        <div class="c-row">
+                            <div class="c-label">Ventas exoneradas - Ley de Amazonía</div>
+                            <div class="c-pair"><span class="c-code">231</span><input type="text" id="m105-a4" inputmode="numeric"></div>
+                        </div>
+                        <p style="margin-bottom: 12px;"><strong>B. Ventas inafectas:</strong></p>
+                        <div class="c-row">
+                            <div class="c-label">Ventas inafectas del IGV</div>
+                            <div class="c-pair"><span class="c-code">232</span><input type="text" id="m105-b" inputmode="numeric"></div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-modal-aceptar" onclick="aceptarModal105();">Aceptar</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m105');">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 122: Compras importadas no gravadas -->
+            <div class="modal-overlay" id="m122">
+                <div class="modal-box">
+                    <header>Asistente de la Casilla 122 - Compras importadas no gravadas <i class="fas fa-times" onclick="cerrarModal('m122');"></i></header>
+                    <div class="modal-body">
+                        <div class="c-row">
+                            <div class="c-label">Compras importadas exoneradas</div>
+                            <div class="c-pair"><span class="c-code">238</span><input type="text" id="m122-238" inputmode="numeric"></div>
+                        </div>
+                        <div class="c-row">
+                            <div class="c-label">Compras importadas inafectas</div>
+                            <div class="c-pair"><span class="c-code">239</span><input type="text" id="m122-239" inputmode="numeric"></div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-modal-aceptar" onclick="aceptarModal122();">Aceptar</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m122');">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 173: Prorrata del crédito fiscal -->
+            <div class="modal-overlay" id="m173">
+                <div class="modal-box">
+                    <header>Asistente de la Casilla 173 - Coeficiente IGV (Prorrata) <i class="fas fa-times" onclick="cerrarModal('m173');"></i></header>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 12px;">Registre las operaciones de los últimos 12 meses (incluye el período que declara). La última fila se completa automáticamente con los datos del formulario.</p>
+                        <table id="m173-tabla">
+                            <thead>
+                                <tr><th>Período</th><th>Ventas Nacionales Gravadas</th><th>Exportaciones</th><th>Ventas no Gravadas</th></tr>
+                            </thead>
+                            <tbody><!-- filas generadas por JS --></tbody>
+                        </table>
+                        <p style="margin-top: 12px; text-align: right;"><strong>Coeficiente: <span id="m173-coef">1.0000</span></strong></p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-modal-aceptar" onclick="aceptarModal173();">Aceptar</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m173');">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 380: Coeficiente Renta -->
+            <div class="modal-overlay" id="m380">
+                <div class="modal-box">
+                    <header>Asistente de la Casilla 380 - Coeficiente Renta <i class="fas fa-times" onclick="cerrarModal('m380');"></i></header>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 12px;">Datos del ejercicio anterior (Declaración Jurada Anual):</p>
+                        <div class="c-row">
+                            <div class="c-label">Impuesto Determinado</div>
+                            <div class="c-pair"><span class="c-code">891</span><input type="text" id="m380-891" inputmode="numeric"></div>
+                        </div>
+                        <div class="c-row">
+                            <div class="c-label">Ingreso Neto</div>
+                            <div class="c-pair"><span class="c-code">892</span><input type="text" id="m380-892" inputmode="numeric"></div>
+                        </div>
+                        <p style="margin-top: 8px; text-align: right;"><strong>Coeficiente (891 ÷ 892): <span id="m380-coef">0.0000</span></strong></p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-modal-aceptar" onclick="aceptarModal380();">Aceptar</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m380');">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casillas 336 / 185 / 317: Pagos previos -->
+            <div class="modal-overlay" id="m336">
+                <div class="modal-box">
+                    <header id="mpagos-titulo">Pagos previos <i class="fas fa-times" onclick="cerrarModal('m336');"></i></header>
+                    <div class="modal-body">
+                        <table>
+                            <thead>
+                                <tr><th>Formulario</th><th>N° Orden</th><th>Fecha de pago</th><th>Importe pagado</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><select id="mpagos-f1"><option value=""></option><option value="0621">0621 - Declara Fácil</option><option value="1662">1662 - Boleta de Pago</option><option value="1663">1663 - Boleta de Pago</option></select></td>
+                                    <td><input type="text" id="mpagos-o1" inputmode="numeric" style="text-align: left;"></td>
+                                    <td><input type="date" id="mpagos-d1"></td>
+                                    <td><input type="text" id="mpagos-p1" inputmode="numeric"></td>
+                                </tr>
+                                <tr>
+                                    <td><select id="mpagos-f2"><option value=""></option><option value="0621">0621 - Declara Fácil</option><option value="1662">1662 - Boleta de Pago</option><option value="1663">1663 - Boleta de Pago</option></select></td>
+                                    <td><input type="text" id="mpagos-o2" inputmode="numeric" style="text-align: left;"></td>
+                                    <td><input type="date" id="mpagos-d2"></td>
+                                    <td><input type="text" id="mpagos-p2" inputmode="numeric"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 12px; text-align: right;"><strong>Total: S/ <span id="mpagos-total">0</span></strong></p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-modal-aceptar" onclick="aceptarModalPagos();">Aceptar</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m336');">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de Validación Correcta (Imagen 5) -->
+            <div class="modal-overlay" id="modal-val-ok">
+                <div class="modal-box" style="max-width: 520px; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 1px solid #CCC;">
+                    <div style="padding: 20px 24px; border-bottom: 1px solid #E5E5E5; font-size: 15px; font-weight: 500; color: #333; background: #fff;">
+                        Casillas llenadas Correctamente
+                    </div>
+                    <div style="padding: 16px 24px; display: flex; justify-content: flex-end; background: #fff;">
+                        <button class="btn-modal-aceptar" onclick="cerrarModal('modal-val-ok');" style="background: #337AB7; color: white; border: none; padding: 8px 20px; font-size: 14px; font-weight: normal; border-radius: 4px; cursor: pointer;">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -971,6 +2273,46 @@
         actualizarReloj();
         setInterval(actualizarReloj, 30000);
 
+        // Initial setup for default states
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleIGVSubOptions();
+            actualizarTextoAviso();
+
+            // Allow radio buttons to be deselected on click (if already selected) or double click
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('mousedown', function() {
+                    this.wasChecked = this.checked;
+                });
+
+                radio.addEventListener('click', function() {
+                    if (this.wasChecked) {
+                        this.checked = false;
+                        this.wasChecked = false;
+                        this.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                radio.addEventListener('dblclick', function() {
+                    this.checked = false;
+                    this.dispatchEvent(new Event('change'));
+                });
+            });
+
+            // Bind click from code badge to input field for all green modal triggers
+            document.querySelectorAll('.inp-green').forEach(input => {
+                const parent = input.closest('.det-pair, .c-pair');
+                if (parent) {
+                    const codeBadge = parent.querySelector('.det-code, .c-code');
+                    if (codeBadge) {
+                        codeBadge.style.cursor = 'pointer';
+                        codeBadge.addEventListener('click', () => {
+                            input.click();
+                        });
+                    }
+                }
+            });
+        });
+
         // ===== Árbol lateral colapsable =====
         function toggleBranch(el) {
             const branch = el.parentElement;
@@ -990,6 +2332,11 @@
             document.getElementById('view-621').style.display = (codigo === '621') ? 'block' : 'none';
             document.getElementById('view-1611').style.display = (codigo === '1611') ? 'block' : 'none';
 
+            // Cerrar la pasarela de pagos si estaba abierta
+            document.getElementById('view-pasarela-621').style.display = 'none';
+            document.querySelector('.paso-bar').style.display = '';
+            actualizarStepper(1); // Complete
+
             document.querySelectorAll('.tree-leaf.active').forEach(li => li.classList.remove('active'));
             const leaf = document.getElementById('leaf-' + codigo);
             if (leaf) leaf.classList.add('active');
@@ -997,15 +2344,48 @@
             document.getElementById('importe-total').textContent = 's/. 0.00';
         }
 
-        // ===== Utilidades =====
-        function formatearPeriodo(input) {
-            input.addEventListener('input', function () {
-                let v = this.value.replace(/[^\d]/g, '');
-                if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2, 6);
-                this.value = v;
+        // ===== Selector de período mm-aaaa (como el FV 621 real) =====
+        const MESES_CORTOS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+        let pickerAnio = new Date().getFullYear();
+
+        function renderPickerMeses() {
+            document.getElementById('pp-anio').textContent = pickerAnio;
+            const cont = document.getElementById('pp-meses');
+            const actual = document.getElementById('periodo-input').value; // "mm-aaaa"
+            cont.innerHTML = '';
+            MESES_CORTOS.forEach((m, i) => {
+                const mm = String(i + 1).padStart(2, '0');
+                const sel = actual === mm + '-' + pickerAnio ? ' sel' : '';
+                cont.insertAdjacentHTML('beforeend',
+                    '<div class="pp-mes' + sel + '" onclick="seleccionarPeriodo(\'' + mm + '\'); event.stopPropagation();">' + m + '</div>');
             });
         }
-        formatearPeriodo(document.getElementById('periodo-input'));
+
+        function abrirPickerPeriodo(e) {
+            e.stopPropagation();
+            renderPickerMeses();
+            document.getElementById('periodo-picker').classList.add('open');
+        }
+
+        function cambiarAnioPicker(delta) {
+            pickerAnio += delta;
+            renderPickerMeses();
+        }
+
+        function seleccionarPeriodo(mm) {
+            document.getElementById('periodo-input').value = mm + '-' + pickerAnio;
+            document.getElementById('periodo-picker').classList.remove('open');
+            document.getElementById('tipo-declaracion').value = 'original';
+            actualizarTextoAviso();
+            toggleIGVSubOptions();
+            // Dejar la lista completa de afectaciones tal como en la imagen 1 y 2
+            document.getElementById('info-inicial').style.display = 'block';
+        }
+
+        // Cierra el picker al hacer clic fuera
+        document.addEventListener('click', () => {
+            document.getElementById('periodo-picker').classList.remove('open');
+        });
 
         // Poblar la lista de períodos del 1611 (últimos 24 meses)
         (function () {
@@ -1031,25 +2411,488 @@
         ['rus-ingresos', 'rus-compras', 'rus-interes'].forEach(soloNumeros);
 
         function periodoValido(valor) {
-            if (!/^\d{2}\/\d{4}$/.test(valor)) return false;
+            if (!/^\d{2}-\d{4}$/.test(valor)) return false;
             const mes = parseInt(valor.slice(0, 2), 10);
             return mes >= 1 && mes <= 12;
         }
 
-        // ===== Formulario 621 =====
+        // =====================================================================
+        // Formulario 621 - IGV Renta Mensual
+        // Lógica replicada de la macro Excel "FV 621 - AA4 - Mayo 2025.xlsm"
+        // (hojas B, C y D + asistentes de casilla)
+        // =====================================================================
+        const IGV_TASA = 0.18;        // Tasa general IGV+IPM
+        const IGV_TASA_ESP = 0.10;    // Ley N° 31556 (restaurantes y hoteles)
+        const UIT = 5350;             // UIT 2025 (la macro usaba 5150, UIT 2024)
+
+        let infoGeneralOk = false;    // bloquea las pestañas 2 y 3 hasta validar
+
+        function val(id) {
+            const el = document.getElementById(id);
+            const n = parseFloat(String(el.value).replace(/,/g, ''));
+            return isNaN(n) ? 0 : n;
+        }
+
+        function formatoMiles(n) {
+            return Math.round(n).toLocaleString('en-US');
+        }
+
+        function setVal(id, n) {
+            document.getElementById(id).value = formatoMiles(n);
+        }
+
+        // Sin movimiento: limpia las casillas del detalle (declaración en cero)
+        function toggleSinMovimiento() {
+            const sinMov = document.querySelector('input[name="sin-movimiento"]:checked');
+            if (sinMov && sinMov.value === 'si') {
+                document.querySelectorAll('#tab621-detalle input').forEach(i => i.value = '');
+            }
+        }
+
+        // --- Navegación entre pestañas del 621 ---
+        function cambiarTab621(tab) {
+            if (tab !== 'info' && !infoGeneralOk) {
+                alert('Complete primero la Información General.');
+                return;
+            }
+            ['info', 'detalle', 'deuda'].forEach(t => {
+                document.getElementById('tab621-' + t).style.display = (t === tab) ? 'block' : 'none';
+                document.getElementById('tab621-btn-' + t).classList.toggle('active', t === tab);
+            });
+            if (tab === 'detalle') { mostrarSubDetalle('ventas'); aplicarVisibilidadDetalle(); }
+            if (tab === 'deuda') recalcularDeuda();
+        }
+
+        // Sub-pestañas del Detalle: IGV (Ventas/Compras/Reporte), IVAP y Renta
+        function mostrarSubDetalle(sub) {
+            const paneles = ['ventas', 'compras', 'reporte', 'ivap', 'renta'];
+            paneles.forEach(p => {
+                document.getElementById('det-' + p).style.display = (p === sub) ? 'block' : 'none';
+            });
+
+            const esIGV = ['ventas', 'compras', 'reporte'].includes(sub);
+            document.getElementById('subtabs-igv').style.display = esIGV ? 'flex' : 'none';
+            document.getElementById('st1-igv').classList.toggle('active', esIGV);
+            document.getElementById('st1-ivap').classList.toggle('active', sub === 'ivap');
+            document.getElementById('st1-renta').classList.toggle('active', sub === 'renta');
+            ['ventas', 'compras', 'reporte'].forEach(p => {
+                document.getElementById('st2-' + p).classList.toggle('active', sub === p);
+            });
+
+            if (sub === 'renta') actualizarMesPeriodo();
+            recalcularDetalle();
+        }
+
+        // Rellena el nombre del mes del período en las preguntas de Renta
+        function actualizarMesPeriodo() {
+            const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
+            const periodo = document.getElementById('periodo-input').value;
+            if (!periodoValido(periodo)) return;
+            const mes = MESES_LARGOS[parseInt(periodo.slice(0, 2), 10) - 1];
+            document.querySelectorAll('.mes-per').forEach(s => s.textContent = mes);
+        }
+
+        // Toggle the suboptions for IGV - Cuenta propia
+        function toggleIGVSubOptions() {
+            const isCuentaPropia = document.getElementById('rb-igv-cuenta-propia').checked;
+            const subOpts = document.getElementById('sub-igv-options');
+            if (isCuentaPropia) {
+                subOpts.style.display = 'block';
+            } else {
+                subOpts.style.display = 'none';
+            }
+        }
+
+        // Dynamically update yellow warning text based on Tipo de Declaración select
+        function actualizarTextoAviso() {
+            const selectDec = document.getElementById('tipo-declaracion');
+            const avisoText = document.getElementById('aviso-renta-igv-text');
+            if (selectDec.value === 'rectificatoria' || selectDec.value === 'sustitutoria') {
+                avisoText.innerHTML = '<strong>Sr. Contribuyente,</strong> seleccione el tributo o tributos a sustituir/rectificar.';
+            } else {
+                avisoText.innerHTML = '<strong>Sr. Contribuyente,</strong> seleccione los tributos a declarar.';
+            }
+        }
+
+        // Réplica de Hacia_Detalle() de la macro: oculta filas según prorrata y tasa especial
+        function aplicarVisibilidadDetalle() {
+            const ventas = document.querySelector('input[name="vng-full"]:checked');
+            const prorrata = ventas && ventas.value === 'si';
+            const tasaEspecial = document.getElementById('chk-ley31556').checked;
+
+            ['row-105', 'row-109', 'row-110', 'row-116', 'row-119', 'row-173'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = prorrata ? 'flex' : 'none';
+            });
+            ['row-154', 'row-156'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = tasaEspecial ? 'flex' : 'none';
+            });
+
+            // Toggle IVAP sub-tab visibility based on whether IVAP is checked in main tab
+            const tieneIVAP = document.getElementById('rb-ivap').checked;
+            document.getElementById('st1-ivap').style.display = tieneIVAP ? 'block' : 'none';
+
+            recalcularDetalle();
+        }
+
         function siguiente621() {
             const periodo = document.getElementById('periodo-input').value.trim();
-            const declaracion = document.getElementById('tipo-declaracion').value;
-            const igv = document.querySelector('input[name="igv-afectacion"]:checked');
-            const renta = document.querySelector('input[name="renta-regimen"]:checked');
-            const ventas = document.querySelector('input[name="ventas-no-grav"]:checked');
+            if (!periodoValido(periodo)) { alert('Seleccione el período tributario.'); return; }
 
-            if (!periodoValido(periodo)) { alert('Ingrese un período válido en formato mm/aaaa.'); return; }
+            const declaracion = document.getElementById('tipo-declaracion').value;
+            const renta = document.querySelector('input[name="renta-full"]:checked');
+            const ventas = document.querySelector('input[name="vng-full"]:checked');
+            const tieneIGV = document.querySelector('input[name="igv-full"]:checked');
+            const tieneIVAP = document.querySelector('input[name="ivap-full"]:checked');
+
             if (!declaracion) { alert('Seleccione el tipo de declaración.'); return; }
-            if (!igv || !renta) { alert('Seleccione la afectación del IGV y el régimen de renta.'); return; }
+            if (!tieneIGV && !tieneIVAP && !renta) { alert('Sr. Contribuyente, seleccione los tributos a declarar.'); return; }
+            if (!renta) { alert('Seleccione el Régimen de Renta.'); return; }
             if (!ventas) { alert('Indique si ha realizado ventas no gravadas con el IGV en los últimos 12 meses.'); return; }
 
-            alert('Información General registrada.\n\nPeríodo: ' + periodo + '\nDeclaración: ' + declaracion + '\n\n(Simulador - Detalle de Declaración EN PROCESO DE IMPLEMENTACION)');
+            infoGeneralOk = true;
+            cambiarTab621('detalle');
+        }
+
+        // --- Detalle de la Declaración (hoja C de la macro) ---
+        // Ventas:   101 = ROUND(100×18%), 103 = ROUND(102×18%), 155 = ROUND(154×10%)
+        //           131 = 101 − 103 + 155
+        // Compras:  108 = ROUND(107×18%), 157 = ROUND(156×10%)
+        //           111 = ROUND(110×18%×coef173), 115 = ROUND(114×18%), 117 = ROUND(116×18%×coef173)
+        //           178 = 108 + 157 + 111 + 115 + 117
+        function coeficiente173() {
+            const prorrata = (document.querySelector('input[name="vng-full"]:checked') || {}).value === 'si';
+            if (!prorrata) return 1;
+            // Y42 = SUM(gravadas + exportaciones) / SUM(gravadas + exportaciones + no gravadas)
+            let grav = val('c100') - val('c102');   // fila del período actual (auto)
+            let expo = val('c106');
+            let noGrav = val('c105');
+            prorrataHist.forEach(r => { grav += r.grav; expo += r.expo; noGrav += r.noGrav; });
+            const total = grav + expo + noGrav;
+            return total === 0 ? 0 : (grav + expo) / total;
+        }
+
+        function recalcularDetalle() {
+            setVal('c101', Math.round(val('c100') * IGV_TASA));
+            setVal('c103', Math.round(val('c102') * IGV_TASA));
+            setVal('c155', Math.round(val('c154') * IGV_TASA_ESP));
+            setVal('c131', Math.round(val('c101') - val('c103') + val('c155')));
+
+            const coef = coeficiente173();
+            document.getElementById('c173').value = coef.toFixed(4);
+
+            setVal('c108', Math.round(val('c107') * IGV_TASA));
+            setVal('c157', Math.round(val('c156') * IGV_TASA_ESP));
+            setVal('c111', Math.round(val('c110') * IGV_TASA * coef));
+            setVal('c115', Math.round(val('c114') * IGV_TASA));
+            setVal('c117', Math.round(val('c116') * IGV_TASA * coef));
+            setVal('c178', val('c108') + val('c157') + val('c111') + val('c115') + val('c117'));
+
+            recalcularRenta();
+        }
+
+        // --- Pago a cuenta de Renta (casillas 380, 315, 301, 312 de la hoja C) ---
+        // Régimen General:  MAX(coeficiente, 1.5%) × ingresos
+        // Régimen Especial: 1.5% × ingresos
+        // Régimen MYPE:     si acumulado > 300 UIT → MAX(coeficiente, 1.5%), si no → 1%
+        // Régimen Agrario (Ley 31110): 0.8% (inciso b, Art. 85°)
+        function recalcularRenta() {
+            const regimen = (document.querySelector('input[name="renta-full"]:checked') || {}).value;
+            const coef380 = coeficiente380();
+            const acumulado = val('ing-acum');
+            const ingresos = val('c301');
+            let pct, impuesto;
+
+            document.getElementById('c380').value = coef380.toFixed(4);
+            document.getElementById('row-acum').style.display = (regimen === 'mype') ? 'flex' : 'none';
+
+            let tasaAplicada; // casilla 894: tasa efectivamente usada para la casilla 312
+            if (regimen === 'especial') {
+                pct = 1.5;
+                tasaAplicada = 0.015;
+            } else if (regimen === 'mype') {
+                if (acumulado > 300 * UIT) {
+                    pct = 1.5;
+                    tasaAplicada = Math.max(coef380, 0.015);
+                } else {
+                    pct = 1.0;
+                    tasaAplicada = 0.01;
+                }
+            } else if (regimen === 'agrario-31110' || regimen === 'agrario') {
+                pct = 0.8;
+                tasaAplicada = 0.008;
+            } else { // Régimen General
+                pct = 1.5;
+                tasaAplicada = Math.max(coef380, 0.015);
+            }
+            impuesto = Math.round(tasaAplicada * ingresos);
+
+            document.getElementById('c315').value = pct.toFixed(1);
+            document.getElementById('c894').value = tasaAplicada.toFixed(4);
+            document.getElementById('c312').value = impuesto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function coeficiente380() {
+            const imp = val('m380-891');
+            const ing = val('m380-892');
+            return ing === 0 ? 0 : Math.round((imp / ing) * 10000) / 10000;
+        }
+
+        // --- Determinación de la Deuda (hoja D de la macro) ---
+        function recalcularDeuda() {
+            recalcularDetalle();
+
+            // IGV
+            const c140 = val('c131') - val('c178');
+            const c184 = c140 - val('c145');
+            const c171 = val('c171'), c168 = val('c168');
+            const c179 = val('c179'), c176 = val('c176');
+
+            // D10: saldo de percepciones no aplicadas
+            const c164 = (c168 + c171 > Math.max(c184, 0)) ? (c168 + c171 - Math.max(c184, 0)) : 0;
+            // D13: saldo de retenciones no aplicadas (sobre el remanente tras percepciones)
+            const remanente = Math.max(c184 - c171 - c168, 0);
+            const c165 = (c176 + c179 > remanente) ? (c176 + c179 - remanente) : 0;
+
+            const c681 = Math.max(c184 - c171 - c168 - c179 - c176, 0);
+            const c188 = Math.round(Math.max(c681 - val('c185') + val('c187'), 0));
+
+            setVal('c140', c140);
+            setVal('c184', c184);
+            setVal('c164', c164);
+            setVal('c165', c165);
+            setVal('c681', c681);
+            setVal('c188', c188);
+
+            // RENTA
+            const c302 = val('c312');
+            const c304 = c302 - val('c303');
+            const c682 = Math.max(c304 - (val('c326') + val('c327') + val('c305') + val('c328') + val('c336')), 0);
+            const c324 = Math.round(Math.max(c682 - val('c317') + val('c319'), 0));
+
+            setVal('c302', c302);
+            setVal('c304', c304);
+            setVal('c682', c682);
+            setVal('c324', c324);
+
+            // Importe total (Pasarella: P7 = D22 + G22)
+            const totalPagar = val('c189') + val('c307');
+            document.getElementById('importe-total').textContent =
+                's/. ' + totalPagar.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // Réplica del Worksheet_Change de Hoja1: si hay deuda y el importe a pagar es 0
+            const deudaTotal = c188 + c324;
+            const importeCero = val('c189') === 0 && val('c307') === 0;
+            document.getElementById('motivo-no-pago').style.display =
+                (deudaTotal > 0 && importeCero) ? 'block' : 'none';
+        }
+
+        function agregarBandeja621() {
+            const c189 = val('c189'), c307 = val('c307');
+            const c188 = val('c188'), c324 = val('c324');
+            if (c189 > c188) { alert('El importe a pagar de IGV (casilla 189) no puede ser mayor a la deuda tributaria (casilla 188: S/ ' + formatoMiles(c188) + ').'); return; }
+            if (c307 > c324) { alert('El importe a pagar de Renta (casilla 307) no puede ser mayor a la deuda tributaria (casilla 324: S/ ' + formatoMiles(c324) + ').'); return; }
+            if ((c188 + c324) > 0 && (c189 + c307) === 0 && !document.querySelector('input[name="motivo-pago"]:checked')) {
+                alert('Ha determinado deuda tributaria con importe a pagar S/ 0. Indique el motivo por el cual no realiza el pago.');
+                return;
+            }
+
+            document.querySelector('.badge-count').textContent = '1';
+            mostrarPasarela621();
+        }
+
+        // ===== Pasarela de pagos del 621 (Presente/Pague) =====
+        function actualizarStepper(pasoActivo) {
+            document.querySelectorAll('.stepper .step').forEach((s, i) => {
+                s.classList.toggle('active', i === pasoActivo);
+            });
+        }
+
+        function mostrarPasarela621() {
+            const total = val('c189') + val('c307');
+            document.getElementById('pasarela621-total').textContent =
+                'S/ ' + total.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+            document.getElementById('view-621').style.display = 'none';
+            document.querySelector('.paso-bar').style.display = 'none';
+            document.getElementById('view-pasarela-621').style.display = 'block';
+            actualizarStepper(2); // Presente/Pague
+            window.scrollTo(0, 0);
+        }
+
+        function volverDeclaracion621() {
+            document.getElementById('view-pasarela-621').style.display = 'none';
+            document.querySelector('.paso-bar').style.display = '';
+            document.getElementById('view-621').style.display = 'block';
+            actualizarStepper(1); // Complete
+        }
+
+        function togglePasarelaAcc(id) {
+            const bodies = document.querySelectorAll('#view-pasarela-621 .pasarela-acc-body');
+            const icons = document.querySelectorAll('#view-pasarela-621 .pasarela-acc-header i');
+
+            bodies.forEach((b, idx) => {
+                if (idx + 1 === id) {
+                    const isVisible = b.style.display === 'block';
+                    b.style.display = isVisible ? 'none' : 'block';
+                    icons[idx].className = isVisible ? 'fas fa-plus' : 'fas fa-minus';
+                } else {
+                    b.style.display = 'none';
+                    icons[idx].className = 'fas fa-plus';
+                }
+            });
+        }
+
+        function procesarPago621() {
+            const total = val('c189') + val('c307');
+            const medio = document.querySelector('input[name="pay-method-621"]:checked');
+
+            if (total > 0 && !medio) {
+                alert('Sr. Contribuyente, seleccione un medio de pago para continuar.');
+                return;
+            }
+
+            alert('Sr. Contribuyente, su declaración ha sido presentada' +
+                (total > 0 ? ' y pagada' : '') + ' satisfactoriamente.\n\n' +
+                'Período: ' + document.getElementById('periodo-input').value + '\n' +
+                'Importe pagado: S/ ' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\n\n' +
+                '(Simulador - Constancia EN PROCESO DE IMPLEMENTACION)');
+
+            document.querySelector('.badge-count').textContent = '0';
+            if (medio) medio.checked = false;
+            volverDeclaracion621();
+        }
+
+        // --- Recálculo automático al escribir ---
+        const inputsDetalle = ['c100', 'c102', 'c154', 'c106', 'c109', 'c112', 'c107', 'c156', 'c110',
+            'c113', 'c114', 'c116', 'c119', 'c120', 'c301', 'ing-acum'];
+        const inputsDeuda = ['c145', 'c171', 'c168', 'c179', 'c176', 'c187', 'c189',
+            'c303', 'c326', 'c327', 'c305', 'c328', 'c319', 'c307'];
+
+        inputsDetalle.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', () => { el.value = el.value.replace(/[^\d]/g, ''); recalcularDetalle(); });
+        });
+        inputsDeuda.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', () => { el.value = el.value.replace(/[^\d]/g, ''); recalcularDeuda(); });
+        });
+
+        // =====================================================================
+        // Modales asistentes de casilla
+        // =====================================================================
+        let modalPagosDestino = null; // 'c336' | 'c185' | 'c317'
+        const prorrataHist = [];      // 11 períodos anteriores de la casilla 173
+        // Cada casilla de pagos previos guarda sus propias filas (como en la macro: Tablas J3:P4, J8:P9, J13:P14)
+        const pagosPrevios = {
+            c336: { f1: '', o1: '', d1: '', p1: '', f2: '', o2: '', d2: '', p2: '' },
+            c185: { f1: '', o1: '', d1: '', p1: '', f2: '', o2: '', d2: '', p2: '' },
+            c317: { f1: '', o1: '', d1: '', p1: '', f2: '', o2: '', d2: '', p2: '' }
+        };
+
+        function abrirModal(id) {
+            // 336/185/317 comparten el mismo modal de pagos previos
+            if (id === 'm336' || id === 'm185' || id === 'm317') {
+                modalPagosDestino = 'c' + id.slice(1);
+                const titulos = {
+                    c336: 'Asistente de la Casilla 336 - Pagos a cuenta en exceso',
+                    c185: 'Asistente de la Casilla 185 - Pagos Previos IGV',
+                    c317: 'Asistente de la Casilla 317 - Pagos Previos Renta'
+                };
+                document.getElementById('mpagos-titulo').firstChild.textContent = titulos[modalPagosDestino] + ' ';
+                const d = pagosPrevios[modalPagosDestino];
+                ['f1', 'o1', 'd1', 'p1', 'f2', 'o2', 'd2', 'p2'].forEach(k => {
+                    document.getElementById('mpagos-' + k).value = d[k];
+                });
+                document.getElementById('mpagos-total').textContent = formatoMiles(val('mpagos-p1') + val('mpagos-p2'));
+                document.getElementById('m336').classList.add('open');
+                return;
+            }
+            if (id === 'm173') poblarTabla173();
+            document.getElementById(id).classList.add('open');
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function aceptarModal127() {
+            setVal('c127', val('m127-183') + val('m127-186'));
+            cerrarModal('m127');
+            recalcularDetalle();
+        }
+
+        function aceptarModal105() {
+            setVal('c105', val('m105-a1') + val('m105-a2') + val('m105-a3') + val('m105-a4') + val('m105-b'));
+            cerrarModal('m105');
+            recalcularDetalle();
+        }
+
+        function aceptarModal122() {
+            setVal('c122', val('m122-238') + val('m122-239'));
+            cerrarModal('m122');
+            recalcularDetalle();
+        }
+
+        function aceptarModal380() {
+            document.getElementById('m380-coef').textContent = coeficiente380().toFixed(4);
+            cerrarModal('m380');
+            recalcularDetalle();
+        }
+
+        function aceptarModalPagos() {
+            const d = pagosPrevios[modalPagosDestino];
+            ['f1', 'o1', 'd1', 'p1', 'f2', 'o2', 'd2', 'p2'].forEach(k => {
+                d[k] = document.getElementById('mpagos-' + k).value;
+            });
+            const total = val('mpagos-p1') + val('mpagos-p2');
+            setVal(modalPagosDestino, total);
+            cerrarModal('m336');
+            recalcularDeuda();
+        }
+
+        // Casilla 173: genera las 12 filas (11 editables + período actual automático)
+        function poblarTabla173() {
+            const tbody = document.querySelector('#m173-tabla tbody');
+            tbody.innerHTML = '';
+            const periodo = document.getElementById('periodo-input').value.trim();
+            const [mm, yyyy] = periodoValido(periodo) ? periodo.split('-').map(Number) : [new Date().getMonth() + 1, new Date().getFullYear()];
+
+            for (let i = 11; i >= 1; i--) {
+                const f = new Date(yyyy, mm - 1 - i, 1);
+                const etiqueta = String(f.getFullYear()) + String(f.getMonth() + 1).padStart(2, '0');
+                const idx = 11 - i;
+                if (!prorrataHist[idx]) prorrataHist[idx] = { grav: 0, expo: 0, noGrav: 0 };
+                const r = prorrataHist[idx];
+                tbody.insertAdjacentHTML('beforeend',
+                    '<tr><td>' + etiqueta + '</td>' +
+                    '<td><input type="text" inputmode="numeric" data-idx="' + idx + '" data-campo="grav" value="' + (r.grav || '') + '"></td>' +
+                    '<td><input type="text" inputmode="numeric" data-idx="' + idx + '" data-campo="expo" value="' + (r.expo || '') + '"></td>' +
+                    '<td><input type="text" inputmode="numeric" data-idx="' + idx + '" data-campo="noGrav" value="' + (r.noGrav || '') + '"></td></tr>');
+            }
+            // Fila del período actual (solo lectura, viene del formulario)
+            const actual = String(yyyy) + String(mm).padStart(2, '0');
+            tbody.insertAdjacentHTML('beforeend',
+                '<tr style="background: #F7F7F7; font-weight: 700;"><td>' + actual + ' (actual)</td>' +
+                '<td>' + formatoMiles(val('c100') - val('c102')) + '</td>' +
+                '<td>' + formatoMiles(val('c106')) + '</td>' +
+                '<td>' + formatoMiles(val('c105')) + '</td></tr>');
+
+            tbody.querySelectorAll('input').forEach(inp => {
+                inp.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^\d]/g, '');
+                    prorrataHist[+this.dataset.idx][this.dataset.campo] = parseFloat(this.value) || 0;
+                    document.getElementById('m173-coef').textContent = coeficiente173().toFixed(4);
+                });
+            });
+            document.getElementById('m173-coef').textContent = coeficiente173().toFixed(4);
+        }
+
+        function aceptarModal173() {
+            cerrarModal('m173');
+            recalcularDetalle();
         }
 
         // ===== Formulario 1611 Nuevo RUS =====
@@ -1106,12 +2949,69 @@
             alert('Formulario 1611 - NUEVO RUS agregado a la bandeja.\n\nPeríodo: ' + periodo + '\nCategoría: ' + categoria + '\nCuota: S/ ' + cuota + '\nInterés moratorio: S/ ' + interes + '\nTotal a pagar: S/ ' + total + '\n\n(Simulador - siguiente paso EN PROCESO DE IMPLEMENTACION)');
         }
 
-        // ===== Limpiar (según vista activa) =====
+        // Toggle the collapsible section in the Debt tab
+        function toggleDeudaSection(header) {
+            const grid = document.querySelector('.deuda-grid');
+            grid.classList.toggle('collapsed');
+            const arrow = header.querySelector('.arrow-icon');
+            if (grid.classList.contains('collapsed')) {
+                arrow.textContent = '▼';
+            } else {
+                arrow.textContent = '▲';
+            }
+        }
+
+        // Validate the declaration and show success modal (Image 5)
+        function validarDeclaracion() {
+            recalcularDeuda();
+            abrirModal('modal-val-ok');
+        }
+
+        // ===== Limpiar (según vista activa) - réplica de Inicializar() de la macro =====
         function limpiarFormulario() {
             if (document.getElementById('view-621').style.display !== 'none') {
                 document.getElementById('periodo-input').value = '';
                 document.getElementById('tipo-declaracion').value = '';
-                document.querySelectorAll('input[name="igv-afectacion"], input[name="renta-regimen"], input[name="ventas-no-grav"]').forEach(r => r.checked = false);
+                document.querySelectorAll('input[name="igv-full"], input[name="ivap-full"], input[name="renta-full"], input[name="vng-full"], input[name="motivo-pago"]').forEach(r => r.checked = false);
+                
+                document.getElementById('rb-igv-cuenta-propia').checked = true;
+                document.getElementById('chk-tasa18').checked = true;
+                document.getElementById('chk-ley31556').checked = false;
+                
+                const mypeRadio = document.querySelector('input[name="renta-full"][value="mype"]');
+                if (mypeRadio) mypeRadio.checked = true;
+                
+                const sinMovNo = document.querySelector('input[name="sin-movimiento"][value="no"]');
+                if (sinMovNo) sinMovNo.checked = true;
+                
+                toggleIGVSubOptions();
+                actualizarTextoAviso();
+                
+                document.getElementById('info-inicial').style.display = 'block';
+
+                // Limpia todas las casillas del Detalle y la Determinación de la Deuda
+                document.querySelectorAll('#tab621-detalle input, #tab621-deuda input').forEach(i => i.value = '');
+                // Limpia los asistentes
+                ['m127-183', 'm127-186', 'm105-a1', 'm105-a2', 'm105-a3', 'm105-a4', 'm105-b',
+                 'm122-238', 'm122-239', 'm380-891', 'm380-892'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('m380-coef').textContent = '0.0000';
+                prorrataHist.length = 0;
+                Object.keys(pagosPrevios).forEach(k => {
+                    Object.keys(pagosPrevios[k]).forEach(c => pagosPrevios[k][c] = '');
+                });
+                document.getElementById('motivo-no-pago').style.display = 'none';
+
+                // Reset collapsible section
+                const grid = document.querySelector('.deuda-grid');
+                if (grid) grid.classList.remove('collapsed');
+                const header = document.querySelector('.deuda-section-header');
+                if (header) {
+                    const arrow = header.querySelector('.arrow-icon');
+                    if (arrow) arrow.textContent = '▲';
+                }
+
+                infoGeneralOk = false;
+                cambiarTab621('info');
             } else {
                 document.getElementById('rus-periodo').value = '';
                 document.getElementById('rus-ingresos').value = '';

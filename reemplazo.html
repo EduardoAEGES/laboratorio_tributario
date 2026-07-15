@@ -82,6 +82,47 @@
         tbody tr:nth-child(even) {
             background: #e9edf3;
         }
+
+        /* CLASIFICACION DE CASILLAS */
+        td.celda-req {
+            background: #fff6d9;
+        }
+
+        td.celda-lock {
+            background: #e3e6e8;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        th .marca-req {
+            color: #ffd54f;
+            font-weight: bold;
+        }
+
+        /* INPUT CON AUTOCOMPLETADO DENTRO DE CELDA */
+        .cell-input {
+            width: 100%;
+            min-width: 90px;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            font-family: inherit;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .cell-input:focus {
+            outline: 1px solid #1a73e8;
+            background: #fff;
+        }
+
+        .leyenda span {
+            display: inline-block;
+            padding: 2px 10px;
+            margin-right: 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -103,6 +144,13 @@
         <label style="font-weight: bold; cursor: pointer;">
             <input type="radio" name="mode" value="RVIE" onchange="cambiarModo()"> Reemplazo RVIE (Ventas)
         </label>
+    </div>
+
+    <!-- LEYENDA DE CASILLAS -->
+    <div class="leyenda" style="margin-bottom: 15px;">
+        <span style="background:#fff6d9; border:1px solid #e0c96a;">Obligatorio *</span>
+        <span style="background:#fff; border:1px solid #ccc;">Opcional / según condición</span>
+        <span style="background:#e3e6e8; color:#777; border:1px solid #bbb;">&#128274; No llenar (se completa automáticamente)</span>
     </div>
 
     <input type="file" id="csvFile" accept=".csv, .txt">
@@ -196,6 +244,159 @@
         // Agregar CLU1-39 a RCE
         for (let i = 1; i <= 39; i++) COLUMNS.RCE.push("CLU" + i);
 
+        // ===================== TABLAS SUNAT (Anexo N.° 1) =====================
+        // Tabla 1: Tipo de Documento de Identidad
+        const TABLA_DOC_IDENTIDAD = [
+            ["0", "Doc. trib. no dom. sin RUC"],
+            ["1", "DNI - Doc. Nacional de Identidad"],
+            ["4", "Carnet de extranjería"],
+            ["6", "RUC - Registro Único de Contribuyentes"],
+            ["7", "Pasaporte"],
+            ["A", "Céd. diplomática de identidad"],
+            ["B", "Doc. identidad país residencia - no dom."],
+            ["C", "TIN - Doc. trib. PP.NN."],
+            ["D", "IN - Doc. trib. PP.JJ."],
+            ["E", "TAM - Tarjeta Andina de Migración"],
+            ["F", "Permiso Temporal de Permanencia (PTP)"],
+            ["G", "Salvoconducto"]
+        ];
+
+        // Tabla 3: Tipo de Comprobante de Pago o Documento (RVIE)
+        const TABLA_CP_RVIE = [
+            ["00", "Otros"], ["01", "Factura"], ["03", "Boleta de venta"], ["04", "Liquidación de compra"],
+            ["05", "Boleto de transporte aéreo (BME)"], ["06", "Carta de porte aéreo"],
+            ["07", "Nota de crédito"], ["08", "Nota de débito"],
+            ["11", "Póliza emitida por las bolsas de valores"], ["12", "Ticket de máquina registradora o Ticket POS"],
+            ["13", "Documento de bancos y empresas supervisadas SBS"], ["14", "Recibo de servicios públicos / Recibo electrónico SP"],
+            ["15", "Boleto de transporte urbano o ferroviario de pasajeros"], ["16", "Boleto de viaje - transporte interprovincial"],
+            ["17", "Documento de la Iglesia Católica por arrendamiento"], ["18", "Documento emitido por las AFP"],
+            ["19", "Boleto por atracciones y espectáculos públicos"], ["21", "Conocimiento de embarque - carga marítima"],
+            ["23", "Póliza de adjudicación por remate"], ["24", "Certificado de pago de regalías PERUPETRO"],
+            ["27", "Seguro Complementario de Trabajo de Riesgo"], ["28", "Etiquetas TUUA"],
+            ["29", "Documentos emitidos por COFOPRI"], ["30", "Documento rol adquirente - tarjetas de crédito/débito"],
+            ["32", "Documento recaudadoras Garantía de Red Principal"], ["34", "Documento del Operador"],
+            ["35", "Documento del Partícipe"], ["36", "Recibo de distribución de gas natural"],
+            ["37", "Documento de revisiones técnicas vehiculares"], ["42", "Documento rol adquiriente - tarjetas propias"],
+            ["43", "Boleto de aviación - transporte no regular"], ["44", "Billetes de lotería, rifas y apuestas"],
+            ["45", "Documento de centros educativos y culturales"], ["48", "Comprobante de Operaciones - Ley 29972"],
+            ["49", "Constancia de depósito - IVAP"], ["55", "BVME transporte ferroviario de pasajeros"],
+            ["56", "Comprobante de pago SEAE"], ["64", "Servicios complementarios al transporte aéreo"],
+            ["87", "Nota de crédito especial"], ["88", "Nota de débito especial"],
+            ["89", "Nota de Ajuste de Operaciones - Ley 29972"]
+        ];
+
+        // Tabla 11: Tipo de Comprobante de Pago o Documento (RCE)
+        const TABLA_CP_RCE = [
+            ["00", "Otros"], ["01", "Factura"], ["02", "Recibo por honorarios"], ["03", "Boleta de venta"],
+            ["04", "Liquidación de compra"], ["05", "Boleto de transporte aéreo (BME)"], ["06", "Carta de porte aéreo"],
+            ["07", "Nota de crédito"], ["08", "Nota de débito"], ["10", "Recibo por arrendamiento (Form. 1683)"],
+            ["11", "Póliza emitida por las bolsas de valores"], ["12", "Ticket de máquina registradora o Ticket POS"],
+            ["13", "Documento de bancos y empresas supervisadas SBS"], ["14", "Recibo de servicios públicos / Recibo electrónico SP"],
+            ["15", "Boleto de transporte urbano o ferroviario de pasajeros"], ["16", "Boleto de viaje - transporte interprovincial"],
+            ["17", "Documento de la Iglesia Católica por arrendamiento"], ["18", "Documento emitido por las AFP y EPS"],
+            ["19", "Boleto por atracciones y espectáculos públicos"], ["21", "Conocimiento de embarque - carga marítima"],
+            ["22", "Formulario 820 - Operaciones no habituales"], ["23", "Póliza de adjudicación por remate"],
+            ["24", "Certificado de pago de regalías PERUPETRO"], ["25", "Documento de atribución"],
+            ["27", "Seguro Complementario de Trabajo de Riesgo"], ["28", "Documentos de servicios aeroportuarios CORPAC"],
+            ["29", "Documentos emitidos por COFOPRI"], ["30", "Documento rol adquirente - tarjetas de crédito/débito"],
+            ["32", "Documento recaudadoras Garantía de Red Principal"], ["34", "Documento del Operador"],
+            ["35", "Documento del Partícipe"], ["36", "Recibo de distribución de gas natural"],
+            ["37", "Documento de revisiones técnicas vehiculares"], ["42", "Documento rol adquiriente - tarjetas propias"],
+            ["43", "Boleto de aviación - transporte no regular"], ["44", "Billetes de lotería, rifas y apuestas"],
+            ["45", "Documento de centros educativos y culturales"], ["46", "Formulario de declaración - pago de tributos internos"],
+            ["48", "Comprobante de Operaciones - Ley 29972"], ["50", "DAM - Importación definitiva"],
+            ["51", "Póliza o DUI fraccionada"], ["52", "Despacho simplificado - Importación simplificada"],
+            ["53", "Declaración de mensajería o courier"], ["54", "Liquidación de cobranza"],
+            ["55", "BVME transporte ferroviario de pasajeros"], ["56", "Comprobante de pago SEAE"],
+            ["64", "Servicios complementarios al transporte aéreo"], ["87", "Nota de crédito especial"],
+            ["88", "Nota de débito especial"], ["89", "Nota de Ajuste de Operaciones - Ley 29972"],
+            ["91", "Comprobante emitido por sujeto no domiciliado"], ["96", "Exceso de crédito fiscal por retiro de bienes"],
+            ["97", "Nota de crédito - No domiciliado"], ["98", "Nota de débito - No domiciliado"]
+        ];
+
+        // Crear los <datalist> de autocompletado (se escribe libre o se elige)
+        function crearDatalists() {
+            const defs = {
+                dl_doc_ident: TABLA_DOC_IDENTIDAD,
+                dl_cp_rvie: TABLA_CP_RVIE,
+                dl_cp_rce: TABLA_CP_RCE
+            };
+            for (const id in defs) {
+                const dl = document.createElement("datalist");
+                dl.id = id;
+                defs[id].forEach(([cod, desc]) => {
+                    const opt = document.createElement("option");
+                    opt.value = cod;
+                    opt.textContent = desc;
+                    dl.appendChild(opt);
+                });
+                document.body.appendChild(dl);
+            }
+        }
+
+        // Datalist que corresponde a una columna segun su nombre y el modo actual
+        function datalistParaColumna(nombre) {
+            if (nombre === "Tipo Doc Identidad") return "dl_doc_ident";
+            if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
+                return currentMode === "RVIE" ? "dl_cp_rvie" : "dl_cp_rce";
+            }
+            return null;
+        }
+
+        // ============== CLASIFICACION DE CASILLAS POR MODO ==============
+        // req = obligatorio | opt = opcional o segun condicion | lock = no llenar
+        const TIPOS_CAMPO = {
+            RCE: [
+                "req", "req", "req", "lock", "req", "opt", "req", "opt", "opt", "req",
+                "opt", "req", "req", "req", "req", "req", "req", "req", "req", "req",
+                "opt", "opt", "opt", "opt", "req", "req", "opt", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt",
+                "opt"
+            ],
+            RVIE: [
+                "req", "req", "req", "lock", "req", "opt", "req", "opt", "req", "opt",
+                "req", "req", "req", "opt", "opt", "opt", "opt", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "req", "req", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt"
+            ]
+        };
+
+        // CLU1-39 de RCE son opcionales
+        for (let i = 1; i <= 39; i++) TIPOS_CAMPO.RCE.push("opt");
+
+        // Configura una celda de datos segun su columna: clasificacion + autocompletado
+        function configurarCelda(td, colIdx, valor) {
+            const nombre = COLUMNS[currentMode][colIdx];
+            const tipo = TIPOS_CAMPO[currentMode][colIdx] || "opt";
+            td.className = "celda-" + tipo;
+
+            if (tipo === "lock") {
+                td.contentEditable = false;
+                td.title = "No llenar: se completa automáticamente";
+                td.innerText = "";
+                return;
+            }
+
+            const dl = datalistParaColumna(nombre);
+            if (dl) {
+                td.contentEditable = false;
+                const inp = document.createElement("input");
+                inp.setAttribute("list", dl);
+                inp.className = "cell-input";
+                inp.value = valor || "";
+                td.appendChild(inp);
+            } else {
+                td.contentEditable = true;
+                td.innerText = valor || "";
+            }
+        }
+
+        // Lee el valor de una celda (input de autocompletado o texto editable)
+        function valorCelda(td) {
+            const inp = td.querySelector("input");
+            return inp ? inp.value : td.innerText;
+        }
+
         let currentMode = "RCE";
 
         // INICIALIZACION
@@ -210,6 +411,9 @@
                 if (y === currentYear) opt.selected = true;
                 selAnio.appendChild(opt);
             }
+
+            // Listas de autocompletado de las tablas SUNAT
+            crearDatalists();
 
             // Crear Tabla por Defecto
             crearTablaDefault();
@@ -254,11 +458,23 @@
             thNum.innerText = "N°";
             trHead.appendChild(thNum);
 
-            headers.forEach(h => {
+            headers.forEach((h, idx) => {
                 const th = document.createElement("th");
                 th.innerText = h;
                 th.style.minWidth = "100px";
                 th.style.height = "20px";
+
+                // Marca visual segun clasificacion de la casilla
+                const tipo = TIPOS_CAMPO[currentMode][idx];
+                if (tipo === "req") {
+                    const marca = document.createElement("span");
+                    marca.className = "marca-req";
+                    marca.innerText = " *";
+                    th.appendChild(marca);
+                } else if (tipo === "lock") {
+                    th.innerText += " \u{1F512}";
+                }
+
                 trHead.appendChild(th);
             });
 
@@ -289,7 +505,7 @@
             // Datos
             for (let k = 2; k < totalCols; k++) {
                 const td = document.createElement("td");
-                td.contentEditable = true;
+                configurarCelda(td, k - 2, "");
                 tr.appendChild(td);
             }
             tbody.appendChild(tr);
@@ -405,16 +621,9 @@
 
                 for (let k = 0; k < totalHeaders; k++) {
                     const td = document.createElement("td");
-                    td.contentEditable = true;
-
-                    // Forzar columna 3 (CAR SUNAT) vacia en ambos modos
-                    if (k === 3) {
-                        td.innerText = "";
-                    } else if (k < columnas.length) {
-                        td.innerText = columnas[k];
-                    } else {
-                        td.innerText = "";
-                    }
+                    // La columna CAR SUNAT queda bloqueada y vacia (configurarCelda)
+                    const valorImportado = (k < columnas.length) ? columnas[k] : "";
+                    configurarCelda(td, k, valorImportado);
                     tr.appendChild(td);
                 }
 
@@ -493,18 +702,15 @@
             // Empezamos desde i=2 (que corresponde a la columna de datos 0)
             for (let i = 2; i < totalColumns; i++) {
                 const td = document.createElement("td");
-                td.contentEditable = true;
 
                 // Auto-fill logic based on column index
-                // i=2 -> RUC
-                // i=3 -> Denom
-                // i=4 -> Periodo
+                // i=2 -> RUC, i=3 -> Denom, i=4 -> Periodo
+                let valor = "";
+                if (i == 2) valor = currentRuc;
+                else if (i == 3) valor = currentDenom;
+                else if (i == 4) valor = currentPeriodo;
 
-                if (i == 2) td.innerText = currentRuc;
-                else if (i == 3) td.innerText = currentDenom;
-                else if (i == 4) td.innerText = currentPeriodo;
-                else td.innerText = "";
-
+                configurarCelda(td, i - 2, valor);
                 tr.appendChild(td);
             }
 
@@ -545,7 +751,7 @@
                 const celdas = fila.querySelectorAll("td");
                 // Skip index 0 (checkbox) and index 1 (number)
                 for (let i = 2; i < celdas.length; i++) {
-                    datos.push(celdas[i].innerText);
+                    datos.push(valorCelda(celdas[i]));
                 }
                 contenido += datos.join(separador) + "\n";
             });
