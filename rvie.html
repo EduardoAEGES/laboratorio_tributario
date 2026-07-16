@@ -891,18 +891,7 @@
                                 <div class="table-responsive results-table-wrapper">
                                     <table class="results-table">
                                         <thead>
-                                            <!-- Group Headers -->
-                                            <tr>
-                                                <th colspan="10" class="group-header">Datos del CP</th>
-                                                <th colspan="4" class="group-header">Datos del Adquiriente</th>
-                                                <th colspan="12" class="group-header">Montos y Tasas</th>
-                                                <!-- Simplified Title -->
-                                                <th colspan="6" class="group-header">Totales y Moneda</th>
-                                                <th colspan="5" class="group-header">Referencias</th>
-                                                <th colspan="9" class="group-header">Detalle y Detracción</th>
-                                                <th colspan="10" class="group-header">Otros</th>
-                                            </tr>
-                                            <!-- Main Columns -->
+                                            <!-- Columnas idénticas al SIRE real (sin cabeceras agrupadas) -->
                                             <tr>
                                                 <th><input type="checkbox"></th>
                                                 <th>Inc.</th>
@@ -910,7 +899,6 @@
                                                 <th>Fecha de emisión</th>
                                                 <th>Fecha Vcto/Pago</th>
                                                 <th>Tipo CP/Doc.</th>
-                                                <th>Comprobante</th>
                                                 <th>Serie del CDP</th>
                                                 <th>Nro CP o Doc. Nro Inicial (Rango)</th>
                                                 <th>Nro Final (Rango)</th>
@@ -919,7 +907,6 @@
                                                 <th>Tipo Doc Identidad</th>
                                                 <th>Nro Doc Identidad</th>
                                                 <th>Apellidos Nombres/ Razón Social</th>
-                                                <th>Tipo de Cliente</th>
 
                                                 <!-- Montos -->
                                                 <th>Valor Facturado Exportación</th>
@@ -931,9 +918,6 @@
                                                 <th>Mto Inafecto</th>
                                                 <th>ISC</th>
                                                 <th>BI Grav IVAP</th>
-                                                <th>Anticipos</th>
-                                                <th>Otros Cargos</th>
-                                                <th>Monto de Redondeo</th>
 
                                                 <!-- Totales/Moneda -->
                                                 <th>IVAP</th>
@@ -949,17 +933,6 @@
                                                 <th>Tipo CP Modificado</th>
                                                 <th>Serie CP Modificado</th>
                                                 <th>Nro CP Modificado</th>
-
-                                                <!-- Detalle y Detracción -->
-                                                <th>Detalle de la Operación</th>
-                                                <th>Descripción</th>
-                                                <th>Forma de Pago</th>
-                                                <th>N° de Cuotas</th>
-                                                <th>Motivo Nota de Crédito</th>
-                                                <th>Sujeto a Detracción</th>
-                                                <th>% de Detracción</th>
-                                                <th>Monto Detracción</th>
-                                                <th>N° Constancia Depósito Detracción</th>
 
                                                 <!-- Otros -->
                                                 <th>ID Proyecto Operadores Atribución</th>
@@ -982,7 +955,6 @@
                                                 <td>02/01/2026</td>
                                                 <td>02/01/2026</td>
                                                 <td>01</td>
-                                                <td>Factura</td>
                                                 <td>F003</td>
                                                 <td>23860</td>
                                                 <td></td>
@@ -991,16 +963,12 @@
                                                 <td>6</td>
                                                 <td>20610352341</td>
                                                 <td>MARIA TRANSPOR S.R.L.</td>
-                                                <td>Empresa Nacional</td>
 
                                                 <!-- Montos -->
                                                 <td>0.00</td>
                                                 <td>20.25</td>
                                                 <td>0.00</td>
                                                 <td>3.65</td>
-                                                <td>0.00</td>
-                                                <td>0.00</td>
-                                                <td>0.00</td>
                                                 <td>0.00</td>
                                                 <td>0.00</td>
                                                 <td>0.00</td>
@@ -1022,17 +990,6 @@
                                                 <td></td>
                                                 <td></td>
 
-                                                <!-- Detalle y Detracción -->
-                                                <td>Mixto (Bienes y Servicios)</td>
-                                                <td>Servicios de mantenimiento</td>
-                                                <td>Contado</td>
-                                                <td></td>
-                                                <td></td>
-                                                <td>No</td>
-                                                <td>0</td>
-                                                <td>0.00</td>
-                                                <td></td>
-
                                                 <!-- Otros -->
                                                 <td></td>
                                                 <td></td>
@@ -1048,7 +1005,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr class="totals-row">
-                                                <td colspan="14" class="total-label-text">TOTALES</td>
+                                                <td colspan="12" class="total-label-text">TOTALES</td>
                                                 <!-- Spans Checkbox to Adquiriente Name -->
 
                                                 <!-- Totals Columns (match Montos columns) -->
@@ -1061,9 +1018,6 @@
                                                 <td id="total-mto-ina">0.00</td>
                                                 <td id="total-isc">0.00</td>
                                                 <td id="total-bi-ivap">0.00</td>
-                                                <td id="total-anticipos">0.00</td>
-                                                <td id="total-otros-cargos">0.00</td>
-                                                <td id="total-redondeo">0.00</td>
 
                                                 <!-- Totals Columns (match Totales columns) -->
                                                 <td id="total-ivap">0.00</td>
@@ -1071,7 +1025,15 @@
                                                 <td id="total-otros">0.00</td>
                                                 <td id="total-total-cp" class="strong">0.00</td>
 
-                                                <td colspan="26"></td> <!-- Spans remaining columns -->
+                                                <!-- Moneda .. Desc. Comp -->
+                                                <td colspan="11"></td>
+
+                                                <!-- FOB y OP Gratuitas también totalizan en el SIRE -->
+                                                <td id="total-fob">0.00</td>
+                                                <td id="total-op-gratuitas">0.00</td>
+
+                                                <!-- Tipo Operación .. CAR SUNAT -->
+                                                <td colspan="4"></td>
                                             </tr>
                                         </tfoot>
                                     </table>

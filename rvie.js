@@ -715,11 +715,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const tbody = document.querySelector('.results-table tbody');
         tbody.innerHTML = '';
 
+        // Montos con separador de miles como en el SIRE real (7,920.12)
+        const fmtMonto = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
         // Initialize totals
         let totals = {
             valExp: 0, biGrav: 0, dsctoBi: 0, igv: 0, dsctoIgv: 0,
             mtoExo: 0, mtoIna: 0, isc: 0, biIvap: 0, ivap: 0,
-            icbper: 0, otros: 0, total: 0, anticipos: 0, otrosCargos: 0, mtoRedondeo: 0
+            icbper: 0, otros: 0, total: 0, anticipos: 0, otrosCargos: 0, mtoRedondeo: 0,
+            fob: 0, opGrat: 0
         };
 
         dataRows.forEach(row => {
@@ -798,6 +802,8 @@ document.addEventListener('DOMContentLoaded', function () {
             totals.icbper += icbper;
             totals.otros += otros;
             totals.total += totalCp;
+            totals.fob += fob;
+            totals.opGrat += opGrat;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -807,36 +813,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${fEmision}</td>
                 <td>${fVcto}</td>
                 <td>${tipoCp}</td>
-                <td>${comprobante}</td>
                 <td>${serie}</td>
                 <td>${nroIni}</td>
                 <td>${nroFin || ''}</td>
-                
+
                 <!-- Adquiriente -->
                 <td>${tipoDocId}</td>
                 <td>${nroDocId}</td>
                 <td>${adqRazon}</td>
-                <td>${tipoCliente}</td>
 
                 <!-- Montos -->
-                <td>${valExp.toFixed(2)}</td>
-                <td>${biGrav.toFixed(2)}</td>
-                <td>${dsctoBi.toFixed(2)}</td>
-                <td>${igv.toFixed(2)}</td>
-                <td>${dsctoIgv.toFixed(2)}</td>
-                <td>${mtoExo.toFixed(2)}</td>
-                <td>${mtoIna.toFixed(2)}</td>
-                <td>${isc.toFixed(2)}</td>
-                <td>${biIvap.toFixed(2)}</td>
-                <td>${anticipos.toFixed(2)}</td>
-                <td>${otrosCargos.toFixed(2)}</td>
-                <td>${mtoRedondeo.toFixed(2)}</td>
+                <td>${fmtMonto(valExp)}</td>
+                <td>${fmtMonto(biGrav)}</td>
+                <td>${fmtMonto(dsctoBi)}</td>
+                <td>${fmtMonto(igv)}</td>
+                <td>${fmtMonto(dsctoIgv)}</td>
+                <td>${fmtMonto(mtoExo)}</td>
+                <td>${fmtMonto(mtoIna)}</td>
+                <td>${fmtMonto(isc)}</td>
+                <td>${fmtMonto(biIvap)}</td>
 
                 <!-- Totales/Moneda -->
-                <td>${ivap.toFixed(2)}</td>
-                <td>${icbper.toFixed(2)}</td>
-                <td>${otros.toFixed(2)}</td>
-                <td>${totalCp.toFixed(2)}</td>
+                <td>${fmtMonto(ivap)}</td>
+                <td>${fmtMonto(icbper)}</td>
+                <td>${fmtMonto(otros)}</td>
+                <td>${fmtMonto(totalCp)}</td>
                 <td>${moneda}</td>
                 <td>${Number(tc).toFixed(3)}</td>
 
@@ -847,24 +848,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${serieRef || ''}</td>
                 <td>${nroRef || ''}</td>
 
-                <!-- Detalle y Detracción -->
-                <td>${detalleOp}</td>
-                <td>${descripcion}</td>
-                <td>${formaPago}</td>
-                <td>${nroCuotas}</td>
-                <td>${motivoNota}</td>
-                <td>${sujetoDetrac}</td>
-                <td>${pctDetrac}%</td>
-                <td>${mtoDetrac.toFixed(2)}</td>
-                <td>${constanciaDetrac}</td>
-
                 <!-- Otros -->
                 <td>${idProy || ''}</td>
                 <td>${tipoNota || ''}</td>
                 <td>${estComp || '1'}</td>
                 <td>${descComp}</td>
-                <td>${fob.toFixed(2)}</td>
-                <td>${opGrat.toFixed(2)}</td>
+                <td>${fmtMonto(fob)}</td>
+                <td>${fmtMonto(opGrat)}</td>
                 <td>${tipoOp || '0101'}</td>
                 <td>${dam || ''}</td>
                 <td>${clu || ''}</td>
@@ -874,22 +864,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // Update Totals Footer
-        document.getElementById('total-val-exp').textContent = totals.valExp.toFixed(2);
-        document.getElementById('total-bi-grav').textContent = totals.biGrav.toFixed(2);
-        document.getElementById('total-dscto-bi').textContent = totals.dsctoBi.toFixed(2);
-        document.getElementById('total-igv').textContent = totals.igv.toFixed(2);
-        document.getElementById('total-dscto-igv').textContent = totals.dsctoIgv.toFixed(2);
-        document.getElementById('total-mto-exo').textContent = totals.mtoExo.toFixed(2);
-        document.getElementById('total-mto-ina').textContent = totals.mtoIna.toFixed(2);
-        document.getElementById('total-isc').textContent = totals.isc.toFixed(2);
-        document.getElementById('total-bi-ivap').textContent = totals.biIvap.toFixed(2);
-        document.getElementById('total-anticipos').textContent = totals.anticipos.toFixed(2);
-        document.getElementById('total-otros-cargos').textContent = totals.otrosCargos.toFixed(2);
-        document.getElementById('total-redondeo').textContent = totals.mtoRedondeo.toFixed(2);
-        document.getElementById('total-ivap').textContent = totals.ivap.toFixed(2);
-        document.getElementById('total-icbper').textContent = totals.icbper.toFixed(2);
-        document.getElementById('total-otros').textContent = totals.otros.toFixed(2);
-        document.getElementById('total-total-cp').textContent = totals.total.toFixed(2);
+        document.getElementById('total-val-exp').textContent = fmtMonto(totals.valExp);
+        document.getElementById('total-bi-grav').textContent = fmtMonto(totals.biGrav);
+        document.getElementById('total-dscto-bi').textContent = fmtMonto(totals.dsctoBi);
+        document.getElementById('total-igv').textContent = fmtMonto(totals.igv);
+        document.getElementById('total-dscto-igv').textContent = fmtMonto(totals.dsctoIgv);
+        document.getElementById('total-mto-exo').textContent = fmtMonto(totals.mtoExo);
+        document.getElementById('total-mto-ina').textContent = fmtMonto(totals.mtoIna);
+        document.getElementById('total-isc').textContent = fmtMonto(totals.isc);
+        document.getElementById('total-bi-ivap').textContent = fmtMonto(totals.biIvap);
+        document.getElementById('total-ivap').textContent = fmtMonto(totals.ivap);
+        document.getElementById('total-icbper').textContent = fmtMonto(totals.icbper);
+        document.getElementById('total-otros').textContent = fmtMonto(totals.otros);
+        document.getElementById('total-total-cp').textContent = fmtMonto(totals.total);
+        document.getElementById('total-fob').textContent = fmtMonto(totals.fob);
+        document.getElementById('total-op-gratuitas').textContent = fmtMonto(totals.opGrat);
 
         // Update pagination text
         const pagInfo = document.getElementById('detailed-pagination-info');
@@ -1620,13 +1609,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const esPipe = linea.includes('|');
             const f = linea.split(esPipe ? '|' : ',').map(v => String(v).trim());
 
-            // El txt SIRE no lleva cabecera ni RUC/Razón (van de la sesión); el csv exportado sí
+            // El archivo del editor de reemplazo lleva RUC y Razón Social como
+            // primeras columnas; el txt de la propuesta SIRE empieza en el Periodo
             let base, ruc, razon;
             if (esPipe) {
-                if (f.length < 20) return; // línea incompleta
-                base = 0;
-                ruc = rucSesion;
-                razon = razonSesion;
+                if (/^\d{11}$/.test(f[0])) {
+                    if (f.length < 22) return; // línea incompleta
+                    base = 2;
+                    ruc = f[0];
+                    razon = f[1] || razonSesion;
+                } else {
+                    if (f.length < 20) return; // línea incompleta
+                    base = 0;
+                    ruc = rucSesion;
+                    razon = razonSesion;
+                }
             } else {
                 if (!/^\d{8,11}$/.test(f[0])) return; // cabecera u otra línea no válida
                 if (f.length < 26) return;
@@ -1640,11 +1637,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const periodoRaw = g(0);
             const periodo = (periodoRaw.length === 8 && periodoRaw.endsWith('00')) ? periodoRaw.slice(0, 6) : periodoRaw;
 
+            // En el archivo de reemplazo el CAR viene vacío (SUNAT lo genera):
+            // RUC(11) + Tipo CP(2) + Serie(4) + Nro CP(10)
+            let car = g(1);
+            if (!car) {
+                const tipoCar = String(g(4) || '').trim().padStart(2, '0');
+                const serieCar = String(g(5) || '').trim();
+                const nroCar = String(g(6) || '').trim().padStart(10, '0');
+                car = ruc + tipoCar + serieCar + nroCar;
+            }
+
             filas.push({
                 'Ruc': ruc,
                 'Razon Social': razon,
                 'Periodo': periodo,
-                'CAR SUNAT': g(1),
+                'CAR SUNAT': car,
                 'Fecha de emisión': g(2),
                 'Fecha Vcto/Pago': g(3),
                 'Tipo CP/Doc.': g(4),
