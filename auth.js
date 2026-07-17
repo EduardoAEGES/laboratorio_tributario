@@ -7,6 +7,149 @@
 const AUTH_SUPABASE_URL = 'https://klmjmlhwuzhymrplemgw.supabase.co';
 const AUTH_SUPABASE_ANON_KEY = 'sb_publishable_DSS-WHn-WawxfYe0RWUHRg_odMjrb_b';
 
+// ============================================================================
+// SimStore: persistencia del estado de la simulación según el rol del usuario.
+//   - Rol MASTER  -> localStorage (los cambios se conservan al cerrar el
+//                    navegador), con espacio de nombres por RUC para no mezclar
+//                    datos entre distintos usuarios MASTER.
+//   - Otros roles -> sessionStorage (temporal, se borra al cerrar la pestaña).
+// Solo se persisten las claves del estado de la simulación (SIM_KEYS); las
+// claves que no son de simulación (sunat_auth, loginReferrer, etc.) siempre
+// usan sessionStorage.
+// ============================================================================
+window.SimStore = (function () {
+    // Se persiste CUALQUIER clave con prefijo 'sire_' (estado + contenido de los
+    // registros, p. ej. sire_aceptado, sire_presentado, sire_export_tickets,
+    // sire_rvie_content_<periodo>, sire_rce_content_<periodo>, ...).
+    const SIM_PREFIX = 'sire_';
+
+    function esClaveSim(key) {
+        return typeof key === 'string' && key.indexOf(SIM_PREFIX) === 0;
+    }
+
+    function usuarioActual() {
+        try { return JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); }
+        catch (e) { return {}; }
+    }
+
+    function esMaster() {
+        return String(usuarioActual().rol || '').toUpperCase() === 'MASTER';
+    }
+
+    // Convención de nombre para localStorage: sim_<ruc>_<clave>
+    function nsKey(ruc, key) {
+        return 'sim_' + (ruc || 'anon') + '_' + key;
+    }
+
+    // Recorre las claves sim_<ruc>_sire_* guardadas en localStorage
+    function clavesSimLocal(ruc) {
+        const prefijo = 'sim_' + (ruc || 'anon') + '_';
+        const out = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const full = localStorage.key(i);
+            if (full && full.indexOf(prefijo + SIM_PREFIX) === 0) {
+                out.push({ full: full, key: full.slice(prefijo.length) });
+            }
+        }
+        return out;
+    }
+
+    function persistente(key) {
+        return esClaveSim(key) && esMaster();
+    }
+
+    // ---- Sincronización con Supabase (solo rol MASTER) ----
+    // Se guarda todo el estado del usuario (una fila por RUC) en la tabla
+    // public.sire_estado. La escritura es "debounced" para no saturar la red.
+    let _syncTimer = null;
+
+    function syncToServer() {
+        if (!esMaster() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+        clearTimeout(_syncTimer);
+        _syncTimer = setTimeout(async function () {
+            const ruc = usuarioActual().ruc;
+            if (!ruc) return;
+            const estado = {};
+            clavesSimLocal(ruc).forEach(function (item) {
+                const v = localStorage.getItem(item.full);
+                if (v !== null) estado[item.key] = v;
+            });
+            try {
+                await authSupabaseClient
+                    .from('sire_estado')
+                    .upsert({ ruc: ruc, estado: estado, actualizado_at: new Date().toISOString() }, { onConflict: 'ruc' });
+            } catch (e) {
+                console.warn('No se pudo sincronizar el estado con Supabase:', e);
+            }
+        }, 600);
+    }
+
+    // Carga el estado guardado en Supabase hacia localStorage (se llama al
+    // iniciar sesión, antes de entrar a los simuladores).
+    async function hydrate() {
+        if (!esMaster() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+        const ruc = usuarioActual().ruc;
+        if (!ruc) return;
+        try {
+            const { data, error } = await authSupabaseClient
+                .from('sire_estado')
+                .select('estado')
+                .eq('ruc', ruc)
+                .maybeSingle();
+            if (error || !data || !data.estado) return;
+            Object.keys(data.estado).forEach(function (k) {
+                if (esClaveSim(k) && data.estado[k] != null) {
+                    localStorage.setItem(nsKey(ruc, k), data.estado[k]);
+                }
+            });
+        } catch (e) {
+            console.warn('No se pudo cargar el estado desde Supabase:', e);
+        }
+    }
+
+    // Borra el estado del usuario actual en localStorage y en Supabase.
+    async function clearAll() {
+        const ruc = usuarioActual().ruc || 'anon';
+        // Claves de sesión conocidas (no llevan prefijo persistente para no-MASTER)
+        ['sire_aceptado', 'sire_presentado', 'sire_resumen',
+         'sire_export_tickets', 'sire_rce_export_tickets'].forEach(function (k) {
+            sessionStorage.removeItem(k);
+        });
+        // Todas las claves persistidas sim_<ruc>_sire_* del MASTER
+        clavesSimLocal(ruc).forEach(function (item) {
+            try { localStorage.removeItem(item.full); } catch (e) {}
+        });
+        if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient && ruc !== 'anon') {
+            try { await authSupabaseClient.from('sire_estado').delete().eq('ruc', ruc); } catch (e) {}
+        }
+    }
+
+    return {
+        esClaveSim: esClaveSim,
+        esMaster: esMaster,
+        hydrate: hydrate,
+        clearAll: clearAll,
+        getItem: function (key) {
+            if (persistente(key)) return localStorage.getItem(nsKey(usuarioActual().ruc, key));
+            return sessionStorage.getItem(key);
+        },
+        setItem: function (key, val) {
+            if (persistente(key)) {
+                localStorage.setItem(nsKey(usuarioActual().ruc, key), val);
+                syncToServer();
+            } else {
+                sessionStorage.setItem(key, val);
+            }
+        },
+        removeItem: function (key) {
+            // Elimina en ambos backends para evitar residuos al cambiar de rol
+            sessionStorage.removeItem(key);
+            try { localStorage.removeItem(nsKey(usuarioActual().ruc, key)); } catch (e) {}
+            if (esClaveSim(key)) syncToServer();
+        }
+    };
+})();
+
 // Si las credenciales son inválidas o no están configuradas, las funciones fallarán graciosamente en local.
 let authSupabaseClient = null;
 
@@ -41,6 +184,10 @@ async function loginConSupabase(ruc, usuario, clave) {
 
         // Guardar sesión
         sessionStorage.setItem('sunat_auth', JSON.stringify(data));
+
+        // Si es MASTER, cargar el estado guardado en Supabase antes de continuar
+        try { await window.SimStore.hydrate(); } catch (e) {}
+
         return true;
     } catch (e) {
         console.error("Error en login:", e);

@@ -67,6 +67,38 @@
         </div>
     </div>
 
+    <!-- Modal: Carga Individual de complemento (editar tipo de cambio) -->
+    <div id="modal-editar-tc" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:820px; width:92%;">
+            <div class="modal-header">
+                <h2>Carga Individual de complemento</h2>
+                <button class="close-btn" id="close-editar-tc">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="tc-edit-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha de Emisión</th>
+                            <th>Tipo de Moneda</th>
+                            <th>Tipo de cambio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="tc-edit-fecha"></td>
+                            <td id="tc-edit-moneda"></td>
+                            <td><input type="number" id="tc-edit-input" step="0.001" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:30px;">
+                <button class="btn-modal-si" id="btn-grabar-tc" style="background:#4caf50;"><i class="fas fa-check"></i> Grabar</button>
+                <button class="btn-modal-no" id="btn-cancelar-tc" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Reemplazo de la Propuesta del RVIE -->
     <div id="rvie-modal-reemplazo" class="modal-overlay" style="display:none;">
         <div class="modal-content" style="max-width:880px; width:92%;">
@@ -108,6 +140,24 @@
             </div>
             <div class="modal-footer modal-footer-right">
                 <button class="btn-modal-si" onclick="cerrarModalTicketReemplazoRvie()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Archivo con inconsistencias (reemplazo de propuesta RVIE) -->
+    <div id="rvie-modal-reemplazo-error" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-md">
+            <div class="modal-header" style="background:#c0392b;">
+                <h2>Archivo con inconsistencias</h2>
+                <button class="close-btn" onclick="cerrarModalReemplazoErrorRvie()">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align:left;">
+                <p>El archivo importado presenta <strong id="rvie-inc-cantidad">0</strong> inconsistencia(s) en su estructura o en campos obligatorios, por lo que <strong>la propuesta del RVIE no ha sido actualizada</strong>.</p>
+                <p style="margin-top:10px;">Se generó el ticket N° <strong id="rvie-inc-ticket-numero">—</strong>. Revise el detalle en la opción <strong>Estado de envío de Ticket RVIE</strong> y descargue el <strong>Reporte de Inconsistencias</strong> desde la columna "Reportes y Descargas".</p>
+                <p style="margin-top:10px; color:#c0392b;">La información se actualizará únicamente cuando cargue un archivo correcto o acepte la propuesta.</p>
+            </div>
+            <div class="modal-footer modal-footer-right">
+                <button class="btn-modal-si" onclick="cerrarModalReemplazoErrorRvie()">Aceptar</button>
             </div>
         </div>
     </div>
@@ -814,8 +864,11 @@
                             </div>
 
                             <div class="search-form-container">
-                                <div class="search-title">Buscar por</div>
+                                <div class="search-title search-title-toggle" id="buscar-por-toggle">
+                                    Buscar por <i class="fas fa-caret-up" id="buscar-por-caret"></i>
+                                </div>
 
+                                <div id="buscar-por-body">
                                 <div class="form-grid">
                                     <!-- Fila 1 -->
                                     <div class="form-group">
@@ -865,6 +918,7 @@
                                 <div class="form-actions">
                                     <button class="btn-search"><i class="fas fa-search"></i> Buscar</button>
                                     <button class="btn-clear"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                                </div>
                                 </div>
                             </div>
 
@@ -1051,9 +1105,10 @@
                                 <div class="action-buttons-row">
                                     <button class="btn-action btn-blue" id="btn-agregar-cp"><i class="fas fa-plus-circle"></i>
                                         Agregar</button>
-                                    <button class="btn-action btn-blue-light"><i class="fas fa-pen"></i> Editar</button>
-                                    <button class="btn-action btn-blue-light"><i class="fas fa-trash-alt"></i>
+                                    <button class="btn-action btn-blue-light" id="btn-editar-cp"><i class="fas fa-pen"></i> Editar</button>
+                                    <button class="btn-action btn-blue-light" id="btn-eliminar-cp"><i class="fas fa-trash-alt"></i>
                                         Eliminar</button>
+                                    <button class="btn-action" id="btn-toggle-presentado-rvie" style="display:none; background:#6a1b9a; color:#fff;"><i class="fas fa-flag"></i> Estado: NO PRESENTADO</button>
 
                                     <div class="spacer"></div>
 

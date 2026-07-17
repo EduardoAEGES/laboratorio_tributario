@@ -2860,3 +2860,43 @@ body.is-mobile-device .bottom-nav {
   height: 100%;
   border: none;
 }
+
+/* ===== Videos adicionales (botoncitos) en la ventana flotante ===== */
+.video-float-extras {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-input);
+  flex-shrink: 0;
+  border-radius: 0 0 16px 16px;
+}
+.video-extras-title {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+.video-extras-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.video-extra-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.video-extra-btn:hover { background: rgba(26, 115, 232, 0.12); }
+.video-extra-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}

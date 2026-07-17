@@ -41,9 +41,11 @@
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* CONTENEDOR CON SCROLL */
+        /* CONTENEDOR CON SCROLL: alto según la ventana para que la barra
+           horizontal quede siempre visible sin bajar hasta el fondo */
         .table-container {
-            max-height: 500px;
+            max-height: calc(100vh - 340px);
+            min-height: 240px;
             overflow-y: auto;
             overflow-x: auto;
             border: 1px solid #ccc;
@@ -63,6 +65,7 @@
             color: white;
             padding: 6px;
             text-align: left;
+            vertical-align: top;
             position: sticky;
             top: 0;
             z-index: 2;
@@ -154,6 +157,199 @@
             border-radius: 3px;
             font-size: 11px;
         }
+
+        /* ====== ENCABEZADO COMPACTO ====== */
+        .encabezado {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .encabezado h2 {
+            margin: 0 0 0 6px;
+            font-size: 16px;
+        }
+
+        .fila-opciones {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        /* ====== PANEL RESUMEN DE COMPROBANTES ====== */
+        .panel-resumen {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .chip {
+            background: #fff;
+            border: 1px solid #cfd8dc;
+            border-radius: 14px;
+            padding: 3px 12px;
+            font-size: 11px;
+        }
+
+        .chip b {
+            font-size: 12px;
+        }
+
+        .chip-error {
+            background: #fdecea;
+            border-color: #e53935;
+            color: #b71c1c;
+        }
+
+        .chip-ok {
+            background: #e8f5e9;
+            border-color: #66bb6a;
+            color: #1b5e20;
+        }
+
+        /* ====== CELDAS CON ERROR DE VALIDACIÓN ====== */
+        td.celda-error {
+            outline: 2px solid #e53935;
+            outline-offset: -2px;
+            background: #fdecea !important;
+        }
+
+        /* ====== COMBO DE AUTOCOMPLETADO (dropdown estético) ====== */
+        .combo-list {
+            position: fixed;
+            z-index: 9999;
+            background: #fff;
+            border: 1px solid #b0bec5;
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            max-height: 260px;
+            overflow-y: auto;
+            min-width: 280px;
+            max-width: 420px;
+            font-size: 12px;
+        }
+
+        .combo-item {
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .combo-item:last-child {
+            border-bottom: none;
+        }
+
+        .combo-item:hover {
+            background: #e8f5e9;
+        }
+
+        .combo-item .cod {
+            font-weight: bold;
+            color: #1e8e3e;
+            min-width: 38px;
+        }
+
+        .combo-item .desc {
+            color: #555;
+        }
+
+        /* ====== ENCABEZADO: etiqueta + botón de ayuda alineados ====== */
+        .th-content {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .th-label {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .th-help {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            user-select: none;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .th-help:hover {
+            background: #fff;
+            color: #2c3e50;
+        }
+
+        /* ====== TARJETA DE AYUDA FIJA (se cierra con la X) ====== */
+        .help-card {
+            position: fixed;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            width: 92%;
+            max-width: 500px;
+            background: #fff;
+            border: 1px solid #90a4ae;
+            border-radius: 8px;
+            box-shadow: 0 12px 44px rgba(0, 0, 0, 0.32);
+            display: none;
+        }
+
+        .help-card-header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .help-card-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .help-card-close {
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+            padding: 0 4px;
+            user-select: none;
+        }
+
+        .help-card-close:hover {
+            color: #ffcdd2;
+        }
+
+        .help-card-body {
+            padding: 14px 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -161,34 +357,35 @@
 
 <body>
 
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-        <img src="LOGO_SUNAT.png" alt="Logo" style="height:50px;">
-        <span style="font-family:'Roboto',Arial,sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
+    <div class="encabezado">
+        <img src="LOGO_SUNAT.png" alt="Logo" style="height:36px;">
+        <span style="font-family:'Roboto',Arial,sans-serif; font-size:12px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
+        <h2 id="tituloPrincipal">Editor de Comprobantes para Ajustes Posteriores de RCE</h2>
     </div>
 
-    <h2 id="tituloPrincipal">Editor de Comprobantes para Ajustes Posteriores de RCE</h2>
-
-    <div style="margin-top: 15px; margin-bottom: 20px;">
-        <label style="margin-right: 20px; font-weight: bold; cursor: pointer;">
-            <input type="radio" name="mode" value="RCE" checked onchange="cambiarModo()"> Ajustes RCE (Compras)
-        </label>
-        <label style="margin-right: 20px; font-weight: bold; cursor: pointer;">
-            <input type="radio" name="mode" value="RVIE" onchange="cambiarModo()"> Ajustes RVIE (Ventas)
-        </label>
-        <label style="font-weight: bold; cursor: pointer;">
-            <input type="radio" name="mode" value="RCE_ND" onchange="cambiarModo()"> Ajustes RCE (No Domiciliados)
-        </label>
-    </div>
-
-    <!-- LEYENDA DE CASILLAS -->
-    <div class="leyenda" style="margin-bottom: 15px;">
-        <span style="background:#fff6d9; border:1px solid #e0c96a;">Obligatorio *</span>
-        <span style="background:#fff; border:1px solid #ccc;">Opcional / según condición</span>
-        <span style="background:#e3e6e8; color:#777; border:1px solid #bbb;">&#128274; No llenar (se completa automáticamente)</span>
+    <div class="fila-opciones">
+        <span>
+            <label style="margin-right: 14px; font-weight: bold; cursor: pointer;">
+                <input type="radio" name="mode" value="RCE" checked onchange="cambiarModo()"> Ajustes RCE (Compras)
+            </label>
+            <label style="margin-right: 14px; font-weight: bold; cursor: pointer;">
+                <input type="radio" name="mode" value="RVIE" onchange="cambiarModo()"> Ajustes RVIE (Ventas)
+            </label>
+            <label style="font-weight: bold; cursor: pointer;">
+                <input type="radio" name="mode" value="RCE_ND" onchange="cambiarModo()"> Ajustes RCE (No Domiciliados)
+            </label>
+        </span>
+        <!-- LEYENDA DE CASILLAS -->
+        <span class="leyenda">
+            <span style="background:#fff6d9; border:1px solid #e0c96a;">Obligatorio *</span>
+            <span style="background:#fff; border:1px solid #ccc;">Opcional / según condición</span>
+            <span style="background:#e3e6e8; color:#777; border:1px solid #bbb;">&#128274; No llenar (se completa automáticamente)</span>
+        </span>
     </div>
 
     <input type="file" id="csvFile" accept=".csv, .txt">
     <button onclick="agregarFila()">Agregar Fila</button>
+    <button onclick="copiarFilas()" style="background:#6a1b9a;">Copiar Fila(s)</button>
     <button onclick="eliminarFilas()" style="background:#d93025;">Eliminar Fila(s)</button>
     <button onclick="exportarArchivo()">Exportar</button>
 
@@ -206,7 +403,7 @@
     </select>
 
     <!-- CONTENEDOR DE METADATOS EDITABLES -->
-    <div class="info-box" style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
+    <div class="info-box" style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; padding:8px 12px; margin-bottom:8px;">
 
         <div>
             <label><strong>RUC:</strong></label>
@@ -250,6 +447,9 @@
         </div>
 
     </div>
+
+    <!-- PANEL RESUMEN: conteo de comprobantes y errores de validación -->
+    <div id="panelResumen" class="panel-resumen"></div>
 
     <div class="table-container">
         <table id="tabla">
@@ -507,38 +707,163 @@
         const TABLA_CP_ND = TABLA_CP_RCE.filter(([c]) => ["00", "91", "97", "98"].includes(c));
         const TABLA_CP_CF = TABLA_CP_RCE.filter(([c]) => ["00", "46", "50", "51", "52", "53"].includes(c));
 
-        // Crear los <datalist> de autocompletado (se escribe libre o se elige)
-        function crearDatalists() {
-            const defs = {
-                dl_doc_ident: TABLA_DOC_IDENTIDAD,
-                dl_cp_rvie: TABLA_CP_RVIE,
-                dl_cp_rce: TABLA_CP_RCE,
-                dl_cp_nd: TABLA_CP_ND,
-                dl_cp_cf: TABLA_CP_CF
-            };
-            for (const id in defs) {
-                const dl = document.createElement("datalist");
-                dl.id = id;
-                defs[id].forEach(([cod, desc]) => {
-                    const opt = document.createElement("option");
-                    opt.value = cod;
-                    opt.textContent = desc;
-                    dl.appendChild(opt);
-                });
-                document.body.appendChild(dl);
-            }
-        }
+        // Tabla 2: Código de Moneda (ISO 4217)
+        const TABLA_MONEDA = [
+            ["PEN", "Sol"], ["USD", "Dólar de Norte América"], ["EUR", "Euro"],
+            ["GBP", "Libra Esterlina"], ["JPY", "Yen Japonés"], ["CHF", "Franco Suizo"],
+            ["CAD", "Dólar Canadiense"], ["AUD", "Dólar Australiano"], ["SEK", "Corona Sueca"],
+            ["NOK", "Corona Noruega"], ["DKK", "Corona Danesa"], ["CNY", "Yuan Chino"],
+            ["KRW", "Won Coreano"], ["BOB", "Boliviano"], ["BRL", "Real Brasileño"],
+            ["CLP", "Peso Chileno"], ["COP", "Peso Colombiano"], ["MXN", "Peso Mexicano"],
+            ["ARS", "Peso Argentino"], ["UYU", "Peso Uruguayo"]
+        ];
 
-        // Datalist que corresponde a una columna segun su nombre y el modo actual
-        function datalistParaColumna(nombre) {
-            if (nombre === "Tipo Doc Identidad") return "dl_doc_ident";
-            if (nombre === "Tipo CP CF") return "dl_cp_cf";
+        // Catálogo que corresponde a una columna segun su nombre y el modo actual
+        function catalogoParaColumna(nombre) {
+            if (nombre === "Tipo Doc Identidad") return TABLA_DOC_IDENTIDAD;
+            if (nombre === "Tipo CP CF") return TABLA_CP_CF;
+            if (nombre === "Moneda") return TABLA_MONEDA;
             if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
-                if (currentMode === "RVIE") return "dl_cp_rvie";
-                if (currentMode === "RCE_ND") return "dl_cp_nd";
-                return "dl_cp_rce";
+                if (currentMode === "RVIE") return TABLA_CP_RVIE;
+                if (currentMode === "RCE_ND") return TABLA_CP_ND;
+                return TABLA_CP_RCE;
             }
             return null;
+        }
+
+        // ============== COMBO DE AUTOCOMPLETADO (dropdown estético) ==============
+        // Reemplaza al <datalist> nativo: lista flotante con código y descripción.
+        let comboDiv = null;
+        let comboSeleccionando = false;
+
+        function obtenerComboDiv() {
+            if (!comboDiv) {
+                comboDiv = document.createElement("div");
+                comboDiv.className = "combo-list";
+                comboDiv.style.display = "none";
+                document.body.appendChild(comboDiv);
+            }
+            return comboDiv;
+        }
+
+        function cerrarCombo() {
+            if (comboDiv) comboDiv.style.display = "none";
+        }
+
+        function mostrarCombo(inp, catalogo) {
+            const div = obtenerComboDiv();
+            const filtro = inp.value.trim().toLowerCase();
+            const items = catalogo.filter(([cod, desc]) =>
+                !filtro || cod.toLowerCase().startsWith(filtro) || desc.toLowerCase().includes(filtro)
+            );
+            div.innerHTML = "";
+            if (!items.length) { div.style.display = "none"; return; }
+            items.forEach(([cod, desc]) => {
+                const item = document.createElement("div");
+                item.className = "combo-item";
+                const spanCod = document.createElement("span");
+                spanCod.className = "cod";
+                spanCod.textContent = cod;
+                const spanDesc = document.createElement("span");
+                spanDesc.className = "desc";
+                spanDesc.textContent = desc;
+                item.appendChild(spanCod);
+                item.appendChild(spanDesc);
+                // mousedown: se dispara antes del blur del input
+                item.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    comboSeleccionando = true;
+                    inp.value = cod;
+                    inp.dispatchEvent(new Event("input", { bubbles: true }));
+                    comboSeleccionando = false;
+                    cerrarCombo();
+                });
+                div.appendChild(item);
+            });
+            const r = inp.getBoundingClientRect();
+            div.style.left = Math.max(4, Math.min(r.left, window.innerWidth - 440)) + "px";
+            if (r.bottom + 270 > window.innerHeight) {
+                div.style.top = "auto";
+                div.style.bottom = (window.innerHeight - r.top + 2) + "px";
+            } else {
+                div.style.bottom = "auto";
+                div.style.top = (r.bottom + 2) + "px";
+            }
+            div.style.display = "block";
+        }
+
+        function activarCombo(inp, catalogo) {
+            inp.addEventListener("focus", () => mostrarCombo(inp, catalogo));
+            inp.addEventListener("input", () => { if (!comboSeleccionando) mostrarCombo(inp, catalogo); });
+            inp.addEventListener("blur", () => setTimeout(cerrarCombo, 150));
+            inp.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" || e.key === "Tab" || e.key === "Enter") cerrarCombo();
+            });
+        }
+
+        // La lista es de posición fija: se cierra al hacer scroll o cambiar el tamaño
+        window.addEventListener("scroll", cerrarCombo, true);
+        window.addEventListener("resize", cerrarCombo);
+
+        // ============== TARJETA DE AYUDA POR CAMPO (fija hasta cerrar) ==============
+        let helpCard = null;
+
+        function obtenerHelpCard() {
+            if (!helpCard) {
+                helpCard = document.createElement("div");
+                helpCard.className = "help-card";
+                helpCard.innerHTML =
+                    '<div class="help-card-header">' +
+                    '<h3 id="help-card-title"></h3>' +
+                    '<span class="help-card-close" title="Cerrar">&times;</span>' +
+                    '</div>' +
+                    '<div class="help-card-body" id="help-card-body"></div>';
+                document.body.appendChild(helpCard);
+                helpCard.querySelector(".help-card-close").addEventListener("click", cerrarHelpCard);
+            }
+            return helpCard;
+        }
+
+        function mostrarHelpCard(titulo, texto) {
+            const card = obtenerHelpCard();
+            card.querySelector("#help-card-title").textContent = titulo;
+            card.querySelector("#help-card-body").textContent = texto;
+            card.style.display = "block";
+        }
+
+        function cerrarHelpCard() {
+            if (helpCard) helpCard.style.display = "none";
+        }
+
+        // Comodidad: la tecla Escape también cierra la tarjeta de ayuda
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") cerrarHelpCard();
+        });
+
+        // Ancho mínimo por columna: nombres/razón social más anchos, serie y
+        // códigos cortos más angostos; el resto usa un ancho estándar.
+        function anchoColumna(nombre) {
+            const anchos = {
+                "Apellidos y Nombres o Razón Social": 230,
+                "Apellidos Nombres/ Razón Social": 230,
+                "Apellidos Nombres/ Razón Social del sujeto": 220,
+                "Apellidos Nombres/ Razón Social del beneficiario": 220,
+                "Domicilio": 200,
+                "Serie del CDP": 85,
+                "Serie CP Modificado": 95,
+                "Serie CP CF": 95,
+                "Año": 65,
+                "Periodo": 90,
+                "Moneda": 90,
+                "Tipo de Cambio": 95,
+                "Tipo Cambio": 95,
+                "Est. Comp.": 80,
+                "Est. Comp": 80,
+                "ISC": 80,
+                "ICBPER": 80,
+                "IVAP": 80
+            };
+            return anchos[nombre] || 110;
         }
 
         // ============== CLASIFICACION DE CASILLAS POR MODO ==============
@@ -577,13 +902,13 @@
                 return;
             }
 
-            const dl = datalistParaColumna(nombre);
-            if (dl) {
+            const catalogo = catalogoParaColumna(nombre);
+            if (catalogo) {
                 td.contentEditable = false;
                 const inp = document.createElement("input");
-                inp.setAttribute("list", dl);
                 inp.className = "cell-input";
                 inp.value = valor || "";
+                activarCombo(inp, catalogo);
                 td.appendChild(inp);
             } else {
                 td.contentEditable = true;
@@ -591,10 +916,21 @@
             }
         }
 
-        // Lee el valor de una celda (input de autocompletado o texto editable)
+        // Lee el valor de una celda (input de autocompletado o texto editable).
+        // Se eliminan saltos de línea que las celdas contenteditable pueden
+        // introducir (p. ej. al pegar o al pulsar Enter), ya que al exportar
+        // partirían la fila en dos y corromperían el archivo plano.
         function valorCelda(td) {
             const inp = td.querySelector("input");
-            return inp ? inp.value : td.innerText;
+            const v = inp ? inp.value : td.innerText;
+            return String(v == null ? "" : v).replace(/[\r\n\t]+/g, " ").replace(/\s+$/, "");
+        }
+
+        // Escribe un valor en una celda (input de autocompletado o texto editable)
+        function setCeldaValor(td, val) {
+            const inp = td.querySelector("input");
+            if (inp) inp.value = val;
+            else td.innerText = val;
         }
 
         let currentMode = "RCE";
@@ -631,11 +967,11 @@
                 selAnio.appendChild(opt);
             }
 
-            // Listas de autocompletado de las tablas SUNAT
-            crearDatalists();
-
             // Crear Tabla por Defecto
             crearTablaDefault();
+
+            // Revalidar mientras se edita cualquier celda
+            document.getElementById("tabla").addEventListener("input", validarConRetraso);
 
             // Indicador de generaciones: refrescar al cambiar RUC o periodo
             document.getElementById("txtRuc").addEventListener("input", renderCorrelativo);
@@ -653,9 +989,18 @@
 
             const trHead = document.createElement("tr");
 
-            // Checkbox
+            // Checkbox "Seleccionar todo / Deseleccionar todo"
             const thCheck = document.createElement("th");
-            thCheck.innerText = "Sel.";
+            thCheck.appendChild(document.createTextNode("Sel. "));
+            const chkTodos = document.createElement("input");
+            chkTodos.type = "checkbox";
+            chkTodos.title = "Seleccionar todo / Deseleccionar todo";
+            chkTodos.style.cursor = "pointer";
+            chkTodos.addEventListener("change", () => {
+                document.querySelectorAll("#tabla tbody td:first-child input[type='checkbox']")
+                    .forEach(c => c.checked = chkTodos.checked);
+            });
+            thCheck.appendChild(chkTodos);
             trHead.appendChild(thCheck);
 
             // N°
@@ -668,22 +1013,41 @@
 
             headers.forEach((h, idx) => {
                 const th = document.createElement("th");
-                th.innerText = h;
-                th.title = reglas[idx] || "";
-                th.style.minWidth = "100px";
-                th.style.height = "20px";
+                const desc = reglas[idx] || ("Campo: " + h);
+                th.title = desc;
+                th.style.minWidth = anchoColumna(h) + "px";
 
-                // Marca visual segun clasificacion de la casilla
                 const tipo = TIPOS_CAMPO[currentMode][idx];
+
+                // Contenedor flex: etiqueta a la izquierda, botón de ayuda arriba a la derecha
+                const cont = document.createElement("div");
+                cont.className = "th-content";
+
+                const label = document.createElement("span");
+                label.className = "th-label";
+                label.appendChild(document.createTextNode(h));
                 if (tipo === "req") {
                     const marca = document.createElement("span");
                     marca.className = "marca-req";
                     marca.innerText = " *";
-                    th.appendChild(marca);
+                    label.appendChild(marca);
                 } else if (tipo === "lock") {
-                    th.innerText += " \u{1F512}";
+                    label.appendChild(document.createTextNode(" \u{1F512}"));
                 }
+                cont.appendChild(label);
 
+                // Botón de ayuda: abre una tarjeta fija con la explicación del campo
+                const help = document.createElement("span");
+                help.className = "th-help";
+                help.textContent = "?";
+                help.title = "Ver ayuda de este campo";
+                help.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    mostrarHelpCard(h, desc);
+                });
+                cont.appendChild(help);
+
+                th.appendChild(cont);
                 trHead.appendChild(th);
             });
 
@@ -691,6 +1055,8 @@
 
             // Crear 1 fila vacia
             agregarFilaVaciaInicial(tbody, headers.length + 2);
+
+            validarTabla();
         }
 
         function agregarFilaVaciaInicial(tbody, totalCols) {
@@ -854,6 +1220,8 @@
 
             // El RUC/periodo importado puede tener otro contador de generaciones
             renderCorrelativo();
+
+            validarTabla();
         }
 
         function actualizarTodo() {
@@ -883,6 +1251,8 @@
                     }
                 }
             }
+
+            validarTabla();
         }
 
         function agregarFila() {
@@ -940,6 +1310,7 @@
             }
 
             tbody.appendChild(tr);
+            validarTabla();
         }
 
         function eliminarFilas() {
@@ -955,9 +1326,251 @@
             });
 
             // Reordenar Numeros
+            renumerarFilas();
+            validarTabla();
+        }
+
+        function renumerarFilas() {
+            const tbody = document.querySelector("#tabla tbody");
             Array.from(tbody.rows).forEach((fila, index) => {
                 fila.cells[1].innerText = index + 1;
             });
+        }
+
+        // Duplica las filas seleccionadas al final de la tabla
+        function copiarFilas() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const seleccionadas = Array.from(tbody.rows).filter(f => {
+                const chk = f.cells[0].querySelector("input[type='checkbox']");
+                return chk && chk.checked;
+            });
+
+            if (!seleccionadas.length) {
+                alert("Seleccione al menos una fila para copiar.");
+                return;
+            }
+
+            seleccionadas.forEach(fila => {
+                const valores = [];
+                for (let i = 2; i < fila.cells.length; i++) valores.push(valorCelda(fila.cells[i]));
+
+                const tr = document.createElement("tr");
+
+                const tdCheck = document.createElement("td");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                tdCheck.appendChild(checkbox);
+                tdCheck.style.textAlign = "center";
+                tr.appendChild(tdCheck);
+
+                const tdNum = document.createElement("td");
+                tdNum.style.fontWeight = "bold";
+                tdNum.contentEditable = false;
+                tr.appendChild(tdNum);
+
+                valores.forEach((v, k) => {
+                    const td = document.createElement("td");
+                    configurarCelda(td, k, v);
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+
+                // Desmarcar la fila original
+                fila.cells[0].querySelector("input[type='checkbox']").checked = false;
+            });
+
+            renumerarFilas();
+            validarTabla();
+        }
+
+        // ==================== VALIDACIÓN Y PANEL RESUMEN ====================
+        const REGEX_FECHA_DDMMAAAA = /^\d{2}\/\d{2}\/\d{4}$/;
+        const REGEX_FECHA_ISO = /^\d{4}-\d{2}-\d{2}$/;
+        const REGEX_MONTO = /^-?\d+(\.\d{1,2})?$/;
+        const REGEX_TC = /^\d{1,2}\.\d{3}$/;
+
+        const COLUMNAS_MONTO = new Set([
+            "BI Gravado DG", "IGV / IPM DG", "BI Gravado DGNG", "IGV / IPM DGNG", "BI Gravado DNG",
+            "IGV / IPM DNG", "Valor Adq. NG", "ISC", "ICBPER", "Otros Trib/ Cargos", "Total CP",
+            "Valor Facturado Exportación", "BI Gravada", "Dscto BI", "IGV / IPM", "Dscto IGV / IPM",
+            "Mto Exonerado", "Mto Inafecto", "BI Grav IVAP", "IVAP", "Otros Tributos",
+            "IMB", "PorcPart",
+            "Val Adquisiciones", "Otros", "Monto Ret", "Rta Bta", "Deduc/Costo", "Rta Neta", "Tasa", "Impto"
+        ]);
+
+        function codigosDe(tabla) {
+            return new Set(tabla.map(([c]) => c));
+        }
+
+        // Valida una celda según los parámetros del RVIE/RCE. Devuelve el mensaje
+        // de error o null si es válida.
+        function validarCelda(nombre, valor, tipo, moneda) {
+            const v = (valor || "").trim();
+
+            if (!v) {
+                if (tipo === "req") return "Campo obligatorio: no puede estar vacío.";
+                if ((nombre === "Tipo de Cambio" || nombre === "Tipo Cambio") && moneda && moneda !== "PEN")
+                    return "Tipo de cambio obligatorio cuando la moneda es distinta de PEN.";
+                return null;
+            }
+
+            if (nombre === "RUC") return /^\d{11}$/.test(v) ? null : "El RUC debe tener 11 dígitos numéricos.";
+            if (nombre === "Periodo") {
+                if (!/^\d{6}$/.test(v)) return "El periodo debe tener formato AAAAMM.";
+                const mm = parseInt(v.substring(4), 10);
+                return (mm >= 1 && mm <= 12) ? null : "El mes del periodo debe estar entre 01 y 12.";
+            }
+            if (nombre.startsWith("Fecha")) {
+                return (REGEX_FECHA_DDMMAAAA.test(v) || REGEX_FECHA_ISO.test(v)) ? null : "La fecha debe tener formato DD/MM/AAAA.";
+            }
+            if (nombre === "Año") return /^\d{4}$/.test(v) ? null : "El año debe tener 4 dígitos.";
+            if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
+                const t = catalogoParaColumna(nombre) || TABLA_CP_RCE;
+                return codigosDe(t).has(v) ? null : "Código de comprobante no válido (Tablas 3/11 del Anexo 1).";
+            }
+            if (nombre === "Tipo CP CF") return codigosDe(TABLA_CP_CF).has(v) ? null : "Solo se permiten los tipos 00, 46, 50, 51, 52 y 53.";
+            if (nombre === "Tipo Doc Identidad") return codigosDe(TABLA_DOC_IDENTIDAD).has(v) ? null : "Tipo de documento de identidad no válido (Tabla 1 del Anexo 1).";
+            if (nombre === "Moneda") return codigosDe(TABLA_MONEDA).has(v) ? null : "Código de moneda no válido (Tabla 2, ISO 4217). Ej: PEN, USD.";
+            if (nombre === "Tipo de Cambio" || nombre === "Tipo Cambio") return REGEX_TC.test(v) ? null : "Formato del tipo de cambio: #.### (3 decimales). Ej: 3.755";
+            if (COLUMNAS_MONTO.has(nombre)) return REGEX_MONTO.test(v) ? null : "Importe no válido: use números con hasta 2 decimales.";
+
+            return null;
+        }
+
+        // Recorre toda la tabla: marca las celdas con error y actualiza el panel
+        // con el conteo de comprobantes por tipo.
+        // Autocompleta el CAR Orig (campo 37 en RCE / campo 35 en RCE_ND): el CAR
+        // del comprobante a modificar, conformado por 27 posiciones:
+        //   RUC del Emisor (11) + Tipo CP (2) + Serie (4) + Número (10)
+        // En RCE (compras) el emisor es el proveedor -> "Nro Doc Identidad".
+        // Solo se rellena si la celda está vacía (respeta lo digitado a mano).
+        function autocompletarCAROrig() {
+            const cols = COLUMNS[currentMode];
+            const idxCar = cols.indexOf("CAR Orig");
+            if (idxCar < 0) return; // RVIE no lleva CAR Orig
+
+            let idxRuc, idxTipo, idxSerie, idxNro;
+            if (currentMode === "RCE") {
+                idxRuc = cols.indexOf("Nro Doc Identidad");
+                idxTipo = cols.indexOf("Tipo CP/Doc.");
+                idxSerie = cols.indexOf("Serie del CDP");
+                idxNro = cols.indexOf("Nro CP o Doc. Nro Inicial (Rango)");
+            } else if (currentMode === "RCE_ND") {
+                idxRuc = -1; // no domiciliado: sin RUC de emisor
+                idxTipo = cols.indexOf("Tipo CP/Doc.");
+                idxSerie = cols.indexOf("Serie del CDP");
+                idxNro = cols.indexOf("Nro CP o Doc.");
+            } else {
+                return;
+            }
+            if (idxTipo < 0 || idxSerie < 0 || idxNro < 0) return;
+
+            const tbody = document.querySelector("#tabla tbody");
+            if (!tbody) return;
+            Array.from(tbody.rows).forEach(fila => {
+                const celda = i => fila.cells[i + 2]; // 0=chk, 1=N°, datos desde 2
+                const carCell = celda(idxCar);
+                if (!carCell) return;
+                // No sobrescribir mientras el usuario edita esa misma celda
+                if (document.activeElement === carCell) return;
+
+                // RUC del emisor: proveedor (Nro Doc Identidad); si falta, se usa
+                // el RUC del generador (campo 1); si tampoco, se rellena con ceros.
+                let ruc = idxRuc >= 0 ? valorCelda(celda(idxRuc)).trim() : "";
+                if (!ruc) {
+                    const iGen = cols.indexOf("RUC");
+                    if (iGen >= 0) ruc = valorCelda(celda(iGen)).trim();
+                }
+                const tipo = valorCelda(celda(idxTipo)).trim();
+                const serie = valorCelda(celda(idxSerie)).trim();
+                const nro = valorCelda(celda(idxNro)).trim();
+
+                // Fila sin datos del comprobante: no hay nada que construir
+                if (!tipo && !serie && !nro) return;
+
+                const rucSeg = (idxRuc >= 0 || ruc) ? ruc.padStart(11, "0") : "";
+                const car = rucSeg + tipo.padStart(2, "0") + serie + nro.padStart(10, "0");
+                // Recalcular siempre (campo derivado): así el CAR siempre aparece y
+                // refleja los datos actuales de la fila.
+                if (valorCelda(carCell).trim() !== car) setCeldaValor(carCell, car);
+            });
+        }
+
+        function validarTabla() {
+            const tbody = document.querySelector("#tabla tbody");
+            if (!tbody) return;
+            autocompletarCAROrig();
+            const cols = COLUMNS[currentMode];
+            const tipos = TIPOS_CAMPO[currentMode];
+            const idxTipoCp = cols.indexOf("Tipo CP/Doc.");
+            const idxMoneda = cols.indexOf("Moneda");
+
+            const conteo = { total: 0, facturas: 0, boletas: 0, nc: 0, nd: 0, otros: 0, errores: 0 };
+
+            Array.from(tbody.rows).forEach(fila => {
+                const celdas = fila.cells;
+                const valores = [];
+                for (let i = 2; i < celdas.length; i++) valores.push(valorCelda(celdas[i]).trim());
+
+                // Fila totalmente vacía: no cuenta ni marca errores
+                const vacia = valores.every(v => !v);
+
+                let filaConError = false;
+                for (let i = 2; i < celdas.length; i++) {
+                    const td = celdas[i];
+                    const colIdx = i - 2;
+                    const tipo = tipos[colIdx] || "opt";
+                    td.classList.remove("celda-error");
+                    if (tipo === "lock") continue;
+                    td.title = "";
+                    if (vacia) continue;
+
+                    const moneda = idxMoneda >= 0 ? valores[idxMoneda] : "";
+                    const error = validarCelda(cols[colIdx], valores[colIdx], tipo, moneda);
+                    if (error) {
+                        td.classList.add("celda-error");
+                        td.title = error;
+                        filaConError = true;
+                    }
+                }
+
+                if (vacia) return;
+                conteo.total++;
+                if (filaConError) conteo.errores++;
+
+                const tipoCp = idxTipoCp >= 0 ? valores[idxTipoCp] : "";
+                if (tipoCp === "01") conteo.facturas++;
+                else if (tipoCp === "03") conteo.boletas++;
+                else if (["07", "87", "97"].includes(tipoCp)) conteo.nc++;
+                else if (["08", "88", "98"].includes(tipoCp)) conteo.nd++;
+                else conteo.otros++;
+            });
+
+            renderPanelResumen(conteo);
+        }
+
+        function renderPanelResumen(c) {
+            const panel = document.getElementById("panelResumen");
+            if (!panel) return;
+            panel.innerHTML =
+                `<span class="chip">Comprobantes: <b>${c.total}</b></span>` +
+                `<span class="chip">Facturas (01): <b>${c.facturas}</b></span>` +
+                `<span class="chip">Boletas (03): <b>${c.boletas}</b></span>` +
+                `<span class="chip">Notas de Crédito (07): <b>${c.nc}</b></span>` +
+                `<span class="chip">Notas de Débito (08): <b>${c.nd}</b></span>` +
+                `<span class="chip">Otros: <b>${c.otros}</b></span>` +
+                (c.errores > 0
+                    ? `<span class="chip chip-error" title="Las celdas con error se resaltan en rojo: pase el mouse sobre ellas para ver el detalle.">&#9888; Filas con errores: <b>${c.errores}</b></span>`
+                    : `<span class="chip chip-ok">&#10004; Sin errores</span>`);
+        }
+
+        // Revalidar mientras se edita (con una pequeña espera)
+        let timerValidacion = null;
+        function validarConRetraso() {
+            clearTimeout(timerValidacion);
+            timerValidacion = setTimeout(validarTabla, 400);
         }
 
         // Identificador del libro (posiciones 22-27 del nombre) por modo
@@ -1017,6 +1630,9 @@
         function exportarArchivo() {
             const tabla = document.getElementById("tabla");
             let contenido = "";
+
+            // Asegurar el CAR Orig (campo 37) antes de leer las celdas
+            autocompletarCAROrig();
 
             const formato = document.getElementById("selFormato").value; // txt or csv
             const separador = document.getElementById("selSeparador").value;

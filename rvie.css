@@ -2185,3 +2185,80 @@ ul {
 .ig-ticket-table tr:hover td {
     background: #f0f5fb;
 }
+
+/* ============================================
+   Carga Individual de complemento (editar TC)
+   ============================================ */
+.results-table .tc-edit-btn {
+    cursor: pointer;
+    color: #333;
+}
+
+.results-table .tc-edit-btn:hover {
+    color: #005691;
+}
+
+.results-table .tc-edit-off {
+    color: #b5b5b5;
+    cursor: default;
+}
+
+.tc-edit-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tc-edit-table th {
+    background-color: #eef1f4;
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.tc-edit-table td {
+    padding: 14px 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.tc-edit-table input {
+    width: 100%;
+    max-width: 260px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    text-align: left;
+}
+
+/* Sección "Buscar por" colapsable (Propuesta del RVIE) */
+.search-title-toggle {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-title-toggle:hover {
+    color: #005691;
+}
+
+.search-title-toggle i {
+    font-size: 14px;
+    transition: transform 0.15s ease;
+}
+
+/* Celdas del detalle editables (modo edición MASTER) */
+.results-table td.celda-editable-rvie {
+    background: #fff8e1;
+    outline: 1px dashed #f39c12;
+    cursor: text;
+}
+.results-table td.celda-editable-rvie:focus {
+    outline: 2px solid #1a73e8;
+    background: #fff;
+}

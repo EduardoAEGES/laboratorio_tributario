@@ -153,6 +153,7 @@ const operations = [
     id: 1,
     name: "Asiento de Apertura",
     description: "Registro inicial de los activos, pasivos y patrimonio con los que la empresa inicia sus operaciones.",
+    videoId: "DmjIWoVXWKQ",
     blocks: [
       {
         title: "1. Asiento de Apertura",
@@ -170,6 +171,12 @@ const operations = [
     id: 2,
     name: "Compra de Activo Realizable (almacenable)",
     description: "Adquisición de mercaderías, materias primas o suministros que ingresan al almacén.",
+    videoId: "U1MwFeguC0A",
+    videosAdicionales: [
+      { id: "7SJYsfMuX6g", titulo: "Video adicional 1" },
+      { id: "fqnWJf8JKLc", titulo: "Video adicional 2" },
+      { id: "8U9hDcW91yU", titulo: "Video adicional 3" }
+    ],
     blocks: [
       {
         title: "2.1. Asiento de Naturaleza",
@@ -941,13 +948,51 @@ function setupNavigation() {
 // ===== VENTANA FLOTANTE DEL VIDEO EXPLICATIVO =====
 const VIDEO_EXPLICACION_ID = "DmjIWoVXWKQ"; // https://www.youtube.com/watch?v=DmjIWoVXWKQ
 
+function reproducirVideoExplicacion(videoId) {
+  const iframe = document.getElementById("video-float-iframe");
+  if (iframe) iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+}
+
 function abrirVideoExplicacion() {
   const modal = document.getElementById("video-float");
   const backdrop = document.getElementById("video-float-backdrop");
   const iframe = document.getElementById("video-float-iframe");
+  const extras = document.getElementById("video-float-extras");
   if (!modal || !iframe) return;
 
-  iframe.src = `https://www.youtube.com/embed/${VIDEO_EXPLICACION_ID}?autoplay=1&rel=0`;
+  // Video de la operación activa (si no tiene, usa el video general por defecto)
+  const op = operations.find(o => o.id === activeOpId);
+  const mainId = (op && op.videoId) ? op.videoId : VIDEO_EXPLICACION_ID;
+  reproducirVideoExplicacion(mainId);
+
+  // Videos adicionales: se muestran como botones que cargan el video principal
+  if (extras) {
+    const adicionales = (op && Array.isArray(op.videosAdicionales)) ? op.videosAdicionales : [];
+    if (adicionales.length) {
+      const items = [{ id: mainId, titulo: "▶ Principal" }].concat(
+        adicionales.map((v, i) => ({ id: v.id, titulo: v.titulo || ("Video " + (i + 1)) }))
+      );
+      extras.innerHTML =
+        '<span class="video-extras-title">Videos:</span>' +
+        '<div class="video-extras-list">' +
+        items.map((v, i) =>
+          `<button type="button" class="video-extra-btn${i === 0 ? " active" : ""}" data-vid="${v.id}" title="${v.titulo}">${v.titulo}</button>`
+        ).join("") +
+        '</div>';
+      extras.style.display = "flex";
+      extras.querySelectorAll(".video-extra-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          extras.querySelectorAll(".video-extra-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          reproducirVideoExplicacion(btn.getAttribute("data-vid"));
+        });
+      });
+    } else {
+      extras.style.display = "none";
+      extras.innerHTML = "";
+    }
+  }
+
   modal.classList.add("show");
   if (backdrop) backdrop.classList.add("show");
 }

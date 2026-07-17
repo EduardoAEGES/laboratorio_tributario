@@ -1,0 +1,11 @@
+
+/* Celdas del detalle editables (modo edición MASTER) */
+.results-table td.celda-editable-rce {
+    background: #fff8e1;
+    outline: 1px dashed #f39c12;
+    cursor: text;
+}
+.results-table td.celda-editable-rce:focus {
+    outline: 2px solid #1a73e8;
+    background: #fff;
+}

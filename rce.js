@@ -1276,7 +1276,7 @@ document.addEventListener('DOMContentLoaded', function () {
             isc: 0, icbper: 0, otros: 0, total: 0, anticipos: 0, otrosCargos: 0, mtoRedondeo: 0
         };
 
-        dataRows.forEach(row => {
+        dataRows.forEach((row, idx) => {
             const fEmision = row.fecha_emision || '';
             const fVcto = row.fecha_vcto_pago || '';
             const tipoCp = row.tipo_cp || '';
@@ -1330,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const descComp = row.desc_comp || 'ACTIVO';
             const fob = parseFloat(row.valor_fob) || 0;
             const opGrat = parseFloat(row.valor_op_gratuitas) || 0;
-            const tipoOp = row.tipo_operacion || '0101';
+            const tipoOp = String(row.tipo_operacion || '0101').padStart(4, '0');
             const dam = row.dam || '';
             const clu = row.clu || '';
             const car = row.src_key || '';
@@ -1350,6 +1350,11 @@ document.addEventListener('DOMContentLoaded', function () {
             totals.otrosCargos += otrosCargos;
             totals.mtoRedondeo += mtoRedondeo;
             totals.total += totalCp;
+
+            // Lápiz de complemento: solo editable cuando la moneda es distinta de PEN
+            const compIcon = moneda !== 'PEN'
+                ? `<i class="fas fa-edit tc-edit-btn" data-idx="${idx}" title="Editar tipo de cambio"></i>`
+                : '<i class="far fa-edit tc-edit-off"></i>';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -1392,7 +1397,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${Number(tc).toFixed(3)}</td>
 
                 <!-- Referencias -->
-                <td><i class="far fa-edit"></i></td>
+                <td>${compIcon}</td>
                 <td>${fRef || ''}</td>
                 <td>${tipoRef || ''}</td>
                 <td>${serieRef || ''}</td>
@@ -1452,6 +1457,273 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // =============================================
+    // EDICIÓN Y PERSISTENCIA DE CONTENIDO DEL RCE (solo rol MASTER)
+    // =============================================
+    let currentPeriodoRce = '';   // 'YYYYMM' del periodo cargado en la propuesta
+    let modoEdicionRce = false;
+
+    function esMasterRce() {
+        try { return !!(window.SimStore && SimStore.esMaster()); } catch (e) { return false; }
+    }
+    function contentKeyRce(periodo) { return 'sire_rce_content_' + periodo; }
+    function comprobantePorTipoRce(tp) {
+        const t = String(tp || '').trim().padStart(2, '0');
+        return t === '01' ? 'Factura' : t === '03' ? 'Boleta de Venta' :
+            t === '07' ? 'Nota de Crédito' : t === '08' ? 'Nota de Débito' : 'Otro';
+    }
+
+    // Mapa: índice de celda en el detalle -> campo del comprobante (n = numérico)
+    const MAP_EDIT_RCE = [
+        { i: 3, f: 'fecha_emision' }, { i: 4, f: 'fecha_vcto_pago' }, { i: 5, f: 'tipo_cp' },
+        { i: 7, f: 'serie' }, { i: 9, f: 'numero' }, { i: 10, f: 'nro_final' },
+        { i: 11, f: 'tipo_doc_identidad' }, { i: 12, f: 'nro_doc_identidad' }, { i: 13, f: 'proveedor' }, { i: 14, f: 'tipo_proveedor' },
+        { i: 15, f: 'bi_gravada', n: true }, { i: 16, f: 'igv_ipm', n: true },
+        { i: 17, f: 'bi_gravada_dgng', n: true }, { i: 18, f: 'igv_ipm_dgng', n: true },
+        { i: 19, f: 'bi_gravada_dng', n: true }, { i: 20, f: 'igv_ipm_dng', n: true },
+        { i: 21, f: 'adquisiciones_no_gravadas', n: true }, { i: 22, f: 'isc', n: true },
+        { i: 23, f: 'icbper', n: true }, { i: 24, f: 'otros_tributos_cargos', n: true },
+        { i: 25, f: 'anticipos', n: true }, { i: 26, f: 'otros_cargos', n: true }, { i: 27, f: 'monto_redondeo', n: true },
+        { i: 28, f: 'total_cp', n: true }, { i: 29, f: 'moneda' }, { i: 30, f: 'tipo_cambio', n: true },
+        { i: 32, f: 'doc_mod_fecha_emision' }, { i: 33, f: 'doc_mod_tipo_cp' }, { i: 34, f: 'doc_mod_serie' }, { i: 35, f: 'doc_mod_numero' },
+        { i: 36, f: 'detalle_operacion' }, { i: 37, f: 'descripcion' }, { i: 38, f: 'forma_pago' }, { i: 39, f: 'motivo_nota_credito' },
+        { i: 41, f: 'tipo_carga' }, { i: 43, f: 'monto_detrac_retenc', n: true }, { i: 44, f: 'nro_constancia_deposito' },
+        { i: 45, f: 'id_proyecto' }, { i: 46, f: 'tipo_nota' }, { i: 47, f: 'est_comp' }, { i: 48, f: 'desc_comp' },
+        { i: 49, f: 'valor_fob', n: true }, { i: 50, f: 'valor_op_gratuitas', n: true },
+        { i: 51, f: 'tipo_operacion' }, { i: 52, f: 'dam' }, { i: 53, f: 'clu' }, { i: 54, f: 'src_key' }
+    ];
+
+    // Renderiza detalle + resumen desde los comprobantes (snake_case)
+    function renderRceContenido(rows) {
+        renderTable(rows);
+        actualizarResumenRce(rows);
+        if (modoEdicionRce) aplicarModoEdicionRce(true);
+    }
+
+    // Recalcula el resumen (parte superior, 11 columnas) desde los comprobantes
+    function actualizarResumenRce(rows) {
+        const tbody = document.getElementById('summary-table-body');
+        if (!tbody) return;
+        const fmt = n => Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const groups = {}; const gt = { docs: 0, biGrav: 0, mtoIgv: 0, biGravDGNG: 0, igvDGNG: 0, biGravDNG: 0, igvDNG: 0, valNoGrav: 0, otros: 0, total: 0 };
+        rows.forEach(r => {
+            const t = String(r.tipo_cp || '01').trim().padStart(2, '0');
+            if (!groups[t]) groups[t] = { docs: 0, biGrav: 0, mtoIgv: 0, biGravDGNG: 0, igvDGNG: 0, biGravDNG: 0, igvDNG: 0, valNoGrav: 0, otros: 0, total: 0 };
+            const add = o => {
+                o.docs += 1; o.biGrav += +r.bi_gravada || 0; o.mtoIgv += +r.igv_ipm || 0; o.biGravDGNG += +r.bi_gravada_dgng || 0;
+                o.igvDGNG += +r.igv_ipm_dgng || 0; o.biGravDNG += +r.bi_gravada_dng || 0; o.igvDNG += +r.igv_ipm_dng || 0;
+                o.valNoGrav += +r.adquisiciones_no_gravadas || 0; o.otros += +r.otros_tributos_cargos || 0; o.total += +r.total_cp || 0;
+            };
+            add(groups[t]); add(gt);
+        });
+        const labels = { '01': '01 - Factura', '02': '02 - Recibo por Honorarios', '03': '03 - Boleta de Venta', '07': '07 - Nota de Crédito', '08': '08 - Nota de Débito', '50': '50 - DAM - Importación definitiva' };
+        const cols = g => `<td>${g.docs}</td><td>${fmt(g.biGrav)}</td><td>${fmt(g.mtoIgv)}</td><td>${fmt(g.biGravDGNG)}</td>` +
+            `<td>${fmt(g.igvDGNG)}</td><td>${fmt(g.biGravDNG)}</td><td>${fmt(g.igvDNG)}</td><td>${fmt(g.valNoGrav)}</td>` +
+            `<td>${fmt(g.otros)}</td><td>${fmt(g.total)}</td>`;
+        tbody.innerHTML = '';
+        Object.keys(groups).sort().forEach(t => { tbody.innerHTML += `<tr><td class="text-left">${labels[t] || t + ' - Otro'}</td>${cols(groups[t])}</tr>`; });
+        const tfoot = document.getElementById('summary-table-foot');
+        if (tfoot) tfoot.innerHTML = `<tr class="totals-row totals-row-red"><td class="text-left">TOTAL:</td>${cols(gt)}</tr>`;
+        const sp = document.getElementById('summary-pagination-info');
+        if (sp) { const c = Object.keys(groups).length; sp.textContent = `Mostrando del 1 al ${c} de un total ${c} registros`; }
+        const cq = document.getElementById('chart-qty'); if (cq) cq.textContent = gt.docs;
+        const ca = document.getElementById('chart-amount'); if (ca) ca.textContent = fmt(gt.total);
+    }
+
+    function guardarContenidoRce() {
+        if (!esMasterRce() || !currentPeriodoRce) return;
+        try { SimStore.setItem(contentKeyRce(currentPeriodoRce), JSON.stringify(comprobantesActualesRce)); } catch (e) {}
+    }
+    function cargarContenidoRce(periodo) {
+        if (!esMasterRce()) return null;
+        try {
+            const raw = SimStore.getItem(contentKeyRce(periodo));
+            if (!raw) return null;
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) && arr.length ? arr : null;
+        } catch (e) { return null; }
+    }
+
+    function aplicarModoEdicionRce(activar) {
+        const tbody = document.querySelector('.results-table tbody');
+        if (!tbody) return;
+        Array.from(tbody.rows).forEach(tr => {
+            MAP_EDIT_RCE.forEach(m => {
+                const td = tr.cells[m.i];
+                if (!td) return;
+                td.contentEditable = activar ? 'true' : 'false';
+                td.classList.toggle('celda-editable-rce', activar);
+            });
+        });
+    }
+    function leerEdicionRce() {
+        const tbody = document.querySelector('.results-table tbody');
+        if (!tbody) return;
+        Array.from(tbody.rows).forEach((tr, idx) => {
+            const row = comprobantesActualesRce[idx];
+            if (!row) return;
+            MAP_EDIT_RCE.forEach(m => {
+                const td = tr.cells[m.i];
+                if (!td) return;
+                let v = td.textContent.trim();
+                if (m.n) v = parseFloat(v.replace(/,/g, '')) || 0;
+                row[m.f] = v;
+            });
+            row.comprobante = comprobantePorTipoRce(row.tipo_cp);
+        });
+    }
+    function toggleEditarRce() {
+        if (!esMasterRce()) { alert('La edición directa solo está disponible para el perfil MASTER.'); return; }
+        if (!comprobantesActualesRce.length) { alert('No hay comprobantes para editar. Cargue una propuesta primero.'); return; }
+        const btn = document.getElementById('btn-editar-cp-rce');
+        if (!modoEdicionRce) {
+            modoEdicionRce = true;
+            aplicarModoEdicionRce(true);
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> Guardar edición';
+        } else {
+            leerEdicionRce();
+            modoEdicionRce = false;
+            renderRceContenido(comprobantesActualesRce);
+            guardarContenidoRce();
+            if (btn) btn.innerHTML = '<i class="fas fa-pen"></i> Editar';
+            alert('Cambios guardados.');
+        }
+    }
+    function eliminarSeleccionadosRce() {
+        if (!esMasterRce()) { alert('Eliminar comprobantes solo está disponible para el perfil MASTER.'); return; }
+        const tbody = document.querySelector('.results-table tbody');
+        if (!tbody) return;
+        const conservar = [];
+        Array.from(tbody.rows).forEach((tr, idx) => {
+            const chk = tr.cells[0] && tr.cells[0].querySelector('input[type="checkbox"]');
+            if (!(chk && chk.checked)) conservar.push(comprobantesActualesRce[idx]);
+        });
+        if (conservar.length === comprobantesActualesRce.length) { alert('Seleccione al menos un comprobante para eliminar.'); return; }
+        comprobantesActualesRce = conservar;
+        renderRceContenido(comprobantesActualesRce);
+        guardarContenidoRce();
+    }
+    // Agrega una fila en blanco (prellenada con RUC/periodo) para editarla en línea
+    function agregarFilaRce() {
+        if (!esMasterRce()) { alert('Agregar comprobantes solo está disponible para el perfil MASTER.'); return; }
+        let auth = {}; try { auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        const nueva = {
+            ruc: auth.ruc || '', razon_social: auth.denominacion || '', periodo: currentPeriodoRce || '', src_key: '',
+            fecha_emision: '', fecha_vcto_pago: '', tipo_cp: '01', comprobante: 'Factura',
+            serie: '', numero: '', nro_final: '', tipo_doc_identidad: '6', nro_doc_identidad: '',
+            proveedor: '', tipo_proveedor: 'Nacional - Bienes/Servicios',
+            bi_gravada: 0, igv_ipm: 0, bi_gravada_dgng: 0, igv_ipm_dgng: 0, bi_gravada_dng: 0, igv_ipm_dng: 0,
+            adquisiciones_no_gravadas: 0, isc: 0, icbper: 0, otros_tributos_cargos: 0, anticipos: 0, otros_cargos: 0, monto_redondeo: 0,
+            total_cp: 0, moneda: 'PEN', tipo_cambio: 1,
+            doc_mod_fecha_emision: '', doc_mod_tipo_cp: '', doc_mod_serie: '', doc_mod_numero: '',
+            detalle_operacion: '', descripcion: '', forma_pago: '', motivo_nota_credito: '',
+            sujeto_detrac_retenc: false, tipo_carga: '', pct_aplicado: 0, monto_detrac_retenc: 0, nro_constancia_deposito: '',
+            id_proyecto: '', tipo_nota: '', est_comp: '1', desc_comp: 'ACTIVO', valor_fob: 0, valor_op_gratuitas: 0,
+            tipo_operacion: '0101', dam: '', clu: ''
+        };
+        comprobantesActualesRce = comprobantesActualesRce.concat([nueva]);
+        const mainContent = document.getElementById('main-content-display');
+        if (mainContent) mainContent.style.display = 'block';
+        renderRceContenido(comprobantesActualesRce);
+        guardarContenidoRce();
+        if (!modoEdicionRce) toggleEditarRce();
+        alert('Fila agregada. Edite los datos y pulse "Guardar edición".');
+    }
+    function togglePresentadoRce() {
+        if (!esMasterRce()) { alert('Cambiar el estado Presentado solo está disponible para el perfil MASTER.'); return; }
+        if (!currentPeriodoRce || currentPeriodoRce.length < 6) { alert('Primero cargue un periodo (Aceptar propuesta).'); return; }
+        const periodo = currentPeriodoRce.slice(0, 4) + '-' + currentPeriodoRce.slice(4, 6);
+        let presentados = {};
+        try { presentados = JSON.parse(SimStore.getItem('sire_presentado') || '{}'); } catch (e) {}
+        if (presentados[periodo]) delete presentados[periodo]; else presentados[periodo] = true;
+        SimStore.setItem('sire_presentado', JSON.stringify(presentados));
+        const nuevoEstado = presentados[periodo] ? 'PRESENTADO' : 'NO PRESENTADO';
+        if (periodoSpan && periodoSpan.textContent !== 'Seleccionar') updateMonthOptions(periodoSpan.textContent.split('-')[0]);
+        const btn = document.getElementById('btn-toggle-presentado-rce');
+        if (btn) btn.innerHTML = '<i class="fas fa-flag"></i> Estado: ' + nuevoEstado;
+        alert('El periodo ' + periodo + ' quedó como ' + nuevoEstado + '.');
+    }
+    // Muestra la barra MASTER y refleja el estado del periodo cargado
+    function actualizarBotonPresentadoRce() {
+        const toolbar = document.getElementById('rce-master-toolbar');
+        if (toolbar) toolbar.style.display = esMasterRce() ? 'flex' : 'none';
+        const btn = document.getElementById('btn-toggle-presentado-rce');
+        if (!btn) return;
+        let estado = 'NO PRESENTADO';
+        if (currentPeriodoRce && currentPeriodoRce.length >= 6) {
+            const periodo = currentPeriodoRce.slice(0, 4) + '-' + currentPeriodoRce.slice(4, 6);
+            try { const p = JSON.parse(SimStore.getItem('sire_presentado') || '{}'); if (p[periodo]) estado = 'PRESENTADO'; } catch (e) {}
+        }
+        btn.innerHTML = '<i class="fas fa-flag"></i> Estado: ' + estado;
+    }
+
+    // Delegación de clicks para Agregar / Editar / Eliminar / Presentado (RCE)
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#btn-agregar-cp-rce')) { e.preventDefault(); agregarFilaRce(); }
+        else if (e.target.closest('#btn-editar-cp-rce')) { e.preventDefault(); toggleEditarRce(); }
+        else if (e.target.closest('#btn-eliminar-cp-rce')) { e.preventDefault(); eliminarSeleccionadosRce(); }
+        else if (e.target.closest('#btn-toggle-presentado-rce')) { e.preventDefault(); togglePresentadoRce(); }
+    });
+
+    // ==========================================================
+    // Modal: Carga Individual de complemento (editar tipo de cambio)
+    // Solo se abre desde el lápiz de filas con moneda distinta de PEN
+    // ==========================================================
+    const modalEditarTc = document.getElementById('modal-editar-tc');
+    let tcEditIdx = null;
+
+    const resultsTbodyTc = document.querySelector('.results-table tbody');
+    if (resultsTbodyTc && modalEditarTc) {
+        resultsTbodyTc.addEventListener('click', (e) => {
+            const btn = e.target.closest('.tc-edit-btn');
+            if (!btn) return;
+            tcEditIdx = parseInt(btn.dataset.idx, 10);
+            const row = comprobantesActualesRce[tcEditIdx];
+            if (!row) return;
+            document.getElementById('tc-edit-fecha').textContent = row.fecha_emision || '';
+            document.getElementById('tc-edit-moneda').textContent = row.moneda || '';
+            document.getElementById('tc-edit-input').value = Number(row.tipo_cambio || 1).toFixed(3);
+            modalEditarTc.style.display = 'flex';
+        });
+    }
+
+    const btnGrabarTc = document.getElementById('btn-grabar-tc');
+    if (btnGrabarTc) {
+        btnGrabarTc.addEventListener('click', () => {
+            const nuevoTc = parseFloat(document.getElementById('tc-edit-input').value);
+            if (isNaN(nuevoTc) || nuevoTc <= 0) {
+                alert('Ingrese un tipo de cambio válido.');
+                return;
+            }
+            if (tcEditIdx !== null && comprobantesActualesRce[tcEditIdx]) {
+                const row = comprobantesActualesRce[tcEditIdx];
+                // Los montos almacenados están en soles convertidos con el TC anterior:
+                // monto_nuevo = (monto / tc_anterior) * tc_nuevo
+                const tcAnterior = parseFloat(row.tipo_cambio) || 1;
+                const factor = nuevoTc / tcAnterior;
+                const camposMonto = [
+                    'bi_gravada', 'igv_ipm', 'bi_gravada_dgng', 'igv_ipm_dgng',
+                    'bi_gravada_dng', 'igv_ipm_dng', 'adquisiciones_no_gravadas', 'isc',
+                    'icbper', 'otros_tributos_cargos', 'anticipos', 'otros_cargos',
+                    'monto_redondeo', 'total_cp', 'valor_fob', 'valor_op_gratuitas',
+                    'monto_detrac_retenc'
+                ];
+                camposMonto.forEach(campo => {
+                    const valor = parseFloat(row[campo]) || 0;
+                    row[campo] = Math.round(valor * factor * 100) / 100;
+                });
+                row.tipo_cambio = nuevoTc;
+                renderTable(comprobantesActualesRce);
+            }
+            modalEditarTc.style.display = 'none';
+        });
+    }
+
+    const btnCancelarTc = document.getElementById('btn-cancelar-tc');
+    if (btnCancelarTc) btnCancelarTc.addEventListener('click', () => { if (modalEditarTc) modalEditarTc.style.display = 'none'; });
+    const closeEditarTc = document.getElementById('close-editar-tc');
+    if (closeEditarTc) closeEditarTc.addEventListener('click', () => { if (modalEditarTc) modalEditarTc.style.display = 'none'; });
+
     // Dropdown Logic
     const monthData = {
         '2026': [
@@ -1507,7 +1779,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // la etiqueta del mes pasa de "No Presentado" a "Presentado"
     function etiquetaMesPresentado(yearKey, month) {
         try {
-            const presentados = JSON.parse(sessionStorage.getItem('sire_presentado') || '{}');
+            const presentados = JSON.parse(SimStore.getItem('sire_presentado') || '{}');
             const mesMapEtiqueta = {
                 'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
                 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
@@ -1616,6 +1888,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 const mesText = mesSeleccionado.split('-')[0];
                 const searchPeriod = `${mesMap[mesText]}/${year}`;
 
+                // Periodo 'YYYYMM' para persistir/recuperar el contenido editado (MASTER)
+                currentPeriodoRce = year + (mesMap[mesText] || '');
+                actualizarBotonPresentadoRce();
+
+                // MASTER: si hay contenido guardado para este periodo, se usa ese
+                // en lugar de la propuesta base de la BD.
+                const contenidoGuardadoRce = cargarContenidoRce(currentPeriodoRce);
+                if (contenidoGuardadoRce) {
+                    renderRceContenido(contenidoGuardadoRce);
+                    return;
+                }
+
                 const tbody = document.getElementById('summary-table-body');
                 if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-center">Cargando datos de Supabase...</td></tr>`;
 
@@ -1696,9 +1980,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             const cpTypesMap = {
                                 '01': '01 - Factura',
+                                '02': '02 - Recibo por Honorarios',
                                 '03': '03 - Boleta de Venta',
                                 '07': '07 - Nota de Crédito',
-                                '08': '08 - Nota de Débito'
+                                '08': '08 - Nota de Débito',
+                                '50': '50 - DAM - Importación definitiva'
                             };
 
                             // Update summary table
@@ -1779,7 +2065,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 fecha_emision: formatDate(d['Fecha de emisión'] || d['Fecha de Emision'] || d['Fecha de emision']),
                                 fecha_vcto_pago: formatDate(d['Fecha Vcto/Pago'] || d['Fecha Vcto/pago']),
                                 tipo_cp: d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] ? String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc']).trim().padStart(2, '0') : '01',
-                                comprobante: d['Comprobante'] || (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '01' ? 'Factura' : (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '03' ? 'Boleta de Venta' : (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '07' ? 'Nota de Crédito' : (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '08' ? 'Nota de Débito' : 'Otro')))),
+                                comprobante: d['Comprobante'] || (String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '01' ? 'Factura' : String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '02' ? 'Recibo por Honorarios' : String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '03' ? 'Boleta de Venta' : String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '07' ? 'Nota de Crédito' : String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '08' ? 'Nota de Débito' : String(d['Tipo CP/Doc.'] || d['Tipo CP/Doc'] || '').trim().padStart(2, '0') === '50' ? 'DAM - Importación Definitiva' : 'Otro'),
                                 serie: d['Serie del CDP'] || d['Serie del cdp'] || d['serie'],
                                 anio: d['Año'] || '',
                                 numero: d['Numero'] || d['numero'] || d['Nro CP o Doc. Nro Inicial (Rango)'],
@@ -2053,6 +2339,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
+                // MASTER: persistir el contenido importado para este periodo
+                if (esMasterRce()) {
+                    const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
+                    if (perImp.length === 6) currentPeriodoRce = perImp;
+                    actualizarBotonPresentadoRce();
+                    guardarContenidoRce();
+                }
+
                 // Registrar el ticket del reemplazo
                 const now = new Date();
                 const pad = n => String(n).padStart(2, '0');
@@ -2060,7 +2354,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const ticketNum = now.getFullYear() + '01000000' + randStr;
 
                 let tickets = [];
-                try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+                try { tickets = JSON.parse(SimStore.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
                 tickets.unshift({
                     numero: ticketNum,
                     fecha: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' +
@@ -2069,7 +2363,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     tipo: 'Reemplazar propuesta',
                     estado: 'Terminado'
                 });
-                sessionStorage.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
+                SimStore.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
 
                 // Cerrar el modal de reemplazo y mostrar "Ticket Generado"
                 cerrarModalReemplazoRce();
@@ -2187,9 +2481,9 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         let tickets = [];
-        try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+        try { tickets = JSON.parse(SimStore.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
         tickets.unshift(ticketData);
-        sessionStorage.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
+        SimStore.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
 
         const ticketEl = document.getElementById('rce-export-ticket-number');
         if (ticketEl) ticketEl.textContent = ticketNum;
@@ -2202,7 +2496,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!tbody) return;
 
         let tickets = [];
-        try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+        try { tickets = JSON.parse(SimStore.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
 
         if (filtroNro) {
             tickets = tickets.filter(t => t.numero.includes(filtroNro));
@@ -2238,7 +2532,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         let tickets = [];
-        try { tickets = JSON.parse(sessionStorage.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
+        try { tickets = JSON.parse(SimStore.getItem('sire_rce_export_tickets') || '[]'); } catch (err) {}
         const ticket = tickets.find(t => t.numero === numeroTicket);
         if (!ticket) return;
 
@@ -2454,10 +2748,10 @@ function rceAceptarTicket() {
     // Se conserva en sessionStorage hasta que el usuario pulse "Salir".
     let estadoAceptado = {};
     try {
-        estadoAceptado = JSON.parse(sessionStorage.getItem('sire_aceptado') || '{}');
+        estadoAceptado = JSON.parse(SimStore.getItem('sire_aceptado') || '{}');
     } catch (e) { /* estado corrupto: se reinicia */ }
     estadoAceptado.rce = periodoTexto;
-    sessionStorage.setItem('sire_aceptado', JSON.stringify(estadoAceptado));
+    SimStore.setItem('sire_aceptado', JSON.stringify(estadoAceptado));
 
     // Marca de navegación: rvie.html mostrará la vista Generación de Registros
     sessionStorage.setItem('rce_nav_generacion', '1');
