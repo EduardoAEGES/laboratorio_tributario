@@ -1635,15 +1635,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const periodo = currentPeriodoRce.slice(0, 4) + '-' + currentPeriodoRce.slice(4, 6);
         let presentados = {};
         try { presentados = JSON.parse(SimStore.getItem('sire_presentado') || '{}'); } catch (e) {}
-        if (presentados[periodo]) delete presentados[periodo]; else presentados[periodo] = true;
+        // Se invierte el estado efectivo actual y se guarda como booleano explícito
+        // (así también se puede pasar de "Presentado" a "No Presentado").
+        const nuevoPresentado = !esPeriodoPresentadoRce(periodo);
+        presentados[periodo] = nuevoPresentado;
         SimStore.setItem('sire_presentado', JSON.stringify(presentados));
-        const nuevoEstado = presentados[periodo] ? 'PRESENTADO' : 'NO PRESENTADO';
-        if (periodoSpan && periodoSpan.textContent !== 'Seleccionar') updateMonthOptions(periodoSpan.textContent.split('-')[0]);
-        const btn = document.getElementById('btn-toggle-presentado-rce');
-        if (btn) btn.innerHTML = '<i class="fas fa-flag"></i> Estado: ' + nuevoEstado;
-        alert('El periodo ' + periodo + ' quedó como ' + nuevoEstado + '.');
+
+        // Refleja el cambio en el texto de arriba (selector de mes) y en las opciones
+        if (periodoSpan && periodoSpan.textContent !== 'Seleccionar') {
+            updateMonthOptions(periodoSpan.textContent.split('-')[0]);
+            if (mesSpan && mesSpan.textContent !== 'Seleccionar') {
+                const abrev = mesSpan.textContent.split('-')[0].trim();
+                mesSpan.textContent = abrev + (nuevoPresentado ? '-Presentado' : '-No Presentado');
+            }
+        }
+        actualizarBotonPresentadoRce();
+        alert('El periodo ' + periodo + ' quedó como ' + (nuevoPresentado ? 'PRESENTADO' : 'NO PRESENTADO') + '.');
     }
-    // Muestra la barra MASTER y refleja el estado del periodo cargado
+    // Muestra la barra MASTER y refleja el estado del periodo cargado en el botón
     function actualizarBotonPresentadoRce() {
         const toolbar = document.getElementById('rce-master-toolbar');
         if (toolbar) toolbar.style.display = esMasterRce() ? 'flex' : 'none';
@@ -1652,9 +1661,11 @@ document.addEventListener('DOMContentLoaded', function () {
         let estado = 'NO PRESENTADO';
         if (currentPeriodoRce && currentPeriodoRce.length >= 6) {
             const periodo = currentPeriodoRce.slice(0, 4) + '-' + currentPeriodoRce.slice(4, 6);
-            try { const p = JSON.parse(SimStore.getItem('sire_presentado') || '{}'); if (p[periodo]) estado = 'PRESENTADO'; } catch (e) {}
+            estado = esPeriodoPresentadoRce(periodo) ? 'PRESENTADO' : 'NO PRESENTADO';
         }
-        btn.innerHTML = '<i class="fas fa-flag"></i> Estado: ' + estado;
+        // El botón es una ACCIÓN ("Cambiar Estado"); el estado real se ve arriba,
+        // pero se muestra entre paréntesis como referencia.
+        btn.innerHTML = '<i class="fas fa-flag"></i> Cambiar Estado (actual: ' + estado + ')';
     }
 
     // Delegación de clicks para Agregar / Editar / Eliminar / Presentado (RCE)
@@ -1775,21 +1786,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Si el periodo fue generado en la simulación (guardado en 'sire_presentado'),
-    // la etiqueta del mes pasa de "No Presentado" a "Presentado"
-    function etiquetaMesPresentado(yearKey, month) {
+    const MES_ABREV_A_NUM = {
+        'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
+        'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+        'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
+    };
+    const MES_NUM_A_ABREV = Object.fromEntries(
+        Object.entries(MES_ABREV_A_NUM).map(([abrev, num]) => [num, abrev])
+    );
+
+    // Fuente única de verdad del estado Presentado/No Presentado de un periodo.
+    // 1) Si el usuario lo cambió con "Cambiar Estado", manda el valor guardado
+    //    (booleano explícito en 'sire_presentado').
+    // 2) Si no, se usa el valor por defecto del dato estático (monthData).
+    // periodo: 'YYYY-MM'
+    function esPeriodoPresentadoRce(periodo) {
         try {
             const presentados = JSON.parse(SimStore.getItem('sire_presentado') || '{}');
-            const mesMapEtiqueta = {
-                'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04',
-                'MAY': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
-                'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12'
-            };
-            const abrev = month.split('-')[0];
-            const periodo = yearKey + '-' + mesMapEtiqueta[abrev];
-            if (presentados[periodo]) return abrev + '-Presentado';
+            if (Object.prototype.hasOwnProperty.call(presentados, periodo)) {
+                return !!presentados[periodo];
+            }
         } catch (e) { /* estado corrupto: se ignora */ }
-        return month;
+        const [yy, mm] = String(periodo).split('-');
+        const abrev = MES_NUM_A_ABREV[mm];
+        const label = (monthData[yy] || []).find(m => m.split('-')[0].trim() === abrev);
+        return label ? !/No\s*Presentado/i.test(label) : false;
+    }
+
+    // Etiqueta del mes en el selector, reflejando el estado real (ambas direcciones)
+    function etiquetaMesPresentado(yearKey, month) {
+        const abrev = month.split('-')[0].trim();
+        const periodo = yearKey + '-' + (MES_ABREV_A_NUM[abrev] || '');
+        return abrev + (esPeriodoPresentadoRce(periodo) ? '-Presentado' : '-No Presentado');
     }
 
     function updateMonthOptions(yearKey) {
@@ -2226,24 +2254,31 @@ document.addEventListener('DOMContentLoaded', function () {
         const lineas = texto.replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim() !== '');
         const filas = [];
 
+        // El Periodo llega como YYYYMM o YYYYMM00
+        const esPeriodo = v => /^\d{6}$/.test(v) || /^\d{8}$/.test(v);
+
         lineas.forEach(linea => {
             const esPipe = linea.includes('|');
             const f = linea.split(esPipe ? '|' : ',').map(v => String(v).trim());
 
-            // El txt SIRE no lleva cabecera; el csv exportado sí (primer campo "RUC")
+            // Se detecta por contenido si la línea trae el prefijo "RUC | Razón social"
+            // antes del Periodo (formato exportado) o empieza directamente por el
+            // Periodo (txt SIRE puro). Así funciona con "|" o "," y con/ sin prefijo.
             let base, ruc, razon;
-            if (esPipe) {
-                if (f.length < 24) return; // línea incompleta
+            if (esPeriodo(f[0])) {
+                // La línea empieza por el Periodo: no hay prefijo
                 base = 0;
                 ruc = rucSesion;
                 razon = razonSesion;
-            } else {
-                if (!/^\d{8,11}$/.test(f[0])) return; // cabecera u otra línea no válida
-                if (f.length < 26) return;
+            } else if (/^\d{8,11}$/.test(f[0]) && esPeriodo(f[2] || '')) {
+                // La línea empieza por RUC, Razón social, Periodo, ...
                 base = 2;
                 ruc = f[0];
                 razon = f[1];
+            } else {
+                return; // cabecera u otra línea no válida
             }
+            if (f.length < base + 24) return; // línea incompleta
 
             const g = i => (f[base + i] !== undefined ? f[base + i] : '');
             // El periodo del txt viene como YYYYMM00
@@ -2377,6 +2412,220 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // =============================================
+    // AJUSTES POSTERIORES (RCE) - importación de zip con la propuesta
+    // Flujo: "Carga de Ajustes Posteriores" -> confirmación -> Sí -> modal de
+    // carga -> Examinar (zip) -> Cargar archivo -> tabla + Ticket Generado.
+    // =============================================
+    let ajustesPosterioresRce = [];
+
+    function apContentKeyRce(periodo) { return 'sire_rce_ap_' + (periodo || 'actual'); }
+
+    // Carga los ajustes guardados del periodo actual (MASTER); si no hay guardado,
+    // conserva lo que ya esté en memoria (para el perfil no persistente).
+    function cargarAjustesRce() {
+        if (!currentPeriodoRce) return;
+        try {
+            const raw = SimStore.getItem(apContentKeyRce(currentPeriodoRce));
+            if (raw) { const a = JSON.parse(raw); if (Array.isArray(a)) ajustesPosterioresRce = a; }
+        } catch (e) {}
+    }
+
+    function guardarAjustesRce() {
+        if (!esMasterRce() || !currentPeriodoRce) return;
+        try { SimStore.setItem(apContentKeyRce(currentPeriodoRce), JSON.stringify(ajustesPosterioresRce)); } catch (e) {}
+    }
+
+    const fmtNum2Ap = v => (parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0).toFixed(2);
+
+    function renderAjustesRce() {
+        const tbody = document.getElementById('ap-rce-tbody');
+        const pag = document.getElementById('ap-rce-paginacion');
+        if (!tbody) return;
+        const rows = ajustesPosterioresRce;
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="15" class="text-center">Ningún registro encontrado</td></tr>';
+            if (pag) pag.textContent = 'Mostrando del 0 al 0 de un total de 0 registros';
+            const chkAll = document.getElementById('ap-rce-check-all');
+            if (chkAll) chkAll.checked = false;
+            return;
+        }
+        tbody.innerHTML = rows.map((r, i) => `
+            <tr>
+                <td><input type="checkbox" class="ap-rce-row-check" data-idx="${i}"></td>
+                <td>${r['Fecha de emisión'] || ''}</td>
+                <td>${r['Fecha Vcto/Pago'] || ''}</td>
+                <td>${r['Tipo CP/Doc.'] || ''}</td>
+                <td>${r['Serie del CDP'] || ''}</td>
+                <td>${r['Año'] || '0'}</td>
+                <td>${r['Nro CP o Doc. Nro Inicial (Rango)'] || ''}</td>
+                <td>${r['Nro Final (Rango)'] || ''}</td>
+                <td>${r['Tipo Doc Identidad'] || ''}</td>
+                <td>${r['Nro Doc Identidad'] || ''}</td>
+                <td class="text-left">${r['Apellidos Nombres/ Razón  Social'] || ''}</td>
+                <td>${fmtNum2Ap(r['BI Gravado DG'])}</td>
+                <td>${fmtNum2Ap(r['IGV / IPM DG'])}</td>
+                <td>${fmtNum2Ap(r['Total CP'])}</td>
+                <td>${r['Moneda'] || 'PEN'}</td>
+            </tr>`).join('');
+        if (pag) pag.textContent = 'Mostrando del 1 al ' + rows.length + ' de un total de ' + rows.length + ' registros';
+    }
+
+    // Genera y registra un ticket de envío; devuelve su número
+    function registrarTicketAp(archivo, tipo) {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const ticketNum = now.getFullYear() + '01000000' + String(Math.floor(Math.random() * 84) + 10);
+        let tickets = [];
+        try { tickets = JSON.parse(SimStore.getItem('sire_rce_export_tickets') || '[]'); } catch (e) {}
+        tickets.unshift({
+            numero: ticketNum,
+            fecha: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' +
+                   pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
+            archivo: archivo || '-',
+            tipo: tipo || 'Ajustes posteriores',
+            estado: 'Terminado'
+        });
+        SimStore.setItem('sire_rce_export_tickets', JSON.stringify(tickets));
+        return ticketNum;
+    }
+    function mostrarTicketAp(numero) {
+        const numEl = document.getElementById('ap-ticket-numero');
+        if (numEl) numEl.textContent = numero;
+        const mt = document.getElementById('rce-modal-ap-ticket');
+        if (mt) mt.style.display = 'flex';
+    }
+    const cerrarModalAp = id => { const m = document.getElementById(id); if (m) m.style.display = 'none'; };
+
+    // Al mostrar la sub-pestaña "Ajustes Posteriores", recuperar/render
+    const apMainSubTab = document.querySelector('.sub-tab-btn[data-target="ajustes-rce"]');
+    if (apMainSubTab) apMainSubTab.addEventListener('click', function () { cargarAjustesRce(); renderAjustesRce(); });
+
+    // Sub-pestañas AP SIRE / AP PER. ANT. SIRE (solo cambian el resaltado)
+    document.querySelectorAll('.ap-subtab-btn').forEach(b => b.addEventListener('click', function () {
+        document.querySelectorAll('.ap-subtab-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+    }));
+
+    // Botón "Carga de Ajustes Posteriores" -> pide confirmación
+    const apBtnCarga = document.getElementById('ap-rce-carga');
+    if (apBtnCarga) apBtnCarga.addEventListener('click', function () {
+        const m = document.getElementById('rce-modal-ap-confirm');
+        if (m) m.style.display = 'flex';
+    });
+    // Confirmación: No / cerrar
+    ['ap-confirm-no', 'ap-confirm-x'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => cerrarModalAp('rce-modal-ap-confirm'));
+    });
+    // Confirmación: Sí -> abre el modal de carga (Examinar)
+    const apConfirmSi = document.getElementById('ap-confirm-si');
+    if (apConfirmSi) apConfirmSi.addEventListener('click', function () {
+        cerrarModalAp('rce-modal-ap-confirm');
+        const inp = document.getElementById('ap-carga-file'); if (inp) inp.value = '';
+        const nb = document.getElementById('ap-carga-filename'); if (nb) nb.value = '';
+        const m = document.getElementById('rce-modal-ap-carga'); if (m) m.style.display = 'flex';
+    });
+
+    // Examinar / mostrar nombre del zip
+    const apExaminar = document.getElementById('ap-carga-examinar');
+    if (apExaminar) apExaminar.addEventListener('click', () => document.getElementById('ap-carga-file').click());
+    const apFile = document.getElementById('ap-carga-file');
+    if (apFile) apFile.addEventListener('change', function () {
+        const nb = document.getElementById('ap-carga-filename');
+        if (nb) nb.value = this.files.length ? this.files[0].name : '';
+    });
+    // Cancelar / cerrar modal de carga
+    ['ap-carga-cancelar', 'ap-carga-x'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => cerrarModalAp('rce-modal-ap-carga'));
+    });
+
+    // "Cargar archivo": lee el zip, puebla la tabla y genera el ticket
+    const apCargar = document.getElementById('ap-carga-cargar');
+    if (apCargar) apCargar.addEventListener('click', async function () {
+        const inp = document.getElementById('ap-carga-file');
+        if (!inp || !inp.files.length) { alert('Seleccione el archivo zip a importar con la opción Examinar.'); return; }
+        if (typeof JSZip === 'undefined') { alert('La librería de compresión JSZip no se ha cargado.'); return; }
+        const file = inp.files[0];
+        try {
+            const zip = await JSZip.loadAsync(file);
+            let entry = null;
+            zip.forEach(function (path, zf) { if (!entry && /\.(txt|csv)$/i.test(path)) entry = zf; });
+            if (!entry) { alert('El zip no contiene un archivo de texto (.txt).'); return; }
+            const texto = await entry.async('string');
+            const filas = parsearArchivoPlanoRce(texto);
+            if (!filas.length) { alert('El archivo no contiene registros con la estructura del RCE.'); return; }
+
+            ajustesPosterioresRce = filas;
+            if (esMasterRce()) {
+                const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
+                if (perImp.length === 6) currentPeriodoRce = perImp;
+                guardarAjustesRce();
+            }
+            renderAjustesRce();
+
+            cerrarModalAp('rce-modal-ap-carga');
+            mostrarTicketAp(registrarTicketAp(file.name, 'Ajustes posteriores'));
+        } catch (err) {
+            console.error('Error al leer el zip de ajustes posteriores:', err);
+            alert('No se pudo leer el archivo zip. Verifique que sea un zip válido con el txt del RCE.');
+        }
+    });
+
+    // Ticket: aceptar / cerrar
+    ['ap-ticket-aceptar', 'ap-ticket-x'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => cerrarModalAp('rce-modal-ap-ticket'));
+    });
+
+    // Seleccionar todos
+    const apCheckAll = document.getElementById('ap-rce-check-all');
+    if (apCheckAll) apCheckAll.addEventListener('change', function () {
+        document.querySelectorAll('.ap-rce-row-check').forEach(c => { c.checked = apCheckAll.checked; });
+    });
+
+    // Eliminar seleccionados
+    const apEliminar = document.getElementById('ap-rce-eliminar');
+    if (apEliminar) apEliminar.addEventListener('click', function () {
+        const idxDel = new Set();
+        document.querySelectorAll('.ap-rce-row-check').forEach(c => { if (c.checked) idxDel.add(parseInt(c.dataset.idx, 10)); });
+        if (!idxDel.size) { alert('Seleccione al menos un registro para eliminar.'); return; }
+        ajustesPosterioresRce = ajustesPosterioresRce.filter((_, i) => !idxDel.has(i));
+        guardarAjustesRce();
+        renderAjustesRce();
+    });
+
+    // Mostrar eventos posteriores de CP -> recarga/render
+    const apEventos = document.getElementById('ap-rce-mostrar-eventos');
+    if (apEventos) apEventos.addEventListener('click', function () { cargarAjustesRce(); renderAjustesRce(); });
+
+    // Envió ajustes posteriores -> genera ticket
+    const apEnviar = document.getElementById('ap-rce-enviar');
+    if (apEnviar) apEnviar.addEventListener('click', function () {
+        if (!ajustesPosterioresRce.length) { alert('No hay ajustes posteriores para enviar. Cargue un archivo primero.'); return; }
+        mostrarTicketAp(registrarTicketAp('-', 'Envío ajustes posteriores'));
+    });
+
+    // Exportar -> CSV simple de los ajustes mostrados
+    const apExportar = document.getElementById('ap-rce-exportar');
+    if (apExportar) apExportar.addEventListener('click', function () {
+        if (!ajustesPosterioresRce.length) { alert('No hay ajustes posteriores para exportar.'); return; }
+        const cols = ['Fecha de emisión', 'Fecha Vcto/Pago', 'Tipo CP/Doc.', 'Serie del CDP', 'Año',
+            'Nro CP o Doc. Nro Inicial (Rango)', 'Nro Final (Rango)', 'Tipo Doc Identidad', 'Nro Doc Identidad',
+            'Apellidos Nombres/ Razón  Social', 'BI Gravado DG', 'IGV / IPM DG', 'Total CP', 'Moneda'];
+        let csv = cols.join(',') + '\r\n';
+        ajustesPosterioresRce.forEach(r => {
+            csv += cols.map(c => '"' + String(r[c] == null ? '' : r[c]).replace(/"/g, '""') + '"').join(',') + '\r\n';
+        });
+        const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'ajustes_posteriores_rce_' + (currentPeriodoRce || '') + '.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    });
 
     // =============================================
     // EXPORTAR PROPUESTA RCE (CSV) + ESTADO DE ENVÍO DE TICKET

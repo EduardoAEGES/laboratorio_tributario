@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUNAT - Sistema Integrado de Registros Electrónicos</title>
     <link rel="stylesheet" href="rvie.css">
+    <link rel="stylesheet" href="rce.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -442,7 +443,7 @@
                                     <button class="btn-action btn-blue" id="btn-agregar-cp-rce"><i class="fas fa-plus-circle"></i> Agregar fila</button>
                                     <button class="btn-action btn-blue-light" id="btn-editar-cp-rce"><i class="fas fa-pen"></i> Editar</button>
                                     <button class="btn-action btn-blue-light" id="btn-eliminar-cp-rce"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                                    <button class="btn-action" id="btn-toggle-presentado-rce" style="background:#6a1b9a; color:#fff;"><i class="fas fa-flag"></i> Estado: NO PRESENTADO</button>
+                                    <button class="btn-action" id="btn-toggle-presentado-rce" style="background:#6a1b9a; color:#fff;"><i class="fas fa-flag"></i> Cambiar Estado</button>
                                 </div>
 
                                 <div class="table-responsive results-table-wrapper">
@@ -627,7 +628,72 @@
                             <div class="p-4 text-center text-muted">Vista de Generación del RCE en desarrollo.</div>
                         </div>
                         <div id="ajustes-rce" class="sub-content-view" style="display: none;">
-                            <div class="p-4 text-center text-muted">Vista de Ajustes Posteriores en desarrollo.</div>
+                            <!-- Sub-pestañas de Ajustes Posteriores -->
+                            <div class="ap-subtabs">
+                                <button class="ap-subtab-btn active" data-ap-tab="ap-sire">AP SIRE</button>
+                                <button class="ap-subtab-btn" data-ap-tab="ap-per-ant">AP PER. ANT. SIRE</button>
+                            </div>
+
+                            <div class="ap-panel">
+                                <div class="ap-radios">
+                                    <label><input type="radio" name="ap-tipo-rc" value="RC" checked> RC</label>
+                                    <label><input type="radio" name="ap-tipo-rc" value="RCND"> RC No Domiciliados</label>
+                                </div>
+
+                                <div class="table-controls-top" style="justify-content:flex-end;">
+                                    <div class="show-rows">mostrar:
+                                        <select id="ap-rce-mostrar">
+                                            <option>20</option>
+                                            <option>50</option>
+                                            <option>100</option>
+                                        </select> registros
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox" id="ap-rce-check-all"></th>
+                                                <th>Fecha de emisión</th>
+                                                <th>Fecha Vcto/Pago</th>
+                                                <th>Tipo CP/Doc.</th>
+                                                <th>Serie del CDP</th>
+                                                <th>Año</th>
+                                                <th>Nro CP o Doc. Nro Inicial(Rango)</th>
+                                                <th>Nro Final(Rango)</th>
+                                                <th>Tipo Doc Identidad</th>
+                                                <th>Nro Doc Identidad</th>
+                                                <th>Apellidos Nombres/ Razón Social</th>
+                                                <th>BI Gravada DG</th>
+                                                <th>IGV / IPM DG</th>
+                                                <th>Total CP</th>
+                                                <th>Moneda</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ap-rce-tbody">
+                                            <tr><td colspan="15" class="text-center">Ningún registro encontrado</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="ap-footer">
+                                    <span id="ap-rce-paginacion" class="ap-pag-info">Mostrando del 0 al 0 de un total de 0 registros</span>
+                                    <div class="ap-pag-controls">
+                                        <button class="ap-pag-btn" disabled>&larr; Anterior</button>
+                                        <span class="ap-pag-num">1</span>
+                                        <button class="ap-pag-btn" disabled>Siguiente &rarr;</button>
+                                    </div>
+                                </div>
+
+                                <div class="ap-actions">
+                                    <button class="ap-btn ap-btn-grey" id="ap-rce-eliminar"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rce-mostrar-eventos"><i class="fas fa-sync-alt"></i> Mostrar eventos posteriores de CP</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rce-carga"><i class="fas fa-upload"></i> Carga de Ajustes Posteriores</button>
+                                    <button class="ap-btn ap-btn-green" id="ap-rce-enviar"><i class="fas fa-check"></i> Envió ajustes posteriores</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rce-exportar"><i class="fas fa-download"></i> Exportar</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- INFORMACIÓN DE GESTIÓN (RCE): Estado de envío de Ticket -->
@@ -890,6 +956,62 @@
             </div>
             <div class="rce-modal-footer" style="justify-content:center;">
                 <button class="rce-btn rce-btn-primary" onclick="cerrarModalTicketReemplazoRce()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmación de importación de Ajustes Posteriores -->
+    <div id="rce-modal-ap-confirm" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:460px;">
+            <div class="rce-modal-header">
+                <span>Mensaje de confirmación</span>
+                <button class="rce-modal-close" id="ap-confirm-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>¿Está seguro de importar ajustes posteriores?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="ap-confirm-no" style="background:#eee; color:#333;">No</button>
+                <button class="rce-btn rce-btn-primary" id="ap-confirm-si">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Carga Ajustes Posteriores (importar zip) -->
+    <div id="rce-modal-ap-carga" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:720px; width:92%;">
+            <div class="rce-modal-header">
+                <span>Carga Ajustes Posteriores</span>
+                <button class="rce-modal-close" id="ap-carga-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>El archivo de texto (txt) a importar debe estar comprimido en formato zip.</p>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+                    <label style="white-space:nowrap; font-weight:600;">Archivo a importar</label>
+                    <input type="text" id="ap-carga-filename" readonly placeholder="Ningún archivo seleccionado" style="flex:1; padding:7px 10px; border:1px solid #ccc; border-radius:3px; background:#f5f5f5; font-size:13px;">
+                    <button class="rce-btn rce-btn-primary" id="ap-carga-examinar"><i class="fas fa-search"></i> Examinar</button>
+                    <input type="file" id="ap-carga-file" accept=".zip" style="display:none;">
+                </div>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="ap-carga-cargar" style="background:#4caf50; color:#fff;"><i class="fas fa-check"></i> Cargar archivo</button>
+                <button class="rce-btn" id="ap-carga-cancelar" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket Generado (Ajustes Posteriores) -->
+    <div id="rce-modal-ap-ticket" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:520px;">
+            <div class="rce-modal-header">
+                <span>Ticket Generado</span>
+                <button class="rce-modal-close" id="ap-ticket-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p><strong>Estimado Contribuyente,</strong> nos encontramos procesando su archivo. El número de ticket generado es <strong id="ap-ticket-numero">20260100000007</strong>, para verificar el estado del ticket puede consultarlo a través de la sub opción <strong>Estado de Envío de Ticket RCE</strong> de la opción "Consultas y Descargas" de la pestaña "Información de Gestión".</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" id="ap-ticket-aceptar">Aceptar</button>
             </div>
         </div>
     </div>
