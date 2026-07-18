@@ -26,17 +26,31 @@ document.addEventListener('DOMContentLoaded', function () {
         if (el) { el.style.display = 'none'; }
     }
 
-    // Exponer función globalmente para el onclick inline del botón (respaldo)
-    window.abrirConfirmarPropuesta = function() {
+    // Ajusta el texto del modal de confirmación según haya o no comprobantes en
+    // la propuesta: sin movimiento SUNAT avisa que se acepta vacía; con
+    // movimiento pregunta por el periodo que se va a aceptar.
+    function abrirModalConfirmarPropuesta() {
+        const p = document.getElementById('texto-confirmar-propuesta');
+        if (p) {
+            if (comprobantesActuales && comprobantesActuales.length) {
+                const periodo = obtenerPeriodoSeleccionadoRVIE().replace('-', '');
+                p.textContent = '¿Está seguro que desea aceptar la propuesta de RVIE del periodo ' + periodo + '?';
+            } else {
+                p.textContent = '¿Está seguro que desea Aceptar la Propuesta sin movimiento?';
+            }
+        }
         showModal(modalConfirmar);
-    };
+    }
+
+    // Exponer función globalmente para el onclick inline del botón (respaldo)
+    window.abrirConfirmarPropuesta = abrirModalConfirmarPropuesta;
 
     // Paso 1: Event delegation desde document - captura el click sin importar cuándo se registró
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('#btn-aceptar-propuesta');
         if (btn) {
             e.preventDefault();
-            showModal(modalConfirmar);
+            abrirModalConfirmarPropuesta();
         }
     });
 
@@ -178,13 +192,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función que transforma el contenido principal a la vista "Generación de Registros".
     // Muestra una fila por cada registro aceptado previamente (RCE y/o RVIE),
     // según el estado guardado en sessionStorage.
-    function mostrarVistaGeneracionRegistros() {
+    // opts.permitirVacio: al entrar desde el menú lateral no se inventa un
+    // registro pendiente; si no hay nada aceptado se muestra la tabla vacía.
+    function mostrarVistaGeneracionRegistros(opts) {
         const contentArea = document.querySelector('.content-area');
         if (!contentArea) return;
 
         const estado = obtenerEstadoAceptacion();
-        // Fallback defensivo: si no hay nada aceptado, mostrar solo el RVIE
-        if (!estado.rce && !estado.rvie) estado.rvie = '2026-05';
+        const hayPendientes = !!(estado.rce || estado.rvie || estado.rce_ap || estado.rvie_ap);
+        // Fallback defensivo: si no hay nada aceptado ni ajustes enviados, mostrar solo el RVIE
+        if (!hayPendientes && !(opts && opts.permitirVacio)) estado.rvie = '2026-05';
 
         function filaRegistro(nombre, periodo, indicador) {
             return `
@@ -203,8 +220,21 @@ document.addEventListener('DOMContentLoaded', function () {
         let filas = '';
         if (estado.rce)  filas += filaRegistro('Registro de compras', estado.rce, 'Con Información');
         if (estado.rvie) filas += filaRegistro('Registro de Ventas e Ingresos', estado.rvie, 'Con Información');
+        // Reportes de ajustes posteriores enviados desde el RCE / RVIE
+        if (estado.rce_ap)  filas += filaRegistro('Reporte de Ajustes Posteriores - Compras', estado.rce_ap, 'Con Información');
+        if (estado.rvie_ap) filas += filaRegistro('Reporte de Ajustes Posteriores - Ventas', estado.rvie_ap, 'Con Información');
 
-        const periodo = estado.rvie || estado.rce;
+        // Sin registros pendientes (entrada desde el menú lateral): tabla vacía
+        if (!filas) filas = '<tr><td colspan="8" style="text-align:center; padding:14px;">Ningún registro encontrado</td></tr>';
+
+        const periodo = estado.rvie || estado.rce || estado.rvie_ap || estado.rce_ap;
+        const filaCasillas = periodo ? `
+                            <tr>
+                                <td>Casilla FV621</td>
+                                <td>${periodo}</td>
+                                <td>Sin Información</td>
+                                <td><a href="#" class="link-registrado">Ver Casillas</a></td>
+                            </tr>` : '';
 
         contentArea.innerHTML = `
             <div class="page-header">
@@ -242,13 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <th>DETALLE DE CASILLAS DE REC.</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Casilla FV621</td>
-                                <td>${periodo}</td>
-                                <td>Sin Información</td>
-                                <td><a href="#" class="link-registrado">Ver Casillas</a></td>
-                            </tr>
+                        <tbody>${filaCasillas}
                         </tbody>
                     </table>
                 </div>
@@ -346,12 +370,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const estado = obtenerEstadoAceptacion();
         const regSpan = document.getElementById('gen-alerta-registros');
         if (regSpan) {
-            if (estado.rce && estado.rvie) regSpan.textContent = 'los RCE Y RVIE';
-            else if (estado.rce)           regSpan.textContent = 'el RCE';
-            else                           regSpan.textContent = 'el RVIE';
+            const partes = [];
+            if (estado.rce && estado.rvie) partes.push('los RCE Y RVIE');
+            else if (estado.rce)           partes.push('el RCE');
+            else if (estado.rvie)          partes.push('el RVIE');
+            if (estado.rce_ap || estado.rvie_ap) partes.push('el Reporte de Ajustes Posteriores');
+            regSpan.textContent = partes.join(' y ') || 'el RVIE';
         }
         const perSpan = document.getElementById('gen-alerta-periodo');
-        if (perSpan) perSpan.textContent = estado.rvie || estado.rce || '2026-05';
+        if (perSpan) perSpan.textContent = estado.rvie || estado.rce || estado.rvie_ap || estado.rce_ap || '2026-05';
 
         showModal(modalGenAlerta);
     });
@@ -393,6 +420,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (estado.rvie) presentados[estado.rvie] = true;
             SimStore.setItem('sire_presentado', JSON.stringify(presentados));
 
+            // Guardar los reportes de ajustes posteriores generados (histórico),
+            // para que queden registrados aunque se limpie 'sire_aceptado'.
+            if (estado.rce_ap || estado.rvie_ap) {
+                let apGenerados = [];
+                try { apGenerados = JSON.parse(SimStore.getItem('sire_ap_generados') || '[]'); } catch (e) {}
+                const generadoEn = new Date().toLocaleString('es-PE');
+                if (estado.rce_ap)  apGenerados.unshift({ registro: 'RCE',  periodo: estado.rce_ap,  generadoEn: generadoEn });
+                if (estado.rvie_ap) apGenerados.unshift({ registro: 'RVIE', periodo: estado.rvie_ap, generadoEn: generadoEn });
+                SimStore.setItem('sire_ap_generados', JSON.stringify(apGenerados));
+            }
+
             // Guardar el resumen de la generación para el reporte PDF final
             const correoInput = document.getElementById('gen-correos');
             const resumen = {
@@ -400,6 +438,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 generadoEn: new Date().toLocaleString('es-PE'),
                 rce: estado.rce || null,
                 rvie: estado.rvie || null,
+                rce_ap: estado.rce_ap || null,
+                rvie_ap: estado.rvie_ap || null,
                 correo: (correoInput && correoInput.value.trim()) || null
             };
             SimStore.setItem('sire_resumen', JSON.stringify(resumen));
@@ -1238,6 +1278,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data && data.length > 0) {
                             procesarDatosRvie(data);
                         } else {
+                            // Periodo sin movimiento: se vacía el detalle para que el
+                            // estado sea real (y "Aceptar Propuesta" avise que va sin movimiento)
+                            renderTable([]);
                             if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center">No se encontraron registros para el periodo ${searchPeriod}.</td></tr>`;
                         }
                     } catch (err) {
@@ -1553,11 +1596,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =============================================
+    // MENÚ LATERAL – "Generación de Registros Electrónicos"
+    // Abre la misma vista que el flujo de aceptación, con los registros
+    // pendientes de generar (o vacía si no hay ninguno).
+    // =============================================
+    const menuGenRegistros = document.getElementById('menu-generacion-registros');
+    if (menuGenRegistros) {
+        menuGenRegistros.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (infoModal) infoModal.style.display = 'none';
+            const modal12h = document.getElementById('rvie-modal-12h');
+            if (modal12h) modal12h.style.display = 'none';
+
+            mostrarVistaGeneracionRegistros({ permitirVacio: true });
+            window.scrollTo(0, 0);
+        });
+    }
+
+    // =============================================
     // NAVEGACIÓN DESDE RCE – Mostrar Generación de Registros
     // =============================================
     if (sessionStorage.getItem('rce_nav_generacion') === '1') {
         sessionStorage.removeItem('rce_nav_generacion');
         sessionStorage.removeItem('rce_gen_periodo'); // clave legada, ya no se usa
+        // Si la navegación vino del menú lateral del RCE (y no de un envío),
+        // no se inventa un registro pendiente.
+        const desdeMenu = sessionStorage.getItem('rce_nav_generacion_menu') === '1';
+        sessionStorage.removeItem('rce_nav_generacion_menu');
 
         // No mostrar los modales informativos al venir del RCE:
         // ni el "Mensaje Informativo" (SIRE) ni el aviso de 12 horas
@@ -1567,7 +1632,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Mostrar directamente la vista "Generación de Registros";
         // las filas salen del estado de aceptación (RCE y/o RVIE)
-        mostrarVistaGeneracionRegistros();
+        mostrarVistaGeneracionRegistros({ permitirVacio: desdeMenu });
         window.scrollTo(0, 0);
     }
 
@@ -2373,6 +2438,397 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // =============================================
+    // GESTIÓN DE AJUSTES POSTERIORES (RVIE)
+    // Flujo: "Carga de Ajustes Posteriores" -> confirmación -> Sí -> modal de
+    // carga (instrucciones + Examinar zip) -> Cargar archivo -> tabla + ticket.
+    // "Envió ajustes posteriores" -> ticket -> Generación de Registros.
+    // =============================================
+    let ajustesPosterioresRvie = [];
+    let apEnvioPendienteRvie = false;
+
+    function apContentKeyRvie(periodo) { return 'sire_rvie_ap_' + (periodo || 'actual'); }
+
+    function periodoApRvie() {
+        if (currentPeriodoRvie && /^\d{6}$/.test(currentPeriodoRvie)) {
+            return currentPeriodoRvie.slice(0, 4) + '-' + currentPeriodoRvie.slice(4);
+        }
+        return obtenerPeriodoSeleccionadoRVIE();
+    }
+
+    function cargarAjustesRvie() {
+        const per = periodoApRvie().replace('-', '');
+        try {
+            const raw = SimStore.getItem(apContentKeyRvie(per));
+            if (raw) { const a = JSON.parse(raw); if (Array.isArray(a)) ajustesPosterioresRvie = a; }
+        } catch (e) {}
+    }
+
+    function guardarAjustesRvie() {
+        if (!esMasterRvie()) return;
+        const per = periodoApRvie().replace('-', '');
+        try { SimStore.setItem(apContentKeyRvie(per), JSON.stringify(ajustesPosterioresRvie)); } catch (e) {}
+    }
+
+    const fmtNum2ApRvie = v => (parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0).toFixed(2);
+
+    /**
+     * Parsea el archivo plano de AJUSTES POSTERIORES del RVIE.
+     *
+     * Estructura del ANEXO N.° 4 (distinta a la propuesta, que tiene 38/40 campos):
+     * 33 campos, del 1 (RUC) al 33 (ID Proyecto Operadores Atribución). Los campos
+     * 34 al 40 no se informan: SUNAT los completa desde la propuesta. Los campos
+     * de libre utilización (41 al 57) son opcionales, así que se acepta cualquier
+     * cantidad de campos adicionales y los pipes finales sobrantes.
+     *
+     * También se admite el archivo sin el prefijo RUC|Razón social (empieza en el
+     * Periodo), tal como el txt que descarga el SIRE.
+     */
+    function parsearAjustesPosterioresRvie(texto) {
+        let authData = {};
+        try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        const rucSesion = authData.ruc || '20606966823';
+        const razonSesion = authData.denominacion || 'EMPRESA DEMO S.A.C.';
+
+        const lineas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim() !== '');
+        const filas = [];
+        const esPeriodo = v => /^\d{6}$/.test(v) || /^\d{8}$/.test(v);
+
+        lineas.forEach(linea => {
+            const esPipe = linea.includes('|');
+            const f = linea.split(esPipe ? '|' : ',').map(v => String(v).trim());
+
+            // Detección del prefijo: RUC|Razón social|Periodo... o directamente Periodo...
+            let base, ruc, razon;
+            if (esPeriodo(f[0])) {
+                base = 0; ruc = rucSesion; razon = razonSesion;
+            } else if (/^\d{8,11}$/.test(f[0]) && esPeriodo(f[2] || '')) {
+                base = 2; ruc = f[0]; razon = f[1] || razonSesion;
+            } else {
+                return; // cabecera u otra línea no válida
+            }
+            // Mínimo hasta el campo 27 (Moneda) para poder mostrar el ajuste
+            if (f.length < base + 25) return;
+
+            const g = i => (f[base + i] !== undefined ? f[base + i] : '');
+            const periodoRaw = g(0);
+            const periodo = (periodoRaw.length === 8 && periodoRaw.endsWith('00')) ? periodoRaw.slice(0, 6) : periodoRaw;
+
+            // El CAR viene vacío cuando es una incorporación: se arma igual que en
+            // el reemplazo de propuesta (RUC + Tipo CP + Serie + Nro CP).
+            let car = g(1);
+            if (!car) {
+                const tipoCar = String(g(4) || '').trim().padStart(2, '0');
+                const serieCar = String(g(5) || '').trim();
+                const nroCar = String(g(6) || '').trim().padStart(10, '0');
+                car = ruc + tipoCar + serieCar + nroCar;
+            }
+
+            filas.push({
+                'Ruc': ruc,
+                'Razon Social': razon,
+                'Periodo': periodo,
+                'CAR SUNAT': car,
+                'Fecha de emisión': g(2),
+                'Fecha Vcto/Pago': g(3),
+                'Tipo CP/Doc.': g(4),
+                'Serie del CDP': g(5),
+                'Nro CP o Doc. Nro Inicial (Rango)': g(6),
+                'Nro Final (Rango)': g(7),
+                'Tipo Doc Identidad': g(8),
+                'Nro Doc Identidad': g(9),
+                'Apellidos Nombres/ Razón Social': g(10),
+                'Valor Facturado Exportación': g(11),
+                'BI Gravada': g(12),
+                'Dscto BI': g(13),
+                'IGV / IPM': g(14),
+                'Dscto IGV / IPM': g(15),
+                'Mto Exonerado': g(16),
+                'Mto Inafecto': g(17),
+                'ISC': g(18),
+                'BI Grav IVAP': g(19),
+                'IVAP': g(20),
+                'ICBPER': g(21),
+                'Otros Tributos': g(22),
+                'Total CP': g(23),
+                'Moneda': g(24) || 'PEN',
+                'Tipo Cambio': g(25) || '1.000',
+                'Fecha Emisión Doc Modificado': g(26),
+                'Tipo CP Modificado': g(27),
+                'Serie CP Modificado': g(28),
+                'Nro CP Modificado': g(29),
+                'ID Proyecto Operadores Atribución': g(30)
+            });
+        });
+
+        return filas;
+    }
+
+    // Cabecera "Datos Generales" (RUC, razón social y periodo del contribuyente)
+    function renderDatosGeneralesApRvie() {
+        let razon = 'EMPRESA DEMO S.A.C.';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.denominacion) razon = auth.denominacion;
+        } catch (e) {}
+        const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+        setTxt('ap-rvie-ruc', rucFromSession());
+        setTxt('ap-rvie-razon', razon);
+        setTxt('ap-rvie-periodo', periodoApRvie());
+    }
+
+    /**
+     * Estructura completa del ANEXO N.° 4 (ajustes posteriores del RVIE).
+     * Se muestran los campos 4 al 33; los campos 1, 2 y 3 (RUC, razón social y
+     * periodo) van en el bloque "Datos Generales" sobre la tabla.
+     */
+    const AP_COLS_RVIE = [
+        { grupo: 'Datos del CP', label: 'CAR SUNAT', key: 'CAR SUNAT' },
+        { grupo: 'Datos del CP', label: 'Fecha de emisión', key: 'Fecha de emisión' },
+        { grupo: 'Datos del CP', label: 'Fecha Vcto/Pago', key: 'Fecha Vcto/Pago' },
+        { grupo: 'Datos del CP', label: 'Tipo CP/Doc.', key: 'Tipo CP/Doc.' },
+        { grupo: 'Datos del CP', label: 'Serie del CDP', key: 'Serie del CDP' },
+        { grupo: 'Datos del CP', label: 'Nro CP o Doc. Nro Inicial(Rango)', key: 'Nro CP o Doc. Nro Inicial (Rango)' },
+        { grupo: 'Datos del CP', label: 'Nro Final(Rango)', key: 'Nro Final (Rango)' },
+        { grupo: 'Datos del Cliente', label: 'Tipo Doc Identidad', key: 'Tipo Doc Identidad' },
+        { grupo: 'Datos del Cliente', label: 'Nro Doc Identidad', key: 'Nro Doc Identidad' },
+        { grupo: 'Datos del Cliente', label: 'Apellidos Nombres/ Razón Social', key: 'Apellidos Nombres/ Razón Social', left: true },
+        { grupo: 'Importes', label: 'Valor Facturado Exportación', key: 'Valor Facturado Exportación', num: true },
+        { grupo: 'Importes', label: 'BI Gravada', key: 'BI Gravada', num: true },
+        { grupo: 'Importes', label: 'Dscto BI', key: 'Dscto BI', num: true },
+        { grupo: 'Importes', label: 'IGV / IPM', key: 'IGV / IPM', num: true },
+        { grupo: 'Importes', label: 'Dscto IGV / IPM', key: 'Dscto IGV / IPM', num: true },
+        { grupo: 'Importes', label: 'Mto Exonerado', key: 'Mto Exonerado', num: true },
+        { grupo: 'Importes', label: 'Mto Inafecto', key: 'Mto Inafecto', num: true },
+        { grupo: 'Importes', label: 'ISC', key: 'ISC', num: true },
+        { grupo: 'Importes', label: 'BI Grav IVAP', key: 'BI Grav IVAP', num: true },
+        { grupo: 'Importes', label: 'IVAP', key: 'IVAP', num: true },
+        { grupo: 'Importes', label: 'ICBPER', key: 'ICBPER', num: true },
+        { grupo: 'Importes', label: 'Otros Tributos', key: 'Otros Tributos', num: true },
+        { grupo: 'Importes', label: 'Total CP', key: 'Total CP', num: true },
+        { grupo: 'Importes', label: 'Moneda', key: 'Moneda' },
+        { grupo: 'Importes', label: 'Tipo Cambio', key: 'Tipo Cambio' },
+        { grupo: 'Datos del CP modificado', label: 'Fecha Emisión Doc Modificado', key: 'Fecha Emisión Doc Modificado' },
+        { grupo: 'Datos del CP modificado', label: 'Tipo CP Modificado', key: 'Tipo CP Modificado' },
+        { grupo: 'Datos del CP modificado', label: 'Serie CP Modificado', key: 'Serie CP Modificado' },
+        { grupo: 'Datos del CP modificado', label: 'Nro CP Modificado', key: 'Nro CP Modificado' },
+        { grupo: 'Otros datos', label: 'ID Proyecto Operadores Atribución', key: 'ID Proyecto Operadores Atribución' }
+    ];
+
+    // Cabecera de dos niveles (grupo + campo) generada desde AP_COLS_RVIE
+    function renderCabeceraApRvie() {
+        const thead = document.getElementById('ap-rvie-thead');
+        if (!thead) return;
+        let grupos = '<th rowspan="2"><input type="checkbox" id="ap-rvie-check-all"></th>';
+        for (let i = 0; i < AP_COLS_RVIE.length;) {
+            const g = AP_COLS_RVIE[i].grupo;
+            let span = 0;
+            while (i + span < AP_COLS_RVIE.length && AP_COLS_RVIE[i + span].grupo === g) span++;
+            grupos += `<th colspan="${span}" class="ap-th-grupo">${g}</th>`;
+            i += span;
+        }
+        thead.innerHTML = '<tr>' + grupos + '</tr>' +
+            '<tr>' + AP_COLS_RVIE.map(c => `<th>${c.label}</th>`).join('') + '</tr>';
+    }
+
+    function renderAjustesRvie() {
+        const tbody = document.getElementById('ap-rvie-tbody');
+        const pag = document.getElementById('ap-rvie-paginacion');
+        if (!tbody) return;
+        renderCabeceraApRvie();
+        const rows = ajustesPosterioresRvie;
+        const totalCols = AP_COLS_RVIE.length + 1;
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center">Ningún registro encontrado</td></tr>`;
+            if (pag) pag.textContent = 'Mostrando del 0 al 0 de un total de 0 registros';
+            const chkAll = document.getElementById('ap-rvie-check-all');
+            if (chkAll) chkAll.checked = false;
+            return;
+        }
+        tbody.innerHTML = rows.map((r, i) => {
+            const celdas = AP_COLS_RVIE.map(c => {
+                const v = r[c.key];
+                const txt = c.num ? fmtNum2ApRvie(v) : (v == null ? '' : String(v));
+                return `<td${c.left ? ' class="text-left"' : ''}>${txt}</td>`;
+            }).join('');
+            return `<tr><td><input type="checkbox" class="ap-rvie-row-check" data-idx="${i}"></td>${celdas}</tr>`;
+        }).join('');
+        if (pag) pag.textContent = 'Mostrando del 1 al ' + rows.length + ' de un total de ' + rows.length + ' registros';
+    }
+
+    // Registra un ticket de envío en el histórico del RVIE y devuelve su número
+    function registrarTicketApRvie(archivo, tipo) {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const ticketNum = now.getFullYear() + '01000000' + String(Math.floor(Math.random() * 84) + 10);
+        let tickets = [];
+        try { tickets = JSON.parse(SimStore.getItem('sire_export_tickets') || '[]'); } catch (e) {}
+        tickets.unshift({
+            numero: ticketNum,
+            fecha: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' +
+                   pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
+            archivo: archivo || '-',
+            tipo: tipo || 'Ajustes posteriores',
+            estado: 'Terminado'
+        });
+        SimStore.setItem('sire_export_tickets', JSON.stringify(tickets));
+        return ticketNum;
+    }
+    function mostrarTicketApRvie(numero) {
+        const numEl = document.getElementById('ap-rvie-ticket-numero');
+        if (numEl) numEl.textContent = numero;
+        const mt = document.getElementById('rvie-modal-ap-ticket');
+        if (mt) mt.style.display = 'flex';
+    }
+    const cerrarModalApRvie = id => { const m = document.getElementById(id); if (m) m.style.display = 'none'; };
+
+    // Al abrir la pestaña "Gestión de Ajustes Posteriores": recuperar y pintar
+    const apTabRvie = document.querySelector('.sub-tab-btn[data-target="ajustes"]');
+    if (apTabRvie) apTabRvie.addEventListener('click', function () {
+        cargarAjustesRvie();
+        renderDatosGeneralesApRvie();
+        renderAjustesRvie();
+    });
+
+    // "Carga de Ajustes Posteriores" / "Carga de Ajustes periodos anteriores"
+    ['ap-rvie-carga', 'ap-rvie-carga-ant'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.addEventListener('click', function () {
+            const m = document.getElementById('rvie-modal-ap-confirm');
+            if (m) m.style.display = 'flex';
+        });
+    });
+    // Confirmación: No / cerrar
+    ['ap-rvie-confirm-no', 'ap-rvie-confirm-x'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => cerrarModalApRvie('rvie-modal-ap-confirm'));
+    });
+    // Confirmación: Sí -> modal de carga
+    const apConfirmSiRvie = document.getElementById('ap-rvie-confirm-si');
+    if (apConfirmSiRvie) apConfirmSiRvie.addEventListener('click', function () {
+        cerrarModalApRvie('rvie-modal-ap-confirm');
+        const inp = document.getElementById('ap-rvie-carga-file'); if (inp) inp.value = '';
+        const nb = document.getElementById('ap-rvie-carga-filename'); if (nb) nb.value = '';
+        const m = document.getElementById('rvie-modal-ap-carga'); if (m) m.style.display = 'flex';
+    });
+
+    // Examinar / nombre del zip
+    const apExaminarRvie = document.getElementById('ap-rvie-carga-examinar');
+    if (apExaminarRvie) apExaminarRvie.addEventListener('click', () => document.getElementById('ap-rvie-carga-file').click());
+    const apFileRvie = document.getElementById('ap-rvie-carga-file');
+    if (apFileRvie) apFileRvie.addEventListener('change', function () {
+        const nb = document.getElementById('ap-rvie-carga-filename');
+        if (nb) nb.value = this.files.length ? this.files[0].name : '';
+    });
+    // Cancelar / cerrar modal de carga
+    ['ap-rvie-carga-cancelar', 'ap-rvie-carga-x'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => cerrarModalApRvie('rvie-modal-ap-carga'));
+    });
+
+    // "Cargar archivo": lee el zip, puebla la tabla y genera el ticket
+    const apCargarRvie = document.getElementById('ap-rvie-carga-cargar');
+    if (apCargarRvie) apCargarRvie.addEventListener('click', async function () {
+        const inp = document.getElementById('ap-rvie-carga-file');
+        if (!inp || !inp.files.length) { alert('Seleccione el archivo zip a importar con la opción Examinar.'); return; }
+        if (typeof JSZip === 'undefined') { alert('La librería de compresión JSZip no se ha cargado.'); return; }
+        const file = inp.files[0];
+        try {
+            const zip = await JSZip.loadAsync(file);
+            let entry = null;
+            zip.forEach(function (path, zf) { if (!entry && /\.(txt|csv)$/i.test(path)) entry = zf; });
+            if (!entry) { alert('El zip no contiene un archivo de texto (.txt).'); return; }
+
+            const texto = await entry.async('string');
+            const filas = parsearAjustesPosterioresRvie(texto);
+            if (!filas.length) {
+                alert('El archivo no contiene registros con la estructura de ajustes posteriores del RVIE (Anexo N.° 4).');
+                return;
+            }
+
+            ajustesPosterioresRvie = filas;
+            const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
+            if (esMasterRvie() && perImp.length === 6) currentPeriodoRvie = perImp;
+            guardarAjustesRvie();
+            renderDatosGeneralesApRvie();
+            renderAjustesRvie();
+
+            cerrarModalApRvie('rvie-modal-ap-carga');
+            mostrarTicketApRvie(registrarTicketApRvie(file.name, 'Ajustes posteriores'));
+        } catch (err) {
+            console.error('Error al leer el zip de ajustes posteriores:', err);
+            alert('No se pudo leer el archivo zip. Verifique que sea un zip válido con el txt del RVIE.');
+        }
+    });
+
+    // Ticket: aceptar / cerrar. Si viene del envío, pasa a Generación de Registros.
+    ['ap-rvie-ticket-aceptar', 'ap-rvie-ticket-x'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => {
+            cerrarModalApRvie('rvie-modal-ap-ticket');
+            if (!apEnvioPendienteRvie) return;
+            apEnvioPendienteRvie = false;
+
+            const estado = obtenerEstadoAceptacion();
+            estado.rvie_ap = periodoApRvie();
+            SimStore.setItem('sire_aceptado', JSON.stringify(estado));
+
+            mostrarVistaGeneracionRegistros();
+            window.scrollTo(0, 0);
+        });
+    });
+
+    // Seleccionar todos (la cabecera se regenera en cada render: se delega)
+    document.addEventListener('change', function (e) {
+        if (!e.target || e.target.id !== 'ap-rvie-check-all') return;
+        document.querySelectorAll('.ap-rvie-row-check').forEach(c => { c.checked = e.target.checked; });
+    });
+
+    // Eliminar seleccionados
+    const apEliminarRvie = document.getElementById('ap-rvie-eliminar');
+    if (apEliminarRvie) apEliminarRvie.addEventListener('click', function () {
+        const idxDel = new Set();
+        document.querySelectorAll('.ap-rvie-row-check').forEach(c => { if (c.checked) idxDel.add(parseInt(c.dataset.idx, 10)); });
+        if (!idxDel.size) { alert('Seleccione al menos un registro para eliminar.'); return; }
+        ajustesPosterioresRvie = ajustesPosterioresRvie.filter((_, i) => !idxDel.has(i));
+        guardarAjustesRvie();
+        renderAjustesRvie();
+    });
+
+    // Mostrar eventos posteriores de CP -> recarga/render
+    const apEventosRvie = document.getElementById('ap-rvie-mostrar-eventos');
+    if (apEventosRvie) apEventosRvie.addEventListener('click', function () {
+        cargarAjustesRvie();
+        renderDatosGeneralesApRvie();
+        renderAjustesRvie();
+    });
+
+    // Envió ajustes posteriores -> ticket -> Generación de Registros
+    const apEnviarRvie = document.getElementById('ap-rvie-enviar');
+    if (apEnviarRvie) apEnviarRvie.addEventListener('click', function () {
+        if (!ajustesPosterioresRvie.length) { alert('No hay ajustes posteriores para enviar. Cargue un archivo primero.'); return; }
+        apEnvioPendienteRvie = true;
+        mostrarTicketApRvie(registrarTicketApRvie('-', 'Envío ajustes posteriores'));
+    });
+
+    // Exportar -> CSV de los ajustes mostrados
+    const apExportarRvie = document.getElementById('ap-rvie-exportar');
+    if (apExportarRvie) apExportarRvie.addEventListener('click', function () {
+        if (!ajustesPosterioresRvie.length) { alert('No hay ajustes posteriores para exportar.'); return; }
+        // Se exportan los campos 1 al 33 del Anexo N.° 4
+        const cols = ['Ruc', 'Razon Social', 'Periodo'].concat(AP_COLS_RVIE.map(c => c.key));
+        let csv = cols.join(',') + '\r\n';
+        ajustesPosterioresRvie.forEach(r => {
+            csv += cols.map(c => '"' + String(r[c] == null ? '' : r[c]).replace(/"/g, '""') + '"').join(',') + '\r\n';
+        });
+        const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'ajustes_posteriores_rvie_' + periodoApRvie() + '.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    });
 
     function rucFromSession() {
         let ruc = '20606966823';

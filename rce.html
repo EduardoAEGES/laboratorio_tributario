@@ -7,6 +7,7 @@
     <title>SUNAT - Sistema Integrado de Registros Electrónicos</title>
     <link rel="stylesheet" href="rvie.css">
     <link rel="stylesheet" href="rce.css">
+    <link rel="stylesheet" href="survey.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -111,7 +112,7 @@
                                 <ul class="nested-menu-level2">
                                     <li class="has-submenu-level3">
                                         <ul class="nested-menu-level3" style="display: block;">
-                                            <li><a href="#">Generación de Registros Electrónicos</a></li>
+                                            <li><a href="#" id="menu-generacion-registros">Generación de Registros Electrónicos</a></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -765,6 +766,14 @@
                                     <label><input type="radio" name="ap-tipo-rc" value="RCND"> RC No Domiciliados</label>
                                 </div>
 
+                                <!-- Datos Generales del contribuyente (campos 1, 2 y 3 del Anexo 12) -->
+                                <fieldset class="ap-datos-generales">
+                                    <legend>Datos Generales:</legend>
+                                    <div><strong>RUC:</strong> <span id="ap-rce-ruc"></span></div>
+                                    <div><strong>Apellidos y Nombres o Razón Social:</strong> <span id="ap-rce-razon"></span></div>
+                                    <div><strong>Período:</strong> <span id="ap-rce-periodo"></span></div>
+                                </fieldset>
+
                                 <div class="table-controls-top" style="justify-content:flex-end;">
                                     <div class="show-rows">mostrar:
                                         <select id="ap-rce-mostrar">
@@ -775,30 +784,12 @@
                                     </div>
                                 </div>
 
+                                <!-- La cabecera y el detalle se generan desde rce.js con la
+                                     estructura completa del Anexo N.° 12 (campos 4 al 37). -->
                                 <div class="table-responsive results-table-wrapper">
-                                    <table class="results-table">
-                                        <thead>
-                                            <tr>
-                                                <th><input type="checkbox" id="ap-rce-check-all"></th>
-                                                <th>Fecha de emisión</th>
-                                                <th>Fecha Vcto/Pago</th>
-                                                <th>Tipo CP/Doc.</th>
-                                                <th>Serie del CDP</th>
-                                                <th>Año</th>
-                                                <th>Nro CP o Doc. Nro Inicial(Rango)</th>
-                                                <th>Nro Final(Rango)</th>
-                                                <th>Tipo Doc Identidad</th>
-                                                <th>Nro Doc Identidad</th>
-                                                <th>Apellidos Nombres/ Razón Social</th>
-                                                <th>BI Gravada DG</th>
-                                                <th>IGV / IPM DG</th>
-                                                <th>Total CP</th>
-                                                <th>Moneda</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="ap-rce-tbody">
-                                            <tr><td colspan="15" class="text-center">Ningún registro encontrado</td></tr>
-                                        </tbody>
+                                    <table class="results-table ap-table">
+                                        <thead id="ap-rce-thead"></thead>
+                                        <tbody id="ap-rce-tbody"></tbody>
                                     </table>
                                 </div>
 
@@ -1226,6 +1217,7 @@
     </div>
 
     <script src="rce.js"></script>
+    <script src="survey.js"></script>
 
 
 </body>

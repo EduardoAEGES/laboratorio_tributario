@@ -39,6 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 .filter((k) => k.indexOf(prefijoSim) === 0)
                 .forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} });
 
+            // Reponer la encuesta de satisfacción: se borran las marcas de la
+            // sesión y también las antiguas permanentes de localStorage
+            // (versiones previas de survey.js las dejaban para siempre).
+            [sessionStorage, localStorage].forEach(function (st) {
+                Object.keys(st)
+                    .filter((k) => k.indexOf('survey_') === 0)
+                    .forEach((k) => { try { st.removeItem(k); } catch (e) {} });
+            });
+
             // Borrar también el estado guardado en Supabase (usuarios MASTER)
             if (ruc !== 'anon' && typeof window.supabase !== 'undefined') {
                 try {

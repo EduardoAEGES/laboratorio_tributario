@@ -2500,6 +2500,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =============================================
+    // MENÚ LATERAL – "Generación de Registros Electrónicos"
+    // La vista vive en rvie.html: se navega marcando que viene del menú
+    // (así no se listan registros pendientes que no existen).
+    // =============================================
+    const menuGenRegistrosRce = document.getElementById('menu-generacion-registros');
+    if (menuGenRegistrosRce) {
+        menuGenRegistrosRce.addEventListener('click', function (e) {
+            e.preventDefault();
+            sessionStorage.setItem('rce_nav_generacion', '1');
+            sessionStorage.setItem('rce_nav_generacion_menu', '1');
+            window.location.href = 'rvie.html';
+        });
+    }
+
+    // =============================================
     // AJUSTES POSTERIORES (RCE) - importación de zip con la propuesta
     // Flujo: "Carga de Ajustes Posteriores" -> confirmación -> Sí -> modal de
     // carga -> Examinar (zip) -> Cargar archivo -> tabla + Ticket Generado.
@@ -2525,36 +2540,104 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const fmtNum2Ap = v => (parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0).toFixed(2);
 
+    /**
+     * Estructura completa del ANEXO N.° 12 (ajustes posteriores del RCE).
+     * Se muestran los campos 4 al 37; los campos 1, 2 y 3 (RUC, razón social y
+     * periodo) van en el bloque "Datos Generales" sobre la tabla.
+     *   grupo -> cabecera agrupada que muestra el SIRE
+     *   key   -> clave devuelta por parsearArchivoPlanoRce
+     *   num   -> se formatea con 2 decimales
+     */
+    const AP_COLS_RCE = [
+        { grupo: 'Datos del CP', label: 'CAR SUNAT', key: 'CAR SUNAT' },
+        { grupo: 'Datos del CP', label: 'Fecha de emisión', key: 'Fecha de emisión' },
+        { grupo: 'Datos del CP', label: 'Fecha Vcto/Pago', key: 'Fecha Vcto/Pago' },
+        { grupo: 'Datos del CP', label: 'Tipo CP/Doc.', key: 'Tipo CP/Doc.' },
+        { grupo: 'Datos del CP', label: 'Serie del CDP', key: 'Serie del CDP' },
+        { grupo: 'Datos del CP', label: 'Año', key: 'Año' },
+        { grupo: 'Datos del CP', label: 'Nro CP o Doc. Nro Inicial(Rango)', key: 'Nro CP o Doc. Nro Inicial (Rango)' },
+        { grupo: 'Datos del CP', label: 'Nro Final(Rango)', key: 'Nro Final (Rango)' },
+        { grupo: 'Datos del Adquiriente', label: 'Tipo Doc Identidad', key: 'Tipo Doc Identidad' },
+        { grupo: 'Datos del Adquiriente', label: 'Nro Doc Identidad', key: 'Nro Doc Identidad' },
+        { grupo: 'Datos del Adquiriente', label: 'Apellidos Nombres/ Razón Social', key: 'Apellidos Nombres/ Razón  Social', left: true },
+        { grupo: 'Importes', label: 'BI Gravado DG', key: 'BI Gravado DG', num: true },
+        { grupo: 'Importes', label: 'IGV / IPM DG', key: 'IGV / IPM DG', num: true },
+        { grupo: 'Importes', label: 'BI Gravado DGNG', key: 'BI Gravado DGNG', num: true },
+        { grupo: 'Importes', label: 'IGV / IPM DGNG', key: 'IGV / IPM DGNG', num: true },
+        { grupo: 'Importes', label: 'BI Gravado DNG', key: 'BI Gravado DNG', num: true },
+        { grupo: 'Importes', label: 'IGV / IPM DNG', key: 'IGV / IPM DNG', num: true },
+        { grupo: 'Importes', label: 'Valor Adq. NG', key: 'Valor Adq. NG', num: true },
+        { grupo: 'Importes', label: 'ISC', key: 'ISC', num: true },
+        { grupo: 'Importes', label: 'ICBPER', key: 'ICBPER', num: true },
+        { grupo: 'Importes', label: 'Otros Trib/ Cargos', key: 'Otros Trib/ Cargos', num: true },
+        { grupo: 'Importes', label: 'Total CP', key: 'Total CP', num: true },
+        { grupo: 'Importes', label: 'Moneda', key: 'Moneda' },
+        { grupo: 'Importes', label: 'Tipo de Cambio', key: 'Tipo de Cambio' },
+        { grupo: 'Datos del CP modificado', label: 'Fecha Emisión Doc Modificado', key: 'Fecha Emisión Doc Modificado' },
+        { grupo: 'Datos del CP modificado', label: 'Tipo CP Modificado', key: 'Tipo CP Modificado' },
+        { grupo: 'Datos del CP modificado', label: 'Serie CP Modificado', key: 'Serie CP Modificado' },
+        { grupo: 'Datos del CP modificado', label: 'COD. DAM O DSI', key: 'COD. DAM O DSI' },
+        { grupo: 'Datos del CP modificado', label: 'Nro CP Modificado', key: 'Nro CP Modificado' },
+        { grupo: 'Otros datos', label: 'Clasif de Bss y Sss', key: 'Clasif de Bss y Sss' },
+        { grupo: 'Otros datos', label: 'ID Proyecto Operadores/Partícipes', key: 'ID Proyecto Operadores' },
+        { grupo: 'Otros datos', label: 'PorcPart', key: 'PorcPart' },
+        { grupo: 'Otros datos', label: 'IMB', key: 'IMB', num: true },
+        { grupo: 'Otros datos', label: 'CAR Orig', key: 'CAR Orig/ Ind E o I' }
+    ];
+
+    // Cabecera de dos niveles (grupo + campo) generada desde AP_COLS_RCE
+    function renderCabeceraApRce() {
+        const thead = document.getElementById('ap-rce-thead');
+        if (!thead) return;
+        let grupos = '<th rowspan="2"><input type="checkbox" id="ap-rce-check-all"></th>';
+        for (let i = 0; i < AP_COLS_RCE.length;) {
+            const g = AP_COLS_RCE[i].grupo;
+            let span = 0;
+            while (i + span < AP_COLS_RCE.length && AP_COLS_RCE[i + span].grupo === g) span++;
+            grupos += `<th colspan="${span}" class="ap-th-grupo">${g}</th>`;
+            i += span;
+        }
+        thead.innerHTML = '<tr>' + grupos + '</tr>' +
+            '<tr>' + AP_COLS_RCE.map(c => `<th>${c.label}</th>`).join('') + '</tr>';
+    }
+
+    // Datos Generales: RUC, razón social y periodo del contribuyente
+    function renderDatosGeneralesApRce() {
+        let ruc = '20606966823';
+        let razon = 'EMPRESA DEMO S.A.C.';
+        try {
+            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+            if (auth.ruc) ruc = auth.ruc;
+            if (auth.denominacion) razon = auth.denominacion;
+        } catch (e) {}
+        const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+        setTxt('ap-rce-ruc', ruc);
+        setTxt('ap-rce-razon', razon);
+        setTxt('ap-rce-periodo', periodoTextoRce());
+    }
+
     function renderAjustesRce() {
         const tbody = document.getElementById('ap-rce-tbody');
         const pag = document.getElementById('ap-rce-paginacion');
         if (!tbody) return;
+        renderCabeceraApRce();
         const rows = ajustesPosterioresRce;
+        const totalCols = AP_COLS_RCE.length + 1;
         if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="15" class="text-center">Ningún registro encontrado</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center">Ningún registro encontrado</td></tr>`;
             if (pag) pag.textContent = 'Mostrando del 0 al 0 de un total de 0 registros';
             const chkAll = document.getElementById('ap-rce-check-all');
             if (chkAll) chkAll.checked = false;
             return;
         }
-        tbody.innerHTML = rows.map((r, i) => `
-            <tr>
-                <td><input type="checkbox" class="ap-rce-row-check" data-idx="${i}"></td>
-                <td>${r['Fecha de emisión'] || ''}</td>
-                <td>${r['Fecha Vcto/Pago'] || ''}</td>
-                <td>${r['Tipo CP/Doc.'] || ''}</td>
-                <td>${r['Serie del CDP'] || ''}</td>
-                <td>${r['Año'] || '0'}</td>
-                <td>${r['Nro CP o Doc. Nro Inicial (Rango)'] || ''}</td>
-                <td>${r['Nro Final (Rango)'] || ''}</td>
-                <td>${r['Tipo Doc Identidad'] || ''}</td>
-                <td>${r['Nro Doc Identidad'] || ''}</td>
-                <td class="text-left">${r['Apellidos Nombres/ Razón  Social'] || ''}</td>
-                <td>${fmtNum2Ap(r['BI Gravado DG'])}</td>
-                <td>${fmtNum2Ap(r['IGV / IPM DG'])}</td>
-                <td>${fmtNum2Ap(r['Total CP'])}</td>
-                <td>${r['Moneda'] || 'PEN'}</td>
-            </tr>`).join('');
+        tbody.innerHTML = rows.map((r, i) => {
+            const celdas = AP_COLS_RCE.map(c => {
+                const v = r[c.key];
+                const txt = c.num ? fmtNum2Ap(v) : (v == null ? '' : String(v));
+                return `<td${c.left ? ' class="text-left"' : ''}>${txt}</td>`;
+            }).join('');
+            return `<tr><td><input type="checkbox" class="ap-rce-row-check" data-idx="${i}"></td>${celdas}</tr>`;
+        }).join('');
         if (pag) pag.textContent = 'Mostrando del 1 al ' + rows.length + ' de un total de ' + rows.length + ' registros';
     }
 
@@ -2586,7 +2669,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Al mostrar la sub-pestaña "Ajustes Posteriores", recuperar/render
     const apMainSubTab = document.querySelector('.sub-tab-btn[data-target="ajustes-rce"]');
-    if (apMainSubTab) apMainSubTab.addEventListener('click', function () { cargarAjustesRce(); renderAjustesRce(); });
+    if (apMainSubTab) apMainSubTab.addEventListener('click', function () {
+        cargarAjustesRce();
+        renderDatosGeneralesApRce();
+        renderAjustesRce();
+    });
 
     // Sub-pestañas AP SIRE / AP PER. ANT. SIRE (solo cambian el resaltado)
     document.querySelectorAll('.ap-subtab-btn').forEach(b => b.addEventListener('click', function () {
@@ -2644,12 +2731,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const filas = parsearArchivoPlanoRce(texto);
             if (!filas.length) { alert('El archivo no contiene registros con la estructura del RCE.'); return; }
 
+            // El CAR llega vacío (SUNAT lo completa): se arma con
+            // RUC(11) + Tipo CP(2) + Serie + Nro CP(10), igual que en el RVIE.
+            filas.forEach(f => {
+                if (f['CAR SUNAT']) return;
+                const tipo = String(f['Tipo CP/Doc.'] || '').trim().padStart(2, '0');
+                const serie = String(f['Serie del CDP'] || '').trim();
+                const nro = String(f['Nro CP o Doc. Nro Inicial (Rango)'] || '').trim().padStart(10, '0');
+                f['CAR SUNAT'] = String(f['RUC'] || '') + tipo + serie + nro;
+            });
+
             ajustesPosterioresRce = filas;
             if (esMasterRce()) {
                 const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
                 if (perImp.length === 6) currentPeriodoRce = perImp;
                 guardarAjustesRce();
             }
+            renderDatosGeneralesApRce();
             renderAjustesRce();
 
             cerrarModalAp('rce-modal-ap-carga');
@@ -2660,16 +2758,53 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Marca que el ticket mostrado corresponde al ENVÍO de ajustes posteriores
+    // (y no a la carga del archivo). Al aceptarlo se pasa a Generación de Registros.
+    let apEnvioPendienteRce = false;
+
+    // Periodo del RCE en formato YYYY-MM (para el estado compartido con el RVIE).
+    // Manda el periodo del archivo de ajustes cargado; si no hay, el del periodo
+    // en curso o el elegido en los selects de la cabecera.
+    function periodoTextoRce() {
+        const perArchivo = (ajustesPosterioresRce[0] && ajustesPosterioresRce[0]['Periodo'])
+            ? String(ajustesPosterioresRce[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
+        if (perArchivo.length === 6) return perArchivo.slice(0, 4) + '-' + perArchivo.slice(4);
+        if (currentPeriodoRce && /^\d{6}$/.test(currentPeriodoRce)) {
+            return currentPeriodoRce.slice(0, 4) + '-' + currentPeriodoRce.slice(4);
+        }
+        const mesMap = { 'ENE': '01', 'FEB': '02', 'MAR': '03', 'ABR': '04', 'MAY': '05', 'JUN': '06',
+                         'JUL': '07', 'AGO': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DIC': '12' };
+        const anioSpan = document.querySelector('#periodo-select span');
+        const mesSpan = document.querySelector('#mes-select span');
+        const anio = (anioSpan && anioSpan.textContent !== 'Seleccionar') ? anioSpan.textContent.split('-')[0].trim() : '2026';
+        const mes = (mesSpan && mesSpan.textContent !== 'Seleccionar') ? (mesMap[mesSpan.textContent.split('-')[0].trim()] || '01') : '01';
+        return anio + '-' + mes;
+    }
+
     // Ticket: aceptar / cerrar
     ['ap-ticket-aceptar', 'ap-ticket-x'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('click', () => cerrarModalAp('rce-modal-ap-ticket'));
+        if (el) el.addEventListener('click', () => {
+            cerrarModalAp('rce-modal-ap-ticket');
+            if (!apEnvioPendienteRce) return;
+            apEnvioPendienteRce = false;
+
+            // Registrar el ajuste posterior del RCE en el estado compartido para
+            // que aparezca como fila en la vista "Generación de Registros".
+            let estadoAceptado = {};
+            try { estadoAceptado = JSON.parse(SimStore.getItem('sire_aceptado') || '{}'); } catch (e) {}
+            estadoAceptado.rce_ap = periodoTextoRce();
+            SimStore.setItem('sire_aceptado', JSON.stringify(estadoAceptado));
+
+            sessionStorage.setItem('rce_nav_generacion', '1');
+            window.location.href = 'rvie.html';
+        });
     });
 
-    // Seleccionar todos
-    const apCheckAll = document.getElementById('ap-rce-check-all');
-    if (apCheckAll) apCheckAll.addEventListener('change', function () {
-        document.querySelectorAll('.ap-rce-row-check').forEach(c => { c.checked = apCheckAll.checked; });
+    // Seleccionar todos (la cabecera se regenera en cada render: se delega)
+    document.addEventListener('change', function (e) {
+        if (!e.target || e.target.id !== 'ap-rce-check-all') return;
+        document.querySelectorAll('.ap-rce-row-check').forEach(c => { c.checked = e.target.checked; });
     });
 
     // Eliminar seleccionados
@@ -2685,12 +2820,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Mostrar eventos posteriores de CP -> recarga/render
     const apEventos = document.getElementById('ap-rce-mostrar-eventos');
-    if (apEventos) apEventos.addEventListener('click', function () { cargarAjustesRce(); renderAjustesRce(); });
+    if (apEventos) apEventos.addEventListener('click', function () {
+        cargarAjustesRce();
+        renderDatosGeneralesApRce();
+        renderAjustesRce();
+    });
 
     // Envió ajustes posteriores -> genera ticket
     const apEnviar = document.getElementById('ap-rce-enviar');
     if (apEnviar) apEnviar.addEventListener('click', function () {
         if (!ajustesPosterioresRce.length) { alert('No hay ajustes posteriores para enviar. Cargue un archivo primero.'); return; }
+        apEnvioPendienteRce = true;
         mostrarTicketAp(registrarTicketAp('-', 'Envío ajustes posteriores'));
     });
 
@@ -2698,9 +2838,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const apExportar = document.getElementById('ap-rce-exportar');
     if (apExportar) apExportar.addEventListener('click', function () {
         if (!ajustesPosterioresRce.length) { alert('No hay ajustes posteriores para exportar.'); return; }
-        const cols = ['Fecha de emisión', 'Fecha Vcto/Pago', 'Tipo CP/Doc.', 'Serie del CDP', 'Año',
-            'Nro CP o Doc. Nro Inicial (Rango)', 'Nro Final (Rango)', 'Tipo Doc Identidad', 'Nro Doc Identidad',
-            'Apellidos Nombres/ Razón  Social', 'BI Gravado DG', 'IGV / IPM DG', 'Total CP', 'Moneda'];
+        // Se exportan los campos 1 al 37 del Anexo N.° 12
+        const cols = ['RUC', 'Apellidos y Nombres o Razón social', 'Periodo']
+            .concat(AP_COLS_RCE.map(c => c.key));
         let csv = cols.join(',') + '\r\n';
         ajustesPosterioresRce.forEach(r => {
             csv += cols.map(c => '"' + String(r[c] == null ? '' : r[c]).replace(/"/g, '""') + '"').join(',') + '\r\n';

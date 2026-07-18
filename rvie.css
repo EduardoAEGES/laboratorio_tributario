@@ -2262,3 +2262,92 @@ ul {
     outline: 2px solid #1a73e8;
     background: #fff;
 }
+
+/* ================= Ajustes Posteriores (RVIE) =================
+   Mismos estilos base que el RCE (rce.css) para que ambas pestañas
+   se vean idénticas; aquí se definen para las páginas que solo cargan rvie.css. */
+.ap-datos-generales {
+    border: 1px solid #d9e2ec;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #333;
+    background: #fff;
+}
+.ap-datos-generales legend {
+    font-weight: 700;
+    color: #1a5a96;
+    padding: 0 6px;
+    font-size: 13px;
+}
+.ap-datos-generales div { margin: 3px 0; }
+
+.ap-panel {
+    border: 1px solid #d9e2ec;
+    padding: 16px;
+    background: #fff;
+}
+.ap-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #555;
+}
+.ap-pag-controls { display: flex; align-items: center; gap: 8px; }
+.ap-pag-btn {
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    color: #888;
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+.ap-pag-num { border: 1px solid #ccc; padding: 4px 10px; border-radius: 3px; }
+.ap-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+.ap-btn {
+    border: none;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+.ap-btn i { font-size: 13px; }
+.ap-btn-blue  { background: #1a5a96; }
+.ap-btn-blue:hover  { background: #16497a; }
+.ap-btn-green { background: #1e9e5a; }
+.ap-btn-green:hover { background: #17824a; }
+.ap-btn-grey  { background: #9aa7b3; }
+.ap-btn-grey:hover  { background: #80909d; }
+
+/* Tabla de ajustes posteriores: muchas columnas -> scroll horizontal y
+   cabecera de dos niveles (grupo + campo), como la muestra el SIRE. */
+.ap-table { min-width: max-content; }
+.ap-table th,
+.ap-table td {
+    white-space: nowrap;
+    font-size: 12px;
+}
+.ap-table th.ap-th-grupo {
+    background: #123a63;
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: .3px;
+    border-left: 1px solid rgba(255, 255, 255, .35);
+}

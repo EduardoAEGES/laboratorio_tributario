@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="survey.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="auth.js"></script>
     <style>
@@ -2253,6 +2254,12 @@
         </main>
     </div>
 
+    <div style="display:flex; justify-content:center; margin:24px 0;">
+        <button type="button" id="btn-finalizar-simulacion" style="background:#C00000; color:#fff; border:none; padding:12px 26px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Roboto',sans-serif;">
+            <i class="fas fa-flag-checkered"></i> Finalizar simulación
+        </button>
+    </div>
+
     <!-- Footer Equipo Académico CERTUS -->
     <footer class="decl-footer">
         <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Equipo Académico de Contabilidad CERTUS</strong></span>
@@ -3024,5 +3031,7 @@
             document.getElementById('importe-total').textContent = 's/. 0.00';
         }
     </script>
+    <script src="survey.js"></script>
+    <script src="finalizar.js"></script>
 </body>
 </html>

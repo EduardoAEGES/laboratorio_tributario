@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUNAT - Sistema Integrado de Registros Electrónicos</title>
     <link rel="stylesheet" href="rvie.css">
+    <link rel="stylesheet" href="survey.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -42,7 +43,8 @@
                 <button class="close-btn" id="close-confirmar-propuesta">&times;</button>
             </div>
             <div class="modal-body">
-                <p>¿Está seguro que desea Aceptar la Propuesta sin movimiento?</p>
+                <!-- El texto lo fija rvie.js: cambia si la propuesta tiene o no movimiento -->
+                <p id="texto-confirmar-propuesta">¿Está seguro que desea Aceptar la Propuesta sin movimiento?</p>
             </div>
             <div class="modal-footer modal-footer-right">
                 <button class="btn-modal-no" id="btn-no-propuesta">No</button>
@@ -527,7 +529,7 @@
                                 <ul class="nested-menu-level2">
                                     <li class="has-submenu-level3">
                                         <ul class="nested-menu-level3" style="display: block;">
-                                            <li><a href="#">Generación de Registros Electrónicos</a></li>
+                                            <li><a href="#" id="menu-generacion-registros">Generación de Registros Electrónicos</a></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1335,6 +1337,61 @@
                         </div>
                         <!-- FIN GENERACIÓN DEL RVIE -->
 
+                        <!-- GESTIÓN DE AJUSTES POSTERIORES (RVIE) -->
+                        <div id="ajustes" class="sub-content-view" style="display: none;">
+                            <div class="content-header-blue" style="margin-bottom:16px;">
+                                <h2>Gestión de ajustes posteriores</h2>
+                            </div>
+
+                            <!-- Datos generales del contribuyente -->
+                            <fieldset class="ap-datos-generales">
+                                <legend>Datos Generales:</legend>
+                                <div><strong>RUC:</strong> <span id="ap-rvie-ruc"></span></div>
+                                <div><strong>Apellidos y Nombres o Razón Social:</strong> <span id="ap-rvie-razon"></span></div>
+                                <div><strong>Período:</strong> <span id="ap-rvie-periodo"></span></div>
+                            </fieldset>
+
+                            <div class="ap-panel">
+                                <div class="table-controls-top" style="justify-content:flex-end;">
+                                    <div class="show-rows">mostrar:
+                                        <select id="ap-rvie-mostrar">
+                                            <option>20</option>
+                                            <option>50</option>
+                                            <option>100</option>
+                                        </select> registros
+                                    </div>
+                                </div>
+
+                                <!-- La cabecera y el detalle se generan desde rvie.js con la
+                                     estructura completa del Anexo N.° 4 (campos 4 al 33). -->
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table ap-table">
+                                        <thead id="ap-rvie-thead"></thead>
+                                        <tbody id="ap-rvie-tbody"></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="ap-footer">
+                                    <span id="ap-rvie-paginacion" class="ap-pag-info">Mostrando del 0 al 0 de un total de 0 registros</span>
+                                    <div class="ap-pag-controls">
+                                        <button class="ap-pag-btn" disabled>&larr; Anterior</button>
+                                        <span class="ap-pag-num">1</span>
+                                        <button class="ap-pag-btn" disabled>Siguiente &rarr;</button>
+                                    </div>
+                                </div>
+
+                                <div class="ap-actions">
+                                    <button class="ap-btn ap-btn-grey" id="ap-rvie-eliminar"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rvie-mostrar-eventos"><i class="fas fa-sync-alt"></i> Mostrar eventos posteriores de CP</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rvie-carga"><i class="fas fa-upload"></i> Carga de Ajustes Posteriores</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rvie-carga-ant"><i class="fas fa-upload"></i> Carga de Ajustes periodos anteriores</button>
+                                    <button class="ap-btn ap-btn-green" id="ap-rvie-enviar"><i class="fas fa-check"></i> Envió ajustes posteriores</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rvie-exportar"><i class="fas fa-download"></i> Exportar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- FIN AJUSTES POSTERIORES (RVIE) -->
+
                     </div>
             </main>
         </div>
@@ -1359,6 +1416,70 @@
             </div>
             <div class="rce-modal-footer" style="justify-content:center;">
                 <button class="rce-btn rce-btn-primary" onclick="cerrarModal12hRVIE()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmación de importación de Ajustes Posteriores (RVIE) -->
+    <div id="rvie-modal-ap-confirm" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:460px;">
+            <div class="rce-modal-header">
+                <span>Mensaje de confirmación</span>
+                <button class="rce-modal-close" id="ap-rvie-confirm-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>¿Está seguro de importar ajustes posteriores?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="ap-rvie-confirm-no" style="background:#eee; color:#333;">No</button>
+                <button class="rce-btn rce-btn-primary" id="ap-rvie-confirm-si">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Carga archivo plano de Ajustes Posteriores (RVIE) -->
+    <div id="rvie-modal-ap-carga" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:860px; width:94%;">
+            <div class="rce-modal-header">
+                <span>Carga archivo plano de Ajustes Posteriores</span>
+                <button class="rce-modal-close" id="ap-rvie-carga-x">&times;</button>
+            </div>
+            <div class="rce-modal-body" style="max-height:65vh; overflow-y:auto;">
+                <p><strong>Señor contribuyente:</strong></p>
+                <p>En caso usted presente ajustes posteriores a su RVIE para modificar un comprobante de pago con error deberá tener en cuenta el siguiente procedimiento:</p>
+                <p><strong>1.</strong> En caso el comprobante tenga error en estos datos: RUC, Tipo de Comprobante, Serie del Comprobante, Número de Comprobante, identificador de registro.<br>
+                Deberá enviar la misma información anotada excepto los campos del 14 al 26, los cuales deberán ser remitidos en "0.00".<br>
+                De la misma manera deberán anotar la nueva información correcta del comprobante en los datos: RUC, Tipo de Comprobante, Serie del Comprobante, identificador de registro, y los campos del 14 al 26 se anotarán con los valores del comprobante de pago.</p>
+                <p><strong>2.</strong> En caso el error esté relacionado a los campos que no son: RUC, Tipo de Comprobante, Serie del comprobante, Número de Comprobante, identificador de registro. Deberán anotar la nueva información correcta del comprobante, manteniendo los datos del RUC, Tipo de Comprobante, Serie del Comprobante, Número de Comprobante, identificador de registro.</p>
+                <p><strong>3.</strong> En el caso de incorporación de nuevo comprobante no anotado anteriormente, remitirá todos los campos del comprobante.</p>
+                <p><strong>4.</strong> Finalmente señor Contribuyente el archivo TXT que usted usará para importar la información de los comprobantes, debe estar zipeado (comprimido).</p>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+                    <label style="white-space:nowrap; font-weight:600;">Archivo a importar:</label>
+                    <input type="text" id="ap-rvie-carga-filename" readonly placeholder="Ningún archivo seleccionado" style="flex:1; padding:7px 10px; border:1px solid #ccc; border-radius:3px; background:#f5f5f5; font-size:13px;">
+                    <button class="rce-btn rce-btn-primary" id="ap-rvie-carga-examinar">Examinar</button>
+                    <input type="file" id="ap-rvie-carga-file" accept=".zip" style="display:none;">
+                </div>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="ap-rvie-carga-cargar" style="background:#4caf50; color:#fff;"><i class="fas fa-check"></i> Cargar archivo</button>
+                <button class="rce-btn" id="ap-rvie-carga-cancelar" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket generado de Ajustes Posteriores (RVIE) -->
+    <div id="rvie-modal-ap-ticket" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:560px;">
+            <div class="rce-modal-header">
+                <span>Mensaje</span>
+                <button class="rce-modal-close" id="ap-rvie-ticket-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Se ha enviado correctamente el archivo. El número de ticket generado es <strong id="ap-rvie-ticket-numero">20260100000010</strong>, para verificar el estado del ticket puede consultarlo a través de la opción <strong>Estado de envío de ticket RVIE</strong>.</p>
+                <p style="color:#c00;">Sr. Contribuyente favor verificar que el estado del ticket sea diferente a <strong>"Validando archivo (en proceso)"</strong>.</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" id="ap-rvie-ticket-aceptar">Aceptar</button>
             </div>
         </div>
     </div>
@@ -1420,6 +1541,7 @@
     </div>
 
     <script src="rvie.js"></script>
+    <script src="survey.js"></script>
 
 </body>
 

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Encuesta - Laboratorio Tributario</title>
+    <!-- CSS de la encuesta -->
+    <link rel="stylesheet" href="survey.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 40px;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            font-size: 24px;
+            color: #0f172a;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #005691;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #003366;
+        }
+        .btn-danger {
+            background-color: #dc2626;
+        }
+        .btn-danger:hover {
+            background-color: #991b1b;
+        }
+        .log-box {
+            margin-top: 30px;
+            background-color: #0f172a;
+            color: #38bdf8;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Entorno de Prueba de Encuestas</h1>
+        <p>Utiliza los siguientes botones para simular la finalización de los módulos:</p>
+        
+        <!-- Botón 1: Terminar simulación (SIRE) -->
+        <button id="btn-terminar-sire" class="btn btn-danger">
+            <i class="fas fa-flag-checkered"></i> Terminar simulación
+        </button>
+
+        <!-- Botón 2: Finalizar simulación (CDP) -->
+        <button id="btn-finalizar-cdp" class="btn">
+            <i class="fas fa-check-circle"></i> Finalizar simulación
+        </button>
+
+        <div class="log-box" id="log-box">Consola de eventos de prueba:
+-- Servidor web listo y esperando clics --</div>
+    </div>
+
+    <!-- Cargar dependencias de Supabase, auth.js y survey.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <script src="survey.js"></script>
+
+    <script>
+        // Loggear eventos
+        const logBox = document.getElementById('log-box');
+        function logMessage(msg) {
+            logBox.textContent += '\n[' + new Date().toLocaleTimeString() + '] ' + msg;
+            console.log(msg);
+        }
+
+        // Listener para simular las acciones por defecto que los botones disparan tras la encuesta
+        document.getElementById('btn-terminar-sire').addEventListener('click', function() {
+            logMessage('ACCIÓN ORIGINAL DISPARADA: Terminar simulación (SIRE) completado.');
+            alert('Acción original: ¡Simulación SIRE terminada con éxito!');
+        });
+
+        document.getElementById('btn-finalizar-cdp').addEventListener('click', function() {
+            logMessage('ACCIÓN ORIGINAL DISPARADA: Finalizar simulación (CDP) completado.');
+            alert('Acción original: ¡Simulación CDP finalizada con éxito!');
+        });
+    </script>
+</body>
+</html>
