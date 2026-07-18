@@ -1263,10 +1263,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // desde el flujo "Reemplazar Propuesta"
     let procesarDatosRce = null;
 
+    // Función que mapea filas crudas al formato snake_case de renderTable.
+    // Se asigna dentro de processData y se reutiliza para alimentar el Preliminar.
+    let mapearFilasRce = null;
+
     // Render detailed table rows
-    function renderTable(dataRows) {
-        comprobantesActualesRce = dataRows;
-        const tbody = document.querySelector('.results-table tbody');
+    function renderTable(dataRows, opts) {
+        opts = opts || {};
+        const tbodySel = opts.tbodySel || '#propuesta-rce .results-table tbody';
+        const P = opts.totalPrefix || 'total-';
+        const pagId = opts.pagInfoId || 'detailed-pagination-info';
+        if (opts.setState !== false) comprobantesActualesRce = dataRows;
+        const tbody = document.querySelector(tbodySel);
         if (!tbody) return;
         tbody.innerHTML = '';
 
@@ -1435,23 +1443,23 @@ document.addEventListener('DOMContentLoaded', function () {
             if (el) el.textContent = val.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };
 
-        setHtml('total-bi-grav-dg', totals.biGravDG);
-        setHtml('total-igv-dg', totals.igvDG);
-        setHtml('total-bi-grav-dgng', totals.biGravDGNG);
-        setHtml('total-igv-dgng', totals.igvDGNG);
-        setHtml('total-bi-grav-dng', totals.biGravDNG);
-        setHtml('total-igv-dng', totals.igvDNG);
-        setHtml('total-val-no-grav', totals.valNoGrav);
-        setHtml('total-isc', totals.isc);
-        setHtml('total-icbper', totals.icbper);
-        setHtml('total-otros', totals.otros);
-        setHtml('total-anticipos', totals.anticipos);
-        setHtml('total-otros-cargos', totals.otrosCargos);
-        setHtml('total-redondeo', totals.mtoRedondeo);
-        setHtml('total-total-cp', totals.total);
+        setHtml(P + 'bi-grav-dg', totals.biGravDG);
+        setHtml(P + 'igv-dg', totals.igvDG);
+        setHtml(P + 'bi-grav-dgng', totals.biGravDGNG);
+        setHtml(P + 'igv-dgng', totals.igvDGNG);
+        setHtml(P + 'bi-grav-dng', totals.biGravDNG);
+        setHtml(P + 'igv-dng', totals.igvDNG);
+        setHtml(P + 'val-no-grav', totals.valNoGrav);
+        setHtml(P + 'isc', totals.isc);
+        setHtml(P + 'icbper', totals.icbper);
+        setHtml(P + 'otros', totals.otros);
+        setHtml(P + 'anticipos', totals.anticipos);
+        setHtml(P + 'otros-cargos', totals.otrosCargos);
+        setHtml(P + 'redondeo', totals.mtoRedondeo);
+        setHtml(P + 'total-cp', totals.total);
 
         // Update pagination text
-        const pagInfo = document.getElementById('detailed-pagination-info');
+        const pagInfo = document.getElementById(pagId);
         if (pagInfo) {
             pagInfo.textContent = `Mostrando del 1 al ${dataRows.length} de un total ${dataRows.length} registros`;
         }
@@ -1499,6 +1507,81 @@ document.addEventListener('DOMContentLoaded', function () {
         actualizarResumenRce(rows);
         if (modoEdicionRce) aplicarModoEdicionRce(true);
     }
+
+    // =============================================
+    // PRELIMINAR DEL RCE
+    // Los datos reemplazados se copian aquí; la Propuesta no se toca.
+    // =============================================
+    let preliminarActualesRce = [];
+    function prelimKeyRce(p) { return 'sire_rce_prelim_' + p; }
+
+    function renderPreliminarRce(rows) {
+        preliminarActualesRce = Array.isArray(rows) ? rows.slice() : [];
+        renderTable(preliminarActualesRce, {
+            tbodySel: '#preliminar-rce .results-table tbody',
+            totalPrefix: 'prelim-total-',
+            pagInfoId: 'prelim-pagination-info',
+            setState: false
+        });
+        guardarPreliminarRce();
+    }
+
+    function guardarPreliminarRce() {
+        if (!esMasterRce() || !currentPeriodoRce) return;
+        try { SimStore.setItem(prelimKeyRce(currentPeriodoRce), JSON.stringify(preliminarActualesRce)); } catch (e) {}
+    }
+
+    function irAPreliminarRce() {
+        const btn = document.querySelector('.sub-tab-btn[data-target="preliminar-rce"]');
+        if (btn) btn.click();
+    }
+
+    // "Registrar Preliminar" → dispara la cadena de aceptación del RCE, que
+    // termina en la vista Generación de Registros.
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btn-registrar-preliminar-rce');
+        if (!btn) return;
+        e.preventDefault();
+        if (!preliminarActualesRce || !preliminarActualesRce.length) {
+            alert('No hay comprobantes en el Preliminar. Reemplace la Propuesta primero.');
+            return;
+        }
+        if (typeof abrirConfirmarPropuesta === 'function') abrirConfirmarPropuesta();
+    });
+
+    // "Eliminar Preliminar" → limpia el Preliminar y regresa a la Propuesta.
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btn-eliminar-preliminar-rce');
+        if (!btn) return;
+        e.preventDefault();
+        if (!preliminarActualesRce || !preliminarActualesRce.length) {
+            alert('No hay un Preliminar para eliminar.');
+            return;
+        }
+        if (!confirm('¿Está seguro de eliminar el Preliminar? Esta acción no se puede deshacer.')) return;
+        renderPreliminarRce([]); // persiste el Preliminar vacío
+        const propTab = document.querySelector('.sub-tab-btn[data-target="propuesta-rce"]');
+        if (propTab) propTab.click();
+    });
+
+    // "Eliminar" (filas seleccionadas) dentro del Preliminar.
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btn-prelim-eliminar-rce');
+        if (!btn) return;
+        e.preventDefault();
+        const tbody = document.querySelector('#preliminar-rce .results-table tbody');
+        if (!tbody) return;
+        const conservar = [];
+        tbody.querySelectorAll('tr').forEach((tr, idx) => {
+            const chk = tr.querySelector('input[type="checkbox"]');
+            if (!(chk && chk.checked)) conservar.push(preliminarActualesRce[idx]);
+        });
+        if (conservar.length === preliminarActualesRce.length) {
+            alert('Seleccione al menos un comprobante para eliminar.');
+            return;
+        }
+        renderPreliminarRce(conservar);
+    });
 
     // Recalcula el resumen (parte superior, 11 columnas) desde los comprobantes
     function actualizarResumenRce(rows) {
@@ -2079,7 +2162,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
 
                             // Pass the data to the detailed table
-                            renderTable(rows.map(d => {
+                            const mapFnRce = (d) => {
                                 // Esquema SIRE (tabla registro_compras con las columnas del CSV de SUNAT):
                                 // "Apellidos Nombres/ Razón  Social" (doble espacio) = proveedor y
                                 // "Apellidos y Nombres o Razón social" = contribuyente. En el fallback
@@ -2146,7 +2229,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 dam: d['COD. DAM O DSI'] || '',
                                 clu: d['CLU'] || ''
                                 };
-                            }));
+                            };
+                            mapearFilasRce = (rr) => rr.map(mapFnRce);
+                            renderTable(rows.map(mapFnRce));
                         }
 
                         procesarDatosRce = processData;
@@ -2366,21 +2451,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // Reemplazar la información de la Propuesta del RCE (tabla y resumen)
-                if (typeof procesarDatosRce === 'function') {
-                    procesarDatosRce(filas);
-                } else {
+                // Los datos reemplazados van al PRELIMINAR; la Propuesta no se toca.
+                if (typeof mapearFilasRce !== 'function') {
                     alert('Primero seleccione un período y pulse Aceptar.');
                     return;
                 }
 
-                // MASTER: persistir el contenido importado para este periodo
+                // MASTER: fijar el periodo del archivo importado
                 if (esMasterRce()) {
                     const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
                     if (perImp.length === 6) currentPeriodoRce = perImp;
                     actualizarBotonPresentadoRce();
-                    guardarContenidoRce();
                 }
+
+                // Pintar el Preliminar y cambiar a esa pestaña
+                renderPreliminarRce(mapearFilasRce(filas));
+                irAPreliminarRce();
 
                 // Registrar el ticket del reemplazo
                 const now = new Date();

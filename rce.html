@@ -617,10 +617,135 @@
                             </div>
                         </div>
 
-                        <!-- OTHER SUBTABS (FALLBACK VIEWS) -->
+                        <!-- ===== PRELIMINAR DEL RCE ===== -->
                         <div id="preliminar-rce" class="sub-content-view" style="display: none;">
-                            <div class="p-4 text-center text-muted">Vista de Preliminar del RCE en desarrollo.</div>
+                            <div class="content-header-blue">
+                                <h2>Preliminar del RCE</h2>
+                            </div>
+
+                            <div class="results-container">
+                                <div class="table-controls-top">
+                                    <div class="show-rows">
+                                        Mostrar:
+                                        <select>
+                                            <option>20</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="11" class="group-header">Datos del CP</th>
+                                                <th colspan="4" class="group-header">Datos del Proveedor</th>
+                                                <th colspan="13" class="group-header">Montos y Tasas</th>
+                                                <th colspan="3" class="group-header">Totales y Moneda</th>
+                                                <th colspan="5" class="group-header">Referencias</th>
+                                                <th colspan="9" class="group-header">Detalle y Detracción/Retención</th>
+                                                <th colspan="10" class="group-header">Otros</th>
+                                            </tr>
+                                            <tr>
+                                                <th><input type="checkbox"></th>
+                                                <th>Inc.</th>
+                                                <th>Des. Per.</th>
+                                                <th>Fecha de emisión</th>
+                                                <th>Fecha Vcto/Pago</th>
+                                                <th>Tipo CP/Doc.</th>
+                                                <th>Comprobante</th>
+                                                <th>Serie del CDP</th>
+                                                <th>Año</th>
+                                                <th>Nro CP o Doc. Nro Inicial (Rango)</th>
+                                                <th>Nro Final (Rango)</th>
+                                                <th>Tipo Doc Identidad</th>
+                                                <th>Nro Doc Identidad</th>
+                                                <th>Apellidos Nombres/ Razón Social</th>
+                                                <th>Tipo de Proveedor</th>
+                                                <th>BI Gravado DG</th>
+                                                <th>IGV / IPM DG</th>
+                                                <th>BI Gravado DGNG</th>
+                                                <th>IGV / IPM DGNG</th>
+                                                <th>BI Gravado DNG</th>
+                                                <th>IGV / IPM DNG</th>
+                                                <th>Valor de las Adquisiciones No Gravadas</th>
+                                                <th>ISC</th>
+                                                <th>ICBPER</th>
+                                                <th>Otros Tributos / Cargos</th>
+                                                <th>Anticipos</th>
+                                                <th>Otros Cargos</th>
+                                                <th>Monto de Redondeo</th>
+                                                <th>Total CP</th>
+                                                <th>Moneda</th>
+                                                <th>Tipo Cambio</th>
+                                                <th>Comp.</th>
+                                                <th>Fecha Emisión Doc Modificado</th>
+                                                <th>Tipo CP Modificado</th>
+                                                <th>Serie CP Modificado</th>
+                                                <th>Nro CP Modificado</th>
+                                                <th>Detalle de la Operación</th>
+                                                <th>Descripción</th>
+                                                <th>Forma de Pago</th>
+                                                <th>Motivo Nota de Crédito</th>
+                                                <th>Sujeto a Detracción / Retención</th>
+                                                <th>Tipo (Detracción / Retención Renta 4ta)</th>
+                                                <th>% Aplicado</th>
+                                                <th>Monto Detracción/Retención</th>
+                                                <th>N° Constancia Depósito</th>
+                                                <th>ID Proyecto Operadores Atribución</th>
+                                                <th>Tipo de Nota</th>
+                                                <th>Est. Comp</th>
+                                                <th>Desc. Comp</th>
+                                                <th>Valor FOB Embarcado</th>
+                                                <th>Valor OP Gratuitas</th>
+                                                <th>Tipo Operación</th>
+                                                <th>DAM / CP</th>
+                                                <th>CLU</th>
+                                                <th>CAR SUNAT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr class="totals-row">
+                                                <td colspan="15" class="total-label-text">TOTALES</td>
+                                                <td id="prelim-total-bi-grav-dg">0.00</td>
+                                                <td id="prelim-total-igv-dg">0.00</td>
+                                                <td id="prelim-total-bi-grav-dgng">0.00</td>
+                                                <td id="prelim-total-igv-dgng">0.00</td>
+                                                <td id="prelim-total-bi-grav-dng">0.00</td>
+                                                <td id="prelim-total-igv-dng">0.00</td>
+                                                <td id="prelim-total-val-no-grav">0.00</td>
+                                                <td id="prelim-total-isc">0.00</td>
+                                                <td id="prelim-total-icbper">0.00</td>
+                                                <td id="prelim-total-otros">0.00</td>
+                                                <td id="prelim-total-anticipos">0.00</td>
+                                                <td id="prelim-total-otros-cargos">0.00</td>
+                                                <td id="prelim-total-redondeo">0.00</td>
+                                                <td id="prelim-total-total-cp" class="strong">0.00</td>
+                                                <td colspan="26"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="pagination-area">
+                                    <div class="pagination-info" id="prelim-pagination-info">Mostrando del 1 al 0 de un total 0 registros</div>
+                                    <div class="pagination-controls">
+                                        <button disabled><i class="fas fa-arrow-left"></i> Anterior</button>
+                                        <button class="active">1</button>
+                                        <button>Siguiente <i class="fas fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="propuesta-action-bar">
+                                    <button class="btn-pa btn-pa-outline" id="btn-prelim-eliminar-rce"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                    <button class="btn-pa btn-pa-green" id="btn-registrar-preliminar-rce"><i class="fas fa-check"></i> Registrar Preliminar</button>
+                                    <button class="btn-pa btn-pa-red" id="btn-eliminar-preliminar-rce"><i class="fas fa-times"></i> Eliminar Preliminar</button>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- OTHER SUBTABS (FALLBACK VIEWS) -->
                         <div id="inconsistencias" class="sub-content-view" style="display: none;">
                             <div class="p-4 text-center text-muted">Vista de Inconsistencias en desarrollo.</div>
                         </div>

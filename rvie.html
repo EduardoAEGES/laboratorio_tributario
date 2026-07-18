@@ -1129,6 +1129,128 @@
                             </div>
                         </div>
 
+                        <!-- ===== PRELIMINAR DEL RVIE ===== -->
+                        <div id="preliminar-rvie" class="sub-content-view" style="display: none;">
+                            <div class="content-header-blue">
+                                <h2>Preliminar del RVIE</h2>
+                            </div>
+
+                            <div class="results-container">
+                                <div class="table-controls-top">
+                                    <div class="show-rows">
+                                        Mostrar:
+                                        <select>
+                                            <option>20</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                    <div class="exportar-dropdown-wrapper">
+                                        <button class="btn-exportar" id="btn-exportar-preliminar"><i class="fas fa-download"></i> Exportar <i
+                                                class="fas fa-caret-down"></i></button>
+                                        <div class="exportar-dropdown" id="dropdown-exportar-preliminar" style="display:none;">
+                                            <div class="exportar-option" data-format="TXT" data-from="preliminar">TXT</div>
+                                            <div class="exportar-option exportar-option-hover" data-format="CSV" data-from="preliminar">CSV</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox"></th>
+                                                <th>Inc.</th>
+                                                <th>Des. Per.</th>
+                                                <th>Fecha de emisión</th>
+                                                <th>Fecha Vcto/Pago</th>
+                                                <th>Tipo CP/Doc.</th>
+                                                <th>Serie del CDP</th>
+                                                <th>Nro CP o Doc. Nro Inicial (Rango)</th>
+                                                <th>Nro Final (Rango)</th>
+                                                <th>Tipo Doc Identidad</th>
+                                                <th>Nro Doc Identidad</th>
+                                                <th>Apellidos Nombres/ Razón Social</th>
+                                                <th>Valor Facturado Exportación</th>
+                                                <th>BI Gravada</th>
+                                                <th>Dscto BI</th>
+                                                <th>IGV / IPM</th>
+                                                <th>Dscto IGV / IPM</th>
+                                                <th>Mto Exonerado</th>
+                                                <th>Mto Inafecto</th>
+                                                <th>ISC</th>
+                                                <th>BI Grav IVAP</th>
+                                                <th>IVAP</th>
+                                                <th>ICBPER</th>
+                                                <th>Otros Tributos</th>
+                                                <th>Total CP</th>
+                                                <th>Moneda</th>
+                                                <th>Tipo Cambio</th>
+                                                <th>Comp.</th>
+                                                <th>Fecha Emisión Doc Modificado</th>
+                                                <th>Tipo CP Modificado</th>
+                                                <th>Serie CP Modificado</th>
+                                                <th>Nro CP Modificado</th>
+                                                <th>ID Proyecto Operadores Atribución</th>
+                                                <th>Tipo de Nota</th>
+                                                <th>Est. Comp</th>
+                                                <th>Desc. Comp</th>
+                                                <th>Valor FOB Embarcado</th>
+                                                <th>Valor OP Gratuitas</th>
+                                                <th>Tipo Operación</th>
+                                                <th>DAM / CP</th>
+                                                <th>CLU</th>
+                                                <th>CAR SUNAT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr class="totals-row">
+                                                <td colspan="12" class="total-label-text">TOTALES</td>
+                                                <td id="prelim-total-val-exp">0.00</td>
+                                                <td id="prelim-total-bi-grav">0.00</td>
+                                                <td id="prelim-total-dscto-bi">0.00</td>
+                                                <td id="prelim-total-igv">0.00</td>
+                                                <td id="prelim-total-dscto-igv">0.00</td>
+                                                <td id="prelim-total-mto-exo">0.00</td>
+                                                <td id="prelim-total-mto-ina">0.00</td>
+                                                <td id="prelim-total-isc">0.00</td>
+                                                <td id="prelim-total-bi-ivap">0.00</td>
+                                                <td id="prelim-total-ivap">0.00</td>
+                                                <td id="prelim-total-icbper">0.00</td>
+                                                <td id="prelim-total-otros">0.00</td>
+                                                <td id="prelim-total-total-cp" class="strong">0.00</td>
+                                                <td colspan="11"></td>
+                                                <td id="prelim-total-fob">0.00</td>
+                                                <td id="prelim-total-op-gratuitas">0.00</td>
+                                                <td colspan="4"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="pagination-area">
+                                    <div class="pagination-info" id="prelim-pagination-info">Mostrando del 1 al 0 de un total 0 registros</div>
+                                    <div class="pagination-controls">
+                                        <button disabled><i class="fas fa-arrow-left"></i> Anterior</button>
+                                        <button class="active">1</button>
+                                        <button>Siguiente <i class="fas fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="action-buttons-row">
+                                    <button class="btn-action btn-blue-light" id="btn-prelim-agregar-rvie" disabled title="Disponible en la pestaña Propuesta"><i class="fas fa-plus-circle"></i> Agregar</button>
+                                    <button class="btn-action btn-blue-light" id="btn-prelim-editar-rvie" disabled title="Disponible en la pestaña Propuesta"><i class="fas fa-pen"></i> Editar</button>
+                                    <button class="btn-action btn-blue-light" id="btn-prelim-eliminar-rvie"><i class="fas fa-trash-alt"></i> Eliminar</button>
+
+                                    <div class="spacer"></div>
+
+                                    <button class="btn-action btn-dark-blue" id="btn-prelim-importacion-cp-rvie" disabled title="Disponible en la pestaña Propuesta"><i class="fas fa-file-upload"></i> Importación de CP</button>
+                                    <button class="btn-action btn-green" id="btn-registrar-preliminar-rvie"><i class="fas fa-check"></i> Registrar Preliminar</button>
+                                    <button class="btn-action btn-red" id="btn-eliminar-preliminar-rvie"><i class="fas fa-times"></i> Eliminar Preliminar</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- ===== GENERACIÓN DEL RVIE ===== -->
                         <div id="generacion-rvie" class="sub-content-view" style="display:none;">
                             <div class="gen-registros-container">

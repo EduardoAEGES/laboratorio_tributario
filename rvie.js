@@ -51,7 +51,9 @@ document.addEventListener('DOMContentLoaded', function () {
         closeConfirmar.addEventListener('click', () => hideModal(modalConfirmar));
     }
 
-    // Paso 2: Click "Sí" → cierra confirmación, abre modal ticket
+    // Paso 2: Click "Sí" → cierra confirmación, abre modal ticket.
+    // "Aceptar Propuesta" salta directo a Generación de Registros (no pasa por
+    // el Preliminar). El Preliminar solo se usa en el flujo de reemplazo.
     const btnSiPropuesta = document.getElementById('btn-si-propuesta');
     if (btnSiPropuesta) {
         btnSiPropuesta.addEventListener('click', () => {
@@ -87,6 +89,52 @@ document.addEventListener('DOMContentLoaded', function () {
             hideModal(modalAviso12h);
         });
     }
+
+    // "Registrar Preliminar" → dispara la cadena ticket → aviso 12h → Generación.
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btn-registrar-preliminar-rvie');
+        if (!btn) return;
+        e.preventDefault();
+        if (!preliminarActuales || !preliminarActuales.length) {
+            alert('No hay comprobantes en el Preliminar. Acepte o reemplace la Propuesta primero.');
+            return;
+        }
+        showModal(modalTicket);
+    });
+
+    // "Eliminar Preliminar" → limpia el Preliminar y regresa a la Propuesta.
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btn-eliminar-preliminar-rvie');
+        if (!btn) return;
+        e.preventDefault();
+        if (!preliminarActuales || !preliminarActuales.length) {
+            alert('No hay un Preliminar para eliminar.');
+            return;
+        }
+        if (!confirm('¿Está seguro de eliminar el Preliminar? Esta acción no se puede deshacer.')) return;
+        renderPreliminarRvie([]); // persiste el Preliminar vacío
+        const propTab = document.querySelector('.sub-tab-btn[data-target="propuesta-rvie"]');
+        if (propTab) propTab.click();
+    });
+
+    // "Eliminar" (filas seleccionadas) dentro del Preliminar.
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btn-prelim-eliminar-rvie');
+        if (!btn) return;
+        e.preventDefault();
+        const tbody = document.querySelector('#preliminar-rvie .results-table tbody');
+        if (!tbody) return;
+        const conservar = [];
+        tbody.querySelectorAll('tr').forEach((tr, idx) => {
+            const chk = tr.querySelector('input[type="checkbox"]');
+            if (!(chk && chk.checked)) conservar.push(preliminarActuales[idx]);
+        });
+        if (conservar.length === preliminarActuales.length) {
+            alert('Seleccione al menos un comprobante para eliminar.');
+            return;
+        }
+        renderPreliminarRvie(conservar);
+    });
 
     // =============================================
     // Estado de aceptación compartido (RCE / RVIE)
@@ -724,9 +772,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Últimos comprobantes mostrados en la tabla de propuesta (fuente del archivo exportado)
     let comprobantesActuales = [];
 
-    function renderTable(dataRows) {
-        comprobantesActuales = dataRows;
-        const tbody = document.querySelector('.results-table tbody');
+    function renderTable(dataRows, opts) {
+        opts = opts || {};
+        const tbodySel = opts.tbodySel || '#propuesta-rvie .results-table tbody';
+        const P = opts.totalPrefix || 'total-';
+        const pagId = opts.pagInfoId || 'detailed-pagination-info';
+        if (opts.setState !== false) comprobantesActuales = dataRows;
+        const tbody = document.querySelector(tbodySel);
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         // Montos con separador de miles como en el SIRE real (7,920.12)
@@ -883,24 +936,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // Update Totals Footer
-        document.getElementById('total-val-exp').textContent = fmtMonto(totals.valExp);
-        document.getElementById('total-bi-grav').textContent = fmtMonto(totals.biGrav);
-        document.getElementById('total-dscto-bi').textContent = fmtMonto(totals.dsctoBi);
-        document.getElementById('total-igv').textContent = fmtMonto(totals.igv);
-        document.getElementById('total-dscto-igv').textContent = fmtMonto(totals.dsctoIgv);
-        document.getElementById('total-mto-exo').textContent = fmtMonto(totals.mtoExo);
-        document.getElementById('total-mto-ina').textContent = fmtMonto(totals.mtoIna);
-        document.getElementById('total-isc').textContent = fmtMonto(totals.isc);
-        document.getElementById('total-bi-ivap').textContent = fmtMonto(totals.biIvap);
-        document.getElementById('total-ivap').textContent = fmtMonto(totals.ivap);
-        document.getElementById('total-icbper').textContent = fmtMonto(totals.icbper);
-        document.getElementById('total-otros').textContent = fmtMonto(totals.otros);
-        document.getElementById('total-total-cp').textContent = fmtMonto(totals.total);
-        document.getElementById('total-fob').textContent = fmtMonto(totals.fob);
-        document.getElementById('total-op-gratuitas').textContent = fmtMonto(totals.opGrat);
+        const setT = (suffix, val) => {
+            const el = document.getElementById(P + suffix);
+            if (el) el.textContent = fmtMonto(val);
+        };
+        setT('val-exp', totals.valExp);
+        setT('bi-grav', totals.biGrav);
+        setT('dscto-bi', totals.dsctoBi);
+        setT('igv', totals.igv);
+        setT('dscto-igv', totals.dsctoIgv);
+        setT('mto-exo', totals.mtoExo);
+        setT('mto-ina', totals.mtoIna);
+        setT('isc', totals.isc);
+        setT('bi-ivap', totals.biIvap);
+        setT('ivap', totals.ivap);
+        setT('icbper', totals.icbper);
+        setT('otros', totals.otros);
+        setT('total-cp', totals.total);
+        setT('fob', totals.fob);
+        setT('op-gratuitas', totals.opGrat);
 
         // Update pagination text
-        const pagInfo = document.getElementById('detailed-pagination-info');
+        const pagInfo = document.getElementById(pagId);
         if (pagInfo) {
             pagInfo.textContent = `Mostrando del 1 al ${dataRows.length} de un total ${dataRows.length} registros`;
         }
@@ -1631,7 +1688,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Pass the data to the old 'Propuesta' detailed table
-        renderTable(data.map(d => ({
+        renderTable(mapearFilasRvie(data));
+    }
+
+    // Convierte filas crudas (importadas o de Supabase) al formato snake_case
+    // que usa renderTable. Extraído para reutilizarlo al alimentar el Preliminar.
+    function mapearFilasRvie(data) {
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '';
+            if (String(dateStr).includes('/')) return dateStr;
+            const parts = String(dateStr).split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return dateStr;
+        };
+        return data.map(d => ({
             ruc: d['Ruc'] || '20123456789',
             razon_social: d['Razon Social'] || 'EMPRESA DEMO S.A.C.',
             periodo: d['Periodo'],
@@ -1687,7 +1757,35 @@ document.addEventListener('DOMContentLoaded', function () {
             tipo_operacion: String(d['Tipo Operación'] || '0101').padStart(4, '0'),
             dam: d['DAM / CP'] || '',
             clu: d['CLU'] || ''
-        })));
+        }));
+    }
+
+    // =============================================
+    // PRELIMINAR DEL RVIE
+    // Los datos aceptados/reemplazados se copian aquí; la Propuesta no se toca.
+    // =============================================
+    let preliminarActuales = [];
+    function prelimKeyRvie(p) { return 'sire_rvie_prelim_' + p; }
+
+    function renderPreliminarRvie(rows) {
+        preliminarActuales = Array.isArray(rows) ? rows.slice() : [];
+        renderTable(preliminarActuales, {
+            tbodySel: '#preliminar-rvie .results-table tbody',
+            totalPrefix: 'prelim-total-',
+            pagInfoId: 'prelim-pagination-info',
+            setState: false
+        });
+        guardarPreliminarRvie();
+    }
+
+    function guardarPreliminarRvie() {
+        if (!esMasterRvie() || !currentPeriodoRvie) return;
+        try { SimStore.setItem(prelimKeyRvie(currentPeriodoRvie), JSON.stringify(preliminarActuales)); } catch (e) {}
+    }
+
+    function irAPreliminarRvie() {
+        const btn = document.querySelector('.sub-tab-btn[data-target="preliminar-rvie"]');
+        if (btn) btn.click();
     }
 
     // =============================================
@@ -2241,20 +2339,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // ===== CASO 2: ARCHIVO CORRECTO =====
-                // Reemplazar la información de la Propuesta del RVIE (tabla y resumen)
-                procesarDatosRvie(filas);
-
-                // MASTER: fijar el periodo del archivo importado y persistir el contenido
+                // Los datos reemplazados van al PRELIMINAR; la Propuesta no se toca.
                 const perImport = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
                 if (esMasterRvie() && perImport.length === 6) {
                     currentPeriodoRvie = perImport;
                     actualizarBotonPresentadoRvie();
-                    guardarContenidoRvie();
                 }
 
-                // Asegurar que se vea la Propuesta con los datos reemplazados
+                // Asegurar que la vista de registros esté visible y pintar el Preliminar
                 const mainContent = document.getElementById('main-content-display');
                 if (mainContent) mainContent.style.display = 'block';
+                renderPreliminarRvie(mapearFilasRvie(filas));
+                irAPreliminarRvie();
 
                 tickets.unshift({
                     numero: ticketNum,
