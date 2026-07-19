@@ -718,6 +718,346 @@
             cursor: pointer;
         }
 
+        /* Asistente de la casilla 380 (réplica del modal real de SUNAT) */
+        .m380-box { max-width: 560px; }
+
+        .m380-box .c-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 8px 0;
+        }
+
+        /* Ancho fijo para que los códigos 891 y 892 queden alineados entre sí */
+        .m380-box .c-label { flex: 0 0 180px; min-width: 0; }
+
+        .m380-box .c-pair { flex: 1; }
+
+        .m380-box .c-pair input { flex: 1; width: auto; }
+
+        .m380-box .btn-modal-aceptar {
+            background: #337ab7;
+            font-weight: 400;
+            padding: 8px 22px;
+        }
+
+        .btn-modal-salir {
+            background: #fff;
+            color: #555;
+            border: 1px solid #ccc;
+            padding: 8px 22px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Asistente de casilla estilo SUNAT (cabecera gris + banner azul) */
+        .modal-box header.asist-head {
+            background: #9B9B9B;
+            color: #fff;
+            font-weight: 400;
+            font-size: 16px;
+        }
+
+        .asist-banner {
+            background: #A3BCE2;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            padding: 14px 30px;
+            margin: 0 0 18px 0;
+            line-height: 1.45;
+        }
+
+        .asist-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .asist-table th {
+            background: #fff;
+            border: 1px solid #D9D9D9;
+            padding: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .asist-table td {
+            border: 1px solid #D9D9D9;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .asist-table td.asist-label { text-align: left; line-height: 1.4; }
+
+        .asist-table td.asist-casilla { text-align: center; width: 90px; }
+
+        .asist-table td.asist-importe { width: 200px; }
+
+        .asist-table td.asist-importe input {
+            width: 100%;
+            border: 1px solid #CCC;
+            padding: 6px 8px;
+            font-size: 13px;
+            text-align: right;
+            box-sizing: border-box;
+        }
+
+        .asist-table td.asist-importe input[readonly] {
+            background: #EFEFEF;
+            color: #333;
+        }
+
+        .asist-table td.asist-importe input.asist-green {
+            background: #A9D08E;
+            color: #333;
+        }
+
+        .asist-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 18px 20px;
+        }
+
+        .btn-asist-salir {
+            background: #fff;
+            color: #333;
+            border: 1px solid #CCC;
+            padding: 9px 26px;
+            font-weight: 400;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-asist-aceptar {
+            background: #4A7EBB;
+            color: #fff;
+            border: none;
+            padding: 9px 26px;
+            font-weight: 400;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-asist-aceptar:hover { background: #3D6CA5; }
+
+        /* Asistente de importación de archivo plano (percepciones / retenciones) */
+        .imp-banner {
+            background: #FDF6DC;
+            border: 1px solid #F0E6C0;
+            padding: 14px 18px;
+            font-size: 13.5px;
+            line-height: 1.55;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .imp-banner span { flex: 1; }
+
+        .imp-banner i { color: #D8CFA8; font-size: 20px; }
+
+        .imp-fieldset {
+            border: 1px solid #DDD;
+            border-radius: 3px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+        }
+
+        .imp-fieldset legend {
+            color: #767676;
+            font-size: 13.5px;
+            padding: 0 8px;
+        }
+
+        .imp-radio-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            font-size: 13.5px;
+            padding: 6px 0;
+            cursor: pointer;
+        }
+
+        .imp-file-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            flex-wrap: wrap;
+        }
+
+        .imp-file-row span { flex: 1; min-width: 180px; }
+
+        .imp-file-row input[type="text"] {
+            border: 1px solid #CCC;
+            padding: 7px 10px;
+            font-size: 13px;
+            width: 210px;
+            background: #fff;
+        }
+
+        .btn-examinar {
+            background: #fff;
+            border: 1px solid #CCC;
+            padding: 7px 14px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-descargar {
+            background: #fff;
+            border: 1px solid #CCC;
+            padding: 7px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .imp-resultado {
+            display: flex;
+            gap: 50px;
+            font-size: 13.5px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .imp-rechazados-head {
+            background: #F7F7F7;
+            border: 1px solid #EEE;
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+
+        .imp-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .imp-tabla th {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid #DDD;
+            font-weight: 700;
+        }
+
+        .imp-tabla td {
+            padding: 8px 14px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        /* Botón "TXT" a la izquierda de las casillas 171 y 179. Va posicionado fuera
+           del flujo para que los códigos 171/179 sigan alineados con 184, 168, 164… */
+        .c-pair-txt { position: relative; }
+
+        .btn-gen-txt {
+            position: absolute;
+            right: calc(100% + 6px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fff;
+            border: 1px solid #C9C9C9;
+            color: #337ab7;
+            padding: 7px 10px;
+            font-size: 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-gen-txt:hover { background: #F0F6FB; }
+
+        /* Generador del archivo de texto plano */
+        .gen-tabla-wrap { overflow-x: auto; }
+
+        .gen-tabla {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        .gen-tabla th {
+            background: #F0F0F0;
+            border: 1px solid #D9D9D9;
+            padding: 6px 8px;
+            font-weight: 700;
+            line-height: 1.3;
+            vertical-align: top;
+            min-width: 110px;
+        }
+
+        .gen-tabla th small {
+            display: block;
+            font-weight: 400;
+            color: #777;
+        }
+
+        .gen-tabla td {
+            border: 1px solid #D9D9D9;
+            padding: 3px;
+        }
+
+        .gen-tabla input, .gen-tabla select {
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 6px;
+            font-size: 12px;
+            background: transparent;
+        }
+
+        .gen-tabla input:focus, .gen-tabla select:focus { border-color: #337ab7; outline: none; }
+
+        .gen-tabla input.campo-invalido { background: #FDECEA; border-color: #E0A6A0; }
+
+        .gen-tabla .col-quitar { width: 34px; min-width: 34px; text-align: center; }
+
+        /* El tipo de comprobante lleva textos largos ("12 - TICKET DE MÁQUINA…") */
+        .gen-tabla .col-tipo { min-width: 200px; }
+
+        /* Fecha: control nativo (se tipea o se elige del calendario), como la casilla 336 */
+        .gen-tabla .col-fecha { min-width: 150px; }
+
+        .gen-tabla input[type="date"] {
+            font-family: inherit;
+            color: #333;
+        }
+
+        .btn-quitar-fila {
+            background: none;
+            border: none;
+            color: #A6001A;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .gen-acciones-tabla {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .gen-total { font-size: 13.5px; }
+
+        .gen-errores {
+            border: 1px solid #E0A800;
+            background: #FFF8E1;
+            border-radius: 3px;
+            padding: 12px 15px;
+            margin-top: 14px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .motivo-no-pago {
             border: 1px solid #E0A800;
             background: #FFF8E1;
@@ -913,6 +1253,19 @@
         .det-pair input.inp-green {
             background: #A9D08E;
             cursor: pointer;
+        }
+
+        /* Ocupa el lugar de la 2da columna en filas de un solo importe,
+           para que la casilla quede alineada con la 1ra columna (como en SUNAT) */
+        .det-ghost {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Casilla 301 cuando el acumulado del ejercicio supera las 300 UIT (MYPE) */
+        .det-code.alerta-300uit {
+            color: #337ab7;
+            font-weight: 700;
         }
 
         .det-total {
@@ -1547,26 +1900,31 @@
                             <div class="det-row">
                                 <div class="det-label">Exportaciones facturadas en el periodo (bienes y servicios).</div>
                                 <div class="det-pair"><span class="det-code">106</span><input type="text" id="c106" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 106: Monto neto de las exportaciones facturadas en el período (proviene de su Registro de Ventas).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row">
                                 <div class="det-label">Exportaciones embarcadas en el periodo (incluye exportación de servicios).</div>
                                 <div class="det-pair"><span class="det-code">127</span><input type="text" id="c127" class="inp-green" readonly onclick="abrirModal('m127');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m127');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row" id="row-105" style="display: none;">
                                 <div class="det-label">Ventas no gravadas (sin considerar exportaciones)</div>
                                 <div class="det-pair"><span class="det-code">105</span><input type="text" id="c105" class="inp-green" readonly onclick="abrirModal('m105');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m105');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row" id="row-109" style="display: none;">
                                 <div class="det-label">Ventas no gravadas sin efecto en ratio</div>
                                 <div class="det-pair"><span class="det-code">109</span><input type="text" id="c109" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 109: Ventas no gravadas que NO se consideran para el cálculo de la prorrata del crédito fiscal (num. 6.2, Art. 6° del Reglamento del IGV).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row">
                                 <div class="det-label">Otras ventas (inc. ii), num 6.2 Art. 6 del Reglam</div>
                                 <div class="det-pair"><span class="det-code">112</span><input type="text" id="c112" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 112: Transferencias señaladas en el inciso ii), numeral 6.2, Art. 6° del Reglamento, que no forman parte del cálculo de la prorrata.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-total">
@@ -1603,6 +1961,7 @@
                             <div class="det-row">
                                 <div class="det-label">Compras Netas Destinadas a vtas. no grav</div>
                                 <div class="det-pair"><span class="det-code">113</span><input type="text" id="c113" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 113: Compras internas gravadas destinadas exclusivamente a ventas no gravadas (no otorgan crédito fiscal).');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row">
@@ -1620,21 +1979,25 @@
                             <div class="det-row" id="row-119" style="display: none;">
                                 <div class="det-label">Compras Netas Importadas destinadas a vtas. no gravadas</div>
                                 <div class="det-pair"><span class="det-code">119</span><input type="text" id="c119" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 119: Compras importadas destinadas exclusivamente a ventas no gravadas.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row">
                                 <div class="det-label">Compras Internas no gravadas</div>
                                 <div class="det-pair"><span class="det-code">120</span><input type="text" id="c120" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 120: Compras internas no gravadas con el IGV.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row">
                                 <div class="det-label">Compras Importadas no gravadas</div>
                                 <div class="det-pair"><span class="det-code">122</span><input type="text" id="c122" class="inp-green" readonly onclick="abrirModal('m122');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m122');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-row" id="row-173" style="display: none;">
                                 <div class="det-label">Coeficiente (prorrata del crédito fiscal)</div>
                                 <div class="det-pair"><span class="det-code">173</span><input type="text" id="c173" class="inp-green" readonly onclick="abrirModal('m173');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m173');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair det-ghost" aria-hidden="true"><span class="det-code">000</span><input type="text" tabindex="-1" disabled><span class="help-circle"><i class="fas fa-question"></i></span></div>
                             </div>
 
                             <div class="det-total">
@@ -1738,14 +2101,9 @@
                                 <div class="det-pair"><span class="det-code">894</span><input type="text" id="c894" class="inp-grey" readonly><span class="help-circle" onclick="alert('Casilla 894: Tasa efectivamente aplicada para el pago a cuenta (el mayor entre el coeficiente de la casilla 380 y el porcentaje de la casilla 315, según el régimen).');"><i class="fas fa-question"></i></span></div>
                             </div>
 
-                            <div class="det-row" id="row-acum">
-                                <div class="det-label">Ingresos netos acumulados en el ejercicio (para determinar la tasa aplicable)</div>
-                                <div class="det-pair"><span class="det-code">&nbsp;</span><input type="text" id="ing-acum" inputmode="numeric"><span class="help-circle" onclick="alert('Suma de los ingresos netos mensuales declarados en el ejercicio. Si supera 300 UIT (S/ ' + formatoMiles(300 * UIT) + '), en el Régimen MYPE se aplica el coeficiente o el 1.5%, el que resulte mayor.');"><i class="fas fa-question"></i></span></div>
-                            </div>
-
                             <div class="det-row" style="border-bottom: none;">
                                 <div class="det-label">Ingresos Netos</div>
-                                <div class="det-pair"><span class="det-code">301</span><input type="text" id="c301" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 301: Ingresos netos del período (base imponible del pago a cuenta). Se propone con la información de su registro de ventas.');"><i class="fas fa-question"></i></span></div>
+                                <div class="det-pair"><span class="det-code" id="badge-301" onclick="abrirModal('m301');" style="cursor: pointer;" title="Clic para registrar los ingresos netos declarados en el ejercicio">301</span><input type="text" id="c301" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 301: Ingresos netos del período (base imponible del pago a cuenta). Se propone con la información de su registro de ventas.');"><i class="fas fa-question"></i></span></div>
                                 <div class="det-pair"><span class="det-code">312</span><input type="text" id="c312" class="inp-grey" readonly><span class="help-circle" onclick="alert('Casilla 312: Pago a cuenta del Impuesto a la Renta calculado automáticamente (casilla 894 × casilla 301).');"><i class="fas fa-question"></i></span></div>
                             </div>
 
@@ -1789,7 +2147,7 @@
                                 <div class="c-pair collapsible-row"><span class="c-code">304</span><input type="text" id="c304" readonly><span class="help-circle" onclick="alert('Casilla 304: Tributo a pagar o saldo a favor de Renta (casilla 302 - casilla 303).');"><i class="fas fa-question"></i></span></div>
 
                                 <div class="dg-label collapsible-row">Percepciones del Período</div>
-                                <div class="c-pair collapsible-row"><span class="c-code">171</span><input type="text" id="c171" class="inp-green" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 171: Monto de las percepciones de IGV declaradas en el período.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair c-pair-txt collapsible-row"><button class="btn-gen-txt" onclick="abrirGenerador('percepciones');" title="Generar el archivo de texto plano de percepciones"><i class="fas fa-file-alt"></i> TXT</button><span class="c-code">171</span><input type="text" id="c171" class="inp-green" readonly onclick="abrirModal('m171');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m171');"><i class="fas fa-question"></i></span></div>
                                 <div class="collapsible-row"></div>
 
                                 <div class="dg-label collapsible-row">Saldos de percepciones de períodos anteriores</div>
@@ -1801,7 +2159,7 @@
                                 <div class="collapsible-row"></div>
 
                                 <div class="dg-label collapsible-row">Retenciones del Período</div>
-                                <div class="c-pair collapsible-row"><span class="c-code">179</span><input type="text" id="c179" class="inp-green" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 179: Monto de las retenciones de IGV declaradas en el período.');"><i class="fas fa-question"></i></span></div>
+                                <div class="c-pair c-pair-txt collapsible-row"><button class="btn-gen-txt" onclick="abrirGenerador('retenciones');" title="Generar el archivo de texto plano de retenciones"><i class="fas fa-file-alt"></i> TXT</button><span class="c-code">179</span><input type="text" id="c179" class="inp-green" readonly onclick="abrirModal('m179');" title="Clic para detallar"><span class="help-circle" onclick="abrirModal('m179');"><i class="fas fa-question"></i></span></div>
                                 <div class="c-pair collapsible-row"><span class="c-code">326</span><input type="text" id="c326" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 326: Monto de las retenciones del Impuesto a la Renta.');"><i class="fas fa-question"></i></span></div>
 
                                 <div class="dg-label collapsible-row">Saldos de retenciones de períodos anteriores</div>
@@ -2063,20 +2421,196 @@
             <!-- Casilla 122: Compras importadas no gravadas -->
             <div class="modal-overlay" id="m122">
                 <div class="modal-box">
-                    <header>Asistente de la Casilla 122 - Compras importadas no gravadas <i class="fas fa-times" onclick="cerrarModal('m122');"></i></header>
+                    <header class="asist-head">Asistente de la casilla 122 <i class="fas fa-times" onclick="cerrarModal('m122');"></i></header>
                     <div class="modal-body">
-                        <div class="c-row">
-                            <div class="c-label">Compras importadas exoneradas</div>
-                            <div class="c-pair"><span class="c-code">238</span><input type="text" id="m122-238" inputmode="numeric"></div>
-                        </div>
-                        <div class="c-row">
-                            <div class="c-label">Compras importadas inafectas</div>
-                            <div class="c-pair"><span class="c-code">239</span><input type="text" id="m122-239" inputmode="numeric"></div>
-                        </div>
+                        <div class="asist-banner">"El monto sugerido en la casilla 238 deberá ser desagregado correctamente en las casillas de este rubro"</div>
+                        <table class="asist-table">
+                            <tr>
+                                <th></th>
+                                <th>CASILLA</th>
+                                <th>IMPORTE</th>
+                            </tr>
+                            <tr>
+                                <td class="asist-label">A - Importaciones exoneradas del IGV exclusivamente por Apéndice I</td>
+                                <td class="asist-casilla">238</td>
+                                <td class="asist-importe"><input type="text" id="m122-238" inputmode="numeric"></td>
+                            </tr>
+                            <tr>
+                                <td class="asist-label">B - Importaciones no gravadas por otras leyes especiales</td>
+                                <td class="asist-casilla">239</td>
+                                <td class="asist-importe"><input type="text" id="m122-239" inputmode="numeric"></td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="modal-actions">
-                        <button class="btn-modal-aceptar" onclick="aceptarModal122();">Aceptar</button>
-                        <button class="btn-modal-cancelar" onclick="cerrarModal('m122');">Cancelar</button>
+                    <div class="asist-actions">
+                        <button class="btn-asist-salir" onclick="cerrarModal('m122');">Salir</button>
+                        <button class="btn-asist-aceptar" onclick="aceptarModal122();">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 171: Percepciones del período -->
+            <div class="modal-overlay" id="m171">
+                <div class="modal-box">
+                    <header class="asist-head">Asistente de la casilla 171 <i class="fas fa-times" onclick="cerrarModal('m171');"></i></header>
+                    <div class="modal-body">
+                        <table class="asist-table">
+                            <tr>
+                                <th></th>
+                                <th>CASILLA</th>
+                                <th>IMPORTE</th>
+                            </tr>
+                            <tr>
+                                <td class="asist-label">Percepciones del periodo</td>
+                                <td class="asist-casilla">684</td>
+                                <td class="asist-importe"><input type="text" id="m171-684" readonly tabindex="-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="asist-label">Percepciones del periodo y percepciones no declaradas en periodos anteriores</td>
+                                <td class="asist-casilla">685</td>
+                                <td class="asist-importe"><input type="text" id="m171-685" class="asist-green" readonly onclick="abrirImportacion('percepciones');" title="Clic para importar el archivo plano"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="asist-actions">
+                        <button class="btn-asist-salir" onclick="cerrarModal('m171');">Salir</button>
+                        <button class="btn-asist-aceptar" onclick="aceptarModal171();">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 179: Retenciones del período -->
+            <div class="modal-overlay" id="m179">
+                <div class="modal-box">
+                    <header class="asist-head">Asistente de la casilla 179 <i class="fas fa-times" onclick="cerrarModal('m179');"></i></header>
+                    <div class="modal-body">
+                        <table class="asist-table">
+                            <tr>
+                                <th></th>
+                                <th>CASILLA</th>
+                                <th>IMPORTE</th>
+                            </tr>
+                            <tr>
+                                <td class="asist-label">Retenciones del periodo</td>
+                                <td class="asist-casilla">686</td>
+                                <td class="asist-importe"><input type="text" id="m179-686" readonly tabindex="-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="asist-label">Retenciones del periodo y retenciones no declaradas en periodos anteriores</td>
+                                <td class="asist-casilla">687</td>
+                                <td class="asist-importe"><input type="text" id="m179-687" class="asist-green" readonly onclick="abrirImportacion('retenciones');" title="Clic para importar el archivo plano"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="asist-actions">
+                        <button class="btn-asist-salir" onclick="cerrarModal('m179');">Salir</button>
+                        <button class="btn-asist-aceptar" onclick="aceptarModal179();">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generador del archivo de texto plano (percepciones / retenciones) -->
+            <div class="modal-overlay" id="mgen">
+                <div class="modal-box" style="max-width: 1400px;">
+                    <header class="asist-head" id="mgen-titulo">Generar archivo TXT <i class="fas fa-times" onclick="cerrarModal('mgen');"></i></header>
+                    <div class="modal-body">
+                        <div class="imp-banner">
+                            <strong>Sr. Contribuyente,</strong> <span>registre aquí los comprobantes y presione <strong>Generar archivo TXT</strong>. Se abrirá el diálogo <strong>Guardar como</strong> para que elija la carpeta donde guardarlo; el nombre ya viene armado como lo exige SUNAT. Luego podrá importarlo desde el asistente de la casilla.</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+
+                        <fieldset class="imp-fieldset" id="mgen-tipo-archivo">
+                            <legend>Tipo de archivo</legend>
+                            <label class="imp-radio-line">
+                                <span>Comprobante de percepción <em>(archivo …P.txt)</em></span>
+                                <input type="radio" name="mgen-tipo" value="P" checked onchange="cambiarEsquemaGenerador();">
+                            </label>
+                            <label class="imp-radio-line">
+                                <span>Comprobante de pago es el comprobante de percepción <em>(archivo …PI.txt)</em></span>
+                                <input type="radio" name="mgen-tipo" value="PI" onchange="cambiarEsquemaGenerador();">
+                            </label>
+                        </fieldset>
+
+                        <fieldset class="imp-fieldset">
+                            <legend>Datos del archivo</legend>
+                            <div class="imp-file-row">
+                                <span>RUC del declarante (11 dígitos):</span>
+                                <input type="text" id="mgen-ruc" maxlength="11" placeholder="20123456789" oninput="this.value = this.value.replace(/\D/g, ''); actualizarNombreArchivo();">
+                                <span style="flex: 0;">Nombre del archivo:</span>
+                                <input type="text" id="mgen-nombre" readonly style="width: 230px;">
+                            </div>
+                        </fieldset>
+
+                        <div class="gen-tabla-wrap">
+                            <table class="gen-tabla" id="mgen-tabla">
+                                <thead><tr id="mgen-cabecera"></tr></thead>
+                                <tbody id="mgen-filas"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="gen-acciones-tabla">
+                            <button class="btn-examinar" onclick="agregarFilaGenerador();"><i class="fas fa-plus"></i> Agregar fila</button>
+                            <span class="gen-total">Total del importe: S/ <strong id="mgen-total">0.00</strong></span>
+                        </div>
+
+                        <div id="mgen-errores" class="gen-errores" style="display: none;"></div>
+                    </div>
+                    <div class="asist-actions">
+                        <button class="btn-asist-salir" onclick="cerrarModal('mgen');">Salir</button>
+                        <button class="btn-asist-aceptar" onclick="generarArchivoTXT();"><i class="fas fa-download"></i> Generar archivo TXT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Importación de archivo plano (percepciones / retenciones) -->
+            <div class="modal-overlay" id="mimp">
+                <div class="modal-box">
+                    <header class="asist-head" id="mimp-titulo">Asistente Importación <i class="fas fa-times" onclick="cerrarModal('mimp');"></i></header>
+                    <div class="modal-body">
+                        <div class="imp-banner">
+                            <strong>Sr. Contribuyente,</strong> <span id="mimp-banner-texto"></span>
+                            <i class="fas fa-check"></i>
+                        </div>
+
+                        <fieldset class="imp-fieldset" id="mimp-tipo-archivo">
+                            <legend>Tipo de archivo</legend>
+                            <label class="imp-radio-line">
+                                <span>Comprobante de percepción</span>
+                                <input type="radio" name="mimp-tipo" value="comprobante-percepcion" checked>
+                            </label>
+                            <label class="imp-radio-line">
+                                <span>Comprobante de pago es el comprobante de percepción</span>
+                                <input type="radio" name="mimp-tipo" value="comprobante-pago">
+                            </label>
+                        </fieldset>
+
+                        <fieldset class="imp-fieldset">
+                            <legend>Archivo</legend>
+                            <div class="imp-file-row">
+                                <span>Ruta del archivo a importar:</span>
+                                <input type="text" id="mimp-ruta" placeholder="Ingrese la ruta del archivo" readonly>
+                                <button class="btn-examinar" onclick="document.getElementById('mimp-file').click();">Examinar</button>
+                                <button class="btn-descargar" title="Cargar el archivo seleccionado" onclick="procesarArchivoImportado();"><i class="fas fa-download"></i></button>
+                                <input type="file" id="mimp-file" accept=".txt,.csv" style="display: none;" onchange="archivoImportacionElegido(this);">
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="imp-fieldset">
+                            <legend>Resultado de la importación</legend>
+                            <div class="imp-resultado">
+                                <span>Registros cargados: <strong id="mimp-cargados">0</strong></span>
+                                <span>Registros rechazados: <strong id="mimp-rechazados">0</strong></span>
+                            </div>
+                            <div class="imp-rechazados-head">Registros rechazados</div>
+                            <table class="imp-tabla">
+                                <thead><tr><th>Fila</th><th>Detalle</th></tr></thead>
+                                <tbody id="mimp-detalle"></tbody>
+                            </table>
+                        </fieldset>
+                    </div>
+                    <div class="asist-actions">
+                        <button class="btn-asist-salir" onclick="cerrarModal('mimp');">Cancelar</button>
+                        <button class="btn-asist-aceptar" id="mimp-guardar" onclick="guardarImportacion();">Guardar</button>
                     </div>
                 </div>
             </div>
@@ -2102,25 +2636,45 @@
                 </div>
             </div>
 
-            <!-- Casilla 380: Coeficiente Renta -->
-            <div class="modal-overlay" id="m380">
-                <div class="modal-box">
-                    <header>Asistente de la Casilla 380 - Coeficiente Renta <i class="fas fa-times" onclick="cerrarModal('m380');"></i></header>
+            <!-- Casilla 301: Ingresos netos declarados en el ejercicio -->
+            <div class="modal-overlay" id="m301">
+                <div class="modal-box" style="max-width: 480px;">
+                    <header>Ingresos Netos Declarados <i class="fas fa-times" onclick="cerrarModal('m301');"></i></header>
                     <div class="modal-body">
-                        <p style="margin-bottom: 12px;">Datos del ejercicio anterior (Declaración Jurada Anual):</p>
-                        <div class="c-row">
-                            <div class="c-label">Impuesto Determinado</div>
-                            <div class="c-pair"><span class="c-code">891</span><input type="text" id="m380-891" inputmode="numeric"></div>
-                        </div>
-                        <div class="c-row">
-                            <div class="c-label">Ingreso Neto</div>
-                            <div class="c-pair"><span class="c-code">892</span><input type="text" id="m380-892" inputmode="numeric"></div>
-                        </div>
-                        <p style="margin-top: 8px; text-align: right;"><strong>Coeficiente (891 ÷ 892): <span id="m380-coef">0.0000</span></strong></p>
+                        <table id="m301-tabla">
+                            <thead>
+                                <tr><th>Periodo</th><th>Base Imponible</th></tr>
+                            </thead>
+                            <tbody><!-- filas generadas por JS -->
+                            </tbody>
+                        </table>
+                        <p id="m301-vacio" style="margin-top: 12px; display: none;">El período que declara es el primero del ejercicio: no hay períodos anteriores que registrar.</p>
+                        <p style="margin-top: 12px; text-align: right;"><strong>Acumulado del ejercicio: S/ <span id="m301-total">0</span></strong></p>
                     </div>
                     <div class="modal-actions">
+                        <button class="btn-modal-aceptar" onclick="aceptarModal301();">Aceptar</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('m301');">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Casilla 380: Coeficiente Renta -->
+            <div class="modal-overlay" id="m380">
+                <div class="modal-box m380-box">
+                    <header class="asist-head">Casilla 380: Coeficiente de Renta <i class="fas fa-times" onclick="cerrarModal('m380');"></i></header>
+                    <div class="modal-body">
+                        <div class="c-row">
+                            <div class="c-label">Impuesto Calculado:</div>
+                            <div class="c-pair"><span class="c-code">891</span><input type="text" id="m380-891" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 891: Impuesto calculado del ejercicio anterior (Declaración Jurada Anual).');"><i class="fas fa-question"></i></span></div>
+                        </div>
+                        <div class="c-row">
+                            <div class="c-label">Ingresos Netos:</div>
+                            <div class="c-pair"><span class="c-code">892</span><input type="text" id="m380-892" inputmode="numeric"><span class="help-circle" onclick="alert('Casilla 892: Ingresos netos del ejercicio anterior. El coeficiente de la casilla 380 es 891 ÷ 892, redondeado a 4 decimales.');"><i class="fas fa-question"></i></span></div>
+                        </div>
+                    </div>
+                    <div class="modal-actions" style="justify-content: flex-end;">
+                        <button class="btn-modal-salir" onclick="cerrarModal('m380');">Salir</button>
                         <button class="btn-modal-aceptar" onclick="aceptarModal380();">Aceptar</button>
-                        <button class="btn-modal-cancelar" onclick="cerrarModal('m380');">Cancelar</button>
                     </div>
                 </div>
             </div>
@@ -2412,7 +2966,7 @@
         function soloNumeros(id) {
             const input = document.getElementById(id);
             input.addEventListener('input', function () {
-                this.value = this.value.replace(/[^\d]/g, '');
+                formatearMilesInput(this);
             });
         }
         ['rus-ingresos', 'rus-compras', 'rus-interes'].forEach(soloNumeros);
@@ -2430,9 +2984,18 @@
         // =====================================================================
         const IGV_TASA = 0.18;        // Tasa general IGV+IPM
         const IGV_TASA_ESP = 0.10;    // Ley N° 31556 (restaurantes y hoteles)
-        const UIT = 5350;             // UIT 2025 (la macro usaba 5150, UIT 2024)
+        // La UIT aplicable depende del ejercicio al que corresponde el período declarado
+        const UIT_POR_ANIO = { 2024: 5150, 2025: 5350, 2026: 5500 };
 
-        let infoGeneralOk = false;    // bloquea las pestañas 2 y 3 hasta validar
+        function uitVigente() {
+            const periodo = document.getElementById('periodo-input').value.trim();
+            const anio = periodoValido(periodo) ? Number(periodo.split('-')[1]) : new Date().getFullYear();
+            if (UIT_POR_ANIO[anio]) return UIT_POR_ANIO[anio];
+            return anio < 2024 ? UIT_POR_ANIO[2024] : UIT_POR_ANIO[2026];
+        }
+
+        let infoGeneralOk = false;    // refleja si la Información General ya pasó la validación
+        let c301Editada = false;      // true cuando el usuario escribió la casilla 301 a mano
 
         function val(id) {
             const el = document.getElementById(id);
@@ -2448,6 +3011,27 @@
             document.getElementById(id).value = formatoMiles(n);
         }
 
+        // Formatea el contenido de un input con separador de miles mientras se
+        // escribe, conservando la posición del cursor (se mide desde el final,
+        // porque al insertar comas cambia la longitud del texto a la izquierda).
+        function formatearMilesInput(el) {
+            const desdeFin = el.value.length - (el.selectionStart ?? el.value.length);
+            const digitos = el.value.replace(/[^\d]/g, '');
+            el.value = digitos ? Number(digitos).toLocaleString('en-US') : '';
+            if (el.type === 'text') {
+                const pos = Math.max(0, el.value.length - desdeFin);
+                try { el.setSelectionRange(pos, pos); } catch (e) { /* input sin selección */ }
+            }
+        }
+
+        // Todo input numérico del formulario se formatea con coma de miles.
+        document.addEventListener('input', function (e) {
+            const el = e.target;
+            if (el.tagName === 'INPUT' && el.getAttribute('inputmode') === 'numeric') {
+                formatearMilesInput(el);
+            }
+        });
+
         // Sin movimiento: limpia las casillas del detalle (declaración en cero)
         function toggleSinMovimiento() {
             const sinMov = document.querySelector('input[name="sin-movimiento"]:checked');
@@ -2458,10 +3042,9 @@
 
         // --- Navegación entre pestañas del 621 ---
         function cambiarTab621(tab) {
-            if (tab !== 'info' && !infoGeneralOk) {
-                alert('Complete primero la Información General.');
-                return;
-            }
+            // Se valida el estado real del formulario (no una bandera), para que
+            // entrar por la pestaña funcione igual que entrar por "Siguiente".
+            if (tab !== 'info' && !validarInfoGeneral()) return;
             ['info', 'detalle', 'deuda'].forEach(t => {
                 document.getElementById('tab621-' + t).style.display = (t === tab) ? 'block' : 'none';
                 document.getElementById('tab621-btn-' + t).classList.toggle('active', t === tab);
@@ -2544,9 +3127,10 @@
             recalcularDetalle();
         }
 
-        function siguiente621() {
+        // Devuelve true si la Información General está completa; si no, avisa qué falta.
+        function validarInfoGeneral() {
             const periodo = document.getElementById('periodo-input').value.trim();
-            if (!periodoValido(periodo)) { alert('Seleccione el período tributario.'); return; }
+            if (!periodoValido(periodo)) { alert('Seleccione el período tributario.'); infoGeneralOk = false; return false; }
 
             const declaracion = document.getElementById('tipo-declaracion').value;
             const renta = document.querySelector('input[name="renta-full"]:checked');
@@ -2554,12 +3138,16 @@
             const tieneIGV = document.querySelector('input[name="igv-full"]:checked');
             const tieneIVAP = document.querySelector('input[name="ivap-full"]:checked');
 
-            if (!declaracion) { alert('Seleccione el tipo de declaración.'); return; }
-            if (!tieneIGV && !tieneIVAP && !renta) { alert('Sr. Contribuyente, seleccione los tributos a declarar.'); return; }
-            if (!renta) { alert('Seleccione el Régimen de Renta.'); return; }
-            if (!ventas) { alert('Indique si ha realizado ventas no gravadas con el IGV en los últimos 12 meses.'); return; }
+            if (!declaracion) { alert('Seleccione el tipo de declaración.'); infoGeneralOk = false; return false; }
+            if (!tieneIGV && !tieneIVAP && !renta) { alert('Sr. Contribuyente, seleccione los tributos a declarar.'); infoGeneralOk = false; return false; }
+            if (!renta) { alert('Seleccione el Régimen de Renta.'); infoGeneralOk = false; return false; }
+            if (!ventas) { alert('Indique si ha realizado ventas no gravadas con el IGV en los últimos 12 meses.'); infoGeneralOk = false; return false; }
 
             infoGeneralOk = true;
+            return true;
+        }
+
+        function siguiente621() {
             cambiarTab621('detalle');
         }
 
@@ -2608,19 +3196,38 @@
         function recalcularRenta() {
             const regimen = (document.querySelector('input[name="renta-full"]:checked') || {}).value;
             const coef380 = coeficiente380();
-            const acumulado = val('ing-acum');
+
+            // La 301 se propone con las ventas netas gravadas (casilla 100) mientras el
+            // usuario no la haya escrito; una vez editada, manda el valor manual.
+            if (!c301Editada) {
+                const ventas100 = val('c100');
+                document.getElementById('c301').value = ventas100 ? formatoMiles(ventas100) : '';
+            }
+
+            const acumulado = ingresosAcumulados();
             const ingresos = val('c301');
             let pct, impuesto;
 
             document.getElementById('c380').value = coef380.toFixed(4);
-            document.getElementById('row-acum').style.display = (regimen === 'mype') ? 'flex' : 'none';
+
+            // En MYPE, superar las 300 UIT del ejercicio cambia la tasa: se resalta la
+            // casilla 301 (azul/negrita) porque pasa a aplicar el coeficiente.
+            const supera300UIT = (regimen === 'mype') && (acumulado > 300 * uitVigente());
+            document.getElementById('badge-301').classList.toggle('alerta-300uit', supera300UIT);
+
+            // La 380 va en verde (asistente activo) cuando el coeficiente sí se usa:
+            // Régimen General y los que calculan igual MAX(coef, 1.5%); en MYPE solo
+            // al superar las 300 UIT. En Especial y Agrario la tasa es fija, va en gris.
+            const tasaFija = ['especial', 'agrario-31110', 'agrario'].includes(regimen);
+            const coefAplicable = !tasaFija && (regimen !== 'mype' || supera300UIT);
+            document.getElementById('c380').className = coefAplicable ? 'inp-green' : 'inp-grey';
 
             let tasaAplicada; // casilla 894: tasa efectivamente usada para la casilla 312
             if (regimen === 'especial') {
                 pct = 1.5;
                 tasaAplicada = 0.015;
             } else if (regimen === 'mype') {
-                if (acumulado > 300 * UIT) {
+                if (supera300UIT) {
                     pct = 1.5;
                     tasaAplicada = Math.max(coef380, 0.015);
                 } else {
@@ -2774,17 +3381,23 @@
 
         // --- Recálculo automático al escribir ---
         const inputsDetalle = ['c100', 'c102', 'c154', 'c106', 'c109', 'c112', 'c107', 'c156', 'c110',
-            'c113', 'c114', 'c116', 'c119', 'c120', 'c301', 'ing-acum'];
-        const inputsDeuda = ['c145', 'c171', 'c168', 'c179', 'c176', 'c187', 'c189',
+            'c113', 'c114', 'c116', 'c119', 'c120', 'c301'];
+        // c171 y c179 no van aquí: son de solo lectura y se llenan desde sus asistentes
+        const inputsDeuda = ['c145', 'c168', 'c176', 'c187', 'c189',
             'c303', 'c326', 'c327', 'c305', 'c328', 'c319', 'c307'];
 
         inputsDetalle.forEach(id => {
             const el = document.getElementById(id);
-            el.addEventListener('input', () => { el.value = el.value.replace(/[^\d]/g, ''); recalcularDetalle(); });
+            el.addEventListener('input', () => {
+                // Al tocar la 301 deja de proponerse desde la 100; si se vacía, vuelve a proponerse.
+                if (id === 'c301') c301Editada = el.value.trim() !== '';
+                formatearMilesInput(el);
+                recalcularDetalle();
+            });
         });
         inputsDeuda.forEach(id => {
             const el = document.getElementById(id);
-            el.addEventListener('input', () => { el.value = el.value.replace(/[^\d]/g, ''); recalcularDeuda(); });
+            el.addEventListener('input', () => { formatearMilesInput(el); recalcularDeuda(); });
         });
 
         // =====================================================================
@@ -2818,6 +3431,7 @@
                 return;
             }
             if (id === 'm173') poblarTabla173();
+            if (id === 'm301') poblarTabla301();
             document.getElementById(id).classList.add('open');
         }
 
@@ -2843,8 +3457,433 @@
             recalcularDetalle();
         }
 
+        function aceptarModal171() {
+            setVal('c171', val('m171-685'));
+            cerrarModal('m171');
+            recalcularDeuda();
+        }
+
+        function aceptarModal179() {
+            setVal('c179', val('m179-687'));
+            cerrarModal('m179');
+            recalcularDeuda();
+        }
+
+        // ===== Archivo de texto plano de percepciones y retenciones =====
+        // Estructura, longitudes, códigos y nombre de archivo según la ayuda del
+        // formulario FV 621: campos separados por "|", importes en enteros (sin
+        // decimales) y nombre 0621 + RUC + período (AAAAMM) + sufijo + .txt
+
+        const TIPOS_CP = {
+            // Percepciones (P y PI): incluye 55 - DUA
+            percepcion: [
+                { v: '01', t: '01 - Factura' },
+                { v: '07', t: '07 - Nota de Crédito' },
+                { v: '08', t: '08 - Nota de Débito' },
+                { v: '12', t: '12 - Ticket de Máquina Registradora' },
+                { v: '55', t: '55 - Declaración Única de Aduanas (DUA)' },
+                { v: '99', t: '99 - Otros' }
+            ],
+            // Retenciones (R): la ayuda no contempla la DUA
+            retencion: [
+                { v: '01', t: '01 - Factura' },
+                { v: '07', t: '07 - Nota de Crédito' },
+                { v: '08', t: '08 - Nota de Débito' },
+                { v: '12', t: '12 - Ticket de Máquina Registradora' },
+                { v: '99', t: '99 - Otros' }
+            ]
+        };
+
+        // tipo: 'ruc' | 'texto' | 'tipoCP' | 'fecha' | 'importe'
+        // long: longitud máxima | numCP: el largo depende del tipo de comprobante (99 → 15)
+        // err: mensaje que se muestra cuando el dato no es válido (estilo SUNAT)
+        const ESQUEMAS_TXT = {
+            P: {
+                sufijo: 'P',
+                columnaImporte: 5,
+                campos: [
+                    { n: 'RUC del agente de percepción', obs: '11 posiciones', tipo: 'ruc', long: 11, err: 'El RUC del agente de percepción no es válido.' },
+                    { n: 'Serie del comprobante de percepción', obs: 'hasta 04 posiciones', tipo: 'texto', long: 4, err: 'La serie del comprobante de percepción no es válida.' },
+                    { n: 'Número del comprobante de percepción', obs: 'hasta 08 posiciones', tipo: 'texto', long: 8, err: 'El número del comprobante de percepción no es válido.' },
+                    { n: 'Fecha de emisión del comp. de percepción', obs: 'dd/mm/aaaa', tipo: 'fecha', err: 'La fecha de emisión del comprobante de percepción no es válida.' },
+                    { n: 'Monto del comprobante de percepción', obs: 'entero, sin decimales', tipo: 'importe', err: 'El monto del comprobante de percepción no es válido.' },
+                    { n: 'Tipo del comprobante de pago', obs: '2 posiciones', tipo: 'tipoCP', opciones: 'percepcion', err: 'El tipo del comprobante de pago no es válido.' },
+                    { n: 'Serie del comprobante de pago', obs: 'hasta 04 posiciones', tipo: 'texto', long: 4, err: 'La serie del comprobante de pago no es válida.' },
+                    { n: 'Número del comprobante de pago', obs: 'hasta 08; con tipo 99 hasta 15', tipo: 'texto', long: 8, numCP: true, err: 'El número del comprobante de pago no es válido.' },
+                    { n: 'Fecha de emisión del comprobante de pago', obs: 'dd/mm/aaaa', tipo: 'fecha', err: 'La fecha de emisión del comprobante de pago no es válida.' },
+                    { n: 'Valor total del comprobante de pago', obs: 'entero, sin decimales', tipo: 'importe', err: 'El valor total del comprobante de pago no es válido.' }
+                ]
+            },
+            PI: {
+                sufijo: 'PI',
+                columnaImporte: 6,
+                campos: [
+                    { n: 'RUC del agente de percepción', obs: '11 posiciones', tipo: 'ruc', long: 11, err: 'El RUC del agente de percepción no es válido.' },
+                    { n: 'Tipo del comprobante de pago', obs: '2 posiciones', tipo: 'tipoCP', opciones: 'percepcion', err: 'El tipo del comprobante de pago no es válido.' },
+                    { n: 'Serie del comprobante de pago', obs: 'hasta 04 posiciones', tipo: 'texto', long: 4, err: 'La serie del comprobante de pago no es válida.' },
+                    { n: 'Número del comprobante de pago', obs: 'hasta 08; con tipo 99 hasta 15', tipo: 'texto', long: 8, numCP: true, err: 'El número del comprobante de pago no es válido.' },
+                    { n: 'Fecha de emisión del comprobante de pago', obs: 'dd/mm/aaaa', tipo: 'fecha', err: 'La fecha de emisión del comprobante de pago no es válida.' },
+                    { n: 'Monto del comprobante de pago', obs: 'entero, sin decimales', tipo: 'importe', err: 'El monto del comprobante de pago no es válido.' }
+                ]
+            },
+            R: {
+                sufijo: 'R',
+                columnaImporte: 5,
+                campos: [
+                    { n: 'RUC del agente de retención', obs: '11 posiciones', tipo: 'ruc', long: 11, err: 'El RUC del agente de retención no es válido.' },
+                    { n: 'Serie del comprobante de retención', obs: 'hasta 04 posiciones', tipo: 'texto', long: 4, err: 'La serie del comprobante de retención no es válida.' },
+                    { n: 'Número del comprobante de retención', obs: 'hasta 08 posiciones', tipo: 'texto', long: 8, err: 'El número del comprobante de retención no es válido.' },
+                    { n: 'Fecha de emisión del comp. de retención', obs: 'dd/mm/aaaa', tipo: 'fecha', err: 'La fecha de emisión del comprobante de retención no es válida.' },
+                    { n: 'Monto del comprobante de retención', obs: 'entero, sin decimales', tipo: 'importe', err: 'El monto del comprobante de retención no es válido.' },
+                    { n: 'Tipo del comprobante de pago', obs: '2 posiciones', tipo: 'tipoCP', opciones: 'retencion', err: 'El tipo del comprobante de pago no es válido.' },
+                    { n: 'Serie del comprobante de pago', obs: 'hasta 04 posiciones', tipo: 'texto', long: 4, err: 'La serie del comprobante de pago no es válida.' },
+                    { n: 'Número del comprobante de pago', obs: 'hasta 08; con tipo 99 hasta 15', tipo: 'texto', long: 8, numCP: true, err: 'El número del comprobante de pago no es válido.' },
+                    { n: 'Fecha de emisión del comprobante de pago', obs: 'dd/mm/aaaa', tipo: 'fecha', err: 'La fecha de emisión del comprobante de pago no es válida.' },
+                    { n: 'Valor total del comprobante de pago', obs: 'entero, sin decimales', tipo: 'importe', err: 'El valor total del comprobante de pago no es válido.' }
+                ]
+            }
+        };
+
+        // Valida un campo de una fila. Devuelve el mensaje de error o null si está bien.
+        // La fila completa se necesita para el número de comprobante de pago, cuyo
+        // largo máximo sube a 15 cuando el tipo de comprobante es 99 (Otros).
+        function validarCampoTXT(campo, valor, fila, esquema) {
+            const v = String(valor || '').trim();
+            if (v === '') return campo.err;
+
+            switch (campo.tipo) {
+                case 'ruc':
+                    return /^\d{11}$/.test(v) ? null : campo.err;
+                case 'fecha':
+                    return fechaValida(v) ? null : campo.err;
+                case 'importe':
+                    // "Importe en enteros (sin decimales)", sin comas
+                    return /^\d{1,12}$/.test(v) ? null : campo.err;
+                case 'tipoCP':
+                    return TIPOS_CP[campo.opciones].some(o => o.v === v) ? null : campo.err;
+                default: {
+                    let max = campo.long;
+                    if (campo.numCP) {
+                        const iTipo = esquema.campos.findIndex(c => c.tipo === 'tipoCP');
+                        if (iTipo >= 0 && String(fila[iTipo]).trim() === '99') max = 15;
+                    }
+                    return v.length <= max ? null : campo.err;
+                }
+            }
+        }
+
+        let generadorActual = 'P';   // esquema en pantalla
+
+        // RUC de la empresa con la que se trabaja (queda en la sesión al iniciar sesión)
+        function rucDeclarante() {
+            try {
+                const sesion = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+                return String(sesion.ruc || '').replace(/\D/g, '');
+            } catch (e) { return ''; }
+        }
+
+        function esquemaGenerador() { return ESQUEMAS_TXT[generadorActual]; }
+
+        function abrirGenerador(destino) {
+            const esRetencion = destino === 'retenciones';
+            generadorActual = esRetencion ? 'R' : 'P';
+
+            document.getElementById('mgen-titulo').firstChild.textContent =
+                (esRetencion ? 'Generar archivo TXT - Retenciones (casilla 179)' : 'Generar archivo TXT - Percepciones (casilla 171)') + ' ';
+            document.getElementById('mgen-tipo-archivo').style.display = esRetencion ? 'none' : '';
+            if (!esRetencion) document.querySelector('input[name="mgen-tipo"][value="P"]').checked = true;
+
+            document.getElementById('mgen-errores').style.display = 'none';
+            document.getElementById('mgen-ruc').value = rucDeclarante();
+            pintarTablaGenerador();
+            document.getElementById('mgen').classList.add('open');
+        }
+
+        function cambiarEsquemaGenerador() {
+            generadorActual = document.querySelector('input[name="mgen-tipo"]:checked').value;
+            pintarTablaGenerador();
+        }
+
+        function pintarTablaGenerador() {
+            const esq = esquemaGenerador();
+            const cabecera = document.getElementById('mgen-cabecera');
+            // La columna de eliminar va primero para que quede siempre visible,
+            // aunque la tabla tenga scroll horizontal.
+            cabecera.innerHTML = '<th class="col-quitar"></th>' + esq.campos
+                .map((c, i) => '<th' + (c.tipo === 'tipoCP' ? ' class="col-tipo"' : '') + '>' +
+                    (i + 1) + '. ' + c.n + '<small>' + c.obs + '</small></th>')
+                .join('');
+
+            document.getElementById('mgen-filas').innerHTML = '';
+            agregarFilaGenerador();
+            actualizarNombreArchivo();
+            actualizarTotalGenerador();
+        }
+
+        function agregarFilaGenerador() {
+            const esq = esquemaGenerador();
+            const celdas = esq.campos.map(c => {
+                if (c.tipo === 'tipoCP') {
+                    const ops = TIPOS_CP[c.opciones].map(o => '<option value="' + o.v + '">' + o.t + '</option>').join('');
+                    return '<td class="col-tipo"><select class="gen-campo">' + ops + '</select></td>';
+                }
+                // Fecha: mismo control que la casilla 336, se puede tipear o usar el calendario
+                if (c.tipo === 'fecha') {
+                    return '<td class="col-fecha"><input type="date" class="gen-campo"></td>';
+                }
+                const ph = c.tipo === 'importe' ? '0' : '';
+                // El número del comprobante de pago admite 15 posiciones con el tipo 99
+                const largo = c.numCP ? 15 : c.long;
+                const max = largo ? ' maxlength="' + largo + '"' : '';
+                return '<td><input type="text" class="gen-campo"' + max + ' placeholder="' + ph + '" oninput="actualizarTotalGenerador();"></td>';
+            }).join('');
+
+            document.getElementById('mgen-filas').insertAdjacentHTML('beforeend',
+                '<tr><td class="col-quitar"><button class="btn-quitar-fila" title="Eliminar fila" ' +
+                'onclick="eliminarFilaGenerador(this);"><i class="fas fa-trash-alt"></i></button></td>' + celdas + '</tr>');
+        }
+
+        // Siempre queda al menos una fila: si se elimina la última, se deja vacía.
+        function eliminarFilaGenerador(boton) {
+            const filas = document.querySelectorAll('#mgen-filas tr');
+            if (filas.length > 1) {
+                boton.closest('tr').remove();
+            } else {
+                boton.closest('tr').querySelectorAll('input').forEach(i => i.value = '');
+            }
+            actualizarTotalGenerador();
+        }
+
+        // El <input type="date"> entrega aaaa-mm-dd; el archivo plano exige dd/mm/aaaa
+        function fechaADdMmAaaa(valor) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(valor);
+            return m ? m[3] + '/' + m[2] + '/' + m[1] : valor;
+        }
+
+        // Lee la tabla y devuelve solo las filas con algún dato. Una fila se considera
+        // vacía cuando no tiene ningún campo escrito: los <select> de tipo de comprobante
+        // siempre traen un valor por defecto y no cuentan como dato.
+        function filasGenerador() {
+            const campos = esquemaGenerador().campos;
+            return [...document.querySelectorAll('#mgen-filas tr')]
+                .map(tr => ({
+                    valores: [...tr.querySelectorAll('.gen-campo')].map((el, j) => {
+                        const v = el.value.trim();
+                        return campos[j] && campos[j].tipo === 'fecha' ? fechaADdMmAaaa(v) : v;
+                    }),
+                    escritos: [...tr.querySelectorAll('input.gen-campo')].map(el => el.value.trim())
+                }))
+                .filter(f => f.escritos.some(v => v !== ''))
+                .map(f => f.valores);
+        }
+
+        function actualizarTotalGenerador() {
+            const esq = esquemaGenerador();
+            const idx = esq.columnaImporte - 1;
+            const total = filasGenerador().reduce((a, f) => a + (parseFloat(f[idx]) || 0), 0);
+            document.getElementById('mgen-total').textContent = formatoMiles(total);
+        }
+
+        // Nombre exigido por SUNAT: 0621 + RUC + AAAAMM del período + sufijo + .TXT
+        function actualizarNombreArchivo() {
+            const ruc = document.getElementById('mgen-ruc').value.replace(/\D/g, '');
+            const periodo = document.getElementById('periodo-input').value.trim();
+            const [mm, yyyy] = periodoValido(periodo) ? periodo.split('-') : ['', ''];
+            const nombre = '0621' + (ruc || '') + (yyyy && mm ? yyyy + mm : '') + esquemaGenerador().sufijo + '.txt';
+            document.getElementById('mgen-nombre').value = nombre;
+            return nombre;
+        }
+
+        function fechaValida(v) {
+            const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+            if (!m) return false;
+            const d = new Date(+m[3], +m[2] - 1, +m[1]);
+            return d.getDate() === +m[1] && d.getMonth() === +m[2] - 1 && d.getFullYear() === +m[3];
+        }
+
+        function validarFilasGenerador(filas) {
+            const esq = esquemaGenerador();
+            const errores = [];
+            filas.forEach((fila, i) => {
+                esq.campos.forEach((campo, j) => {
+                    const err = validarCampoTXT(campo, fila[j], fila, esq);
+                    if (err) errores.push('Fila ' + (i + 1) + ': ' + err);
+                });
+            });
+            return errores;
+        }
+
+        async function generarArchivoTXT() {
+            const cajaErr = document.getElementById('mgen-errores');
+            const ruc = document.getElementById('mgen-ruc').value.replace(/\D/g, '');
+            const filas = filasGenerador();
+
+            if (!/^\d{11}$/.test(ruc)) { alert('Ingrese el RUC del declarante (11 dígitos) para nombrar el archivo.'); return; }
+            if (!periodoValido(document.getElementById('periodo-input').value.trim())) { alert('Seleccione el período tributario.'); return; }
+            if (!filas.length) { alert('Registre al menos un comprobante.'); return; }
+
+            const errores = validarFilasGenerador(filas);
+            if (errores.length) {
+                cajaErr.innerHTML = '<strong>Corrija antes de generar el archivo:</strong><br>' + errores.join('<br>');
+                cajaErr.style.display = '';
+                return;
+            }
+            cajaErr.style.display = 'none';
+
+            // Cada campo va seguido de "|", igual que creartxt del VBA
+            const contenido = filas.map(f => f.join('|') + '|').join('\r\n') + '\r\n';
+            const nombre = actualizarNombreArchivo();
+
+            const casilla = esquemaGenerador().sufijo === 'R' ? '179' : '171';
+            const cierre = '\n\nAhora puede importarlo desde el asistente de la casilla ' + casilla + '.';
+
+            // Si el navegador lo permite, se abre el diálogo "Guardar como" para que el
+            // usuario elija la carpeta; si no, se descarga a la carpeta de Descargas.
+            if (typeof window.showSaveFilePicker === 'function') {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: nombre,
+                        types: [{ description: 'Archivo de texto plano', accept: { 'text/plain': ['.txt'] } }]
+                    });
+                    const salida = await handle.createWritable();
+                    await salida.write(contenido);
+                    await salida.close();
+                    alert('Se guardó el archivo ' + handle.name + ' con ' + filas.length + ' registro(s) ' +
+                          'en la ubicación que eligió.' + cierre);
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return;   // el usuario canceló el diálogo
+                    // Cualquier otro problema: se continúa con la descarga normal
+                }
+            }
+
+            const enlace = document.createElement('a');
+            enlace.href = URL.createObjectURL(new Blob([contenido], { type: 'text/plain' }));
+            enlace.download = nombre;
+            enlace.click();
+            URL.revokeObjectURL(enlace.href);
+
+            alert('Se generó el archivo ' + nombre + ' con ' + filas.length + ' registro(s).\n\n' +
+                  'Se guardó en la carpeta de Descargas de su navegador ' +
+                  '(si el navegador pregunta dónde guardar, elija la carpeta que prefiera).' + cierre);
+        }
+
+        // ===== Asistente de importación de archivo plano (casillas 685 y 687) =====
+        // Réplica del asistente real de SUNAT: se elige un archivo plano, se procesa y
+        // el total de los registros válidos se lleva al campo verde del asistente.
+        const IMPORTACION = {
+            percepciones: {
+                titulo: 'Asistente Importación Percepciones',
+                destino: 'm171-685',
+                tipoArchivo: true,
+                banner: 'A fin de ingresar el importe de las percepciones declaradas, deberá ingresar la información a través de la importación de un archivo plano. La estructura del archivo plano podrá visualizarla en la ayuda del formulario.<br>Debe tener en cuenta que si utiliza la Casilla 685, la Casilla 684 será CERO.'
+            },
+            retenciones: {
+                titulo: 'Asistente Importación Retenciones',
+                destino: 'm179-687',
+                tipoArchivo: false,
+                banner: 'A fin de ingresar el importe de las retenciones declaradas, deberá ingresar la información a través de la importación de un archivo plano. La estructura del archivo plano podrá visualizarla en la ayuda del formulario.<br>Debe tener en cuenta que si utiliza la Casilla 687, la Casilla 686 será CERO.'
+            }
+        };
+
+        let importacionActual = null;   // clave dentro de IMPORTACION
+        let importacionTotal = 0;       // suma de los registros válidos del último archivo
+
+        function abrirImportacion(tipo) {
+            const cfg = IMPORTACION[tipo];
+            importacionActual = tipo;
+            importacionTotal = 0;
+
+            document.getElementById('mimp-titulo').firstChild.textContent = cfg.titulo + ' ';
+            document.getElementById('mimp-banner-texto').innerHTML = cfg.banner;
+            document.getElementById('mimp-tipo-archivo').style.display = cfg.tipoArchivo ? '' : 'none';
+
+            document.getElementById('mimp-ruta').value = '';
+            document.getElementById('mimp-file').value = '';
+            document.getElementById('mimp-cargados').textContent = '0';
+            document.getElementById('mimp-rechazados').textContent = '0';
+            document.getElementById('mimp-detalle').innerHTML = '';
+
+            document.getElementById('mimp').classList.add('open');
+        }
+
+        function archivoImportacionElegido(input) {
+            const archivo = input.files[0];
+            if (!archivo) return;
+            document.getElementById('mimp-ruta').value = archivo.name;
+            procesarArchivoImportado();
+        }
+
+        // Formato del archivo plano (mismo que genera la macro FV 621): campos separados
+        // por "|". El importe está en una columna fija según el tipo de archivo:
+        // P y R → campo 5; PI → campo 6 (hojas LectP / LectR / LectPI del libro).
+        function esquemaImportacion() {
+            if (importacionActual === 'retenciones') return ESQUEMAS_TXT.R;
+            const tipo = (document.querySelector('input[name="mimp-tipo"]:checked') || {}).value;
+            return tipo === 'comprobante-pago' ? ESQUEMAS_TXT.PI : ESQUEMAS_TXT.P;
+        }
+
+        function procesarArchivoImportado() {
+            const archivo = document.getElementById('mimp-file').files[0];
+            if (!archivo) { alert('Seleccione primero el archivo a importar.'); return; }
+
+            const esq = esquemaImportacion();
+            const nCampos = esq.campos.length;
+            const idxImporte = esq.columnaImporte - 1;
+
+            const lector = new FileReader();
+            lector.onload = () => {
+                const lineas = String(lector.result).split(/\r?\n/);
+                const detalle = document.getElementById('mimp-detalle');
+                let cargados = 0, rechazados = 0, total = 0;
+                detalle.innerHTML = '';
+
+                lineas.forEach((linea, i) => {
+                    if (!linea.trim()) return;
+                    // El "|" final deja un campo vacío al partir: se descarta
+                    const campos = linea.split('|');
+                    if (campos.length && campos[campos.length - 1].trim() === '') campos.pop();
+
+                    // Se informa el primer dato incorrecto del registro, con su descripción
+                    let rechazar = null;
+                    if (campos.length !== nCampos) {
+                        rechazar = 'El registro tiene ' + campos.length + ' campos y se esperaban ' + nCampos + '.';
+                    } else {
+                        for (let j = 0; j < esq.campos.length; j++) {
+                            const err = validarCampoTXT(esq.campos[j], campos[j], campos, esq);
+                            if (err) { rechazar = err; break; }
+                        }
+                    }
+
+                    if (rechazar) {
+                        rechazados++;
+                        detalle.insertAdjacentHTML('beforeend',
+                            '<tr><td>' + (i + 1) + '</td><td>' + rechazar + '</td></tr>');
+                    } else {
+                        cargados++;
+                        total += parseFloat(campos[idxImporte]);
+                    }
+                });
+
+                importacionTotal = total;
+                document.getElementById('mimp-cargados').textContent = cargados;
+                document.getElementById('mimp-rechazados').textContent = rechazados;
+            };
+            lector.readAsText(archivo);
+        }
+
+        function guardarImportacion() {
+            const cfg = IMPORTACION[importacionActual];
+            if (!cfg) return;
+            if (!importacionTotal) { alert('No hay registros cargados para guardar.'); return; }
+
+            setVal(cfg.destino, importacionTotal);
+            // Si se usa la 685 / 687, su par (684 / 686) queda en CERO
+            setVal(importacionActual === 'percepciones' ? 'm171-684' : 'm179-686', 0);
+            cerrarModal('mimp');
+        }
+
         function aceptarModal380() {
-            document.getElementById('m380-coef').textContent = coeficiente380().toFixed(4);
             cerrarModal('m380');
             recalcularDetalle();
         }
@@ -2858,6 +3897,55 @@
             setVal(modalPagosDestino, total);
             cerrarModal('m336');
             recalcularDeuda();
+        }
+
+        // Casilla 301: ingresos netos declarados en los períodos anteriores del
+        // ejercicio, indexados por período ("202601"). Sirven para el acumulado
+        // que determina la tasa del Régimen MYPE (límite de 300 UIT).
+        const ingresosPrevios = {};
+
+        // Genera una fila por cada período del ejercicio anterior al que se declara:
+        // si se declara 202604, muestra 202601, 202602 y 202603.
+        function poblarTabla301() {
+            const tbody = document.querySelector('#m301-tabla tbody');
+            const tabla = document.getElementById('m301-tabla');
+            const vacio = document.getElementById('m301-vacio');
+            tbody.innerHTML = '';
+
+            const periodo = document.getElementById('periodo-input').value.trim();
+            const [mm, yyyy] = periodoValido(periodo) ? periodo.split('-').map(Number) : [new Date().getMonth() + 1, new Date().getFullYear()];
+
+            for (let m = 1; m < mm; m++) {
+                const etiqueta = String(yyyy) + String(m).padStart(2, '0');
+                const guardado = ingresosPrevios[etiqueta];
+                tbody.insertAdjacentHTML('beforeend',
+                    '<tr><td>' + etiqueta + '</td>' +
+                    '<td><input type="text" inputmode="numeric" data-periodo="' + etiqueta + '" value="' + (guardado ? formatoMiles(guardado) : '') + '"></td></tr>');
+            }
+
+            const sinPrevios = mm === 1;
+            tabla.style.display = sinPrevios ? 'none' : '';
+            vacio.style.display = sinPrevios ? '' : 'none';
+
+            tbody.querySelectorAll('input').forEach(inp => {
+                inp.addEventListener('input', function () {
+                    formatearMilesInput(this);
+                    ingresosPrevios[this.dataset.periodo] = parseFloat(this.value.replace(/,/g, '')) || 0;
+                    document.getElementById('m301-total').textContent = formatoMiles(ingresosAcumulados());
+                });
+            });
+            document.getElementById('m301-total').textContent = formatoMiles(ingresosAcumulados());
+        }
+
+        // Acumulado del ejercicio = períodos anteriores registrados + casilla 301
+        function ingresosAcumulados() {
+            const previos = Object.values(ingresosPrevios).reduce((a, b) => a + b, 0);
+            return previos + val('c301');
+        }
+
+        function aceptarModal301() {
+            cerrarModal('m301');
+            recalcularRenta();
         }
 
         // Casilla 173: genera las 12 filas (11 editables + período actual automático)
@@ -2889,8 +3977,8 @@
 
             tbody.querySelectorAll('input').forEach(inp => {
                 inp.addEventListener('input', function () {
-                    this.value = this.value.replace(/[^\d]/g, '');
-                    prorrataHist[+this.dataset.idx][this.dataset.campo] = parseFloat(this.value) || 0;
+                    formatearMilesInput(this);
+                    prorrataHist[+this.dataset.idx][this.dataset.campo] = parseFloat(this.value.replace(/,/g, '')) || 0;
                     document.getElementById('m173-coef').textContent = coeficiente173().toFixed(4);
                 });
             });
@@ -2905,8 +3993,8 @@
         // ===== Formulario 1611 Nuevo RUS =====
         // La categoría y la cuota se determinan automáticamente según ingresos/compras
         function calcularCategoriaRUS() {
-            const ingresos = parseInt(document.getElementById('rus-ingresos').value, 10) || 0;
-            const compras = parseInt(document.getElementById('rus-compras').value, 10) || 0;
+            const ingresos = val('rus-ingresos');
+            const compras = val('rus-compras');
             const mayor = Math.max(ingresos, compras);
             const categoria = document.getElementById('rus-categoria');
             const cuota = document.getElementById('rus-cuota');
@@ -2930,8 +4018,8 @@
         document.getElementById('rus-compras').addEventListener('input', calcularCategoriaRUS);
 
         function actualizarImporteRUS() {
-            const cuota = parseInt(document.getElementById('rus-cuota').value, 10) || 0;
-            const interes = parseInt(document.getElementById('rus-interes').value, 10) || 0;
+            const cuota = val('rus-cuota');
+            const interes = val('rus-interes');
             document.getElementById('importe-total').textContent = 's/. ' + (cuota + interes).toFixed(2);
         }
         document.getElementById('rus-interes').addEventListener('input', actualizarImporteRUS);
@@ -2951,8 +4039,8 @@
                 return;
             }
 
-            const interes = parseInt(document.getElementById('rus-interes').value, 10) || 0;
-            const total = (parseInt(cuota, 10) + interes).toFixed(2);
+            const interes = val('rus-interes');
+            const total = (val('rus-cuota') + interes).toFixed(2);
             alert('Formulario 1611 - NUEVO RUS agregado a la bandeja.\n\nPeríodo: ' + periodo + '\nCategoría: ' + categoria + '\nCuota: S/ ' + cuota + '\nInterés moratorio: S/ ' + interes + '\nTotal a pagar: S/ ' + total + '\n\n(Simulador - siguiente paso EN PROCESO DE IMPLEMENTACION)');
         }
 
@@ -3000,9 +4088,11 @@
                 document.querySelectorAll('#tab621-detalle input, #tab621-deuda input').forEach(i => i.value = '');
                 // Limpia los asistentes
                 ['m127-183', 'm127-186', 'm105-a1', 'm105-a2', 'm105-a3', 'm105-a4', 'm105-b',
-                 'm122-238', 'm122-239', 'm380-891', 'm380-892'].forEach(id => document.getElementById(id).value = '');
-                document.getElementById('m380-coef').textContent = '0.0000';
+                 'm122-238', 'm122-239', 'm171-684', 'm171-685', 'm179-686', 'm179-687',
+                 'm380-891', 'm380-892'].forEach(id => document.getElementById(id).value = '');
                 prorrataHist.length = 0;
+                Object.keys(ingresosPrevios).forEach(k => delete ingresosPrevios[k]);
+                c301Editada = false;
                 Object.keys(pagosPrevios).forEach(k => {
                     Object.keys(pagosPrevios[k]).forEach(c => pagosPrevios[k][c] = '');
                 });
