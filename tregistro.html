@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - T-Registro</title>
+    <link rel="stylesheet" href="rvie.css">
+    <link rel="stylesheet" href="survey.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <style>
+        /* ===== T-Registro ===== */
+        .treg-main {
+            flex: 1;
+            padding: 18px 20px 40px 20px;
+            font-family: 'Roboto', sans-serif;
+            background: #FFF;
+        }
+
+        .treg-titulo {
+            background: #2A9FD6;
+            color: #FFF;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 700;
+            padding: 11px;
+            border: 1px solid #1C86B8;
+        }
+
+        /* Barra de búsqueda */
+        .treg-busqueda {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            border: 1px solid #CCC;
+            padding: 10px 12px;
+            margin-top: 18px;
+            font-size: 13px;
+        }
+
+        .treg-busqueda .treg-lbl {
+            background: #F0F0F0;
+            border: 1px solid #DDD;
+            padding: 7px 12px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .treg-busqueda input[type="text"] {
+            border: 1px solid #CCC;
+            padding: 6px 8px;
+            width: 300px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .treg-busqueda label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .treg-btn {
+            background: linear-gradient(#FDFDFD, #E8E8E8);
+            border: 1px solid #BBB;
+            border-radius: 3px;
+            padding: 6px 16px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .treg-btn:hover { background: #EFEFEF; }
+
+        .treg-acciones {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 14px 0 10px 0;
+            font-size: 13px;
+        }
+
+        .treg-acciones label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+
+        /* Grilla de prestadores */
+        .treg-grid-wrap {
+            border: 1px solid #CCC;
+            min-height: 470px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .treg-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        .treg-grid th {
+            background: #F5F5F5;
+            border: 1px solid #CCC;
+            padding: 7px 6px;
+            font-weight: 500;
+            color: #333;
+            text-align: center;
+        }
+
+        .treg-grid td {
+            border: 1px solid #E4E4E4;
+            padding: 7px 6px;
+            color: #A0522D;
+        }
+
+        .treg-grid td a { color: #1B6CB0; }
+
+        .treg-vacio {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 13px;
+            padding: 40px 20px;
+        }
+
+        .treg-pie {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #F5F5F5;
+            border-top: 1px solid #CCC;
+            padding: 7px 10px;
+            font-size: 12.5px;
+            color: #555;
+        }
+
+        .treg-pag { display: flex; align-items: center; gap: 10px; color: #888; }
+        .treg-pag strong { color: #333; }
+
+        /* Ficha de datos de identificación */
+        .treg-seccion {
+            background: #EFEFE6;
+            border: 1px solid #DDD;
+            padding: 9px 14px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #444;
+            margin-top: 18px;
+        }
+
+        .treg-ficha {
+            border: 1px solid #7BA7D7;
+            padding: 16px 18px;
+            font-size: 13px;
+        }
+
+        .treg-ficha .treg-instruccion { margin-bottom: 16px; color: #333; }
+        .treg-ficha .treg-instruccion a { color: #1B6CB0; font-style: italic; }
+
+        .treg-datos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px 25px;
+        }
+
+        .treg-datos > div { display: flex; gap: 8px; }
+        .treg-datos .treg-campo-lbl { color: #333; white-space: nowrap; }
+        .treg-datos .treg-campo-val { color: #A0522D; font-weight: 500; }
+
+        /* Datos de contacto */
+        .treg-contacto { border-top: none; }
+
+        .treg-contacto-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+        }
+
+        .treg-form-fila {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .treg-form-fila > label { min-width: 175px; color: #333; }
+
+        .treg-form-fila select,
+        .treg-form-fila input[type="text"] {
+            border: 1px solid #BBB;
+            padding: 4px 6px;
+            font-size: 13px;
+            font-family: inherit;
+            flex: 1;
+            max-width: 380px;
+        }
+
+        .treg-form-fila.treg-dir > label { min-width: 130px; }
+        .treg-form-fila.treg-dir a { color: #1B6CB0; }
+
+        /* Categoría */
+        .treg-cat-tabs {
+            display: flex;
+            gap: 3px;
+            margin-top: 14px;
+            padding-left: 4px;
+        }
+
+        .treg-cat-tab {
+            border: 1px solid #CCC;
+            border-bottom: none;
+            background: #F5F5F5;
+            padding: 7px 14px;
+            font-size: 12.5px;
+            color: #444;
+            cursor: pointer;
+        }
+
+        .treg-cat-tab.active { background: #FFF; font-weight: 500; }
+
+        .treg-cat-panel {
+            border: 1px solid #CCC;
+            padding: 16px 20px;
+            font-size: 13px;
+        }
+
+        .treg-cat-lista { list-style: none; margin: 0 0 10px 40px; padding: 0; }
+        .treg-cat-lista li { padding: 2px 0; color: #333; }
+        .treg-cat-pendiente { color: #777; margin: 0 0 10px 0; }
+
+        .treg-cat-acciones {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .treg-ayuda { font-size: 12.5px; color: #555; font-style: italic; margin-top: 14px; }
+        .treg-ayuda a { color: #1B6CB0; font-style: normal; }
+
+        /* Modal Búsqueda de Persona */
+        .treg-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .35);
+            z-index: 500;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 60px 15px;
+            overflow-y: auto;
+        }
+
+        .treg-modal-overlay.open { display: flex; }
+
+        .treg-modal {
+            background: #FFF;
+            border: 1px solid #AAA;
+            width: 100%;
+            max-width: 810px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, .3);
+        }
+
+        .treg-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(#F5F5F5, #E4E4E4);
+            border-bottom: 1px solid #CCC;
+            padding: 9px 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #444;
+        }
+
+        .treg-modal-head i { cursor: pointer; color: #8A8A8A; font-size: 16px; }
+
+        .treg-modal-body { padding: 18px; }
+
+        .treg-modal-titulo {
+            background: #2A9FD6;
+            color: #FFF;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 7px;
+            border: 1px solid #1C86B8;
+        }
+
+        .treg-bp-bloque {
+            border: 1px solid #CCC;
+            border-top: none;
+            padding: 12px 14px;
+        }
+
+        .treg-bp-fila {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            padding: 2px 0;
+        }
+
+        .treg-bp-fila > label:first-child { min-width: 185px; font-weight: 700; color: #333; }
+
+        .treg-bp-fila select,
+        .treg-bp-fila input[type="text"] {
+            border: 1px solid #999;
+            padding: 3px 5px;
+            font-size: 13px;
+            font-family: inherit;
+            width: 250px;
+        }
+
+        .treg-bp-fila .treg-bp-ro { background: #E9E9E9; width: 380px; }
+        .treg-bp-hint { font-size: 12px; color: #444; }
+
+        .treg-bp-radio {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 0 !important;
+            font-weight: 400 !important;
+        }
+
+        .treg-bp-acciones {
+            display: flex;
+            gap: 8px;
+            border: 1px solid #CCC;
+            border-top: none;
+            padding: 10px 14px;
+        }
+
+        .treg-btn[disabled] { color: #AAA; cursor: default; }
+
+        /* Alta de persona en el padrón */
+        .treg-alta-aviso {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #FDF6DC;
+            border: 1px solid #F0E6C0;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #6B5B2A;
+            line-height: 1.5;
+        }
+
+        .treg-alta-aviso i { color: #C88A00; margin-top: 2px; }
+
+        .treg-alta-nota {
+            font-size: 12.5px;
+            margin: 10px 0 0 0;
+            min-height: 16px;
+        }
+
+        .treg-alta-nota.ok { color: #1B7B3A; }
+        .treg-alta-nota.error { color: #C0392B; }
+
+        /* Registro de Dirección */
+        .treg-dir-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 10px 12px;
+            margin-bottom: 14px;
+        }
+
+        .treg-dir-campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+        .treg-dir-campo label {
+            font-size: 12.5px;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .treg-dir-campo select,
+        .treg-dir-campo input[type="text"] {
+            border: 1px solid #999;
+            padding: 3px 5px;
+            font-size: 13px;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .treg-dir-essalud {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 13px;
+            margin: 18px 0;
+        }
+
+        .treg-dir-essalud label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+        .treg-dir-acciones {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            border-top: 1px solid #E4E4E4;
+            padding-top: 16px;
+        }
+
+        .treg-req { color: #C0392B; font-weight: 700; }
+        .treg-alta-obligatorio { font-size: 12px; color: #777; margin: 8px 0 0 0; }
+
+        @media (max-width: 900px) {
+            .treg-datos { grid-template-columns: 1fr; }
+            .treg-contacto-grid { grid-template-columns: 1fr; }
+            .treg-busqueda input[type="text"] { width: 100%; }
+            .treg-cat-tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Encabezado -->
+        <header class="main-header">
+            <div class="logo-area" style="display:flex; align-items:center; gap:10px;">
+                <a href="tramites.html"><img src="LOGO_SUNAT.png" alt="SUNAT Logo" class="logo"></a>
+                <span style="font-family:'Roboto',sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
+            </div>
+            <div class="header-right">
+                <div class="top-links">
+                    <a href="#"><i class="fas fa-envelope"></i> Buzón Electrónico</a>
+                    <a href="#"><i class="fas fa-star"></i> Favoritos <i class="fas fa-caret-down"></i></a>
+                    <a href="#"><i class="fas fa-print"></i> Imprimir</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Barra de Usuario -->
+        <div class="user-bar">
+            <div class="date-display" id="clock">19/07/2026 22:27:00</div>
+            <div class="user-info">
+                <span>Bienvenido, EMPRESA DEMO S.A.C. <i class="fas fa-caret-down"></i></span>
+                <span class="domicilio">Domicilio: Habido</span>
+                <a href="index.html" class="btn-salir">Salir</a>
+            </div>
+        </div>
+
+        <div class="main-body">
+            <!-- Barra Lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <a href="tramites.html" class="home-link"><i class="fas fa-home"></i> Ir al inicio</a>
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="sidebar-title">
+                    <h3 class="sidebar-title">MI RUC Y OTROS REGISTROS</h3>
+
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Mis Datos del RUC</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Actualizo información de mi RUC</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Reporte Tributario y Aduanero</a></li>
+
+                    <li class="has-submenu open">
+                        <a href="#" class="submenu-toggle"><i class="fas fa-caret-down"></i> T-Registro</a>
+                        <ul class="nested-menu" style="display: block;">
+                            <li class="has-submenu-level2">
+                                <a href="#" class="submenu-toggle-level2"><i class="fas fa-caret-right"></i> Registro de Derechohabientes</a>
+                            </li>
+                            <li class="has-submenu-level2">
+                                <a href="#" class="submenu-toggle-level2"><i class="fas fa-caret-right"></i> Registro del Empleador</a>
+                            </li>
+                            <li class="has-submenu-level2 open">
+                                <a href="#" class="submenu-toggle-level2"><i class="fas fa-caret-down"></i> Registro de Trabaj., Pension., Pers. en forma</a>
+                                <ul class="nested-menu-level2" style="display: block;">
+                                    <li class="has-submenu-level3 open">
+                                        <ul class="nested-menu-level3" style="display: block;">
+                                            <li><a href="tregistro.html" class="active-item-rvie">Registro individual <i class="fas fa-chevron-right float-right"></i></a></li>
+                                            <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Carga masiva</a></li>
+                                            <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Consultas y reportes</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Registro del Trab. del Hogar y sus derechohabientes</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Exportadores de Servicios</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Envio Reporte Tributario</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Establecimientos Afiliados</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Establecimientos Autorizados</a></li>
+                    <li class="has-submenu"><a href="#" class="submenu-toggle"><i class="fas fa-caret-right"></i> Registro Productores Mineros</a></li>
+                </div>
+            </aside>
+
+            <!-- Contenido -->
+            <main class="treg-main">
+                <div class="treg-titulo">Registro de Trabajadores, Pensionistas y Otros Prestadores de Servicios</div>
+
+                <!-- ===== Vista: listado de prestadores ===== -->
+                <div id="treg-lista">
+                    <div class="treg-busqueda">
+                        <span class="treg-lbl">Ingrese el Numero de Documento:</span>
+                        <input type="text" id="treg-buscar-doc" autocomplete="off">
+                        <label><input type="radio" name="treg-tipo-busqueda" value="documento" checked> Número de Documento</label>
+                        <label><input type="radio" name="treg-tipo-busqueda" value="nombres"> Apellidos y Nombres</label>
+                        <button class="treg-btn" onclick="buscarPrestador();">Buscar</button>
+                    </div>
+
+                    <div class="treg-acciones">
+                        <button class="treg-btn" onclick="nuevoPrestador();">Nuevo</button>
+                        <label><input type="checkbox" id="treg-historico" onchange="pintarPrestadores();"> Mostrar Histórico de Prestadores</label>
+                    </div>
+
+                    <div class="treg-grid-wrap">
+                        <table class="treg-grid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"></th>
+                                    <th>Categoría</th>
+                                    <th>Documento de Identidad</th>
+                                    <th>Apellidos y Nombres</th>
+                                    <th>Fec. Nac.</th>
+                                    <th>Sexo</th>
+                                    <th>Estado</th>
+                                    <th style="width: 70px;">Modificar</th>
+                                    <th style="width: 70px;">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="treg-filas"></tbody>
+                        </table>
+
+                        <div class="treg-vacio" id="treg-vacio">No se encontraron prestadores registrados.</div>
+
+                        <div class="treg-pie">
+                            <span id="treg-conteo">0 - 0 de 0 elementos</span>
+                            <span class="treg-pag">
+                                <i class="fas fa-angle-double-left"></i>
+                                <i class="fas fa-angle-left"></i>
+                                <strong>1</strong>
+                                <i class="fas fa-angle-right"></i>
+                                <i class="fas fa-angle-double-right"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Vista: alta de un prestador ===== -->
+                <div id="treg-nuevo" style="display: none;">
+                    <div class="treg-seccion">Datos de Identificación</div>
+
+                    <div class="treg-ficha">
+                        <p class="treg-instruccion">
+                            Ingrese a la opción <a href="#" onclick="abrirBusquedaPersona(); return false;">Búsqueda de Persona</a>
+                            actualice los datos de identificación de la persona
+                        </p>
+
+                        <div class="treg-datos">
+                            <div><span class="treg-campo-lbl">Tipo y Número de Documento:</span><span class="treg-campo-val" id="treg-doc"></span></div>
+                            <div><span class="treg-campo-lbl">Fecha de Nacimiento:</span><span class="treg-campo-val" id="treg-fnac"></span></div>
+                            <div><span class="treg-campo-lbl">País emisor de Documento:</span><span class="treg-campo-val" id="treg-pais"></span></div>
+                            <div><span class="treg-campo-lbl">Apellidos y Nombres:</span><span class="treg-campo-val" id="treg-nombres"></span></div>
+                            <div><span class="treg-campo-lbl">Sexo:</span><span class="treg-campo-val" id="treg-sexo"></span></div>
+                            <div><span class="treg-campo-lbl">Estado Civil:</span><span class="treg-campo-val" id="treg-ecivil"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- Datos de contacto: aparecen recién cuando se ubica a la persona -->
+                    <div class="treg-ficha treg-contacto" id="treg-contacto" style="display: none;">
+                        <div class="treg-contacto-grid">
+                            <div class="treg-form-fila">
+                                <label>Nacionalidad:</label>
+                                <select id="treg-nacionalidad">
+                                    <option>PERU</option>
+                                    <option>ARGENTINA</option>
+                                    <option>BOLIVIA</option>
+                                    <option>BRASIL</option>
+                                    <option>CHILE</option>
+                                    <option>COLOMBIA</option>
+                                    <option>ECUADOR</option>
+                                    <option>ESPAÑA</option>
+                                    <option>ESTADOS UNIDOS</option>
+                                    <option>VENEZUELA</option>
+                                </select>
+                            </div>
+                            <div class="treg-form-fila treg-dir">
+                                <label>Primera dirección:</label>
+                                <span class="treg-campo-val" id="treg-dir1"></span>
+                            </div>
+                            <div class="treg-form-fila">
+                                <label>Teléfono( código y número ):</label>
+                                <select id="treg-tel-codigo" style="max-width: 200px;">
+                                    <option></option>
+                                    <option>1-LIMA Y CALLAO</option>
+                                    <option>41-AMAZONAS</option>
+                                    <option>42-SAN MARTIN</option>
+                                    <option>43-ANCASH</option>
+                                    <option>44-LA LIBERTAD</option>
+                                    <option>51-PUNO</option>
+                                    <option>52-TACNA</option>
+                                    <option>53-MOQUEGUA</option>
+                                    <option>54-AREQUIPA</option>
+                                    <option>56-ICA</option>
+                                    <option>61-UCAYALI</option>
+                                    <option>62-HUANUCO</option>
+                                    <option>63-PASCO</option>
+                                    <option>64-JUNIN</option>
+                                    <option>65-LORETO</option>
+                                    <option>66-AYACUCHO</option>
+                                    <option>67-HUANCAVELICA</option>
+                                    <option>72-TUMBES</option>
+                                    <option>73-PIURA</option>
+                                    <option>74-LAMBAYEQUE</option>
+                                    <option>76-CAJAMARCA</option>
+                                    <option>82-MADRE DE DIOS</option>
+                                    <option>83-APURIMAC</option>
+                                    <option>84-CUSCO</option>
+                                </select>
+                                <input type="text" id="treg-tel-numero" maxlength="9" autocomplete="off">
+                            </div>
+                            <div class="treg-form-fila treg-dir">
+                                <label>Segunda dirección:</label>
+                                <a href="#" onclick="abrirRegistroDireccion(); return false;"><em>Detalle</em></a>
+                                <span class="treg-campo-val" id="treg-dir2"></span>
+                            </div>
+                            <div class="treg-form-fila">
+                                <label>Correo electrónico:</label>
+                                <input type="text" id="treg-correo" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría del prestador -->
+                    <div id="treg-categoria" style="display: none;">
+                        <div class="treg-seccion">Categoría</div>
+
+                        <div class="treg-cat-tabs">
+                            <div class="treg-cat-tab active" id="tcat-resumen" onclick="cambiarTabCategoria('resumen');">Resumen de Prestadores</div>
+                            <div class="treg-cat-tab" id="tcat-trabajador" onclick="cambiarTabCategoria('trabajador');">Trabajador</div>
+                            <div class="treg-cat-tab" id="tcat-pensionista" onclick="cambiarTabCategoria('pensionista');">Pensionista</div>
+                            <div class="treg-cat-tab" id="tcat-formacion" onclick="cambiarTabCategoria('formacion');">Personal en formación laboral</div>
+                        </div>
+
+                        <div class="treg-cat-panel">
+                            <div id="tpanel-resumen">
+                                <ul class="treg-cat-lista">
+                                    <li>Trabajador</li>
+                                    <li>Pensionista</li>
+                                    <li>Personal en formación laboral</li>
+                                    <li>Personal de Terceros</li>
+                                </ul>
+                            </div>
+                            <div id="tpanel-trabajador" style="display: none;">
+                                <p class="treg-cat-pendiente">Datos del Trabajador — EN PROCESO DE IMPLEMENTACION.</p>
+                            </div>
+                            <div id="tpanel-pensionista" style="display: none;">
+                                <p class="treg-cat-pendiente">Datos del Pensionista — EN PROCESO DE IMPLEMENTACION.</p>
+                            </div>
+                            <div id="tpanel-formacion" style="display: none;">
+                                <p class="treg-cat-pendiente">Datos del Personal en formación laboral — EN PROCESO DE IMPLEMENTACION.</p>
+                            </div>
+
+                            <div class="treg-cat-acciones">
+                                <button class="treg-btn" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Grabar</button>
+                                <button class="treg-btn" onclick="volverListaPrestadores();">Retornar</button>
+                            </div>
+                        </div>
+
+                        <p class="treg-ayuda">
+                            Para mayor detalle respecto a las opciones e información solicitada, sírvase ingresar al siguiente enlace:
+                            <a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Ayuda del T-Registro</a>
+                        </p>
+                    </div>
+
+                    <div style="margin-top: 22px;" id="treg-acciones-nuevo">
+                        <button class="treg-btn" onclick="volverListaPrestadores();"><i class="fas fa-chevron-left"></i> Regresar</button>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Búsqueda de Persona ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-busqueda">
+                    <div class="treg-modal">
+                        <div class="treg-modal-head">
+                            <span>Búsqueda de Persona</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarBusquedaPersona();"></i>
+                        </div>
+                        <div class="treg-modal-body">
+                            <div class="treg-modal-titulo">Búsqueda de Persona</div>
+
+                            <div class="treg-bp-bloque">
+                                <div class="treg-bp-fila">
+                                    <label>Tipo de Documento:</label>
+                                    <select id="bp-tipo-doc">
+                                        <option>L.E / DNI</option>
+                                        <option>CARNÉ EXT.</option>
+                                        <option>PASAPORTE</option>
+                                        <option>CARNÉ REFUG.</option>
+                                        <option>C.IDENT-RREE</option>
+                                        <option>PTP</option>
+                                        <option>DOC.ID.EXTR.</option>
+                                        <option>CPP</option>
+                                    </select>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <!-- autocomplete="username" evita que el navegador tome este campo
+                                         por un número de tarjeta y muestre su aviso de conexión insegura -->
+                                    <label>Número de Documento:</label>
+                                    <input type="text" id="bp-numero" name="numero-documento" maxlength="12" autocomplete="username">
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Fecha de Nacimiento:</label>
+                                    <input type="text" id="bp-fnac" name="fecha-nacimiento" maxlength="10" autocomplete="bday">
+                                    <span class="treg-bp-hint">dd/mm/aaaa</span>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>País Emisor del Documento:</label>
+                                    <select id="bp-pais">
+                                        <option>PERU</option>
+                                        <option>ARGENTINA</option>
+                                        <option>BOLIVIA</option>
+                                        <option>CHILE</option>
+                                        <option>COLOMBIA</option>
+                                        <option>ECUADOR</option>
+                                        <option>VENEZUELA</option>
+                                    </select>
+                                    <button class="treg-btn" onclick="buscarPersona();">Buscar</button>
+                                </div>
+                            </div>
+
+                            <div class="treg-bp-bloque">
+                                <div class="treg-bp-fila">
+                                    <label>Apellido Paterno:</label>
+                                    <input type="text" id="bp-ap-paterno" class="treg-bp-ro" readonly>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Apellido Materno:</label>
+                                    <input type="text" id="bp-ap-materno" class="treg-bp-ro" readonly>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Nombres:</label>
+                                    <input type="text" id="bp-nombres" class="treg-bp-ro" readonly>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Sexo:</label>
+                                    <label class="treg-bp-radio"><input type="radio" name="bp-sexo" value="MASCULINO" disabled> <strong>Masculino</strong></label>
+                                    <label class="treg-bp-radio"><input type="radio" name="bp-sexo" value="FEMENINO" disabled> <strong>Femenino</strong></label>
+                                </div>
+                            </div>
+
+                            <div class="treg-bp-acciones">
+                                <button class="treg-btn" disabled>Nuevo</button>
+                                <button class="treg-btn" disabled>Grabar</button>
+                                <button class="treg-btn" onclick="limpiarBusquedaPersona();">Limpiar</button>
+                                <button class="treg-btn" onclick="cerrarBusquedaPersona();">Retornar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Registro de Dirección ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-direccion">
+                    <div class="treg-modal" style="max-width: 860px;">
+                        <div class="treg-modal-head">
+                            <span>Registro de Dirección</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarRegistroDireccion();"></i>
+                        </div>
+                        <div class="treg-modal-body">
+                            <div class="treg-dir-grid">
+                                <div class="treg-dir-campo" style="grid-column: span 3;">
+                                    <label>Departamento</label>
+                                    <select id="dir-departamento" onchange="cargarProvincias();"></select>
+                                </div>
+                                <div class="treg-dir-campo" style="grid-column: span 3;">
+                                    <label>Provincia</label>
+                                    <select id="dir-provincia" onchange="cargarDistritos();"></select>
+                                </div>
+                                <div class="treg-dir-campo" style="grid-column: span 3;">
+                                    <label>Distrito</label>
+                                    <select id="dir-distrito"></select>
+                                </div>
+                            </div>
+
+                            <div class="treg-dir-grid">
+                                <div class="treg-dir-campo" style="grid-column: span 2;">
+                                    <label>Tipo de vía</label>
+                                    <select id="dir-tipo-via"></select>
+                                </div>
+                                <div class="treg-dir-campo" style="grid-column: span 3;">
+                                    <label>Nombre de vía</label>
+                                    <input type="text" id="dir-nombre-via" autocomplete="off">
+                                </div>
+                                <div class="treg-dir-campo" style="grid-column: span 2;">
+                                    <label>Número</label>
+                                    <input type="text" id="dir-numero" autocomplete="off">
+                                </div>
+                                <div class="treg-dir-campo"><label>Dpto</label><input type="text" id="dir-dpto" autocomplete="off"></div>
+                                <div class="treg-dir-campo"><label>Interior</label><input type="text" id="dir-interior" autocomplete="off"></div>
+                                <div class="treg-dir-campo"><label>Manzana</label><input type="text" id="dir-manzana" autocomplete="off"></div>
+                                <div class="treg-dir-campo"><label>Lote</label><input type="text" id="dir-lote" autocomplete="off"></div>
+                                <div class="treg-dir-campo"><label>Km.</label><input type="text" id="dir-km" autocomplete="off"></div>
+                                <div class="treg-dir-campo"><label>Block</label><input type="text" id="dir-block" autocomplete="off"></div>
+                                <div class="treg-dir-campo"><label>Etapa</label><input type="text" id="dir-etapa" autocomplete="off"></div>
+                            </div>
+
+                            <div class="treg-dir-grid">
+                                <div class="treg-dir-campo" style="grid-column: span 2;">
+                                    <label>Tipo de zona</label>
+                                    <select id="dir-tipo-zona"></select>
+                                </div>
+                                <div class="treg-dir-campo" style="grid-column: span 3;">
+                                    <label>Nombre de zona</label>
+                                    <input type="text" id="dir-nombre-zona" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="treg-dir-grid">
+                                <div class="treg-dir-campo" style="grid-column: span 9;">
+                                    <label>Referencia</label>
+                                    <input type="text" id="dir-referencia" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="treg-dir-essalud">
+                                <span>Referente para Centro Asistencial EsSalud:</span>
+                                <label><input type="radio" name="dir-essalud" value="SI" checked> Sí</label>
+                                <label><input type="radio" name="dir-essalud" value="NO"> No</label>
+                            </div>
+
+                            <div class="treg-dir-acciones">
+                                <button class="treg-btn" onclick="aceptarRegistroDireccion();">Aceptar</button>
+                                <button class="treg-btn" onclick="limpiarRegistroDireccion();">Limpiar</button>
+                                <button class="treg-btn" onclick="cerrarRegistroDireccion();">Retornar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: persona no encontrada / alta en el padrón ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-alta">
+                    <div class="treg-modal" style="max-width: 620px;">
+                        <div class="treg-modal-head">
+                            <span>Persona no encontrada</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarAltaPersona();"></i>
+                        </div>
+                        <div class="treg-modal-body">
+                            <div class="treg-alta-aviso">
+                                <i class="fas fa-triangle-exclamation"></i>
+                                <span>El documento <strong id="alta-doc-texto"></strong> no se encuentra registrado en el padrón. Complete los datos para registrarlo.</span>
+                            </div>
+
+                            <div class="treg-bp-bloque" style="border-top: 1px solid #CCC;">
+                                <div class="treg-bp-fila">
+                                    <label>Apellido Paterno: <span class="treg-req">*</span></label>
+                                    <input type="text" id="alta-paterno" autocomplete="off">
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Apellido Materno:</label>
+                                    <input type="text" id="alta-materno" autocomplete="off">
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Nombres: <span class="treg-req">*</span></label>
+                                    <input type="text" id="alta-nombres" autocomplete="off">
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Sexo:</label>
+                                    <label class="treg-bp-radio"><input type="radio" name="alta-sexo" value="MASCULINO" checked> <strong>Masculino</strong></label>
+                                    <label class="treg-bp-radio"><input type="radio" name="alta-sexo" value="FEMENINO"> <strong>Femenino</strong></label>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Estado Civil:</label>
+                                    <select id="alta-ecivil">
+                                        <option>SOLTERO</option>
+                                        <option>CASADO</option>
+                                        <option>CONVIVIENTE</option>
+                                        <option>DIVORCIADO</option>
+                                        <option>VIUDO</option>
+                                    </select>
+                                </div>
+                                <div class="treg-bp-fila">
+                                    <label>Dirección:</label>
+                                    <input type="text" id="alta-direccion" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <p class="treg-alta-obligatorio"><span class="treg-req">*</span> Campos obligatorios.</p>
+                            <p class="treg-alta-nota" id="alta-mensaje"></p>
+
+                            <div class="treg-bp-acciones">
+                                <button class="treg-btn" id="btn-alta-grabar" onclick="grabarPersonaNueva();">Grabar en el padrón</button>
+                                <button class="treg-btn" onclick="cerrarAltaPersona();">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer-slim">
+        <div class="footer-left">
+            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Equipo Académico de Contabilidad CERTUS</strong></span>
+        </div>
+        <div class="footer-right">
+            <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank">Aprende en la página oficial de SUNAT</a>
+        </div>
+    </footer>
+
+    <script>
+        // ===== Reloj en vivo =====
+        function actualizarReloj() {
+            const ahora = new Date();
+            const dd = String(ahora.getDate()).padStart(2, '0');
+            const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+            const hh = String(ahora.getHours()).padStart(2, '0');
+            const mi = String(ahora.getMinutes()).padStart(2, '0');
+            const ss = String(ahora.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent =
+                dd + '/' + mm + '/' + ahora.getFullYear() + ' ' + hh + ':' + mi + ':' + ss;
+        }
+        actualizarReloj();
+        setInterval(actualizarReloj, 1000);
+
+        // ===== Prestadores registrados =====
+        // Por ahora el T-Registro arranca sin trabajadores: la grilla se llena
+        // desde aquí cuando se implemente el alta.
+        const prestadores = [];
+
+        function pintarPrestadores(filtro) {
+            const historico = document.getElementById('treg-historico').checked;
+            let filas = prestadores.filter(p => historico || p.estado === 'Activo');
+
+            if (filtro) {
+                const t = filtro.toLowerCase();
+                filas = filas.filter(p =>
+                    p.documento.toLowerCase().includes(t) || p.nombres.toLowerCase().includes(t));
+            }
+
+            const tbody = document.getElementById('treg-filas');
+            tbody.innerHTML = filas.map(p =>
+                '<tr><td></td>' +
+                '<td><a href="#" onclick="alert(\'EN PROCESO DE IMPLEMENTACION\'); return false;">' + p.categoria + '</a></td>' +
+                '<td>' + p.documento + '</td>' +
+                '<td>' + p.nombres + '</td>' +
+                '<td>' + p.fecNac + '</td>' +
+                '<td>' + p.sexo + '</td>' +
+                '<td>' + p.estado + '</td>' +
+                '<td style="text-align:center;"><i class="fas fa-pen-to-square" style="color:#C88A00; cursor:pointer;" onclick="alert(\'EN PROCESO DE IMPLEMENTACION\');"></i></td>' +
+                '<td style="text-align:center;"><i class="fas fa-xmark" style="color:#C00; cursor:pointer;" onclick="alert(\'EN PROCESO DE IMPLEMENTACION\');"></i></td></tr>'
+            ).join('');
+
+            document.getElementById('treg-vacio').style.display = filas.length ? 'none' : 'flex';
+            document.getElementById('treg-conteo').textContent = filas.length
+                ? '1 - ' + filas.length + ' de ' + filas.length + ' elementos'
+                : '0 - 0 de 0 elementos';
+        }
+
+        function buscarPrestador() {
+            pintarPrestadores(document.getElementById('treg-buscar-doc').value.trim());
+        }
+
+        function nuevoPrestador() {
+            // La ficha llega vacía: los datos se traen con "Búsqueda de Persona"
+            ['treg-doc', 'treg-fnac', 'treg-pais', 'treg-nombres', 'treg-sexo', 'treg-ecivil']
+                .forEach(id => document.getElementById(id).textContent = '');
+            document.getElementById('treg-contacto').style.display = 'none';
+            document.getElementById('treg-categoria').style.display = 'none';
+            document.getElementById('treg-acciones-nuevo').style.display = 'block';
+            limpiarBusquedaPersona();
+            document.getElementById('treg-lista').style.display = 'none';
+            document.getElementById('treg-nuevo').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // ===== Búsqueda de Persona =====
+        // El padrón vive en la tabla `personas` de Supabase (auth.js expone el cliente).
+        function clienteSupabase() {
+            return (typeof authSupabaseClient !== 'undefined') ? authSupabaseClient : null;
+        }
+
+        // Une los apellidos y nombres para mostrarlos como una sola línea.
+        function nombreCompleto(p) {
+            const partes = [p.apellido_paterno, p.apellido_materno, p.nombres_pila].filter(Boolean);
+            return partes.length ? partes.join(' ') : (p.nombres || '');
+        }
+
+        function abrirBusquedaPersona() {
+            document.getElementById('treg-modal-busqueda').classList.add('open');
+        }
+
+        function cerrarBusquedaPersona() {
+            document.getElementById('treg-modal-busqueda').classList.remove('open');
+        }
+
+        function limpiarBusquedaPersona() {
+            ['bp-numero', 'bp-fnac', 'bp-ap-paterno', 'bp-ap-materno', 'bp-nombres']
+                .forEach(id => document.getElementById(id).value = '');
+            document.querySelectorAll('input[name="bp-sexo"]').forEach(r => r.checked = false);
+            document.getElementById('bp-tipo-doc').selectedIndex = 0;
+            document.getElementById('bp-pais').selectedIndex = 0;
+        }
+
+        async function buscarPersona() {
+            const doc = document.getElementById('bp-numero').value.replace(/\D/g, '');
+            if (!doc) { alert('Ingrese el número de documento.'); return; }
+
+            const cliente = clienteSupabase();
+            if (!cliente) { alert('No hay conexión con el padrón en este momento.'); return; }
+
+            const { data, error } = await cliente
+                .from('personas')
+                .select('*')
+                .eq('dni', doc)
+                .maybeSingle();
+
+            if (error) {
+                alert('No se pudo consultar el padrón: ' + error.message);
+                return;
+            }
+
+            if (!data) { abrirAltaPersona(doc); return; }
+
+            mostrarPersona(data);
+        }
+
+        // Vuelca la persona en el buscador y en la ficha de Datos de Identificación
+        function mostrarPersona(p) {
+            const tipo = document.getElementById('bp-tipo-doc').value;
+            const pais = document.getElementById('bp-pais').value;
+            const fnac = p.fecha_nacimiento || document.getElementById('bp-fnac').value.trim();
+
+            document.getElementById('bp-ap-paterno').value = p.apellido_paterno || '';
+            document.getElementById('bp-ap-materno').value = p.apellido_materno || '';
+            document.getElementById('bp-nombres').value = p.nombres_pila || p.nombres || '';
+            document.querySelectorAll('input[name="bp-sexo"]').forEach(r => r.checked = false);
+            const radio = document.querySelector('input[name="bp-sexo"][value="' + (p.sexo || '') + '"]');
+            if (radio) radio.checked = true;
+
+            document.getElementById('treg-doc').textContent = (p.tipo_documento || tipo) + ' - ' + p.dni;
+            document.getElementById('treg-fnac').textContent = fnac;
+            document.getElementById('treg-pais').textContent = (p.pais_emisor || pais) === 'PERU' ? 'PERÚ' : (p.pais_emisor || pais);
+            document.getElementById('treg-nombres').textContent = nombreCompleto(p);
+            document.getElementById('treg-sexo').textContent = p.sexo || '';
+            document.getElementById('treg-ecivil').textContent = p.estado_civil || '';
+            document.getElementById('treg-dir1').textContent = p.direccion || '';
+
+            document.getElementById('treg-contacto').style.display = 'block';
+            document.getElementById('treg-categoria').style.display = 'block';
+            document.getElementById('treg-acciones-nuevo').style.display = 'none';
+            cambiarTabCategoria('resumen');
+
+            cerrarBusquedaPersona();
+            window.scrollTo(0, 0);
+        }
+
+        // ===== Registro de Dirección =====
+        // Provincias completas de los 25 departamentos. Los distritos solo están
+        // cargados para las provincias que se usan en clase; para el resto se
+        // propone el distrito capital, que en Perú lleva el nombre de la provincia.
+        const PROVINCIAS = {
+            'AMAZONAS': ['CHACHAPOYAS', 'BAGUA', 'BONGARA', 'CONDORCANQUI', 'LUYA', 'RODRIGUEZ DE MENDOZA', 'UTCUBAMBA'],
+            'ANCASH': ['HUARAZ', 'AIJA', 'ANTONIO RAYMONDI', 'ASUNCION', 'BOLOGNESI', 'CARHUAZ', 'CARLOS FERMIN FITZCARRALD', 'CASMA', 'CORONGO', 'HUARI', 'HUARMEY', 'HUAYLAS', 'MARISCAL LUZURIAGA', 'OCROS', 'PALLASCA', 'POMABAMBA', 'RECUAY', 'SANTA', 'SIHUAS', 'YUNGAY'],
+            'APURIMAC': ['ABANCAY', 'ANDAHUAYLAS', 'ANTABAMBA', 'AYMARAES', 'COTABAMBAS', 'CHINCHEROS', 'GRAU'],
+            'AREQUIPA': ['AREQUIPA', 'CAYLLOMA', 'CAMANA', 'CARAVELI', 'CASTILLA', 'CONDESUYOS', 'ISLAY', 'LA UNION'],
+            'AYACUCHO': ['HUAMANGA', 'CANGALLO', 'HUANCA SANCOS', 'HUANTA', 'LA MAR', 'LUCANAS', 'PARINACOCHAS', 'PAUCAR DEL SARA SARA', 'SUCRE', 'VICTOR FAJARDO', 'VILCAS HUAMAN'],
+            'CAJAMARCA': ['CAJAMARCA', 'CAJABAMBA', 'CELENDIN', 'CHOTA', 'CONTUMAZA', 'CUTERVO', 'HUALGAYOC', 'JAEN', 'SAN IGNACIO', 'SAN MARCOS', 'SAN MIGUEL', 'SAN PABLO', 'SANTA CRUZ'],
+            'CUSCO': ['CUSCO', 'ACOMAYO', 'ANTA', 'CALCA', 'CANAS', 'CANCHIS', 'CHUMBIVILCAS', 'ESPINAR', 'LA CONVENCION', 'PARURO', 'PAUCARTAMBO', 'QUISPICANCHI', 'URUBAMBA'],
+            'HUANCAVELICA': ['HUANCAVELICA', 'ACOBAMBA', 'ANGARAES', 'CASTROVIRREYNA', 'CHURCAMPA', 'HUAYTARA', 'TAYACAJA'],
+            'HUANUCO': ['HUANUCO', 'AMBO', 'DOS DE MAYO', 'HUACAYBAMBA', 'HUAMALIES', 'LEONCIO PRADO', 'MARAÑON', 'PACHITEA', 'PUERTO INCA', 'LAURICOCHA', 'YAROWILCA'],
+            'ICA': ['ICA', 'CHINCHA', 'NASCA', 'PALPA', 'PISCO'],
+            'JUNIN': ['HUANCAYO', 'CONCEPCION', 'CHANCHAMAYO', 'JAUJA', 'JUNIN', 'SATIPO', 'TARMA', 'YAULI', 'CHUPACA'],
+            'LA LIBERTAD': ['TRUJILLO', 'ASCOPE', 'BOLIVAR', 'CHEPEN', 'JULCAN', 'OTUZCO', 'PACASMAYO', 'PATAZ', 'SANCHEZ CARRION', 'SANTIAGO DE CHUCO', 'GRAN CHIMU', 'VIRU'],
+            'LAMBAYEQUE': ['CHICLAYO', 'FERREÑAFE', 'LAMBAYEQUE'],
+            'LIMA': ['LIMA', 'BARRANCA', 'CAJATAMBO', 'CANTA', 'CAÑETE', 'HUARAL', 'HUAROCHIRI', 'HUAURA', 'OYON', 'YAUYOS'],
+            'LORETO': ['MAYNAS', 'ALTO AMAZONAS', 'LORETO', 'MARISCAL RAMON CASTILLA', 'REQUENA', 'UCAYALI', 'DATEM DEL MARAÑON', 'PUTUMAYO'],
+            'MADRE DE DIOS': ['TAMBOPATA', 'MANU', 'TAHUAMANU'],
+            'MOQUEGUA': ['MARISCAL NIETO', 'GENERAL SANCHEZ CERRO', 'ILO'],
+            'PASCO': ['PASCO', 'DANIEL ALCIDES CARRION', 'OXAPAMPA'],
+            'PIURA': ['PIURA', 'AYABACA', 'HUANCABAMBA', 'MORROPON', 'PAITA', 'SULLANA', 'TALARA', 'SECHURA'],
+            'PUNO': ['PUNO', 'AZANGARO', 'CARABAYA', 'CHUCUITO', 'EL COLLAO', 'HUANCANE', 'LAMPA', 'MELGAR', 'MOHO', 'SAN ANTONIO DE PUTINA', 'SAN ROMAN', 'SANDIA', 'YUNGUYO'],
+            'SAN MARTIN': ['MOYOBAMBA', 'BELLAVISTA', 'EL DORADO', 'HUALLAGA', 'LAMAS', 'MARISCAL CACERES', 'PICOTA', 'RIOJA', 'SAN MARTIN', 'TOCACHE'],
+            'TACNA': ['TACNA', 'CANDARAVE', 'JORGE BASADRE', 'TARATA'],
+            'TUMBES': ['TUMBES', 'CONTRALMIRANTE VILLAR', 'ZARUMILLA'],
+            'PROV. CONST. DEL CALLAO': ['PROV. CONST. DEL CALLAO'],
+            'UCAYALI': ['CORONEL PORTILLO', 'ATALAYA', 'PADRE ABAD', 'PURUS']
+        };
+
+        const DISTRITOS = {
+            'AREQUIPA|AREQUIPA': ['AREQUIPA', 'ALTO SELVA ALEGRE', 'CAYMA', 'CERRO COLORADO', 'CHARACATO', 'CHIGUATA', 'JACOBO HUNTER', 'JOSE LUIS BUSTAMANTE Y RIVERO', 'LA JOYA', 'MARIANO MELGAR', 'MIRAFLORES', 'MOLLEBAYA', 'PAUCARPATA', 'POCSI', 'POLOBAYA', 'QUEQUEÑA', 'SABANDIA', 'SACHACA', 'SAN JUAN DE SIGUAS', 'SAN JUAN DE TARUCANI', 'SANTA ISABEL DE SIGUAS', 'SANTA RITA DE SIGUAS', 'SOCABAYA', 'TIABAYA', 'UCHUMAYO', 'VITOR', 'YANAHUARA', 'YARABAMBA', 'YURA'],
+            'AREQUIPA|ISLAY': ['MOLLENDO', 'COCACHACRA', 'DEAN VALDIVIA', 'ISLAY', 'MEJIA', 'PUNTA DE BOMBON'],
+            'LIMA|LIMA': ['LIMA', 'ANCON', 'ATE', 'BARRANCO', 'BREÑA', 'CARABAYLLO', 'CHACLACAYO', 'CHORRILLOS', 'CIENEGUILLA', 'COMAS', 'EL AGUSTINO', 'INDEPENDENCIA', 'JESUS MARIA', 'LA MOLINA', 'LA VICTORIA', 'LINCE', 'LOS OLIVOS', 'LURIGANCHO', 'LURIN', 'MAGDALENA DEL MAR', 'MIRAFLORES', 'PACHACAMAC', 'PUCUSANA', 'PUEBLO LIBRE', 'PUENTE PIEDRA', 'PUNTA HERMOSA', 'PUNTA NEGRA', 'RIMAC', 'SAN BARTOLO', 'SAN BORJA', 'SAN ISIDRO', 'SAN JUAN DE LURIGANCHO', 'SAN JUAN DE MIRAFLORES', 'SAN LUIS', 'SAN MARTIN DE PORRES', 'SAN MIGUEL', 'SANTA ANITA', 'SANTA MARIA DEL MAR', 'SANTA ROSA', 'SANTIAGO DE SURCO', 'SURQUILLO', 'VILLA EL SALVADOR', 'VILLA MARIA DEL TRIUNFO'],
+            'PROV. CONST. DEL CALLAO|PROV. CONST. DEL CALLAO': ['CALLAO', 'BELLAVISTA', 'CARMEN DE LA LEGUA REYNOSO', 'LA PERLA', 'LA PUNTA', 'MI PERU', 'VENTANILLA'],
+            'CUSCO|CUSCO': ['CUSCO', 'CCORCA', 'POROY', 'SAN JERONIMO', 'SAN SEBASTIAN', 'SANTIAGO', 'SAYLLA', 'WANCHAQ'],
+            'PUNO|PUNO': ['PUNO', 'ACORA', 'AMANTANI', 'ATUNCOLLA', 'CAPACHICA', 'CHUCUITO', 'COATA', 'HUATA', 'MAÑAZO', 'PAUCARCOLLA', 'PICHACANI', 'PLATERIA', 'SAN ANTONIO', 'TIQUILLACA', 'VILQUE'],
+            'TACNA|TACNA': ['TACNA', 'ALTO DE LA ALIANZA', 'CALANA', 'CIUDAD NUEVA', 'INCLAN', 'PACHIA', 'PALCA', 'POCOLLAY', 'SAMA', 'CORONEL GREGORIO ALBARRACIN LANCHIPA', 'LA YARADA LOS PALOS']
+        };
+
+        const TIPOS_VIA = ['', 'AVENIDA', 'CALLE', 'JIRON', 'PASAJE', 'ALAMEDA', 'BAJADA', 'BOULEVARD', 'CARRETERA', 'MALECON', 'OVALO', 'PARQUE', 'PLAZA', 'PROLONGACION', 'PUENTE', 'ZONA'];
+        const TIPOS_ZONA = ['', 'URBANIZACION', 'PUEBLO JOVEN', 'ASENTAMIENTO HUMANO', 'ASOCIACION', 'CONJUNTO HABITACIONAL', 'COOPERATIVA', 'FUNDO', 'GRUPO', 'PARQUE INDUSTRIAL', 'RESIDENCIAL', 'SECTOR', 'UNIDAD VECINAL', 'ZONA INDUSTRIAL', 'CASERIO', 'CENTRO POBLADO', 'COMUNIDAD CAMPESINA', 'OTROS'];
+
+        function llenarSelect(id, valores) {
+            document.getElementById(id).innerHTML =
+                valores.map(v => '<option>' + v + '</option>').join('');
+        }
+
+        function cargarProvincias() {
+            const dep = document.getElementById('dir-departamento').value;
+            llenarSelect('dir-provincia', [''].concat(PROVINCIAS[dep] || []));
+            cargarDistritos();
+        }
+
+        function cargarDistritos() {
+            const dep = document.getElementById('dir-departamento').value;
+            const prov = document.getElementById('dir-provincia').value;
+            if (!prov) { llenarSelect('dir-distrito', ['']); return; }
+            // Si no hay distritos cargados para esa provincia, se ofrece su capital
+            const distritos = DISTRITOS[dep + '|' + prov] || [prov];
+            llenarSelect('dir-distrito', [''].concat(distritos));
+        }
+
+        function abrirRegistroDireccion() {
+            if (!document.getElementById('dir-departamento').options.length) {
+                llenarSelect('dir-departamento', [''].concat(Object.keys(PROVINCIAS).sort()));
+                llenarSelect('dir-tipo-via', TIPOS_VIA);
+                llenarSelect('dir-tipo-zona', TIPOS_ZONA);
+                cargarProvincias();
+            }
+            document.getElementById('treg-modal-direccion').classList.add('open');
+        }
+
+        function cerrarRegistroDireccion() {
+            document.getElementById('treg-modal-direccion').classList.remove('open');
+        }
+
+        function limpiarRegistroDireccion() {
+            ['dir-nombre-via', 'dir-numero', 'dir-dpto', 'dir-interior', 'dir-manzana', 'dir-lote',
+             'dir-km', 'dir-block', 'dir-etapa', 'dir-nombre-zona', 'dir-referencia']
+                .forEach(id => document.getElementById(id).value = '');
+            document.getElementById('dir-departamento').selectedIndex = 0;
+            document.getElementById('dir-tipo-via').selectedIndex = 0;
+            document.getElementById('dir-tipo-zona').selectedIndex = 0;
+            document.querySelector('input[name="dir-essalud"][value="SI"]').checked = true;
+            cargarProvincias();
+        }
+
+        // Arma la dirección en una sola línea, al estilo de la que muestra SUNAT
+        function aceptarRegistroDireccion() {
+            const v = id => document.getElementById(id).value.trim().toUpperCase();
+            const conEtiqueta = (etq, id) => v(id) ? etq + ' ' + v(id) : '';
+
+            const via = [v('dir-tipo-via'), v('dir-nombre-via'), v('dir-numero')].filter(Boolean).join(' ');
+            const detalle = [
+                conEtiqueta('DPTO.', 'dir-dpto'),
+                conEtiqueta('INT.', 'dir-interior'),
+                conEtiqueta('MZ-', 'dir-manzana'),
+                conEtiqueta('LT-', 'dir-lote'),
+                conEtiqueta('KM.', 'dir-km'),
+                conEtiqueta('BLOCK', 'dir-block'),
+                conEtiqueta('ETAPA', 'dir-etapa')
+            ].filter(Boolean).join(' ');
+            const zona = [v('dir-tipo-zona'), v('dir-nombre-zona')].filter(Boolean).join(' ');
+            const ubigeo = [v('dir-departamento'), v('dir-provincia'), v('dir-distrito')].filter(Boolean).join('-');
+
+            const linea = [via, detalle, zona, ubigeo].filter(Boolean).join(' ');
+            if (!linea) { alert('Complete los datos de la dirección.'); return; }
+
+            document.getElementById('treg-dir2').textContent = linea;
+            cerrarRegistroDireccion();
+        }
+
+        // ===== Alta de una persona que no está en el padrón =====
+        let altaDocumento = '';
+
+        function abrirAltaPersona(doc) {
+            altaDocumento = doc;
+            document.getElementById('alta-doc-texto').textContent =
+                document.getElementById('bp-tipo-doc').value + ' - ' + doc;
+            ['alta-paterno', 'alta-materno', 'alta-nombres', 'alta-direccion']
+                .forEach(id => document.getElementById(id).value = '');
+            document.getElementById('alta-ecivil').selectedIndex = 0;
+            document.querySelector('input[name="alta-sexo"][value="MASCULINO"]').checked = true;
+            mensajeAlta('', '');
+            document.getElementById('treg-modal-alta').classList.add('open');
+        }
+
+        function cerrarAltaPersona() {
+            document.getElementById('treg-modal-alta').classList.remove('open');
+        }
+
+        function mensajeAlta(texto, clase) {
+            const el = document.getElementById('alta-mensaje');
+            el.textContent = texto;
+            el.className = 'treg-alta-nota' + (clase ? ' ' + clase : '');
+        }
+
+        // La tabla `personas` exige: dni (clave primaria, sin duplicados) y nombres
+        // (NOT NULL). El resto es opcional y created_at lo pone la propia base.
+        async function grabarPersonaNueva() {
+            const paterno = document.getElementById('alta-paterno').value.trim().toUpperCase();
+            const materno = document.getElementById('alta-materno').value.trim().toUpperCase();
+            const nombres = document.getElementById('alta-nombres').value.trim().toUpperCase();
+
+            if (!altaDocumento) {
+                mensajeAlta('El número de documento es obligatorio.', 'error');
+                return;
+            }
+            if (!paterno || !nombres) {
+                mensajeAlta('El apellido paterno y los nombres son obligatorios.', 'error');
+                return;
+            }
+
+            // Las columnas opcionales van como null, no como cadena vacía.
+            const opcional = v => (v && v.trim()) ? v.trim().toUpperCase() : null;
+
+            const registro = {
+                dni: altaDocumento,
+                nombres: [paterno, materno, nombres].filter(Boolean).join(' '),
+                apellido_paterno: paterno,
+                apellido_materno: opcional(materno),
+                nombres_pila: nombres,
+                sexo: document.querySelector('input[name="alta-sexo"]:checked').value,
+                estado_civil: document.getElementById('alta-ecivil').value,
+                direccion: opcional(document.getElementById('alta-direccion').value),
+                fecha_nacimiento: opcional(document.getElementById('bp-fnac').value),
+                tipo_documento: document.getElementById('bp-tipo-doc').value,
+                pais_emisor: document.getElementById('bp-pais').value
+            };
+
+            const boton = document.getElementById('btn-alta-grabar');
+            boton.disabled = true;
+            mensajeAlta('Grabando...', '');
+
+            const { data, error } = await clienteSupabase()
+                .from('personas')
+                .insert(registro)
+                .select()
+                .single();
+
+            boton.disabled = false;
+
+            if (error) {
+                // 23505 = clave duplicada: el documento ya existe en el padrón
+                if (error.code === '23505') {
+                    mensajeAlta('El documento ' + altaDocumento + ' ya está registrado en el padrón. Use Buscar para traerlo.', 'error');
+                } else {
+                    mensajeAlta('No se pudo grabar: ' + error.message, 'error');
+                }
+                return;
+            }
+
+            mensajeAlta('Persona registrada en el padrón.', 'ok');
+            cerrarAltaPersona();
+            mostrarPersona(data);
+        }
+
+        function cambiarTabCategoria(tab) {
+            ['resumen', 'trabajador', 'pensionista', 'formacion'].forEach(t => {
+                document.getElementById('tpanel-' + t).style.display = (t === tab) ? 'block' : 'none';
+                document.getElementById('tcat-' + t).classList.toggle('active', t === tab);
+            });
+        }
+
+        function volverListaPrestadores() {
+            document.getElementById('treg-nuevo').style.display = 'none';
+            document.getElementById('treg-lista').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        pintarPrestadores();
+    </script>
+    <script src="survey.js"></script>
+</body>
+
+</html>
