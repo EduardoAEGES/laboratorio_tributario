@@ -9,25 +9,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
 </head>
 <body>
 
-    <!-- Announcement Bar -->
-    <div class="announcement-bar" id="announcement">
-        <div class="container">
-            <span><i class="fas fa-info-circle"></i> Comunicaciones destacadas</span>
-            <a href="#" class="announcement-link">VER MÁS</a>
-            <span class="close-announcement" onclick="document.getElementById('announcement').style.display='none'">&times;</span>
-        </div>
-    </div>
+    <!-- Thin Green Top Stripe -->
+    <div style="background-color: #007A33; height: 6px; width: 100%;"></div>
 
-    <!-- Header gob.pe -->
+    <!-- Header -->
     <header class="main-header">
         <div class="container">
-            <div class="logo-gob">
+            <div class="logo-gob" style="display: flex; align-items: center; gap: 12px;">
                 <img src="ESCUDO.png" alt="Escudo del Perú" style="width: 35px; height: auto;">
-                <span>gob.pe</span>
-                <span class="platform-desc">Plataforma digital única del Estado Peruano</span>
+                <span style="font-size: 20px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">ECOSISTEMA DE SIMULACIÓN ACADÉMICO</span>
             </div>
             <div class="search-box">
                 <input type="text" placeholder="Buscar en SUNAT">
@@ -36,49 +31,66 @@
         </div>
     </header>
 
-    <!-- Breadcrumbs -->
-    <nav class="breadcrumbs">
-        <div class="container">
-            <ul>
-                <li><a href="#">Inicio</a></li>
-                <li><a href="#">El Estado</a></li>
-                <li><a href="#">MEF</a></li>
-                <li>SUNAT</li>
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Main Navigation Tabs -->
-    <nav class="nav-tabs">
-        <div class="container">
-            <ul>
-                <li class="nav-item active">Trámites y servicios</li>
-            </ul>
-        </div>
-    </nav>
-
-
-
     <!-- Main Content -->
-    <main class="container hero" style="padding-top: 40px; padding-bottom: 40px;">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <div class="sunat-logo-main" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                <img src="LOGO_SUNAT.png" alt="SUNAT Logo" style="width: 220px; max-width: 100%;">
-                <div style="border-left: 3px solid #006699; padding-left: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left;">
-                    <span style="font-family: 'Roboto', sans-serif; font-size: 42px; font-weight: 900; letter-spacing: 2px; line-height: 1; background: linear-gradient(90deg, #004B91 0%, #0077B6 55%, #00B4D8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #004B91;">TAXLAB <span style="font-weight: 300;">360</span></span>
-                    <span style="font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: bold; color: #1E395B; letter-spacing: 3px;">LABORATORIO TRIBUTARIO CERTUS</span>
-                    <a href="dinamica/index.html" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 10px 22px; background: linear-gradient(90deg, #1E7A46 0%, #2FA05C 100%); color: #fff; border-radius: 25px; text-decoration: none; font-family: 'Roboto', sans-serif; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(30, 122, 70, 0.35); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(30, 122, 70, 0.45)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(30, 122, 70, 0.35)';">
-                        <i class="fas fa-book-open"></i> Dinámica del Plan Contable
+    <main class="container hero" style="padding-top: 20px; padding-bottom: 20px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div class="sunat-logo-main" style="margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <img src="LOGO_SUNAT.png" alt="SUNAT Logo" style="width: 200px; max-width: 100%;">
+                <div style="border-left: 3px solid #006699; padding-left: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;">
+                    <span style="font-family: 'Roboto', sans-serif; font-size: 38px; font-weight: 900; letter-spacing: 2px; line-height: 1; background: linear-gradient(90deg, #004B91 0%, #0077B6 55%, #00B4D8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #004B91;">TAXLAB <span style="font-weight: 300;">360</span></span>
+                    <span style="font-family: 'Roboto', sans-serif; font-size: 13px; font-weight: bold; color: #1E395B; letter-spacing: 3px;">LABORATORIO CONTABLE</span>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap;">
+                        <a href="dinamica/index.html" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; background: linear-gradient(90deg, #1E7A46 0%, #2FA05C 100%); color: #fff; border-radius: 25px; text-decoration: none; font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(30, 122, 70, 0.35); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(30, 122, 70, 0.45)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(30, 122, 70, 0.35)';">
+                            <i class="fas fa-book-open"></i> Dinámica del Plan Contable
+                        </a>
+                        
+                        <div style="display: inline-flex; align-items: center; gap: 6px; background: #F4F8FB; border: 1px solid #CDE0EE; padding: 3px 8px 3px 10px; border-radius: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+                            <select id="select-cursos" style="padding: 5px 10px; font-size: 12px; border: 1px solid #B0C4DE; border-radius: 18px; font-family: 'Roboto', sans-serif; background: #FFF; color: #1E395B; font-weight: 500; outline: none; cursor: pointer;">
+                                <option value="">-- Elegir Cursos --</option>
+                                <option value="contabilidad">Contabilidad General</option>
+                                <option value="tributacion1">Tributación I - Personas Naturales</option>
+                                <option value="tributacion2">Tributación II - Empresas y PDT</option>
+                                <option value="plame">Planilla Electrónica y PLAME</option>
+                                <option value="sire">Sistema Integrado de Registros (SIRE)</option>
+                            </select>
+                            <button type="button" onclick="irAlCurso();" style="padding: 5px 14px; background: #004B91; color: #FFF; border: none; border-radius: 18px; font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;">
+                                Seleccionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 25px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto;">
+                <!-- Fila 1: Operaciones en línea (SOL) + AFP NET + REMYPE + GESTOR DE USUARIOS -->
+                <div style="display: flex; gap: 12px; width: 100%; justify-content: center; flex-wrap: wrap;">
+                    <a href="sol.html" class="sol-btn" style="flex: 2; min-width: 240px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15.5px; padding: 14px 20px; background-color: #004B91; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0, 75, 145, 0.3); transition: all 0.3s ease; text-transform: uppercase; text-align: center;">
+                        <i class="fas fa-user-circle" style="font-size: 20px;"></i> Operaciones en línea (SOL) <i class="fas fa-chevron-right" style="font-size: 13px;"></i>
+                    </a>
+                    <a href="https://www.afpnet.com.pe" target="_blank" class="quick-btn" style="flex: 1; min-width: 130px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; background: #0077B6; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
+                        <i class="fas fa-building"></i> AFP NET
+                    </a>
+                    <a href="tregistro.html" class="quick-btn" style="flex: 1; min-width: 130px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; background: #D97706; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
+                        <i class="fas fa-briefcase"></i> REMYPE
+                    </a>
+                    <a href="login.html" class="quick-btn" style="flex: 1; min-width: 150px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; background: #4F46E5; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
+                        <i class="fas fa-users-cog"></i> GESTOR DE USUARIOS
+                    </a>
+                </div>
+
+                <!-- Fila 2: Aplicativo Reemplazo + Ajustes Posteriores -->
+                <div style="display: flex; gap: 12px; width: 100%; justify-content: center; flex-wrap: wrap;">
+                    <a href="reemplazo.html" class="app-btn-reemplazo" style="flex: 1; min-width: 280px; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px 20px; background-color: #1C3B5E; color: white; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 15px; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
+                        <i class="fas fa-th-large" style="font-size: 20px; border: 2px solid white; padding: 3px 5px; border-radius: 3px; flex-shrink: 0;"></i>
+                        <span style="text-align: center; line-height: 1.2;">ABRIR APLICATIVO DE REEMPLAZO</span>
+                    </a>
+
+                    <a href="ajustes.html" class="app-btn-ajustes" style="flex: 1; min-width: 280px; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px 20px; background-color: #1B874B; color: white; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 15px; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
+                        <i class="fas fa-th-large" style="font-size: 20px; border: 2px solid white; padding: 3px 5px; border-radius: 3px; flex-shrink: 0;"></i>
+                        <span style="text-align: center; line-height: 1.2;">ABRIR APLICATIVO DE AJUSTES POSTERIORES</span>
                     </a>
                 </div>
             </div>
-            <h1 class="hero-title" style="font-size: 28px; line-height: 1.2; margin-bottom: 10px; color: #333;">Superintendencia Nacional de Aduanas y de Administración Tributaria</h1>
-            <p class="hero-subtitle" style="font-size: 15px; margin-bottom: 30px; color: #666;">Administramos los tributos del Gobierno Nacional Peruano.</p>
-            
-            <a href="sol.html" class="sol-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 18px; padding: 15px 40px; background-color: #004B91; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0, 75, 145, 0.3); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;">
-                <i class="fas fa-user-circle" style="font-size: 24px;"></i> Operaciones en línea (SOL) <i class="fas fa-chevron-right" style="margin-left: 5px;"></i>
-            </a>
-        </div>
 
         <!-- Links Grid Section -->
         <div style="display: flex; gap: 40px; align-items: flex-start; justify-content: center; flex-wrap: wrap; max-width: 1000px; margin: 0 auto;">
@@ -162,6 +174,20 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 75, 145, 0.4);
         }
+        .app-btn-reemplazo:hover {
+            background-color: #122842 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(28, 59, 94, 0.4) !important;
+        }
+        .app-btn-ajustes:hover {
+            background-color: #136638 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(27, 135, 75, 0.4) !important;
+        }
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25) !important;
+        }
         .link-item {
             display: flex;
             align-items: center;
@@ -196,8 +222,9 @@
 
     <!-- Footer -->
     <footer class="dashboard-footer-slim">
-        <div class="footer-left">
-            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Equipo Académico de Contabilidad CERTUS</strong></span>
+        <div class="footer-left" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;">
+            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Eduardo Estrategico</strong></span>
+            <span style="font-size:11px; color:#A0C4E2;">Para mayor información contactar al <strong>973590390 (WhatsApp)</strong> o correo <strong>edu.mamaniroque@gmail.com</strong></span>
         </div>
         <div class="footer-right">
             <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank">Aprende en la página oficial de SUNAT</a>
@@ -205,6 +232,22 @@
     </footer>
     <script src="script.js"></script>
     <script>
+        function irAlCurso() {
+            const val = document.getElementById('select-cursos').value;
+            if (!val) {
+                alert('Por favor, seleccione un curso de la lista.');
+                return;
+            }
+            const targetUrl = (val === 'plame' || val === 'tributacion2' || val === 'sire') ? 'sol.html' : 'dinamica/index.html';
+            
+            // Si no está autenticado, abrir ventana flotante encima de la pantalla
+            if (!sessionStorage.getItem('sunat_auth')) {
+                window.mostrarModalLogin(targetUrl);
+            } else {
+                window.location.href = targetUrl;
+            }
+        }
+
         // Al llegar a index se borra el estado temporal de la simulación
         // (aceptaciones, periodos presentados, resumen del reporte)
         ['sire_aceptado', 'sire_presentado', 'sire_resumen',
