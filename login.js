@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeRegister = document.getElementById('mode-register');
     const loginSubtitle = document.getElementById('login-subtitle');
     
+    const rucField = document.getElementById('ruc-field');
     const userField = document.getElementById('user-field');
     const denomField = document.getElementById('denom-field');
     const passField = document.getElementById('pass-field');
@@ -14,8 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentMode = 'login'; // 'login' | 'register'
 
-    // Alternar entre Iniciar Sesión y Registrarse
-    if (modeLogin && modeRegister) {
+    // Detectar si venimos de un aplicativo (redirect=xxx.html)
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectParam = urlParams.get('redirect');
+    const isClaveSolMode = !!redirectParam; // Modo Clave SOL cuando hay redirect
+
+    // ===== MODO CLAVE SOL (con redirect) =====
+    // Ocultar selector de modo completo y mostrar campo RUC
+    if (isClaveSolMode) {
+        // Ocultar ambos botones de modo (Iniciar Sesión / Registrarse)
+        if (modeLogin) modeLogin.parentElement.style.display = 'none';
+        // Mostrar campo RUC
+        if (rucField) rucField.style.display = 'block';
+        // Actualizar textos
+        if (loginSubtitle) loginSubtitle.textContent = 'Ingresa los datos de tu Clave SOL';
+        if (btnSubmit) btnSubmit.textContent = 'Entrar';
+    }
+
+    // Alternar entre Iniciar Sesión y Registrarse (solo si NO es modo Clave SOL)
+    if (modeLogin && modeRegister && !isClaveSolMode) {
         modeLogin.addEventListener('click', () => {
             currentMode = 'login';
             modeLogin.classList.add('active');
@@ -67,14 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Submit Handler (Login or Register)
     btnSubmit.addEventListener('click', async () => {
+        const ruc = rucField ? rucField.value.trim() : '';
         const user = userField.value.trim();
         const denom = denomField ? denomField.value.trim() : user;
         const pass = passField.value.trim();
 
         // Get redirect parameter or fallback
-        const urlParams = new URLSearchParams(window.location.search);
         const referrer = sessionStorage.getItem('loginReferrer');
-        let redirectUrl = urlParams.get('redirect') || referrer || 'dashboard.html';
+        let redirectUrl = redirectParam || referrer || 'dashboard.html';
 
         const irADashboard = () => {
             if (referrer) {
@@ -84,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (currentMode === 'register') {
-            // REGISTRO EN SUPABASE
+            // REGISTRO EN SUPABASE (solo disponible sin redirect)
             if (!user || !pass) {
                 alert('Por favor ingrese Usuario y Contraseña para registrarse.');
                 return;
@@ -111,9 +129,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             // INICIO DE SESIÓN
-            if (!user || !pass) {
-                alert('Por favor ingrese su usuario y contraseña.');
-                return;
+            if (isClaveSolMode) {
+                // Modo Clave SOL: requiere RUC + Usuario + Contraseña → tabla 'usuarios'
+                if (!ruc || !user || !pass) {
+                    alert('Por favor ingrese su RUC, Usuario y Contraseña.');
+                    return;
+                }
+            } else {
+                // Modo participantes: requiere Usuario + Contraseña
+                if (!user || !pass) {
+                    alert('Por favor ingrese su usuario y contraseña.');
+                    return;
+                }
             }
 
             btnSubmit.disabled = true;
@@ -121,7 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSubmit.textContent = 'Verificando...';
 
             try {
-                const loginRes = await loginConSupabase(user, pass);
+                // Pasar RUC si estamos en modo Clave SOL para que loginConSupabase
+                // busque directamente en la tabla 'usuarios'
+                const loginRes = await loginConSupabase(user, pass, isClaveSolMode ? ruc : null);
                 if (loginRes.success) {
                     irADashboard();
                 } else if (loginRes.reason === 'ROL_RESTRINGIDO') {
@@ -140,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Iniciar sesión/Registro al presionar la tecla ENTER en los campos
-    const inputs = [userField, denomField, passField];
+    const inputs = [rucField, userField, denomField, passField];
     inputs.forEach(input => {
         if (input) {
             input.addEventListener('keydown', (e) => {

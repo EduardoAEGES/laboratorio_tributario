@@ -1052,77 +1052,54 @@
             window.scrollTo(0, 0);
         }
 
-        // ===== Registro de Dirección =====
-        // Provincias completas de los 25 departamentos. Los distritos solo están
-        // cargados para las provincias que se usan en clase; para el resto se
-        // propone el distrito capital, que en Perú lleva el nombre de la provincia.
-        const PROVINCIAS = {
-            'AMAZONAS': ['CHACHAPOYAS', 'BAGUA', 'BONGARA', 'CONDORCANQUI', 'LUYA', 'RODRIGUEZ DE MENDOZA', 'UTCUBAMBA'],
-            'ANCASH': ['HUARAZ', 'AIJA', 'ANTONIO RAYMONDI', 'ASUNCION', 'BOLOGNESI', 'CARHUAZ', 'CARLOS FERMIN FITZCARRALD', 'CASMA', 'CORONGO', 'HUARI', 'HUARMEY', 'HUAYLAS', 'MARISCAL LUZURIAGA', 'OCROS', 'PALLASCA', 'POMABAMBA', 'RECUAY', 'SANTA', 'SIHUAS', 'YUNGAY'],
-            'APURIMAC': ['ABANCAY', 'ANDAHUAYLAS', 'ANTABAMBA', 'AYMARAES', 'COTABAMBAS', 'CHINCHEROS', 'GRAU'],
-            'AREQUIPA': ['AREQUIPA', 'CAYLLOMA', 'CAMANA', 'CARAVELI', 'CASTILLA', 'CONDESUYOS', 'ISLAY', 'LA UNION'],
-            'AYACUCHO': ['HUAMANGA', 'CANGALLO', 'HUANCA SANCOS', 'HUANTA', 'LA MAR', 'LUCANAS', 'PARINACOCHAS', 'PAUCAR DEL SARA SARA', 'SUCRE', 'VICTOR FAJARDO', 'VILCAS HUAMAN'],
-            'CAJAMARCA': ['CAJAMARCA', 'CAJABAMBA', 'CELENDIN', 'CHOTA', 'CONTUMAZA', 'CUTERVO', 'HUALGAYOC', 'JAEN', 'SAN IGNACIO', 'SAN MARCOS', 'SAN MIGUEL', 'SAN PABLO', 'SANTA CRUZ'],
-            'CUSCO': ['CUSCO', 'ACOMAYO', 'ANTA', 'CALCA', 'CANAS', 'CANCHIS', 'CHUMBIVILCAS', 'ESPINAR', 'LA CONVENCION', 'PARURO', 'PAUCARTAMBO', 'QUISPICANCHI', 'URUBAMBA'],
-            'HUANCAVELICA': ['HUANCAVELICA', 'ACOBAMBA', 'ANGARAES', 'CASTROVIRREYNA', 'CHURCAMPA', 'HUAYTARA', 'TAYACAJA'],
-            'HUANUCO': ['HUANUCO', 'AMBO', 'DOS DE MAYO', 'HUACAYBAMBA', 'HUAMALIES', 'LEONCIO PRADO', 'MARAÑON', 'PACHITEA', 'PUERTO INCA', 'LAURICOCHA', 'YAROWILCA'],
-            'ICA': ['ICA', 'CHINCHA', 'NASCA', 'PALPA', 'PISCO'],
-            'JUNIN': ['HUANCAYO', 'CONCEPCION', 'CHANCHAMAYO', 'JAUJA', 'JUNIN', 'SATIPO', 'TARMA', 'YAULI', 'CHUPACA'],
-            'LA LIBERTAD': ['TRUJILLO', 'ASCOPE', 'BOLIVAR', 'CHEPEN', 'JULCAN', 'OTUZCO', 'PACASMAYO', 'PATAZ', 'SANCHEZ CARRION', 'SANTIAGO DE CHUCO', 'GRAN CHIMU', 'VIRU'],
-            'LAMBAYEQUE': ['CHICLAYO', 'FERREÑAFE', 'LAMBAYEQUE'],
-            'LIMA': ['LIMA', 'BARRANCA', 'CAJATAMBO', 'CANTA', 'CAÑETE', 'HUARAL', 'HUAROCHIRI', 'HUAURA', 'OYON', 'YAUYOS'],
-            'LORETO': ['MAYNAS', 'ALTO AMAZONAS', 'LORETO', 'MARISCAL RAMON CASTILLA', 'REQUENA', 'UCAYALI', 'DATEM DEL MARAÑON', 'PUTUMAYO'],
-            'MADRE DE DIOS': ['TAMBOPATA', 'MANU', 'TAHUAMANU'],
-            'MOQUEGUA': ['MARISCAL NIETO', 'GENERAL SANCHEZ CERRO', 'ILO'],
-            'PASCO': ['PASCO', 'DANIEL ALCIDES CARRION', 'OXAPAMPA'],
-            'PIURA': ['PIURA', 'AYABACA', 'HUANCABAMBA', 'MORROPON', 'PAITA', 'SULLANA', 'TALARA', 'SECHURA'],
-            'PUNO': ['PUNO', 'AZANGARO', 'CARABAYA', 'CHUCUITO', 'EL COLLAO', 'HUANCANE', 'LAMPA', 'MELGAR', 'MOHO', 'SAN ANTONIO DE PUTINA', 'SAN ROMAN', 'SANDIA', 'YUNGUYO'],
-            'SAN MARTIN': ['MOYOBAMBA', 'BELLAVISTA', 'EL DORADO', 'HUALLAGA', 'LAMAS', 'MARISCAL CACERES', 'PICOTA', 'RIOJA', 'SAN MARTIN', 'TOCACHE'],
-            'TACNA': ['TACNA', 'CANDARAVE', 'JORGE BASADRE', 'TARATA'],
-            'TUMBES': ['TUMBES', 'CONTRALMIRANTE VILLAR', 'ZARUMILLA'],
-            'PROV. CONST. DEL CALLAO': ['PROV. CONST. DEL CALLAO'],
-            'UCAYALI': ['CORONEL PORTILLO', 'ATALAYA', 'PADRE ABAD', 'PURUS']
-        };
-
-        const DISTRITOS = {
-            'AREQUIPA|AREQUIPA': ['AREQUIPA', 'ALTO SELVA ALEGRE', 'CAYMA', 'CERRO COLORADO', 'CHARACATO', 'CHIGUATA', 'JACOBO HUNTER', 'JOSE LUIS BUSTAMANTE Y RIVERO', 'LA JOYA', 'MARIANO MELGAR', 'MIRAFLORES', 'MOLLEBAYA', 'PAUCARPATA', 'POCSI', 'POLOBAYA', 'QUEQUEÑA', 'SABANDIA', 'SACHACA', 'SAN JUAN DE SIGUAS', 'SAN JUAN DE TARUCANI', 'SANTA ISABEL DE SIGUAS', 'SANTA RITA DE SIGUAS', 'SOCABAYA', 'TIABAYA', 'UCHUMAYO', 'VITOR', 'YANAHUARA', 'YARABAMBA', 'YURA'],
-            'AREQUIPA|ISLAY': ['MOLLENDO', 'COCACHACRA', 'DEAN VALDIVIA', 'ISLAY', 'MEJIA', 'PUNTA DE BOMBON'],
-            'LIMA|LIMA': ['LIMA', 'ANCON', 'ATE', 'BARRANCO', 'BREÑA', 'CARABAYLLO', 'CHACLACAYO', 'CHORRILLOS', 'CIENEGUILLA', 'COMAS', 'EL AGUSTINO', 'INDEPENDENCIA', 'JESUS MARIA', 'LA MOLINA', 'LA VICTORIA', 'LINCE', 'LOS OLIVOS', 'LURIGANCHO', 'LURIN', 'MAGDALENA DEL MAR', 'MIRAFLORES', 'PACHACAMAC', 'PUCUSANA', 'PUEBLO LIBRE', 'PUENTE PIEDRA', 'PUNTA HERMOSA', 'PUNTA NEGRA', 'RIMAC', 'SAN BARTOLO', 'SAN BORJA', 'SAN ISIDRO', 'SAN JUAN DE LURIGANCHO', 'SAN JUAN DE MIRAFLORES', 'SAN LUIS', 'SAN MARTIN DE PORRES', 'SAN MIGUEL', 'SANTA ANITA', 'SANTA MARIA DEL MAR', 'SANTA ROSA', 'SANTIAGO DE SURCO', 'SURQUILLO', 'VILLA EL SALVADOR', 'VILLA MARIA DEL TRIUNFO'],
-            'PROV. CONST. DEL CALLAO|PROV. CONST. DEL CALLAO': ['CALLAO', 'BELLAVISTA', 'CARMEN DE LA LEGUA REYNOSO', 'LA PERLA', 'LA PUNTA', 'MI PERU', 'VENTANILLA'],
-            'CUSCO|CUSCO': ['CUSCO', 'CCORCA', 'POROY', 'SAN JERONIMO', 'SAN SEBASTIAN', 'SANTIAGO', 'SAYLLA', 'WANCHAQ'],
-            'PUNO|PUNO': ['PUNO', 'ACORA', 'AMANTANI', 'ATUNCOLLA', 'CAPACHICA', 'CHUCUITO', 'COATA', 'HUATA', 'MAÑAZO', 'PAUCARCOLLA', 'PICHACANI', 'PLATERIA', 'SAN ANTONIO', 'TIQUILLACA', 'VILQUE'],
-            'TACNA|TACNA': ['TACNA', 'ALTO DE LA ALIANZA', 'CALANA', 'CIUDAD NUEVA', 'INCLAN', 'PACHIA', 'PALCA', 'POCOLLAY', 'SAMA', 'CORONEL GREGORIO ALBARRACIN LANCHIPA', 'LA YARADA LOS PALOS']
-        };
-
-        const TIPOS_VIA = ['', 'AVENIDA', 'CALLE', 'JIRON', 'PASAJE', 'ALAMEDA', 'BAJADA', 'BOULEVARD', 'CARRETERA', 'MALECON', 'OVALO', 'PARQUE', 'PLAZA', 'PROLONGACION', 'PUENTE', 'ZONA'];
-        const TIPOS_ZONA = ['', 'URBANIZACION', 'PUEBLO JOVEN', 'ASENTAMIENTO HUMANO', 'ASOCIACION', 'CONJUNTO HABITACIONAL', 'COOPERATIVA', 'FUNDO', 'GRUPO', 'PARQUE INDUSTRIAL', 'RESIDENCIAL', 'SECTOR', 'UNIDAD VECINAL', 'ZONA INDUSTRIAL', 'CASERIO', 'CENTRO POBLADO', 'COMUNIDAD CAMPESINA', 'OTROS'];
+        // Vía y zona salen de las tablas T5 y T6 de la Tabla Paramétrica PLAME.
+        const TIPOS_VIA = ['', 'AVENIDA', 'JIRÓN', 'CALLE', 'PASAJE', 'ALAMEDA', 'MALECÓN', 'OVALO', 'PARQUE', 'PLAZA', 'CARRETERA', 'BLOCK'];
+        const TIPOS_ZONA = ['', 'URB. URBANIZACIÓN', 'P.J. PUEBLO JOVEN', 'U.V. UNIDAD VECINAL', 'C.H. CONJUNTO HABITACIONAL', 'A.H. ASENTAMIENTO HUMANO', 'COO. COOPERATIVA', 'RES. RESIDENCIAL', 'Z.I. ZONA INDUSTRIAL', 'GRU. GRUPO', 'CAS. CASERÍO', 'FND. FUNDO'];
 
         function llenarSelect(id, valores) {
             document.getElementById(id).innerHTML =
                 valores.map(v => '<option>' + v + '</option>').join('');
         }
 
-        function cargarProvincias() {
-            const dep = document.getElementById('dir-departamento').value;
-            llenarSelect('dir-provincia', [''].concat(PROVINCIAS[dep] || []));
-            cargarDistritos();
+        // Los tres niveles del ubigeo salen de la tabla `ubigeo` de Supabase,
+        // cargada desde la Tabla Paramétrica PLAME (T7): 25 / 195 / 1834.
+        async function llenarUbigeo(idSelect, padre) {
+            const select = document.getElementById(idSelect);
+            const cliente = clienteSupabase();
+            if (!cliente) { select.innerHTML = '<option></option>'; return; }
+
+            let consulta = cliente.from('ubigeo').select('codigo,nombre').order('nombre');
+            consulta = padre === null ? consulta.eq('nivel', 1) : consulta.eq('padre', padre);
+
+            const { data, error } = await consulta;
+            if (error) { select.innerHTML = '<option></option>'; return; }
+
+            select.innerHTML = '<option value=""></option>' +
+                data.map(u => '<option value="' + u.codigo + '">' + u.nombre + '</option>').join('');
         }
 
-        function cargarDistritos() {
+        async function cargarProvincias() {
             const dep = document.getElementById('dir-departamento').value;
+            if (!dep) {
+                document.getElementById('dir-provincia').innerHTML = '<option></option>';
+                document.getElementById('dir-distrito').innerHTML = '<option></option>';
+                return;
+            }
+            await llenarUbigeo('dir-provincia', dep);
+            document.getElementById('dir-distrito').innerHTML = '<option></option>';
+        }
+
+        async function cargarDistritos() {
             const prov = document.getElementById('dir-provincia').value;
-            if (!prov) { llenarSelect('dir-distrito', ['']); return; }
-            // Si no hay distritos cargados para esa provincia, se ofrece su capital
-            const distritos = DISTRITOS[dep + '|' + prov] || [prov];
-            llenarSelect('dir-distrito', [''].concat(distritos));
+            if (!prov) { document.getElementById('dir-distrito').innerHTML = '<option></option>'; return; }
+            await llenarUbigeo('dir-distrito', prov);
         }
 
-        function abrirRegistroDireccion() {
-            if (!document.getElementById('dir-departamento').options.length) {
-                llenarSelect('dir-departamento', [''].concat(Object.keys(PROVINCIAS).sort()));
+        async function abrirRegistroDireccion() {
+            if (!document.getElementById('dir-tipo-via').options.length) {
                 llenarSelect('dir-tipo-via', TIPOS_VIA);
                 llenarSelect('dir-tipo-zona', TIPOS_ZONA);
-                cargarProvincias();
+                await llenarUbigeo('dir-departamento', null);
             }
             document.getElementById('treg-modal-direccion').classList.add('open');
         }
@@ -1131,7 +1108,7 @@
             document.getElementById('treg-modal-direccion').classList.remove('open');
         }
 
-        function limpiarRegistroDireccion() {
+        async function limpiarRegistroDireccion() {
             ['dir-nombre-via', 'dir-numero', 'dir-dpto', 'dir-interior', 'dir-manzana', 'dir-lote',
              'dir-km', 'dir-block', 'dir-etapa', 'dir-nombre-zona', 'dir-referencia']
                 .forEach(id => document.getElementById(id).value = '');
@@ -1139,13 +1116,18 @@
             document.getElementById('dir-tipo-via').selectedIndex = 0;
             document.getElementById('dir-tipo-zona').selectedIndex = 0;
             document.querySelector('input[name="dir-essalud"][value="SI"]').checked = true;
-            cargarProvincias();
+            await cargarProvincias();
         }
 
         // Arma la dirección en una sola línea, al estilo de la que muestra SUNAT
         function aceptarRegistroDireccion() {
             const v = id => document.getElementById(id).value.trim().toUpperCase();
             const conEtiqueta = (etq, id) => v(id) ? etq + ' ' + v(id) : '';
+            // Los selects de ubigeo guardan el código; para la línea se usa el nombre
+            const texto = id => {
+                const s = document.getElementById(id);
+                return s.selectedIndex >= 0 ? s.options[s.selectedIndex].text.trim() : '';
+            };
 
             const via = [v('dir-tipo-via'), v('dir-nombre-via'), v('dir-numero')].filter(Boolean).join(' ');
             const detalle = [
@@ -1158,7 +1140,8 @@
                 conEtiqueta('ETAPA', 'dir-etapa')
             ].filter(Boolean).join(' ');
             const zona = [v('dir-tipo-zona'), v('dir-nombre-zona')].filter(Boolean).join(' ');
-            const ubigeo = [v('dir-departamento'), v('dir-provincia'), v('dir-distrito')].filter(Boolean).join('-');
+            const ubigeo = [texto('dir-departamento'), texto('dir-provincia'), texto('dir-distrito')]
+                .filter(Boolean).join('-');
 
             const linea = [via, detalle, zona, ubigeo].filter(Boolean).join(' ');
             if (!linea) { alert('Complete los datos de la dirección.'); return; }

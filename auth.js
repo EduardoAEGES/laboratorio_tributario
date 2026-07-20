@@ -458,6 +458,8 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                     const loginRes = await loginConSupabase(user, pass);
                     if (loginRes.success) {
                         modal.style.display = 'none';
+                        // Actualizar botones del header si existen
+                        if (typeof actualizarBotonesAuth === 'function') actualizarBotonesAuth();
                         const dest = modal.dataset.pendingUrl;
                         if (dest) window.location.href = dest;
                         else if (callback) callback();
@@ -590,8 +592,9 @@ document.addEventListener('click', function (e) {
 function checkAuth() {
     const authData = sessionStorage.getItem('sunat_auth');
     if (!authData) {
-        sessionStorage.setItem('loginReferrer', window.location.pathname);
-        window.location.href = 'login.html';
+        const currentPage = window.location.pathname.split('/').pop() || '';
+        sessionStorage.setItem('loginReferrer', currentPage);
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(currentPage);
     }
 }
 
@@ -644,9 +647,10 @@ async function registrarUsuario(ruc, usuario, clave, denominacion, rol = 'INVITA
 // Verifica en qué página estamos
 const isLoginPage = window.location.pathname.includes('login.html') || window.location.pathname.endsWith('login');
 const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname.endsWith('/') || window.location.pathname === '';
+const isSolPage = window.location.pathname.includes('sol.html');
 
 // Solo requerir autenticación para otras páginas (los simuladores)
-if (!isLoginPage && !isIndexPage) {
+if (!isLoginPage && !isIndexPage && !isSolPage) {
     checkAuth();
 }
 

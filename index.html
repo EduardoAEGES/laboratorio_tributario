@@ -24,9 +24,16 @@
                 <img src="ESCUDO.png" alt="Escudo del Perú" style="width: 35px; height: auto;">
                 <span style="font-size: 20px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">ECOSISTEMA DE SIMULACIÓN ACADÉMICO</span>
             </div>
-            <div class="search-box">
-                <input type="text" placeholder="Buscar en SUNAT">
-                <button class="search-btn"><i class="fas fa-search"></i></button>
+            <div class="auth-header-btns" id="auth-header-btns">
+                <button type="button" class="header-auth-btn" id="btn-header-login" onclick="window.mostrarModalLogin('', function(){ actualizarBotonesAuth(); })">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+                <button type="button" class="header-auth-btn header-auth-register" id="btn-header-register" onclick="window.mostrarModalLoginRegistro()">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+                <button type="button" class="header-auth-btn header-auth-logout" id="btn-header-logout" style="display:none;" onclick="cerrarSesionIndex()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
             </div>
         </div>
     </header>
@@ -169,6 +176,50 @@
     </main>
 
     <style>
+        /* Auth Header Buttons */
+        .auth-header-btns {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-auth-btn {
+            padding: 8px 18px;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+        .header-auth-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .header-auth-register {
+            background: #fff;
+            color: #B91C1C;
+            border-color: #fff;
+        }
+        .header-auth-register:hover {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .header-auth-logout {
+            background: rgba(220,38,38,0.15);
+            border-color: rgba(255,255,255,0.6);
+        }
+        .header-auth-logout:hover {
+            background: rgba(220,38,38,0.35);
+        }
+
         .sol-btn:hover {
             background-color: #003a70;
             transform: translateY(-2px);
@@ -232,6 +283,46 @@
     </footer>
     <script src="script.js"></script>
     <script>
+        // ===== Gestión de botones de autenticación en el header =====
+        function actualizarBotonesAuth() {
+            const btnLogin = document.getElementById('btn-header-login');
+            const btnRegister = document.getElementById('btn-header-register');
+            const btnLogout = document.getElementById('btn-header-logout');
+            const authData = sessionStorage.getItem('sunat_auth');
+
+            if (authData) {
+                // Usuario con sesión activa: mostrar "Cerrar Sesión"
+                if (btnLogin) btnLogin.style.display = 'none';
+                if (btnRegister) btnRegister.style.display = 'none';
+                if (btnLogout) btnLogout.style.display = 'inline-flex';
+            } else {
+                // Sin sesión: mostrar "Iniciar Sesión" y "Registrarse"
+                if (btnLogin) btnLogin.style.display = 'inline-flex';
+                if (btnRegister) btnRegister.style.display = 'inline-flex';
+                if (btnLogout) btnLogout.style.display = 'none';
+            }
+        }
+
+        function cerrarSesionIndex() {
+            sessionStorage.removeItem('sunat_auth');
+            actualizarBotonesAuth();
+        }
+
+        // Abrir el modal directamente en modo Registro
+        window.mostrarModalLoginRegistro = function () {
+            window.mostrarModalLogin('', function () {
+                actualizarBotonesAuth();
+            });
+            // Después de que el modal se cree/muestre, activar la pestaña de registro
+            setTimeout(function () {
+                const tabRegister = document.getElementById('modal-tab-register');
+                if (tabRegister) tabRegister.click();
+            }, 50);
+        };
+
+        // Actualizar botones al cargar la página
+        document.addEventListener('DOMContentLoaded', actualizarBotonesAuth);
+
         function irAlCurso() {
             const val = document.getElementById('select-cursos').value;
             if (!val) {
@@ -242,7 +333,7 @@
             
             // Si no está autenticado, abrir ventana flotante encima de la pantalla
             if (!sessionStorage.getItem('sunat_auth')) {
-                window.mostrarModalLogin(targetUrl);
+                window.mostrarModalLogin(targetUrl, function() { actualizarBotonesAuth(); });
             } else {
                 window.location.href = targetUrl;
             }

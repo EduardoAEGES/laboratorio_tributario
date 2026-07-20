@@ -3735,24 +3735,7 @@
                                     <th style="padding: 10px 14px; text-align: center; font-weight: bold; width: 110px;">Afecto</th>
                                 </tr>
                             </thead>
-                            <tbody id="afect-tabla-body">
-                                <tr style="border-bottom: 1px solid #EEE;">
-                                    <td style="padding: 10px 14px; text-align: center; border-right: 1px solid #DDD;">ESSALUD SEGURO REGULAR TRABAJADOR</td>
-                                    <td style="padding: 10px 14px; text-align: center;">Si(X) No( )</td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid #EEE;">
-                                    <td style="padding: 10px 14px; text-align: center; border-right: 1px solid #DDD;">SISTEMA NACIONAL DE PENSIONES 19990</td>
-                                    <td style="padding: 10px 14px; text-align: center;">Si(X) No( )</td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid #EEE;">
-                                    <td style="padding: 10px 14px; text-align: center; border-right: 1px solid #DDD;">SISTEMA PRIVADO DE PENSIONES</td>
-                                    <td style="padding: 10px 14px; text-align: center;">Si(X) No( )</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px 14px; text-align: center; border-right: 1px solid #DDD;">RENTA 5TA CATEGORÍA RETENCIONES</td>
-                                    <td style="padding: 10px 14px; text-align: center;">Si(X) No( )</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="afect-tabla-body"><!-- se llena desde AFECTACIONES_T22 --></tbody>
                         </table>
 
                         <div style="display: flex; justify-content: center; margin-top: 22px;">
@@ -4137,6 +4120,45 @@
         }
 
         // ===== Mantenimiento de Conceptos (PLAME Web) =====
+        // Afectaciones por concepto, tomadas de la hoja "T22 Ing, Trib y Desc" de la
+        // Tabla Paramétrica PLAME. Cada valor son 4 letras S/N en este orden:
+        // ESSALUD SEG. REG. TRABAJADOR | SNP 19990 | SPP | RENTA 5TA RETENCIONES
+        const AFECT_T22_ETIQUETAS = [
+            'ESSALUD SEGURO REGULAR TRABAJADOR',
+            'SISTEMA NACIONAL DE PENSIONES 19990',
+            'SISTEMA PRIVADO DE PENSIONES',
+            'RENTA 5TA CATEGORÍA RETENCIONES'
+        ];
+
+        const AFECTACIONES_T22 = {
+            '0101': 'SSSS', '0102': 'SSSS', '0103': 'SSSS', '0104': 'SSSS', '0105': 'SSSS', '0106': 'SSSS',
+            '0107': 'SSSS', '0108': 'SSSS', '0109': 'SNSS', '0110': 'SNSN', '0111': 'SSSS', '0112': 'SSSS',
+            '0113': 'NNNS', '0114': 'SSSS', '0115': 'SSSS', '0116': 'SSNS', '0117': 'SSSS', '0118': 'SSSS',
+            '0119': 'SSSS', '0120': 'SSNN', '0121': 'SSSS', '0122': 'SSSS', '0123': 'SSSS', '0124': 'SSSN',
+            '0125': 'SSSS', '0126': 'NSSN', '0127': 'SSSN', '0201': 'SSSS', '0202': 'NNNS', '0203': 'NNNS',
+            '0204': 'NNNS', '0205': 'NNNS', '0206': 'NNNS', '0207': 'SSSS', '0208': 'NNNS', '0209': 'NNNN',
+            '0210': 'SSSS', '0211': 'NNNS', '0212': 'NNNS', '0213': 'SSSS', '0214': 'NNNN', '0301': 'SSSS',
+            '0302': 'NNNS', '0303': 'SSSS', '0304': 'SSSS', '0305': 'SSSS', '0306': 'SSSS', '0307': 'NNNN',
+            '0308': 'SSSS', '0309': 'SSSS', '0310': 'SSSS', '0311': 'SSSS', '0312': 'NNNS', '0313': 'NNNS',
+            '0401': 'SSSS', '0402': 'SSSS', '0403': 'NNNS', '0404': 'SSSS', '0405': 'SSSS', '0406': 'NNNS',
+            '0407': 'NNNS', '0501': 'NNNN', '0502': 'NNNN', '0503': 'NNNN', '0504': 'NNNN', '0505': 'NNNN',
+            '0506': 'NNNN', '0507': 'NNNN', '0901': 'NNNS', '0902': 'NNNS', '0903': 'NNNS', '0904': 'NNNN',
+            '0905': 'SSSS', '0906': 'NNNN', '0907': 'SSSS', '0908': 'SSSS', '0909': 'NNNS', '0910': 'NNNS',
+            '0911': 'NNNS', '0912': 'NNNN', '0913': 'NNNS', '0914': 'NNNS', '0915': 'NSSN', '0916': 'NSSN',
+            '0917': 'NNNN', '0918': 'SSSN', '0919': 'SSSS', '0920': 'SSSS', '0921': 'NNNN', '0922': 'NNNN',
+            '0923': 'NNNS', '0924': 'NNNS', '0925': 'SNNN', '1001': 'NNNN', '1002': 'NNNN', '1003': 'NNNN',
+            '1004': 'NNNN', '1005': 'NNNN', '1006': 'NNNN', '1007': 'NNNN', '1008': 'NNNN', '1009': 'NNNN',
+            '1010': 'NNNN', '1011': 'NNNN', '1012': 'NNNN', '1013': 'NNNN', '1014': 'NNNN', '1015': 'NNNN',
+            '1016': 'NNNN', '1017': 'NNNN', '1018': 'NNNN', '1019': 'NNNN', '1020': 'NNNN', '2001': 'SSSS',
+            '2002': 'SSSS', '2003': 'SSSS', '2004': 'SSSS', '2005': 'SSSS', '2006': 'SSSS', '2007': 'SSSS',
+            '2008': 'SSSS', '2009': 'NNNS', '2010': 'NNNN', '2011': 'NNNN', '2012': 'NNNN', '2013': 'NNNN',
+            '2014': 'NNNN', '2015': 'SSSS', '2016': 'NNNN', '2017': 'SNSS', '2018': 'SNSS', '2019': 'NNNS',
+            '2020': 'SSSS', '2021': 'NNNS', '2022': 'NNNS', '2023': 'NNNS', '2024': 'NNNN', '2025': 'NNNN',
+            '2026': 'SSNS', '2027': 'NNNS', '2028': 'SSNS', '2029': 'NNNS', '2030': 'SSNS', '2031': 'NNNS',
+            '2032': 'SSNS', '2033': 'NNNS', '2034': 'SSNS', '2035': 'NNNS', '2036': 'SSNS', '2037': 'NNNS',
+            '2038': 'NNNS', '2039': 'SSSN', '2040': 'SSSS', '2041': 'NNNS'
+        };
+
         const CONCEPTOS_PLAME = [
             { codigo: '0103', tipo: 'INGRESOS', desc: 'COMISIONES O DESTAJO', afectaciones: true, active: false },
             { codigo: '0105', tipo: 'INGRESOS', desc: 'TRABAJO SOBRETIEMPO (H. EXTRAS 25%)', afectaciones: true, active: true },
@@ -4226,6 +4248,26 @@
 
         function mostrarAfectacionesConcepto(codigo, desc) {
             document.getElementById('afect-concepto-titulo').textContent = codigo + ' ' + desc;
+
+            const afect = AFECTACIONES_T22[codigo];
+            const cuerpo = document.getElementById('afect-tabla-body');
+
+            if (!afect) {
+                // Concepto que no figura en la T22 de esta tabla paramétrica
+                cuerpo.innerHTML = '<tr><td colspan="2" style="padding: 16px 14px; text-align: center; color: #777;">' +
+                    'Este concepto no figura en la Tabla Paramétrica PLAME (T22).</td></tr>';
+                abrirModal('modal-afectaciones-concepto');
+                return;
+            }
+
+            cuerpo.innerHTML = AFECT_T22_ETIQUETAS.map((etiqueta, i) => {
+                const si = afect[i] === 'S';
+                return '<tr style="border-bottom: 1px solid #EEE;">' +
+                    '<td style="padding: 10px 14px; text-align: center; border-right: 1px solid #DDD;">' + etiqueta + '</td>' +
+                    '<td style="padding: 10px 14px; text-align: center;">' +
+                    'Si(' + (si ? 'X' : '&nbsp;') + ') No(' + (si ? '&nbsp;' : 'X') + ')</td></tr>';
+            }).join('');
+
             abrirModal('modal-afectaciones-concepto');
         }
 

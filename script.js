@@ -76,22 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add CSS for simple fade transition
-    servicesContent.style.transition = 'opacity 0.3s ease';
-
-    // Search Box Interaction
-    const searchInput = document.querySelector('.search-box input');
-    const searchBtn = document.querySelector('.search-btn');
-
-    searchBtn.addEventListener('click', () => {
-        if (searchInput.value.trim() !== "") {
-            alert(`Buscando: ${searchInput.value}... (Simulación)`);
-        }
-    });
-
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchBtn.click();
-        }
-    });
-
+    if (servicesContent) {
+        servicesContent.style.transition = 'opacity 0.3s ease';
+    }
 });
