@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="auth.js"></script>
+    <script src="t10_ocupaciones.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* ===== T-Registro ===== */
         .treg-main {
@@ -18,6 +20,8 @@
             padding: 18px 20px 40px 20px;
             font-family: 'Roboto', sans-serif;
             background: #FFF;
+            min-width: 0;
+            overflow-x: hidden;
         }
 
         .treg-titulo {
@@ -225,8 +229,10 @@
 
         .treg-cat-panel {
             border: 1px solid #CCC;
-            padding: 16px 20px;
+            padding: 12px 14px;
             font-size: 13px;
+            overflow: hidden;
+            min-width: 0;
         }
 
         .treg-cat-lista { list-style: none; margin: 0 0 10px 40px; padding: 0; }
@@ -414,6 +420,394 @@
             .treg-contacto-grid { grid-template-columns: 1fr; }
             .treg-busqueda input[type="text"] { width: 100%; }
             .treg-cat-tabs { flex-wrap: wrap; }
+        }
+
+        /* ===== Secciones colapsables del Trabajador ===== */
+        .treg-collapsible-header {
+            background: #EFEFE6;
+            border: 1px solid #DDD;
+            padding: 9px 14px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #444;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 0;
+        }
+        .treg-collapsible-header:first-child { margin-top: 0; }
+        .treg-collapsible-header .treg-arrow {
+            display: inline-block;
+            width: 0; height: 0;
+            border-left: 6px solid #444;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            transition: transform .2s;
+            flex-shrink: 0;
+        }
+        .treg-collapsible-header.open .treg-arrow {
+            transform: rotate(90deg);
+        }
+        .treg-collapsible-body {
+            display: none;
+            border: 1px solid #DDD;
+            border-top: none;
+            padding: 12px 10px;
+            font-size: 12.5px;
+            background: #FFF;
+            overflow: hidden;
+        }
+        .treg-collapsible-body.open { display: block; }
+
+        /* Formulario de datos laborales */
+        .trab-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            overflow: hidden;
+        }
+        .trab-col {
+            padding: 0;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .trab-col:first-child {
+            border-right: 1px solid #DDD;
+            padding-right: 10px;
+        }
+        .trab-col:last-child {
+            padding-left: 10px;
+        }
+        .trab-fila {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            padding: 3px 0;
+            flex-wrap: nowrap;
+        }
+        .trab-fila > label {
+            min-width: 130px;
+            max-width: 140px;
+            color: #333;
+            font-weight: 500;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .trab-fila input[type="text"],
+        .trab-fila select {
+            border: 1px solid #BBB;
+            padding: 2px 4px;
+            font-size: 12px;
+            font-family: inherit;
+            flex: 1;
+            min-width: 0;
+            max-width: 180px;
+        }
+        .trab-fila input[type="text"].trab-fecha {
+            max-width: 80px;
+        }
+        .trab-fila a.trab-detalle,
+        a.trab-detalle {
+            color: #1B6CB0;
+            font-style: italic;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .trab-fila a.trab-detalle:hover,
+        a.trab-detalle:hover { text-decoration: underline; }
+
+        /* Fieldset de establecimiento */
+        .trab-fieldset {
+            border: 1px solid #AAA;
+            padding: 8px 10px;
+            margin: 0;
+            font-size: 12.5px;
+        }
+        .trab-fieldset legend {
+            font-weight: 700;
+            color: #333;
+            font-size: 12px;
+            padding: 0 4px;
+        }
+
+        /* Bloque periodo laboral */
+        .trab-periodo-bloque {
+            border: 1px solid #CCC;
+            padding: 6px 8px;
+            background: #FAFAFA;
+            overflow: hidden;
+        }
+        .trab-periodo-titulo {
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        .trab-periodo-grid {
+            display: grid;
+            grid-template-columns: auto 80px 80px 1fr auto;
+            gap: 3px 6px;
+            align-items: center;
+            font-size: 11.5px;
+        }
+        .trab-periodo-grid .trab-plbl {
+            color: #333;
+            font-weight: 500;
+            font-size: 11.5px;
+        }
+        .trab-periodo-grid input[type="text"] {
+            border: 1px solid #BBB;
+            padding: 2px 3px;
+            font-size: 11.5px;
+            font-family: inherit;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        .trab-periodo-grid select {
+            border: 1px solid #BBB;
+            padding: 2px 3px;
+            font-size: 11.5px;
+            font-family: inherit;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        /* Checkboxes de jornada */
+        .trab-check-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .trab-check-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 400 !important;
+            min-width: 0 !important;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* En la columna derecha todos los rótulos comparten ancho, así los
+           checkboxes de jornada y los radios de discapacidad/sindicalizado
+           arrancan en la misma columna. */
+        .trab-fila.trab-derecha > label {
+            min-width: 175px;
+            max-width: 175px;
+            align-self: flex-start;
+        }
+
+        /* Constancia de alta del prestador */
+        .cons-fila {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            padding: 3px 0;
+        }
+        .cons-fila > span { min-width: 220px; color: #333; }
+        .cons-fila > b { color: #A0522D; font-weight: 500; }
+        .cons-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .cons-tabla td {
+            border-top: 1px solid #DDD;
+            border-bottom: 1px solid #DDD;
+            padding: 9px 6px;
+            color: #333;
+        }
+        .cons-tabla a { color: #1B6CB0; }
+
+        /* Fechas editables dentro de la grilla de Períodos de Formación */
+        .treg-periodos-table input.form-fecha {
+            border: 1px solid #999;
+            padding: 3px 5px;
+            font-size: 12.5px;
+            font-family: inherit;
+            width: 130px;
+            text-align: center;
+        }
+
+        /* Bloque SCTR / coberturas: rótulo + dos columnas de radios alineadas */
+        .ss-sctr-grid {
+            display: grid;
+            grid-template-columns: 150px 140px 1fr;
+            align-items: center;
+            gap: 8px 10px;
+            font-size: 12.5px;
+        }
+        .ss-sctr-grid > label:first-child,
+        .ss-sctr-grid > label:nth-child(3n+1) { color: #333; font-weight: 500; }
+        .ss-sctr-grid .ss-opt {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .ss-sctr-fechas {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 2px 10px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        /* Consulta SBS simulada */
+        .sbs-sim-box {
+            background: #FFF;
+            width: 100%;
+            max-width: 560px;
+            border: 1px solid #999;
+            box-shadow: 0 4px 18px rgba(0,0,0,.3);
+        }
+        .sbs-sim-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #2A6BB5;
+            color: #FFF;
+            padding: 10px 14px;
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+        .sbs-sim-head .sbs-sim-logo { height: 30px; border-radius: 50%; background: #FFF; }
+        .sbs-sim-head .fa-circle-xmark { margin-left: auto; cursor: pointer; }
+        .sbs-sim-body { padding: 18px 22px; font-size: 13px; }
+        .sbs-sim-aviso { color: #C0392B; font-weight: 700; margin: 0 0 6px 0; }
+        .sbs-sim-sim {
+            background: #FFF4F4; border: 1px solid #F0C6C6; color: #A33;
+            font-size: 11.5px; padding: 6px 10px; margin: 0 0 16px 0; text-align: center;
+        }
+        .sbs-sim-fila { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .sbs-sim-fila > label { min-width: 190px; color: #1B5AA0; font-weight: 700; font-size: 12.5px; }
+        .sbs-sim-fila select, .sbs-sim-fila input[type="text"] {
+            border: 1px solid #999; padding: 4px 6px; font-size: 13px; font-family: inherit; width: 190px;
+        }
+        .sbs-req { color: #C0392B; }
+        .sbs-sim-ley { font-size: 11px; color: #555; line-height: 1.4; margin: 12px 0 6px 0; }
+        .sbs-sim-buscar {
+            background: #2A6BB5; color: #FFF; border: none; border-radius: 4px;
+            padding: 9px 34px; font-size: 14px; font-weight: 700; cursor: pointer;
+        }
+        .sbs-sim-buscar:hover { background: #21568F; }
+        .sbs-sim-resultado {
+            border: 1px solid #CCC; background: #FFF; padding: 14px 16px;
+            font-size: 12px; margin-top: 14px; line-height: 1.5;
+        }
+        .sbs-rep-titulo { color: #1B5AA0; font-weight: 700; font-size: 12.5px; margin-bottom: 10px; }
+        .sbs-rep-linea {
+            display: flex; justify-content: space-between; gap: 20px;
+            color: #1B5AA0; padding: 3px 0;
+        }
+        .sbs-rep-linea b { color: #1B5AA0; white-space: nowrap; }
+        .sbs-rep-p { color: #1B5AA0; margin: 8px 0 0 0; }
+        .sbs-rep-box { border: 1px solid #CCC; padding: 10px 14px; margin: 14px 0; }
+        .sbs-rep-box-tit { text-align: center; font-weight: 700; color: #333; letter-spacing: 1px; margin-bottom: 8px; }
+        .sbs-rep-sub { color: #1B5AA0; font-weight: 700; text-decoration: underline; margin: 10px 0 4px 0; }
+        .sbs-rep-box .sbs-rep-p { color: #555; }
+        .sbs-rep-tel { color: #C0392B; margin: 10px 0 0 0; }
+
+        /* Radio group inline */
+        .trab-radio-group {
+            display: flex;
+            gap: 12px;
+        }
+        .trab-radio-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 400 !important;
+            min-width: 0 !important;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* ===== Modal de Periodos Laborales ===== */
+        .treg-periodos-modal {
+            background: #FFF;
+            border: 1px solid #AAA;
+            width: 100%;
+            max-width: 680px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.3);
+            padding: 18px 22px;
+        }
+        .treg-periodos-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .treg-periodos-head span {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: #333;
+        }
+        .treg-periodos-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin-bottom: 14px;
+        }
+        .treg-periodos-table th {
+            background: #2A9FD6;
+            color: #FFF;
+            padding: 7px 8px;
+            border: 1px solid #1C86B8;
+            font-weight: 500;
+            text-align: center;
+        }
+        .treg-periodos-table td {
+            border: 1px solid #DDD;
+            padding: 7px 8px;
+            color: #333;
+        }
+        .treg-periodos-table td .treg-icon-edit {
+            cursor: pointer; color: #28A745; font-size: 14px;
+        }
+        .treg-periodos-table td .treg-icon-del {
+            cursor: pointer; color: #DC3545; font-size: 14px;
+        }
+        .treg-periodos-acciones {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Sub-modal: edición de un periodo */
+        #treg-modal-periodo-edit,
+        #treg-modal-tipo-trab-edit { z-index: 600; align-items: center; }
+        .treg-periodo-edit-modal {
+            background: #FFF;
+            border: 1px solid #AAA;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.3);
+        }
+        .treg-periodo-edit-body {
+            padding: 14px 16px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px 10px;
+            align-items: center;
+            font-size: 12.5px;
+            color: #333;
+        }
+        .treg-periodo-edit-body label { text-align: right; }
+        .treg-periodo-edit-body input,
+        .treg-periodo-edit-body select {
+            border: 1px solid #999;
+            padding: 3px 5px;
+            font-size: 12.5px;
+            width: 100%;
         }
     </style>
 </head>
@@ -648,19 +1042,455 @@
                                     <li>Personal en formación laboral</li>
                                     <li>Personal de Terceros</li>
                                 </ul>
+                                <div style="text-align: center; margin-top: 18px;">
+                                    <button class="treg-btn" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Aceptar</button>
+                                </div>
                             </div>
                             <div id="tpanel-trabajador" style="display: none;">
-                                <p class="treg-cat-pendiente">Datos del Trabajador — EN PROCESO DE IMPLEMENTACION.</p>
+
+                                <!-- Sección: Datos laborales -->
+                                <div class="treg-collapsible-header open" onclick="toggleSeccion(this);">
+                                    <span class="treg-arrow"></span> Datos laborales
+                                </div>
+                                <div class="treg-collapsible-body open">
+                                    <div class="trab-grid">
+                                        <!-- Columna izquierda -->
+                                        <div class="trab-col">
+                                            <div class="trab-periodo-bloque">
+                                                <div class="trab-periodo-grid">
+                                                    <span class="trab-plbl"></span>
+                                                    <span class="trab-plbl" style="text-align:center;">Fecha de Inicio<br>(dd/mm/aaaa)</span>
+                                                    <span class="trab-plbl" style="text-align:center;">Fecha de Fin<br>(dd/mm/aaaa)</span>
+                                                    <span class="trab-plbl">Motivo de baja del registro</span>
+                                                    <span></span>
+
+                                                    <span class="trab-plbl">Periodo<br>laboral:</span>
+                                                    <input type="text" id="trab-periodo-inicio" class="trab-fecha" value="01/07/2026">
+                                                    <input type="text" id="trab-periodo-fin" class="trab-fecha" value="">
+                                                    <select id="trab-motivo-baja" style="max-width:220px;">
+                                                        <option value=""></option>
+                                                        <option>RENUNCIA</option>
+                                                        <option>RENUNCIA CON INCENTIVOS</option>
+                                                        <option>DESPIDO O DESTITUCIÓN</option>
+                                                        <option>CESE COLECTIVO</option>
+                                                        <option>JUBILACIÓN</option>
+                                                        <option>INVALIDEZ ABSOLUTA PERMANENTE</option>
+                                                        <option>TERMINACIÓN DE LA OBRA O SERVICIO O VENCIMIENTO DEL PLAZO</option>
+                                                        <option>MUTUO DISENSO</option>
+                                                        <option>FALLECIMIENTO</option>
+                                                        <option>BAJA POR SUCESIÓN EN POSICIÓN DEL EMPLEADOR</option>
+                                                        <option>EXTINCIÓN O LIQUIDACIÓN DEL EMPLEADOR</option>
+                                                        <option>NO SE INICIO LA REL. LABORAL O PREST. DE SERVICIOS</option>
+                                                    </select>
+                                                    <a href="#" class="trab-detalle" onclick="abrirPeriodosLaborales(); return false;">Detalle</a>
+                                                </div>
+                                            </div>
+
+                                            <div class="trab-periodo-bloque" style="border-top: none;">
+                                                <div class="trab-periodo-grid" style="grid-template-columns: auto 1fr auto 1fr auto;">
+                                                    <span class="trab-plbl"></span>
+                                                    <span class="trab-plbl" style="text-align:center;">Fecha de Inicio<br>(dd/mm/aaaa)</span>
+                                                    <span class="trab-plbl" style="text-align:center;">Fecha de Fin<br>(dd/mm/aaaa)</span>
+                                                    <span></span>
+                                                    <span></span>
+
+                                                    <span class="trab-plbl">Tipo de<br>trabajador:</span>
+                                                    <select id="trab-tipo-trabajador" style="max-width:180px;" onchange="cambiarTipoTrabajador();">
+                                                        <option value=""></option>
+                                                    </select>
+                                                    <input type="text" id="trab-tipo-inicio" class="trab-fecha" value="" placeholder="dd/mm/aaaa">
+                                                    <input type="text" id="trab-tipo-fin" class="trab-fecha" value="" placeholder="dd/mm/aaaa">
+                                                    <a href="#" class="trab-detalle" onclick="abrirTiposTrabajador(); return false;">Detalle</a>
+                                                </div>
+                                            </div>
+
+                                            <div class="trab-fila">
+                                                <label>Régimen laboral:</label>
+                                                <select id="trab-regimen" onchange="cambiarRegimenLaboral();">
+                                                    <option value=""></option>
+                                                    <option>D LEG N.° 728</option>
+                                                    <option>MICROEMPRESA</option>
+                                                    <option>AGRARIO</option>
+                                                    <option>MINEROS</option>
+                                                    <option>OTROS</option>
+                                                </select>
+                                            </div>
+                                            <div class="trab-fila">
+                                                <label>Categoría ocupacional:</label>
+                                                <select id="trab-categ-ocup">
+                                                    <option value=""></option>
+                                                    <option value="1">EJECUTIVO</option>
+                                                    <option value="2">OBRERO</option>
+                                                    <option value="3">EMPLEADO</option>
+                                                </select>
+                                            </div>
+                                            <div class="trab-fila" id="trab-fila-ocupacion" style="display:none;">
+                                                <label>Ocupación:</label>
+                                                <div style="display:grid; grid-template-columns:auto 1fr; gap:2px 8px; flex:1;">
+                                                    <span class="trab-plbl">Código</span>
+                                                    <span class="trab-plbl">Nombre</span>
+                                                    <input type="text" id="trab-ocup-codigo" maxlength="6" style="max-width:70px;" readonly>
+                                                    <input type="text" id="trab-ocup-nombre" list="lista-ocupaciones" placeholder="Escriba para buscar..." oninput="cambiarOcupacion();" autocomplete="off">
+                                                    <datalist id="lista-ocupaciones"></datalist>
+                                                </div>
+                                            </div>
+                                            <div class="trab-fila">
+                                                <label>Tipo de contrato:</label>
+                                                <select id="trab-tipo-contrato">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                            <div class="trab-fila">
+                                                <label>Tipo de pago y periodicidad de ingreso:</label>
+                                                <select id="trab-tipo-pago" style="max-width:150px;">
+                                                    <option value=""></option>
+                                                </select>
+                                                <select id="trab-periodicidad" style="max-width:130px;">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                            <div class="trab-fila">
+                                                <label>Monto de remuneración<br>básica inicial:</label>
+                                                <input type="text" id="trab-remuneracion" value="">
+                                            </div>
+                                        </div>
+
+                                        <!-- Columna derecha -->
+                                        <div class="trab-col">
+                                            <fieldset class="trab-fieldset">
+                                                <legend>Establecimiento donde labora:</legend>
+                                                <div class="trab-fila">
+                                                    <select id="trab-establecimiento" onchange="cambiarEstablecimiento();" style="max-width:none;">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </div>
+                                                <div class="trab-fila">
+                                                    <label style="min-width:70px; max-width:70px;">Cod. Local</label>
+                                                    <input type="text" id="trab-cod-local" value="" readonly style="background:#E9E9E9; max-width:70px;">
+                                                    <label style="min-width:40px; max-width:40px;">Local</label>
+                                                    <input type="text" id="trab-local" value="" readonly style="background:#E9E9E9; max-width:180px;">
+                                                    <a href="#" class="trab-detalle" onclick="abrirEstablecimientos(); return false;">Detalle</a>
+                                                </div>
+                                                <div class="trab-fila">
+                                                    <label style="min-width:70px; max-width:70px;">Tipo:</label>
+                                                    <span id="trab-tipo-estab" style="color:#333; font-style:italic; font-size:12px;"></span>
+                                                </div>
+                                            </fieldset>
+
+                                            <div class="trab-fila trab-derecha" style="margin-top:12px;">
+                                                <label>Jornada laboral:</label>
+                                                <div class="trab-check-group">
+                                                    <label><input type="checkbox" id="trab-jornada-max"> Jornada de trabajo máxima</label>
+                                                    <label><input type="checkbox" id="trab-jornada-atipica"> Jornada atípica o acumulativa</label>
+                                                    <label><input type="checkbox" id="trab-jornada-nocturna"> Trabajo en horario nocturno</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="trab-fila trab-derecha" style="margin-top:10px;">
+                                                <label>Situación especial:</label>
+                                                <select id="trab-situacion-esp" style="max-width:none;">
+                                                    <option>NINGUNA</option>
+                                                    <option>TRABAJADOR DE DIRECCIÓN - PRESENCIAL</option>
+                                                    <option>TRABAJADOR DE CONFIANZA - PRESENCIAL</option>
+                                                    <option>TRABAJADOR DE DIRECCIÓN - TELETRABAJO MIXTO</option>
+                                                    <option>TRABAJADOR DE CONFIANZA - TELETRABAJO MIXTO</option>
+                                                    <option>TRABAJADOR DE DIRECCIÓN - TELETRABAJO COMPLETO</option>
+                                                    <option>TRABAJADOR DE CONFIANZA - TELETRABAJO COMPLETO</option>
+                                                    <option>TELETRABAJO MIXTO</option>
+                                                    <option>TELETRABAJO COMPLETO</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="trab-fila trab-derecha">
+                                                <label>¿Persona con discapacidad?</label>
+                                                <div class="trab-radio-group">
+                                                    <label><input type="radio" name="trab-discapacidad" value="SI"> Sí</label>
+                                                    <label><input type="radio" name="trab-discapacidad" value="NO" checked> No</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="trab-fila trab-derecha">
+                                                <label>¿Sindicalizado?</label>
+                                                <div class="trab-radio-group">
+                                                    <label><input type="radio" name="trab-sindicalizado" value="SI"> Sí</label>
+                                                    <label><input type="radio" name="trab-sindicalizado" value="NO" checked> No</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="trab-fila">
+                                                <label>Situación:</label>
+                                                <span style="color:#A0522D; font-weight:500;" id="trab-situacion-txt">Activo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sección: Datos de Seguridad Social -->
+                                <div class="treg-collapsible-header open" onclick="toggleSeccion(this);">
+                                    <span class="treg-arrow"></span> Datos de Seguridad Social
+                                </div>
+                                <div class="treg-collapsible-body open">
+                                    <div class="trab-grid">
+                                        <!-- Columna izquierda: régimen de salud y pensionario -->
+                                        <div class="trab-col">
+                                            <fieldset class="trab-fieldset">
+                                                <legend>Régimen de salud:</legend>
+                                                <div class="trab-fila">
+                                                    <span class="trab-plbl" style="font-style:italic;">Régimen de salud</span>
+                                                </div>
+                                                <div class="trab-fila">
+                                                    <select id="ss-salud-regimen" disabled style="background:#E9E9E9; max-width:none;">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </div>
+                                                <div class="trab-periodo-grid" style="grid-template-columns:1fr 1fr auto; margin-top:6px;">
+                                                    <span class="trab-plbl" style="font-style:italic;">Fecha de Inicio<br>(dd/mm/aaaa)</span>
+                                                    <span class="trab-plbl" style="font-style:italic;">Fecha de Fin<br>(dd/mm/aaaa)</span>
+                                                    <span></span>
+                                                    <input type="text" id="ss-salud-inicio" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                                    <input type="text" id="ss-salud-fin" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                                    <a href="#" class="trab-detalle" onclick="abrirPeriodosSalud(); return false;">Detalle</a>
+                                                </div>
+                                            </fieldset>
+
+                                            <fieldset class="trab-fieldset" style="margin-top:12px;">
+                                                <legend>Régimen pensionario:</legend>
+                                                <div class="trab-fila" style="justify-content:space-between;">
+                                                    <span class="trab-plbl" style="font-style:italic;">Régimen pensionario</span>
+                                                    <a href="#" class="trab-detalle" onclick="abrirConsultaSBS(); return false;">Consulta SBS</a>
+                                                </div>
+                                                <div class="trab-fila">
+                                                    <select id="ss-pension-regimen" disabled style="background:#E9E9E9; max-width:none;">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </div>
+                                                <div class="trab-fila">
+                                                    <label style="min-width:50px; max-width:50px;">CUSPP</label>
+                                                    <input type="text" id="ss-cuspp" maxlength="12" autocomplete="off" style="max-width:150px;">
+                                                </div>
+                                                <div class="trab-periodo-grid" style="grid-template-columns:1fr 1fr auto; margin-top:6px;">
+                                                    <span class="trab-plbl" style="font-style:italic;">Fecha de Inicio<br>(dd/mm/aaaa)</span>
+                                                    <span class="trab-plbl" style="font-style:italic;">Fecha de Fin<br>(dd/mm/aaaa)</span>
+                                                    <span></span>
+                                                    <input type="text" id="ss-pension-inicio" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                                    <input type="text" id="ss-pension-fin" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                                    <a href="#" class="trab-detalle" onclick="abrirPeriodosPension(); return false;">Detalle</a>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+                                        <!-- Columna derecha: SCTR y coberturas -->
+                                        <div class="trab-col">
+                                            <fieldset class="trab-fieldset">
+                                                <div class="ss-sctr-grid">
+                                                    <label>¿Aporta al SCTR?</label>
+                                                    <label class="ss-opt"><input type="radio" name="ss-sctr" value="SI"> Sí</label>
+                                                    <label class="ss-opt"><input type="radio" name="ss-sctr" value="NO" checked> No</label>
+
+                                                    <label>Cobertura Pensión:</label>
+                                                    <label class="ss-opt"><input type="radio" name="ss-cob-pension" value="ONP"> ONP</label>
+                                                    <label class="ss-opt"><input type="radio" name="ss-cob-pension" value="PRIVADO"> Seguro Privado</label>
+
+                                                    <label>Cobertura Salud:</label>
+                                                    <label class="ss-opt"><input type="radio" name="ss-cob-salud" value="ESSALUD"> EsSalud</label>
+                                                    <label class="ss-opt"><input type="radio" name="ss-cob-salud" value="EPS"> EPS</label>
+                                                </div>
+                                                <div class="ss-sctr-fechas">
+                                                    <span class="trab-plbl" style="font-style:italic;">Fecha de Inicio<br>(dd/mm/aaaa)</span>
+                                                    <span class="trab-plbl" style="font-style:italic;">Fecha de Fin<br>(dd/mm/aaaa)</span>
+                                                    <span></span>
+                                                    <input type="text" id="ss-sctr-inicio" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                                    <input type="text" id="ss-sctr-fin" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                                    <a href="#" class="trab-detalle" onclick="abrirPeriodosSctr(); return false;">Detalle</a>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sección: Datos de la Situación Educativa -->
+                                <div class="treg-collapsible-header open" onclick="toggleSeccion(this);">
+                                    <span class="treg-arrow"></span> Datos de la Situación Educativa
+                                </div>
+                                <div class="treg-collapsible-body open">
+                                    <fieldset class="trab-fieldset">
+                                        <div class="trab-fila">
+                                            <span class="trab-plbl" style="font-weight:700;">La Situación Educativa que deberá consignar corresponde al nivel educativo del prestador.</span>
+                                        </div>
+                                        <div class="trab-fila" style="margin-top:8px;">
+                                            <label style="min-width:150px; max-width:150px;">Situación Educativa:</label>
+                                            <select id="edu-nivel" style="max-width:520px;">
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+                                    </fieldset>
+                                </div>
+
+                                <!-- Sección: Datos Tributarios -->
+                                <div class="treg-collapsible-header open" onclick="toggleSeccion(this);">
+                                    <span class="treg-arrow"></span> Datos Tributarios
+                                </div>
+                                <div class="treg-collapsible-body open">
+                                    <div class="trab-grid">
+                                        <div class="trab-col"></div>
+                                        <div class="trab-col">
+                                            <fieldset class="trab-fieldset">
+                                                <div class="trab-fila trab-derecha">
+                                                    <label>¿Percibe rentas de 5ta exoneradas (Inc. e) Art. 19 de la LIR?</label>
+                                                    <div class="trab-radio-group">
+                                                        <label><input type="radio" name="trib-renta5ta" value="SI"> Sí</label>
+                                                        <label><input type="radio" name="trib-renta5ta" value="NO" checked> No</label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset class="trab-fieldset" style="margin-top:10px;">
+                                                <div class="trab-fila trab-derecha">
+                                                    <label>¿Aplica convenio para evitar doble imposición?</label>
+                                                    <div class="trab-radio-group">
+                                                        <label><input type="radio" name="trib-convenio-si" value="SI" onchange="cambiarConvenio();"> Sí</label>
+                                                        <label><input type="radio" name="trib-convenio-si" value="NO" checked onchange="cambiarConvenio();"> No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="trab-fila">
+                                                    <select id="trib-convenio" disabled style="background:#E9E9E9; max-width:none;">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                             <div id="tpanel-pensionista" style="display: none;">
-                                <p class="treg-cat-pendiente">Datos del Pensionista — EN PROCESO DE IMPLEMENTACION.</p>
+                                <div class="treg-seccion">Información Complementaria</div>
+                                <fieldset class="trab-fieldset" style="margin-top:12px;">
+                                    <div class="trab-fila">
+                                        <label style="min-width:150px; max-width:150px;">Tipo de Pensionista:</label>
+                                        <select id="pen-tipo" style="max-width:520px;">
+                                            <option value=""></option>
+                                            <option>PENSIÓN DE JUBILACIÓN</option>
+                                            <option>PENSIÓN DE CESANTÍA</option>
+                                            <option>PENSIÓN DE INVALIDEZ</option>
+                                            <option>PENSIÓN DE VIUDEZ</option>
+                                            <option>PENSIÓN DE ORFANDAD</option>
+                                            <option>PENSIÓN DE ASCENDENCIA</option>
+                                        </select>
+                                    </div>
+                                    <div class="trab-periodo-bloque" style="margin-top:8px;">
+                                        <div class="trab-periodo-grid" style="grid-template-columns:auto 1fr 1fr 1.4fr auto;">
+                                            <span class="trab-plbl"></span>
+                                            <span class="trab-plbl" style="text-align:center;">Fecha de inicio<br>(dd/mm/aaaa)</span>
+                                            <span class="trab-plbl" style="text-align:center;">Fecha de fin<br>(dd/mm/aaaa)</span>
+                                            <span class="trab-plbl">Motivo de fin o suspensión</span>
+                                            <span></span>
+                                            <span class="trab-plbl">Período:</span>
+                                            <input type="text" id="pen-inicio" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                            <input type="text" id="pen-fin" class="trab-fecha" readonly style="background:#E9E9E9;">
+                                            <select id="pen-motivo" disabled style="background:#E9E9E9; max-width:220px;"><option value=""></option></select>
+                                            <a href="#" class="trab-detalle" onclick="abrirPeriodosPensionista(); return false;">Detalle</a>
+                                        </div>
+                                    </div>
+                                    <div class="trab-fila" style="margin-top:8px;">
+                                        <label style="min-width:150px; max-width:150px;">Régimen pensionario:</label>
+                                        <select id="pen-regimen" style="max-width:520px;"><option value=""></option></select>
+                                    </div>
+                                    <div class="trab-fila">
+                                        <label style="min-width:150px; max-width:150px;">Tipo de Pago:</label>
+                                        <select id="pen-pago" style="max-width:520px;"><option value=""></option></select>
+                                    </div>
+                                    <div class="trab-fila">
+                                        <label style="min-width:150px; max-width:150px;">Situación:</label>
+                                        <span style="color:#A0522D; font-weight:500;">ACTIVO</span>
+                                    </div>
+                                </fieldset>
                             </div>
                             <div id="tpanel-formacion" style="display: none;">
-                                <p class="treg-cat-pendiente">Datos del Personal en formación laboral — EN PROCESO DE IMPLEMENTACION.</p>
+                                <div class="treg-seccion">Información Complementaria</div>
+                                <div class="trab-grid" style="margin-top:12px;">
+                                    <!-- Columna izquierda -->
+                                    <div class="trab-col">
+                                        <div class="trab-fila">
+                                            <label style="min-width:160px; max-width:160px;">Tipo de modalidad formativa:</label>
+                                            <select id="pfl-modalidad" style="max-width:none;"><option value=""></option></select>
+                                        </div>
+                                        <div class="trab-fila trab-derecha">
+                                            <label>Seguro médico:</label>
+                                            <div class="trab-radio-group" style="flex-direction:column; gap:4px;">
+                                                <label><input type="radio" name="pfl-seguro" value="ESSALUD"> EsSalud</label>
+                                                <label><input type="radio" name="pfl-seguro" value="PRIVADA"> Compañía Privada</label>
+                                            </div>
+                                        </div>
+                                        <div class="trab-fila">
+                                            <label style="min-width:160px; max-width:160px;">Situación Educativa:</label>
+                                            <select id="pfl-educativa" style="max-width:none;"><option value=""></option></select>
+                                        </div>
+                                        <div class="trab-fila">
+                                            <label style="min-width:160px; max-width:160px;">Ocupación:</label>
+                                            <input type="text" id="pfl-ocupacion" list="lista-ocupaciones" placeholder="Escriba para buscar..." autocomplete="off" style="max-width:none;">
+                                        </div>
+                                        <div class="trab-fila trab-derecha">
+                                            <label>Centro de Formación:</label>
+                                            <div class="trab-radio-group" style="flex-direction:column; gap:4px;">
+                                                <label><input type="radio" name="pfl-centro" value="CENTRO EDUCATIVO"> Centro Educativo</label>
+                                                <label><input type="radio" name="pfl-centro" value="UNIVERSIDAD"> Universidad</label>
+                                                <label><input type="radio" name="pfl-centro" value="INSTITUTO"> Instituto</label>
+                                                <label><input type="radio" name="pfl-centro" value="OTROS"> Otros</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Columna derecha -->
+                                    <div class="trab-col">
+                                        <fieldset class="trab-fieldset">
+                                            <div class="trab-periodo-grid" style="grid-template-columns:auto 1fr 1fr auto;">
+                                                <span class="trab-plbl"></span>
+                                                <span class="trab-plbl" style="text-align:center;">Fecha de inicio<br>(dd/mm/aaaa)</span>
+                                                <span class="trab-plbl" style="text-align:center;">Fecha de fin<br>(dd/mm/aaaa)</span>
+                                                <span></span>
+                                                <span class="trab-plbl">Período formativo:</span>
+                                                <input type="text" id="pfl-inicio" class="trab-fecha" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off">
+                                                <input type="text" id="pfl-fin" class="trab-fecha" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off">
+                                                <a href="#" class="trab-detalle" onclick="abrirPeriodosFormacion(); return false;">Detalle</a>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="trab-fieldset" style="margin-top:8px;">
+                                            <div class="trab-periodo-grid" style="grid-template-columns:auto 70px 1fr auto;">
+                                                <span class="trab-plbl"></span>
+                                                <span class="trab-plbl">Código</span>
+                                                <span class="trab-plbl">Local</span>
+                                                <span></span>
+                                                <span class="trab-plbl">Establecimiento en el que se forma:</span>
+                                                <input type="text" id="pfl-cod-local" readonly style="background:#E9E9E9;">
+                                                <select id="pfl-local" onchange="cambiarEstablecimientoFormacion();" style="max-width:none;"></select>
+                                                <a href="#" class="trab-detalle" onclick="abrirEstablecimientos(); return false;">Detalle</a>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="trab-fieldset" style="margin-top:8px;">
+                                            <div class="trab-fila trab-derecha">
+                                                <label>¿ Presenta Discapacidad ?</label>
+                                                <div class="trab-radio-group">
+                                                    <label><input type="radio" name="pfl-discap" value="SI"> Sí</label>
+                                                    <label><input type="radio" name="pfl-discap" value="NO" checked> No</label>
+                                                </div>
+                                            </div>
+                                            <div class="trab-fila trab-derecha">
+                                                <label>¿ Horario Nocturno ?</label>
+                                                <div class="trab-radio-group">
+                                                    <label><input type="radio" name="pfl-nocturno" value="SI"> Sí</label>
+                                                    <label><input type="radio" name="pfl-nocturno" value="NO" checked> No</label>
+                                                </div>
+                                            </div>
+                                            <div class="trab-fila trab-derecha">
+                                                <label>Situación:</label>
+                                                <span style="color:#A0522D; font-weight:500;">ACTIVO</span>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="treg-cat-acciones">
-                                <button class="treg-btn" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Grabar</button>
+                                <button class="treg-btn" onclick="grabarPrestador();">Grabar</button>
                                 <button class="treg-btn" onclick="volverListaPrestadores();">Retornar</button>
                             </div>
                         </div>
@@ -673,6 +1503,62 @@
 
                     <div style="margin-top: 22px;" id="treg-acciones-nuevo">
                         <button class="treg-btn" onclick="volverListaPrestadores();"><i class="fas fa-chevron-left"></i> Regresar</button>
+                    </div>
+                </div>
+
+                <!-- ===== Vista: Constancia de alta del prestador ===== -->
+                <div id="treg-constancia" style="display: none;">
+                    <div class="treg-seccion">Impresión de Constancias de Alta, Modificación o Baja de un Prestador de Servicios</div>
+                    <div class="treg-seccion" style="margin-top:0;">Datos de Identificación</div>
+
+                    <div class="treg-ficha">
+                        <p style="margin:0 0 16px 0; color:#333;">
+                            Se ha realizado el alta, modificación o baja de un prestador de servicios satisfactoriamente,
+                            cuyos datos de identificación son:
+                        </p>
+                        <div class="cons-fila"><span>Tipo y Número de Documento:</span><b id="cons-doc"></b></div>
+                        <div class="cons-fila"><span>País emisor de Documento:</span><b id="cons-pais"></b></div>
+                        <div class="cons-fila"><span>Apellidos y Nombres:</span><b id="cons-nombres"></b></div>
+
+                        <p style="margin:18px 0 10px 0; color:#333;">
+                            Categorías en las cuales se realizó el alta, modificación o baja de un prestador de servicios:
+                        </p>
+                        <table class="cons-tabla">
+                            <tbody>
+                                <tr>
+                                    <td style="width:35%;">Trabajador</td>
+                                    <td style="width:35%;">Alta</td>
+                                    <td><a href="#" onclick="imprimirCIR(); return false;">Imprimir CIR</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="text-align:center; margin-top:22px;">
+                        <button class="treg-btn" onclick="retornarDesdeConstancia();">Retornar</button>
+                    </div>
+
+                    <div style="text-align:center; margin-top:16px;">
+                        <button type="button" id="btn-finalizar-simulacion" data-sin-redireccion
+                            style="background:#C00000; color:#fff; border:none; padding:12px 26px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Roboto',sans-serif;">
+                            <i class="fas fa-flag-checkered"></i> Finalizar simulación
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: datos grabados ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-msg-grabado" style="align-items:center;">
+                    <div class="treg-periodo-edit-modal" style="max-width:420px;">
+                        <div class="treg-modal-head">
+                            <span>Mensaje</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarMsgGrabado();"></i>
+                        </div>
+                        <div style="padding:22px;">
+                            <p style="font-size:13px; color:#333; margin:0 0 18px 0;">Los datos fueron grabados exitosamente.</p>
+                            <div style="text-align:center;">
+                                <button class="treg-btn" onclick="cerrarMsgGrabado();">Aceptar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -714,13 +1600,268 @@
                                 <div class="treg-bp-fila">
                                     <label>País Emisor del Documento:</label>
                                     <select id="bp-pais">
-                                        <option>PERU</option>
-                                        <option>ARGENTINA</option>
-                                        <option>BOLIVIA</option>
-                                        <option>CHILE</option>
-                                        <option>COLOMBIA</option>
-                                        <option>ECUADOR</option>
-                                        <option>VENEZUELA</option>
+                                        <option value="9589" selected>PERÚ</option>
+                                        <option value="9013">AFGANISTAN</option>
+                                        <option value="9017">ALBANIA</option>
+                                        <option value="9019">ALDERNEY</option>
+                                        <option value="9023">ALEMANIA</option>
+                                        <option value="9026">ARMENIA</option>
+                                        <option value="9027">ARUBA</option>
+                                        <option value="9028">ASCENCION</option>
+                                        <option value="9029">BOSNIA-HERZEGOVINA</option>
+                                        <option value="9031">BURKINA FASO</option>
+                                        <option value="9037">ANDORRA</option>
+                                        <option value="9040">ANGOLA</option>
+                                        <option value="9041">ANGUILLA</option>
+                                        <option value="9043">ANTIGUA Y BARBUDA</option>
+                                        <option value="9047">ANTILLAS HOLANDESAS</option>
+                                        <option value="9053">ARABIA SAUDITA</option>
+                                        <option value="9059">ARGELIA</option>
+                                        <option value="9063">ARGENTINA</option>
+                                        <option value="9069">AUSTRALIA</option>
+                                        <option value="9072">AUSTRIA</option>
+                                        <option value="9074">AZERBAIJÁN</option>
+                                        <option value="9077">BAHAMAS</option>
+                                        <option value="9080">BAHREIN</option>
+                                        <option value="9081">BANGLA DESH</option>
+                                        <option value="9083">BARBADOS</option>
+                                        <option value="9087">BÉLGICA</option>
+                                        <option value="9088">BELICE</option>
+                                        <option value="9090">BERMUDAS</option>
+                                        <option value="9091">BELARUS</option>
+                                        <option value="9093">MYANMAR</option>
+                                        <option value="9097">BOLIVIA</option>
+                                        <option value="9101">BOTSWANA</option>
+                                        <option value="9105">BRASIL</option>
+                                        <option value="9108">BRUNEI DARUSSALAM</option>
+                                        <option value="9111">BULGARIA</option>
+                                        <option value="9115">BURUNDI</option>
+                                        <option value="9119">BUTÁN</option>
+                                        <option value="9127">CABO VERDE</option>
+                                        <option value="9137">CAIMÁN, ISLAS</option>
+                                        <option value="9141">CAMBOYA</option>
+                                        <option value="9145">CAMERÚN, REPUBLICA UNIDA DEL</option>
+                                        <option value="9147">CAMPIONE D TALIA</option>
+                                        <option value="9149">CANADÁ</option>
+                                        <option value="9155">CANAL (NORMANDAS), ISLAS</option>
+                                        <option value="9157">CANTÓN Y ENDERBURRY</option>
+                                        <option value="9159">SANTA SEDE</option>
+                                        <option value="9165">COCOS (KEELING),ISLAS</option>
+                                        <option value="9169">COLOMBIA</option>
+                                        <option value="9173">COMORAS</option>
+                                        <option value="9177">CONGO</option>
+                                        <option value="9183">COOK, ISLAS</option>
+                                        <option value="9187">COREA (NORTE), REPUBLICA POPULAR DEMOCRATICA DE</option>
+                                        <option value="9190">COREA (SUR), REPUBLICA DE</option>
+                                        <option value="9193">COSTA DE MARFIL</option>
+                                        <option value="9196">COSTA RICA</option>
+                                        <option value="9198">CROACIA</option>
+                                        <option value="9199">CUBA</option>
+                                        <option value="9203">CHAD</option>
+                                        <option value="9207">CHECOSLOVAQUIA</option>
+                                        <option value="9211">CHILE</option>
+                                        <option value="9215">CHINA</option>
+                                        <option value="9218">TAIWAN (FORMOSA)</option>
+                                        <option value="9221">CHIPRE</option>
+                                        <option value="9229">BENIN</option>
+                                        <option value="9232">DINAMARCA</option>
+                                        <option value="9235">DOMINICA</option>
+                                        <option value="9239">ECUADOR</option>
+                                        <option value="9240">EGIPTO</option>
+                                        <option value="9242">EL SALVADOR</option>
+                                        <option value="9243">ERITREA</option>
+                                        <option value="9244">EMIRATOS ARABES UNIDOS</option>
+                                        <option value="9245">ESPAÑA</option>
+                                        <option value="9246">ESLOVAQUIA</option>
+                                        <option value="9247">ESLOVENIA</option>
+                                        <option value="9249">ESTADOS UNIDOS</option>
+                                        <option value="9251">ESTONIA</option>
+                                        <option value="9253">ETIOPIA</option>
+                                        <option value="9259">FEROE, ISLAS</option>
+                                        <option value="9267">FILIPINAS</option>
+                                        <option value="9271">FINLANDIA</option>
+                                        <option value="9275">FRANCIA</option>
+                                        <option value="9281">GABON</option>
+                                        <option value="9285">GAMBIA</option>
+                                        <option value="9286">GAZA Y JERICO</option>
+                                        <option value="9287">GEORGIA</option>
+                                        <option value="9289">GHANA</option>
+                                        <option value="9293">GIBRALTAR</option>
+                                        <option value="9297">GRANADA</option>
+                                        <option value="9301">GRECIA</option>
+                                        <option value="9305">GROENLANDIA</option>
+                                        <option value="9309">GUADALUPE</option>
+                                        <option value="9313">GUAM</option>
+                                        <option value="9317">GUATEMALA</option>
+                                        <option value="9325">GUAYANA FRANCESA</option>
+                                        <option value="9327">GUERNSEY</option>
+                                        <option value="9329">GUINEA</option>
+                                        <option value="9331">GUINEA ECUATORIAL</option>
+                                        <option value="9334">GUINEA-BISSAU</option>
+                                        <option value="9337">GUYANA</option>
+                                        <option value="9341">HAITI</option>
+                                        <option value="9345">HONDURAS</option>
+                                        <option value="9348">HONDURAS BRITANICAS</option>
+                                        <option value="9351">HONG KONG</option>
+                                        <option value="9355">HUNGRIA</option>
+                                        <option value="9361">INDIA</option>
+                                        <option value="9365">INDONESIA</option>
+                                        <option value="9369">IRAK</option>
+                                        <option value="9372">IRAN, REPUBLICA ISLAMICA DEL</option>
+                                        <option value="9375">IRLANDA (EIRE)</option>
+                                        <option value="9377">ISLA AZORES</option>
+                                        <option value="9378">ISLA DEL MAN</option>
+                                        <option value="9379">ISLANDIA</option>
+                                        <option value="9380">ISLAS CANARIAS</option>
+                                        <option value="9381">ISLAS DE CHRISTMAS</option>
+                                        <option value="9382">ISLAS QESHM</option>
+                                        <option value="9383">ISRAEL</option>
+                                        <option value="9386">ITALIA</option>
+                                        <option value="9391">JAMAICA</option>
+                                        <option value="9395">JONSTON, ISLAS</option>
+                                        <option value="9399">JAPON</option>
+                                        <option value="9401">JERSEY</option>
+                                        <option value="9403">JORDANIA</option>
+                                        <option value="9406">KAZAJSTAN</option>
+                                        <option value="9410">KENIA</option>
+                                        <option value="9411">KIRIBATI</option>
+                                        <option value="9412">KIRGUIZISTAN</option>
+                                        <option value="9413">KUWAIT</option>
+                                        <option value="9418">LABUN</option>
+                                        <option value="9420">LAOS, REPUBLICA POPULAR DEMOCRATICA DE</option>
+                                        <option value="9426">LESOTHO</option>
+                                        <option value="9429">LETONIA</option>
+                                        <option value="9431">LIBANO</option>
+                                        <option value="9434">LIBERIA</option>
+                                        <option value="9438">LIBIA</option>
+                                        <option value="9440">LIECHTENSTEIN</option>
+                                        <option value="9443">LITUANIA</option>
+                                        <option value="9445">LUXEMBURGO</option>
+                                        <option value="9447">MACAO</option>
+                                        <option value="9448">MACEDONIA</option>
+                                        <option value="9450">MADAGASCAR</option>
+                                        <option value="9453">MADEIRA</option>
+                                        <option value="9455">MALAYSIA</option>
+                                        <option value="9458">MALAWI</option>
+                                        <option value="9461">MALDIVAS</option>
+                                        <option value="9464">MALI</option>
+                                        <option value="9467">MALTA</option>
+                                        <option value="9469">MARIANAS DEL NORTE, ISLAS</option>
+                                        <option value="9472">MARSHALL, ISLAS</option>
+                                        <option value="9474">MARRUECOS</option>
+                                        <option value="9477">MARTINICA</option>
+                                        <option value="9485">MAURICIO</option>
+                                        <option value="9488">MAURITANIA</option>
+                                        <option value="9493">MEXICO</option>
+                                        <option value="9494">MICRONESIA, ESTADOS FEDERADOS DE</option>
+                                        <option value="9495">MIDWAY ISLAS</option>
+                                        <option value="9496">MOLDAVIA</option>
+                                        <option value="9497">MONGOLIA</option>
+                                        <option value="9498">MONACO</option>
+                                        <option value="9501">MONTSERRAT, ISLA</option>
+                                        <option value="9505">MOZAMBIQUE</option>
+                                        <option value="9507">NAMIBIA</option>
+                                        <option value="9508">NAURU</option>
+                                        <option value="9511">NAVIDAD (CHRISTMAS), ISLA</option>
+                                        <option value="9517">NEPAL</option>
+                                        <option value="9521">NICARAGUA</option>
+                                        <option value="9525">NIGER</option>
+                                        <option value="9528">NIGERIA</option>
+                                        <option value="9531">NIUE, ISLA</option>
+                                        <option value="9535">NORFOLK, ISLA</option>
+                                        <option value="9538">NORUEGA</option>
+                                        <option value="9542">NUEVA CALEDONIA</option>
+                                        <option value="9545">PAPUASIA NUEVA GUINEA</option>
+                                        <option value="9548">NUEVA ZELANDA</option>
+                                        <option value="9551">VANUATU</option>
+                                        <option value="9556">OMAN</option>
+                                        <option value="9566">PACIFICO, ISLAS DEL</option>
+                                        <option value="9573">PAISES BAJOS</option>
+                                        <option value="9576">PAKISTAN</option>
+                                        <option value="9578">PALAU, ISLAS</option>
+                                        <option value="9579">TERRITORIO AUTONOMO DE PALESTINA</option>
+                                        <option value="9580">PANAMA</option>
+                                        <option value="9586">PARAGUAY</option>
+                                        <option value="9593">PITCAIRN, ISLA</option>
+                                        <option value="9599">POLINESIA FRANCESA</option>
+                                        <option value="9603">POLONIA</option>
+                                        <option value="9607">PORTUGAL</option>
+                                        <option value="9611">PUERTO RICO</option>
+                                        <option value="9618">QATAR</option>
+                                        <option value="9628">REINO UNIDO</option>
+                                        <option value="9629">ESCOCIA</option>
+                                        <option value="9633">REPUBLICA ARABE UNIDA</option>
+                                        <option value="9640">REPUBLICA CENTROAFRICANA</option>
+                                        <option value="9644">REPUBLICA CHECA</option>
+                                        <option value="9645">REPUBLICA DE SWAZILANDIA</option>
+                                        <option value="9646">REPUBLICA DE TUNEZ</option>
+                                        <option value="9647">REPUBLICA DOMINICANA</option>
+                                        <option value="9660">REUNION</option>
+                                        <option value="9665">ZIMBABWE</option>
+                                        <option value="9670">RUMANIA</option>
+                                        <option value="9675">RUANDA</option>
+                                        <option value="9676">RUSIA</option>
+                                        <option value="9677">SALOMON, ISLAS</option>
+                                        <option value="9685">SAHARA OCCIDENTAL</option>
+                                        <option value="9687">SAMOA OCCIDENTAL</option>
+                                        <option value="9690">SAMOA NORTEAMERICANA</option>
+                                        <option value="9695">SAN CRISTOBAL Y NIEVES</option>
+                                        <option value="9697">SAN MARINO</option>
+                                        <option value="9700">SAN PEDRO Y MIQUELON</option>
+                                        <option value="9705">SAN VICENTE Y LAS GRANADINAS</option>
+                                        <option value="9710">SANTA ELENA</option>
+                                        <option value="9715">SANTA LUCIA</option>
+                                        <option value="9720">SANTO TOME Y PRINCIPE</option>
+                                        <option value="9728">SENEGAL</option>
+                                        <option value="9731">SEYCHELLES</option>
+                                        <option value="9735">SIERRA LEONA</option>
+                                        <option value="9741">SINGAPUR</option>
+                                        <option value="9744">SIRIA, REPUBLICA ARABE DE</option>
+                                        <option value="9748">SOMALIA</option>
+                                        <option value="9750">SRI LANKA</option>
+                                        <option value="9756">SUDAFRICA, REPUBLICA DE</option>
+                                        <option value="9759">SUDAN</option>
+                                        <option value="9764">SUECIA</option>
+                                        <option value="9767">SUIZA</option>
+                                        <option value="9770">SURINAM</option>
+                                        <option value="9773">SAWSILANDIA</option>
+                                        <option value="9774">TADJIKISTAN</option>
+                                        <option value="9776">TAILANDIA</option>
+                                        <option value="9780">TANZANIA, REPUBLICA UNIDA DE</option>
+                                        <option value="9783">DJIBOUTI</option>
+                                        <option value="9786">TERRITORIO ANTARTICO BRITANICO</option>
+                                        <option value="9787">TERRITORIO BRITANICO DEL OCEANO INDICO</option>
+                                        <option value="9788">TIMOR DEL ESTE</option>
+                                        <option value="9800">TOGO</option>
+                                        <option value="9805">TOKELAU</option>
+                                        <option value="9810">TONGA</option>
+                                        <option value="9815">TRINIDAD Y TOBAGO</option>
+                                        <option value="9816">TRISTAN DA CUNHA</option>
+                                        <option value="9820">TUNICIA</option>
+                                        <option value="9823">TURCAS Y CAICOS, ISLAS</option>
+                                        <option value="9825">TURKMENISTAN</option>
+                                        <option value="9827">TURQUIA</option>
+                                        <option value="9828">TUVALU</option>
+                                        <option value="9830">UCRANIA</option>
+                                        <option value="9833">UGANDA</option>
+                                        <option value="9840">URSS</option>
+                                        <option value="9845">URUGUAY</option>
+                                        <option value="9847">UZBEKISTAN</option>
+                                        <option value="9850">VENEZUELA</option>
+                                        <option value="9855">VIET NAM</option>
+                                        <option value="9858">VIETNAM (DEL NORTE)</option>
+                                        <option value="9863">VIRGENES, ISLAS (BRITANICAS)</option>
+                                        <option value="9866">VIRGENES, ISLAS (NORTEAMERICANAS)</option>
+                                        <option value="9870">FIJI</option>
+                                        <option value="9873">WAKE, ISLA</option>
+                                        <option value="9875">WALLIS Y FORTUNA, ISLAS</option>
+                                        <option value="9880">YEMEN</option>
+                                        <option value="9885">YUGOSLAVIA</option>
+                                        <option value="9888">ZAIRE</option>
+                                        <option value="9890">ZAMBIA</option>
+                                        <option value="9895">ZONA DEL CANAL DE PANAMA</option>
+                                        <option value="9896">ZONA LIBRE OSTRAVA</option>
+                                        <option value="9897">ZONA NEUTRAL (PALESTINA)</option>
                                     </select>
                                     <button class="treg-btn" onclick="buscarPersona();">Buscar</button>
                                 </div>
@@ -748,7 +1889,7 @@
 
                             <div class="treg-bp-acciones">
                                 <button class="treg-btn" disabled>Nuevo</button>
-                                <button class="treg-btn" disabled>Grabar</button>
+                                <button class="treg-btn" id="bp-btn-grabar" disabled onclick="grabarBusquedaPersona();">Grabar</button>
                                 <button class="treg-btn" onclick="limpiarBusquedaPersona();">Limpiar</button>
                                 <button class="treg-btn" onclick="cerrarBusquedaPersona();">Retornar</button>
                             </div>
@@ -891,6 +2032,485 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ===== Modal: Periodos Laborales ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-periodos">
+                    <div class="treg-periodos-modal">
+                        <div class="treg-periodos-head">
+                            <span>Periodos laborales</span>
+                            <button class="treg-btn" onclick="agregarPeriodoLaboral();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha de inicio</th>
+                                    <th>Fecha de fin</th>
+                                    <th>Motivo de baja del registro</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="periodos-filas">
+                                <tr>
+                                    <td>01/07/2026</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="text-align:center;">
+                                        <i class="fas fa-pen-to-square treg-icon-edit" title="Editar" onclick="editarPeriodoLaboral(this);"></i>
+                                        <i class="fas fa-circle-xmark treg-icon-del" title="Eliminar" style="margin-left:6px;" onclick="this.closest('tr').remove();"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarPeriodosLaborales();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Tipos de trabajador (Tabla 8) ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-tipos-trab">
+                    <div class="treg-periodos-modal">
+                        <div class="treg-periodos-head">
+                            <span>Tipos de trabajador</span>
+                            <button class="treg-btn" onclick="agregarTipoTrabajador();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:80px;">Código</th>
+                                    <th>Tipo de trabajador</th>
+                                    <th style="width:120px;">Fecha de inicio</th>
+                                    <th style="width:120px;">Fecha de fin</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tipos-trab-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarTiposTrabajador();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Sub-modal: edición de un tipo de trabajador ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-tipo-trab-edit">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Tipo de trabajador</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarTipoTrabEdit();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>Tipo de trabajador:</label>
+                            <select id="tt-tipo" onchange="document.getElementById('tt-codigo').value = this.value;">
+                                <option value=""></option>
+                            </select>
+                            <label>Código:</label>
+                            <input type="text" id="tt-codigo" readonly style="background:#E9E9E9; max-width:80px;">
+                            <label>Fecha de inicio:</label>
+                            <input type="text" id="tt-inicio" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Fecha de fin:</label>
+                            <input type="text" id="tt-fin" maxlength="10" placeholder="dd/mm/aaaa">
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarTipoTrabEdit();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Sub-modal: edición de un periodo laboral ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-periodo-edit">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Periodo</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarPeriodoEdit();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>Fecha de inicio:</label>
+                            <input type="text" id="pe-inicio" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Fecha de fin:</label>
+                            <input type="text" id="pe-fin" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Motivo de baja:</label>
+                            <select id="pe-motivo">
+                                <option value=""></option>
+                                <option>RENUNCIA</option>
+                                <option>RENUNCIA CON INCENTIVOS</option>
+                                <option>DESPIDO O DESTITUCIÓN</option>
+                                <option>CESE COLECTIVO</option>
+                                <option>JUBILACIÓN</option>
+                                <option>INVALIDEZ ABSOLUTA PERMANENTE</option>
+                                <option>TERMINACIÓN DE LA OBRA O SERVICIO O VENCIMIENTO DEL PLAZO</option>
+                                <option>MUTUO DISENSO</option>
+                                <option>FALLECIMIENTO</option>
+                                <option>BAJA POR SUCESIÓN EN POSICIÓN DEL EMPLEADOR</option>
+                                <option>EXTINCIÓN O LIQUIDACIÓN DEL EMPLEADOR</option>
+                                <option>NO SE INICIO LA REL. LABORAL O PREST. DE SERVICIOS</option>
+                            </select>
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarPeriodoEdit();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Establecimientos donde labora ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-establecimientos">
+                    <div class="treg-periodos-modal" style="max-width:760px;">
+                        <div class="treg-periodos-head">
+                            <span>Establecimientos en el que labora</span>
+                            <button class="treg-btn" onclick="abrirPeriodoEstablecimiento();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th style="width:80px;">Local</th>
+                                    <th style="width:150px;">Tipo</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="estab-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarEstablecimientos();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Periodos de regímenes de salud ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-salud">
+                    <div class="treg-periodos-modal" style="max-width:820px;">
+                        <div class="treg-periodos-head">
+                            <span>Periodos de regímenes de salud</span>
+                            <button class="treg-btn" onclick="abrirPeriodoSalud();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th>Régimen de salud</th>
+                                    <th style="width:110px;">Fecha de inicio</th>
+                                    <th style="width:110px;">Fecha de fin</th>
+                                    <th>Entidad prestadora de salud</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="salud-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarPeriodosSalud();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-modal: Periodo de régimen de salud -->
+                <div class="treg-modal-overlay" id="treg-modal-salud-edit" style="z-index:600; align-items:center;">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Periodo</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarPeriodoSalud();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>Régimen de salud:</label>
+                            <select id="se-regimen">
+                                <option value=""></option>
+                                <option>ESSALUD REGULAR</option>
+                                <option>ESSALUD REGULAR Y EPS/SERV. PROP.</option>
+                                <option>SIS - MICROEMPRESA</option>
+                            </select>
+                            <label>Fecha de inicio:</label>
+                            <input type="text" id="se-inicio" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Fecha de fin:</label>
+                            <input type="text" id="se-fin" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label id="se-eps-lbl" style="display:none;">Entidad prestadora de salud:</label>
+                            <select id="se-eps" style="display:none;"><option value=""></option></select>
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarPeriodoSalud();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Periodos de regímenes pensionarios ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-pension">
+                    <div class="treg-periodos-modal" style="max-width:820px;">
+                        <div class="treg-periodos-head">
+                            <span>Periodos de regímenes pensionarios</span>
+                            <button class="treg-btn" onclick="abrirPeriodoPension();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th>Régimen de pensionario</th>
+                                    <th style="width:110px;">Fecha de inicio</th>
+                                    <th style="width:110px;">Fecha de fin</th>
+                                    <th style="width:130px;">CUSPP</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="pension-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarPeriodosPension();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-modal: Periodo de régimen pensionario -->
+                <div class="treg-modal-overlay" id="treg-modal-pension-edit" style="z-index:600; align-items:center;">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Periodo</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarPeriodoPension();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>Régimen de pensionario:</label>
+                            <select id="pe-regimen"><option value=""></option></select>
+                            <label>Fecha de inicio:</label>
+                            <input type="text" id="pe-p-inicio" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Fecha de fin:</label>
+                            <input type="text" id="pe-p-fin" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>CUSPP:</label>
+                            <input type="text" id="pe-cuspp" maxlength="12" autocomplete="off">
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarPeriodoPension();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Periodos de SCTR / coberturas ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-sctr">
+                    <div class="treg-periodos-modal" style="max-width:760px;">
+                        <div class="treg-periodos-head">
+                            <span>Periodos de aporte al SCTR</span>
+                            <button class="treg-btn" onclick="abrirPeriodoSctr();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:110px;">Fecha de inicio</th>
+                                    <th style="width:110px;">Fecha de fin</th>
+                                    <th>Cobertura Pensión</th>
+                                    <th>Cobertura Salud</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="sctr-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarPeriodosSctr();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-modal: Periodo de SCTR -->
+                <div class="treg-modal-overlay" id="treg-modal-sctr-edit" style="z-index:600; align-items:center;">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Periodo</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarPeriodoSctr();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>Fecha de inicio:</label>
+                            <input type="text" id="sc-inicio" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Fecha de fin:</label>
+                            <input type="text" id="sc-fin" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Cobertura Pensión:</label>
+                            <select id="sc-pension"><option value=""></option><option>ONP</option><option>SEGURO PRIVADO</option></select>
+                            <label>Cobertura Salud:</label>
+                            <select id="sc-salud"><option value=""></option><option>ESSALUD</option><option>EPS</option></select>
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarPeriodoSctr();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Período (Pensionista / Formación) reutilizable ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-periodo-simple">
+                    <div class="treg-periodos-modal" style="max-width:760px;">
+                        <div class="treg-periodos-head">
+                            <span id="ps-titulo">Períodos</span>
+                            <button class="treg-btn" onclick="agregarPeriodoSimple();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:120px;">Fecha de inicio</th>
+                                    <th style="width:120px;">Fecha de fin</th>
+                                    <th id="ps-th-motivo">Motivo de fin o suspensión</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="ps-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="cerrarPeriodosSimple();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-modal: Período simple -->
+                <div class="treg-modal-overlay" id="treg-modal-periodo-simple-edit" style="z-index:600; align-items:center;">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Período</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarPeriodoSimpleEdit();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>Fecha de inicio:</label>
+                            <input type="text" id="ps-inicio" maxlength="10" placeholder="dd/mm/aaaa">
+                            <label>Fecha de fin:</label>
+                            <input type="text" id="ps-fin" maxlength="10" placeholder="dd/mm/aaaa">
+                            <div id="ps-motivo-wrap">
+                                <label>Motivo de fin o suspensión:</label>
+                                <select id="ps-motivo"><option value=""></option></select>
+                            </div>
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarPeriodoSimpleEdit();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Períodos de Formación (edición en línea) ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-form-periodos">
+                    <div class="treg-periodos-modal" style="max-width:700px;">
+                        <div class="treg-periodos-head" style="justify-content:flex-end;">
+                            <button class="treg-btn" onclick="agregarPeriodoFormacion();">Agregar</button>
+                        </div>
+                        <table class="treg-periodos-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha de inicio o reinicio</th>
+                                    <th>Fecha de fin o suspensión</th>
+                                    <th style="width:80px;">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="form-periodos-filas"></tbody>
+                        </table>
+                        <div class="treg-periodos-acciones">
+                            <button class="treg-btn" onclick="aceptarPeriodosFormacion();">Aceptar</button>
+                            <button class="treg-btn" onclick="cerrarPeriodosFormacion();">Retornar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: aviso de pensionista bloqueado ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-msg-pensionista" style="align-items:center;">
+                    <div class="treg-periodo-edit-modal" style="max-width:640px;">
+                        <div class="treg-modal-head">
+                            <span>Mensaje</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarMsgPensionista();"></i>
+                        </div>
+                        <div style="padding:20px 22px;">
+                            <p style="font-size:13px; color:#333; margin:0 0 18px 0;">
+                                Solo podrán registrar pensionistas entidades como ONP, AFP u otras entidades que tienen a su cargo el pago de pensiones.
+                            </p>
+                            <div style="text-align:center;">
+                                <button class="treg-btn" onclick="cerrarMsgPensionista();">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: elección de Consulta SBS ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-sbs-elegir" style="align-items:center;">
+                    <div class="treg-periodo-edit-modal" style="max-width:430px;">
+                        <div class="treg-modal-head">
+                            <span>Consulta SBS - Sistema Privado de Pensiones</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarConsultaSBS();"></i>
+                        </div>
+                        <div style="padding:22px; text-align:center;">
+                            <p style="font-size:13px; color:#444; margin:0 0 20px 0;">Seleccione el tipo de consulta que desea realizar:</p>
+                            <button class="treg-btn" style="display:block; width:100%; margin-bottom:12px; padding:10px;"
+                                onclick="abrirSBSReal();"><i class="fas fa-up-right-from-square"></i> Consulta real (portal SBS)</button>
+                            <button class="treg-btn" style="display:block; width:100%; padding:10px;"
+                                onclick="abrirSBSSimulada();"><i class="fas fa-flask"></i> Consulta simulada</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Modal: Consulta SBS simulada (réplica del portal) ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-sbs-sim" style="align-items:flex-start;">
+                    <div class="sbs-sim-box">
+                        <div class="sbs-sim-head">
+                            <img src="favicon.png" alt="Simulador" class="sbs-sim-logo">
+                            <span>BÚSQUEDA AFILIADO EN EL SISTEMA PRIVADO DE PENSIONES</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarSBSSimulada();"></i>
+                        </div>
+                        <div class="sbs-sim-body">
+                            <p class="sbs-sim-aviso">Aviso Importante: Ingrese datos sin considerar tildes.</p>
+                            <p class="sbs-sim-sim">Simulación con fines didácticos — Laboratorio Tributario CERTUS. No es una consulta oficial de la SBS.</p>
+
+                            <div class="sbs-sim-fila">
+                                <label>Tipo de Documento de Identidad</label>
+                                <select id="sbs-tipo-doc">
+                                    <option>DNI/Lib.Electoral</option>
+                                    <option>Carné Extranj.</option>
+                                    <option>Carné Mil/Pol</option>
+                                    <option>Carné Min.trab</option>
+                                    <option>Pasaporte</option>
+                                </select><span class="sbs-req">*</span>
+                            </div>
+                            <div class="sbs-sim-fila">
+                                <label>N° de Documento</label>
+                                <input type="text" id="sbs-num-doc" autocomplete="off"><span class="sbs-req">*</span>
+                            </div>
+                            <div class="sbs-sim-fila">
+                                <label>Apellido Paterno</label>
+                                <input type="text" id="sbs-paterno" autocomplete="off"><span class="sbs-req">*</span>
+                            </div>
+                            <div class="sbs-sim-fila">
+                                <label>Apellido Materno</label>
+                                <input type="text" id="sbs-materno" autocomplete="off"><span class="sbs-req">*</span>
+                            </div>
+                            <div class="sbs-sim-fila">
+                                <label>Primer Nombre</label>
+                                <input type="text" id="sbs-nombre1" autocomplete="off"><span class="sbs-req">*</span>
+                            </div>
+                            <div class="sbs-sim-fila">
+                                <label>Segundo Nombre</label>
+                                <input type="text" id="sbs-nombre2" autocomplete="off">
+                            </div>
+
+                            <p class="sbs-sim-ley">Le informamos que los datos personales que proporcione serán tratados conforme a la Ley N° 29733 y su reglamento.</p>
+                            <p class="sbs-req" style="font-weight:700;">(*) Datos obligatorios para la consulta.</p>
+
+                            <div id="sbs-sim-resultado" class="sbs-sim-resultado" style="display:none;"></div>
+
+                            <div style="text-align:center; margin-top:14px;">
+                                <button class="sbs-sim-buscar" onclick="buscarSBSSimulada();">Buscar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Sub-modal: Periodo (alta de un establecimiento) ===== -->
+                <div class="treg-modal-overlay" id="treg-modal-estab-edit" style="z-index:600; align-items:center;">
+                    <div class="treg-periodo-edit-modal">
+                        <div class="treg-modal-head">
+                            <span>Periodo</span>
+                            <i class="fas fa-circle-xmark" onclick="cerrarPeriodoEstablecimiento();"></i>
+                        </div>
+                        <div class="treg-periodo-edit-body">
+                            <label>RUC:</label>
+                            <select id="ee-ruc"><option value=""></option></select>
+                            <label>Cod. Local:</label>
+                            <input type="text" id="ee-cod-local" maxlength="4" autocomplete="off">
+                            <label>Local:</label>
+                            <input type="text" id="ee-local" autocomplete="off">
+                            <label>Tipo:</label>
+                            <select id="ee-tipo">
+                                <option>DOMICILIO FISCAL</option>
+                                <option>ESTABLECIMIENTO ANEXO</option>
+                            </select>
+                        </div>
+                        <div class="treg-periodos-acciones" style="padding-bottom:14px;">
+                            <button class="treg-btn" onclick="aceptarPeriodoEstablecimiento();">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
@@ -936,17 +2556,19 @@
             }
 
             const tbody = document.getElementById('treg-filas');
-            tbody.innerHTML = filas.map(p =>
-                '<tr><td></td>' +
-                '<td><a href="#" onclick="alert(\'EN PROCESO DE IMPLEMENTACION\'); return false;">' + p.categoria + '</a></td>' +
-                '<td>' + p.documento + '</td>' +
-                '<td>' + p.nombres + '</td>' +
-                '<td>' + p.fecNac + '</td>' +
-                '<td>' + p.sexo + '</td>' +
-                '<td>' + p.estado + '</td>' +
-                '<td style="text-align:center;"><i class="fas fa-pen-to-square" style="color:#C88A00; cursor:pointer;" onclick="alert(\'EN PROCESO DE IMPLEMENTACION\');"></i></td>' +
-                '<td style="text-align:center;"><i class="fas fa-xmark" style="color:#C00; cursor:pointer;" onclick="alert(\'EN PROCESO DE IMPLEMENTACION\');"></i></td></tr>'
-            ).join('');
+            // El índice real en `prestadores` se guarda para editar/eliminar aunque haya filtro.
+            tbody.innerHTML = filas.map(p => {
+                const i = prestadores.indexOf(p);
+                return '<tr><td></td>' +
+                    '<td><a href="#" onclick="modificarPrestador(' + i + '); return false;">' + p.categoria + '</a></td>' +
+                    '<td>' + p.documento + '</td>' +
+                    '<td>' + p.nombres + '</td>' +
+                    '<td>' + p.fecNac + '</td>' +
+                    '<td>' + p.sexo + '</td>' +
+                    '<td>' + p.estado + '</td>' +
+                    '<td style="text-align:center;"><i class="fas fa-pen-to-square" style="color:#C88A00; cursor:pointer;" title="Modificar" onclick="modificarPrestador(' + i + ');"></i></td>' +
+                    '<td style="text-align:center;"><i class="fas fa-xmark" style="color:#C00; cursor:pointer;" title="Eliminar" onclick="eliminarPrestador(' + i + ');"></i></td></tr>';
+            }).join('');
 
             document.getElementById('treg-vacio').style.display = filas.length ? 'none' : 'flex';
             document.getElementById('treg-conteo').textContent = filas.length
@@ -959,6 +2581,7 @@
         }
 
         function nuevoPrestador() {
+            prestadorEnEdicion = null;   // alta, no edición
             // La ficha llega vacía: los datos se traen con "Búsqueda de Persona"
             ['treg-doc', 'treg-fnac', 'treg-pais', 'treg-nombres', 'treg-sexo', 'treg-ecivil']
                 .forEach(id => document.getElementById(id).textContent = '');
@@ -991,12 +2614,17 @@
             document.getElementById('treg-modal-busqueda').classList.remove('open');
         }
 
+        let personaBuscada = null;
+
         function limpiarBusquedaPersona() {
             ['bp-numero', 'bp-fnac', 'bp-ap-paterno', 'bp-ap-materno', 'bp-nombres']
                 .forEach(id => document.getElementById(id).value = '');
             document.querySelectorAll('input[name="bp-sexo"]').forEach(r => r.checked = false);
             document.getElementById('bp-tipo-doc').selectedIndex = 0;
             document.getElementById('bp-pais').selectedIndex = 0;
+            const btnGrabar = document.getElementById('bp-btn-grabar');
+            if (btnGrabar) btnGrabar.disabled = true;
+            personaBuscada = null;
         }
 
         async function buscarPersona() {
@@ -1004,7 +2632,10 @@
             if (!doc) { alert('Ingrese el número de documento.'); return; }
 
             const cliente = clienteSupabase();
-            if (!cliente) { alert('No hay conexión con el padrón en este momento.'); return; }
+            if (!cliente) {
+                alert('No hay conexión con el padrón. Vuelva a iniciar sesión.');
+                return;
+            }
 
             const { data, error } = await cliente
                 .from('personas')
@@ -1017,27 +2648,52 @@
                 return;
             }
 
-            if (!data) { abrirAltaPersona(doc); return; }
+            // Si no está en el padrón, se ofrece darla de alta en Supabase
+            if (!data) {
+                personaBuscada = null;
+                document.getElementById('bp-btn-grabar').disabled = true;
+                abrirAltaPersona(doc);
+                return;
+            }
 
-            mostrarPersona(data);
+            personaBuscada = data;
+
+            // Rellenar solo los campos dentro del modal de Búsqueda de Persona
+            document.getElementById('bp-ap-paterno').value = data.apellido_paterno || '';
+            document.getElementById('bp-ap-materno').value = data.apellido_materno || '';
+            document.getElementById('bp-nombres').value = data.nombres_pila || data.nombres || '';
+            document.querySelectorAll('input[name="bp-sexo"]').forEach(r => r.checked = false);
+            const radio = document.querySelector('input[name="bp-sexo"][value="' + (data.sexo || '') + '"]');
+            if (radio) radio.checked = true;
+
+            // Habilitar el botón Grabar del modal
+            const btnGrabar = document.getElementById('bp-btn-grabar');
+            if (btnGrabar) btnGrabar.disabled = false;
+        }
+
+        function grabarBusquedaPersona() {
+            if (!personaBuscada) return;
+            mostrarPersona(personaBuscada);
         }
 
         // Vuelca la persona en el buscador y en la ficha de Datos de Identificación
         function mostrarPersona(p) {
             const tipo = document.getElementById('bp-tipo-doc').value;
-            const pais = document.getElementById('bp-pais').value;
+            const selPais = document.getElementById('bp-pais');
+            const pais = selPais.options[selPais.selectedIndex].text;
             const fnac = p.fecha_nacimiento || document.getElementById('bp-fnac').value.trim();
-
-            document.getElementById('bp-ap-paterno').value = p.apellido_paterno || '';
-            document.getElementById('bp-ap-materno').value = p.apellido_materno || '';
-            document.getElementById('bp-nombres').value = p.nombres_pila || p.nombres || '';
-            document.querySelectorAll('input[name="bp-sexo"]').forEach(r => r.checked = false);
-            const radio = document.querySelector('input[name="bp-sexo"][value="' + (p.sexo || '') + '"]');
-            if (radio) radio.checked = true;
 
             document.getElementById('treg-doc').textContent = (p.tipo_documento || tipo) + ' - ' + p.dni;
             document.getElementById('treg-fnac').textContent = fnac;
-            document.getElementById('treg-pais').textContent = (p.pais_emisor || pais) === 'PERU' ? 'PERÚ' : (p.pais_emisor || pais);
+            // Filas antiguas pueden traer el código (9589) en vez del nombre del país
+            let paisMostrar = p.pais_emisor || pais;
+            if (/^\d+$/.test(paisMostrar)) {
+                const opt = selPais.querySelector('option[value="' + paisMostrar + '"]');
+                paisMostrar = opt ? opt.text : pais;
+            }
+            if (paisMostrar === 'PERU') paisMostrar = 'PERÚ';
+            document.getElementById('treg-pais').textContent = paisMostrar;
+            document.getElementById('treg-pais').setAttribute('data-cod', selPais.value);
             document.getElementById('treg-nombres').textContent = nombreCompleto(p);
             document.getElementById('treg-sexo').textContent = p.sexo || '';
             document.getElementById('treg-ecivil').textContent = p.estado_civil || '';
@@ -1205,7 +2861,8 @@
                 direccion: opcional(document.getElementById('alta-direccion').value),
                 fecha_nacimiento: opcional(document.getElementById('bp-fnac').value),
                 tipo_documento: document.getElementById('bp-tipo-doc').value,
-                pais_emisor: document.getElementById('bp-pais').value
+                // Se guarda el nombre del país, no el código de la tabla T18
+                pais_emisor: (function (s) { return s.options[s.selectedIndex].text; })(document.getElementById('bp-pais'))
             };
 
             const boton = document.getElementById('btn-alta-grabar');
@@ -1237,9 +2894,32 @@
 
         function cambiarTabCategoria(tab) {
             ['resumen', 'trabajador', 'pensionista', 'formacion'].forEach(t => {
-                document.getElementById('tpanel-' + t).style.display = (t === tab) ? 'block' : 'none';
-                document.getElementById('tcat-' + t).classList.toggle('active', t === tab);
+                const el = document.getElementById('tpanel-' + t);
+                if (el) el.style.display = (t === tab) ? 'block' : 'none';
+                const tabEl = document.getElementById('tcat-' + t);
+                if (tabEl) tabEl.classList.toggle('active', t === tab);
             });
+            const catAcciones = document.querySelector('.treg-cat-acciones');
+            if (catAcciones) {
+                catAcciones.style.display = (tab === 'resumen') ? 'none' : 'flex';
+            }
+
+            // El registro de pensionistas está reservado a ONP/AFP y similares:
+            // la pestaña se muestra pero bloqueada, con el aviso de SUNAT.
+            if (tab === 'pensionista') bloquearPensionista();
+        }
+
+        function bloquearPensionista() {
+            document.querySelectorAll('#tpanel-pensionista select, #tpanel-pensionista input, #tpanel-pensionista a')
+                .forEach(el => {
+                    if (el.tagName === 'A') { el.style.pointerEvents = 'none'; el.style.color = '#999'; }
+                    else { el.disabled = true; el.style.background = '#E9E9E9'; }
+                });
+            document.getElementById('treg-modal-msg-pensionista').classList.add('open');
+        }
+
+        function cerrarMsgPensionista() {
+            document.getElementById('treg-modal-msg-pensionista').classList.remove('open');
         }
 
         function volverListaPrestadores() {
@@ -1248,9 +2928,1117 @@
             window.scrollTo(0, 0);
         }
 
+        // ===== Secciones colapsables del Trabajador =====
+        function toggleSeccion(header) {
+            header.classList.toggle('open');
+            const body = header.nextElementSibling;
+            if (body && body.classList.contains('treg-collapsible-body')) {
+                body.classList.toggle('open');
+            }
+        }
+
+        // ===== Modal de Periodos Laborales =====
+        function abrirPeriodosLaborales() {
+            document.getElementById('treg-modal-periodos').classList.add('open');
+        }
+
+        function cerrarPeriodosLaborales() {
+            volcarPrimerPeriodo();
+            document.getElementById('treg-modal-periodos').classList.remove('open');
+        }
+
+        // Formatea un Date como dd/mm/aaaa.
+        function fechaDDMMYYYY(d) {
+            return String(d.getDate()).padStart(2, '0') + '/' +
+                String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+        }
+
+        // Convierte dd/mm/aaaa a un número comparable (aaaammdd); 0 si está vacía.
+        function fechaOrden(txt) {
+            const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec((txt || '').trim());
+            return m ? Number(m[3] + m[2] + m[1]) : 0;
+        }
+
+        // La ficha de datos laborales muestra el periodo más reciente (mayor fecha de inicio).
+        function volcarPrimerPeriodo() {
+            const filas = Array.from(document.getElementById('periodos-filas').rows);
+            let fila = null, mayor = -1;
+            filas.forEach(f => {
+                const orden = fechaOrden(f.cells[0].textContent);
+                if (orden >= mayor) { mayor = orden; fila = f; }
+            });
+            const celdas = fila ? fila.querySelectorAll('td') : null;
+            document.getElementById('trab-periodo-inicio').value = celdas ? celdas[0].textContent.trim() : '';
+            document.getElementById('trab-periodo-fin').value = celdas ? celdas[1].textContent.trim() : '';
+            document.getElementById('trab-motivo-baja').value = celdas ? celdas[2].textContent.trim() : '';
+        }
+
+        function agregarPeriodoLaboral() {
+            const tbody = document.getElementById('periodos-filas');
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td></td>' +
+                '<td></td>' +
+                '<td></td>' +
+                '<td style="text-align:center;">' +
+                    '<i class="fas fa-pen-to-square treg-icon-edit" title="Editar" onclick="editarPeriodoLaboral(this);"></i>' +
+                    '<i class="fas fa-circle-xmark treg-icon-del" title="Eliminar" style="margin-left:6px;" onclick="this.closest(\'tr\').remove();"></i>' +
+                '</td>';
+            tbody.appendChild(tr);
+            editarPeriodoLaboral(tr.querySelector('.treg-icon-edit'));
+        }
+
+        // ===== Sub-modal: edición de un periodo =====
+        let filaPeriodoEnEdicion = null;
+
+        function editarPeriodoLaboral(icono) {
+            filaPeriodoEnEdicion = icono.closest('tr');
+            const celdas = filaPeriodoEnEdicion.querySelectorAll('td');
+            document.getElementById('pe-inicio').value = celdas[0].textContent.trim();
+            document.getElementById('pe-fin').value = celdas[1].textContent.trim();
+            document.getElementById('pe-motivo').value = celdas[2].textContent.trim();
+            document.getElementById('treg-modal-periodo-edit').classList.add('open');
+        }
+
+        function cerrarPeriodoEdit() {
+            document.getElementById('treg-modal-periodo-edit').classList.remove('open');
+            filaPeriodoEnEdicion = null;
+        }
+
+        function aceptarPeriodoEdit() {
+            if (!filaPeriodoEnEdicion) return cerrarPeriodoEdit();
+            const inicio = document.getElementById('pe-inicio').value.trim();
+            const fin = document.getElementById('pe-fin').value.trim();
+            const motivo = document.getElementById('pe-motivo').value;
+
+            // La baja exige fecha de fin y motivo juntos (validación de SUNAT).
+            if ((fin && !motivo) || (!fin && motivo)) {
+                alert('Debe registrar la fecha de fin y el motivo de baja del registro.');
+                return;
+            }
+
+            const celdas = filaPeriodoEnEdicion.querySelectorAll('td');
+            celdas[0].textContent = inicio;
+            celdas[1].textContent = fin;
+            celdas[2].textContent = motivo;
+
+            // El primer periodo es el que se refleja en la ficha de datos laborales.
+            volcarPrimerPeriodo();
+            cerrarPeriodoEdit();
+        }
+
+        // ===== Tipo de trabajador (Tabla 8 de la Tabla Paramétrica PLAME) =====
+        const T8_TIPO_TRABAJADOR = [
+            ['19', 'EJECUTIVO'],
+            ['20', 'OBRERO'],
+            ['21', 'EMPLEADO'],
+            ['22', 'TRABAJADOR PORTUARIO'],
+            ['23', 'PRACTICANTE SENATI'],
+            ['24', 'PENSIONISTA O CESANTE'],
+            ['26', 'PENSIONISTA - LEY 28320'],
+            ['27', 'CONSTRUCCIÓN CIVIL'],
+            ['28', 'PILOTO Y COPILOTO DE AVIA. COM.'],
+            ['29', 'MARÍTIMO, FLUVIAL O LACUSTRE'],
+            ['30', 'PERIODISTA'],
+            ['31', 'TRAB. DE LA INDUSTRIA DE CUERO'],
+            ['32', 'MINERO DE MINA DE SOCAVÓN'],
+            ['36', 'PESCADOR - LEY 28320'],
+            ['37', 'MINERO DE TAJO ABIERTO'],
+            ['38', 'MINERO DE INDUSTRIA MINERA METALÚRGICA'],
+            ['56', 'ARTISTA - LEY DEL ARTISTA - LEY 28131'],
+            ['64', 'AGRARIO DEPENDIENTE - LEY 27360'],
+            ['65', 'TRABAJADOR ACTIVIDAD ACUÍCOLA . LEY 27460'],
+            ['66', 'PESCADOR Y PROCESADOR ARTESANAL INDEPENDIENTE'],
+            ['67', 'REG. ESPECIAL D. LEG.1057'],
+            ['68', 'TRABAJADOR DE LA MICROEMPRESA AFILIADO AL SIS'],
+            ['69', 'CONDUCTOR DE LA MICROEMPRESA AFILIADO AL SIS'],
+            ['70', 'CONDUCTOR DE LA MICROEMPRESA - SEGURO REGULAR'],
+            ['82', 'FUNCIONARIO PÚBLICO'],
+            ['83', 'EMPLEADO DE CONFIANZA'],
+            ['84', 'SERVIDOR PÚBLICO - DIRECTIVO SUPERIOR'],
+            ['85', 'SERVIDOR PÚBLICO - EJECUTIVO'],
+            ['86', 'SERVIDOR PÚBLICO - ESPECIALISTA'],
+            ['87', 'SERVIDOR PÚBLICO - DE APOYO'],
+            ['88', 'PERSONAL DE LA ADMINISTRACIÓN PÚBLICA - ASIGNACIÓN ESPECIAL - D.U. 126-2001'],
+            ['98', 'PERSONA QUE GENERA INGRESOS DE CUARTA - QUINTA CATEGORÍA']
+        ];
+
+        // La categoría ocupacional se deriva del tipo 19/20/21 y no se pide para los tipos
+        // exceptuados en la nota de la Tabla 24.
+        const CATEG_DERIVADA = { '19': '1', '20': '2', '21': '3' };
+        const SIN_CATEG_OCUPACIONAL = ['23', '24', '26', '66', '98'];
+
+        function llenarTiposTrabajador() {
+            ['trab-tipo-trabajador', 'tt-tipo'].forEach(id => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = '<option value=""></option>';
+                T8_TIPO_TRABAJADOR.forEach(([cod, desc]) => {
+                    const o = document.createElement('option');
+                    o.value = cod;
+                    o.textContent = desc;
+                    sel.appendChild(o);
+                });
+            });
+        }
+
+        function cambiarTipoTrabajador() {
+            const cod = document.getElementById('trab-tipo-trabajador').value;
+            const categ = document.getElementById('trab-categ-ocup');
+            const filaOcup = document.getElementById('trab-fila-ocupacion');
+
+            if (!cod) {
+                categ.value = '';
+                categ.disabled = true;
+                filaOcup.style.display = 'none';
+                document.getElementById('trab-tipo-inicio').value = '';
+                return;
+            }
+
+            // El periodo del tipo de trabajador arranca con el inicio del periodo laboral
+            const ini = document.getElementById('trab-tipo-inicio');
+            if (!ini.value) ini.value = document.getElementById('trab-periodo-inicio').value;
+
+            // La categoría se propone para los tipos 19/20/21 pero queda editable.
+            if (CATEG_DERIVADA[cod]) {
+                categ.value = CATEG_DERIVADA[cod];
+            } else if (SIN_CATEG_OCUPACIONAL.indexOf(cod) >= 0) {
+                categ.value = '';
+            }
+
+            llenarOcupaciones();
+            filaOcup.style.display = '';
+            sincronizarTiposTrabajador();
+        }
+
+        // Régimen laboral: en microempresa la categoría se limita según SUNAT,
+        // pero en el simulador se deja el catálogo completo editable.
+        function cambiarRegimenLaboral() {
+            // Placeholder por si luego se condiciona la categoría al régimen.
+        }
+
+        // Tabla 10 "Ocupación": 4745 filas, se cargan desde t10_ocupaciones.js
+        let ocupacionesCargadas = false;
+
+        // Índice nombre->código para resolver la ocupación escrita en el datalist.
+        const OCUP_POR_NOMBRE = {};
+
+        function llenarOcupaciones() {
+            if (ocupacionesCargadas || typeof T10_OCUPACIONES === 'undefined') return;
+            const lista = document.getElementById('lista-ocupaciones');
+            const frag = document.createDocumentFragment();
+            T10_OCUPACIONES.forEach(([cod, nombre]) => {
+                OCUP_POR_NOMBRE[nombre.toUpperCase()] = cod;
+                const o = document.createElement('option');
+                o.value = nombre;   // el datalist muestra y filtra por nombre
+                frag.appendChild(o);
+            });
+            lista.appendChild(frag);
+            ocupacionesCargadas = true;
+        }
+
+        // Al escribir/elegir la ocupación se busca su código exacto (vacío si no coincide).
+        function cambiarOcupacion() {
+            const nombre = document.getElementById('trab-ocup-nombre').value.trim().toUpperCase();
+            document.getElementById('trab-ocup-codigo').value = OCUP_POR_NOMBRE[nombre] || '';
+        }
+
+        // ===== Modal: Tipos de trabajador =====
+        function abrirTiposTrabajador() {
+            sembrarTiposDesdePeriodos();
+            document.getElementById('treg-modal-tipos-trab').classList.add('open');
+        }
+
+        // Las fechas del tipo de trabajador siguen a las de los periodos laborales:
+        // una fila por periodo, con sus fechas ya puestas. El código/tipo se conserva
+        // por posición si ya se había elegido; solo faltará escoger el tipo.
+        function sembrarTiposDesdePeriodos() {
+            const periodos = Array.from(document.getElementById('periodos-filas').rows);
+            const tbody = document.getElementById('tipos-trab-filas');
+            const previos = Array.from(tbody.rows).map(r => ({
+                cod: r.cells[0].textContent.trim(),
+                desc: r.cells[1].textContent.trim()
+            }));
+
+            tbody.innerHTML = '';
+            periodos.forEach((p, i) => {
+                const tr = filaTipoTrabajador();
+                tbody.appendChild(tr);
+                const anterior = previos[i] || { cod: '', desc: '' };
+                pintarFilaTipoTrabajador(tr, anterior.cod, anterior.desc,
+                    p.cells[0].textContent.trim(), p.cells[1].textContent.trim());
+            });
+        }
+
+        function cerrarTiposTrabajador() {
+            volcarPrimerTipoTrabajador();
+            document.getElementById('treg-modal-tipos-trab').classList.remove('open');
+        }
+
+        // Refleja en la grilla el tipo elegido en la ficha (una sola fila mientras no se agreguen más)
+        function sincronizarTiposTrabajador() {
+            const tbody = document.getElementById('tipos-trab-filas');
+            if (tbody.rows.length > 1) return;
+            const sel = document.getElementById('trab-tipo-trabajador');
+            if (!sel.value) { tbody.innerHTML = ''; return; }
+            if (!tbody.rows.length) tbody.appendChild(filaTipoTrabajador());
+            pintarFilaTipoTrabajador(tbody.rows[0], sel.value,
+                sel.options[sel.selectedIndex].text,
+                document.getElementById('trab-tipo-inicio').value,
+                document.getElementById('trab-tipo-fin').value);
+        }
+
+        function filaTipoTrabajador() {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td></td><td></td><td></td><td></td>' +
+                '<td style="text-align:center;">' +
+                    '<i class="fas fa-pen-to-square treg-icon-edit" title="Editar" onclick="editarTipoTrabajador(this);"></i>' +
+                    '<i class="fas fa-circle-xmark treg-icon-del" title="Eliminar" style="margin-left:6px;" onclick="this.closest(\'tr\').remove();"></i>' +
+                '</td>';
+            return tr;
+        }
+
+        function pintarFilaTipoTrabajador(tr, cod, desc, ini, fin) {
+            const celdas = tr.querySelectorAll('td');
+            celdas[0].textContent = cod;
+            celdas[1].textContent = desc;
+            celdas[2].textContent = ini;
+            celdas[3].textContent = fin;
+        }
+
+        function agregarTipoTrabajador() {
+            const tbody = document.getElementById('tipos-trab-filas');
+            const tr = filaTipoTrabajador();
+            tbody.appendChild(tr);
+            editarTipoTrabajador(tr.querySelector('.treg-icon-edit'));
+        }
+
+        let filaTipoEnEdicion = null;
+
+        function editarTipoTrabajador(icono) {
+            filaTipoEnEdicion = icono.closest('tr');
+            const celdas = filaTipoEnEdicion.querySelectorAll('td');
+            document.getElementById('tt-tipo').value = celdas[0].textContent.trim();
+            document.getElementById('tt-codigo').value = celdas[0].textContent.trim();
+            document.getElementById('tt-inicio').value = celdas[2].textContent.trim();
+            document.getElementById('tt-fin').value = celdas[3].textContent.trim();
+            document.getElementById('treg-modal-tipo-trab-edit').classList.add('open');
+        }
+
+        function cerrarTipoTrabEdit() {
+            document.getElementById('treg-modal-tipo-trab-edit').classList.remove('open');
+            filaTipoEnEdicion = null;
+        }
+
+        function aceptarTipoTrabEdit() {
+            if (!filaTipoEnEdicion) return cerrarTipoTrabEdit();
+            const sel = document.getElementById('tt-tipo');
+            if (!sel.value) {
+                alert('Seleccione el tipo de trabajador.');
+                return;
+            }
+            const inicio = document.getElementById('tt-inicio').value.trim();
+            if (!inicio) {
+                alert('La fecha de inicio es obligatoria.');
+                return;
+            }
+            pintarFilaTipoTrabajador(filaTipoEnEdicion, sel.value, sel.options[sel.selectedIndex].text,
+                inicio, document.getElementById('tt-fin').value.trim());
+            volcarPrimerTipoTrabajador();
+            cerrarTipoTrabEdit();
+        }
+
+        // La ficha muestra el tipo de trabajador del periodo más reciente (mayor fecha de inicio).
+        function volcarPrimerTipoTrabajador() {
+            const filas = Array.from(document.getElementById('tipos-trab-filas').rows);
+            const sel = document.getElementById('trab-tipo-trabajador');
+            let fila = null, mayor = -1;
+            filas.forEach(f => {
+                const orden = fechaOrden(f.cells[2].textContent);
+                if (orden >= mayor) { mayor = orden; fila = f; }
+            });
+            if (!fila) {
+                sel.value = '';
+                document.getElementById('trab-tipo-inicio').value = '';
+                document.getElementById('trab-tipo-fin').value = '';
+                cambiarTipoTrabajador();
+                return;
+            }
+            const celdas = fila.querySelectorAll('td');
+            sel.value = celdas[0].textContent.trim();
+            document.getElementById('trab-tipo-inicio').value = celdas[2].textContent.trim();
+            document.getElementById('trab-tipo-fin').value = celdas[3].textContent.trim();
+            cambiarTipoTrabajador();
+        }
+
+        // Catálogos de PLAME: T12 (contrato), T16 (tipo de pago), T13 (periodicidad).
+        const T12_CONTRATOS = [
+            'A PLAZO INDETERMINADO', 'A TIEMPO PARCIAL', 'POR INICIO O INCREMENTO DE ACTIVIDAD',
+            'POR NECESIDADES DEL MERCADO', 'POR RECONVERSIÓN EMPRESARIAL', 'OCASIONAL',
+            'DE SUPLENCIA', 'DE EMERGENCIA', 'PARA OBRA DETERMINADA O SERVICIO ESPECÍFICO',
+            'INTERMITENTE', 'DE TEMPORADA', 'DE EXPORTACIÓN NO TRADICIONAL', 'DE EXTRANJERO',
+            'ADMINISTRATIVO DE SERVICIOS', 'OTROS'
+        ];
+        const T16_TIPO_PAGO = ['EFECTIVO', 'DEPÓSITO EN CUENTA', 'OTROS'];
+        const T13_PERIODICIDAD = ['MENSUAL', 'QUINCENAL', 'SEMANAL', 'DIARIA', 'OTROS'];
+
+        function llenarCatalogo(id, valores) {
+            const sel = document.getElementById(id);
+            valores.forEach(v => {
+                const o = document.createElement('option');
+                o.textContent = v;
+                sel.appendChild(o);
+            });
+        }
+
+        // ===== Establecimiento donde labora =====
+        // "RUC - RAZÓN SOCIAL" de la empresa con la que se inició sesión.
+        function empresaActual() {
+            try {
+                const s = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+                const ruc = String(s.ruc || '').replace(/\D/g, '');
+                const razon = (s.denominacion || document.querySelector('.user-info-right span').textContent
+                    .replace('Bienvenido,', '').replace(/\s*$/,'').trim() || 'EMPRESA').replace(/\s*$/,'').trim();
+                return (ruc ? ruc + ' - ' : '') + razon;
+            } catch (e) { return 'EMPRESA'; }
+        }
+
+        // Por defecto el trabajador labora en el domicilio fiscal de la empresa actual.
+        const establecimientos = [
+            { empresa: empresaActual(), codLocal: '0000', local: 'DOMICILIO FISCAL', tipo: 'DOMICILIO FISCAL' }
+        ];
+
+        function poblarSelectEstablecimiento() {
+            const sel = document.getElementById('trab-establecimiento');
+            const previo = sel.selectedIndex;
+            sel.innerHTML = establecimientos
+                .map((e, i) => '<option value="' + i + '">' + e.empresa + '</option>').join('');
+            sel.selectedIndex = previo >= 0 && previo < establecimientos.length ? previo : 0;
+            cambiarEstablecimiento();
+
+            // El mismo listado alimenta el establecimiento de formación laboral
+            const selF = document.getElementById('pfl-local');
+            const previoF = selF.selectedIndex;
+            selF.innerHTML = establecimientos
+                .map((e, i) => '<option value="' + i + '">' + e.local + '</option>').join('');
+            selF.selectedIndex = previoF >= 0 && previoF < establecimientos.length ? previoF : 0;
+            cambiarEstablecimientoFormacion();
+        }
+
+        function cambiarEstablecimientoFormacion() {
+            const i = Number(document.getElementById('pfl-local').value || 0);
+            const e = establecimientos[i] || establecimientos[0];
+            document.getElementById('pfl-cod-local').value = e ? e.codLocal : '';
+        }
+
+        // La dirección del domicilio fiscal se toma de la tabla `empresas` de Supabase.
+        async function cargarDireccionEmpresa() {
+            const cliente = clienteSupabase();
+            if (!cliente) return;
+            let ruc = '';
+            try { ruc = String(JSON.parse(sessionStorage.getItem('sunat_auth') || '{}').ruc || '').replace(/\D/g, ''); }
+            catch (e) { return; }
+            if (!ruc) return;
+
+            const { data } = await cliente.from('empresas')
+                .select('direccion_legal, urbanizacion, distrito_ciudad, provincia, departamento')
+                .eq('ruc', ruc).maybeSingle();
+            if (!data) return;
+
+            const partes = [data.direccion_legal, data.urbanizacion].filter(Boolean).join(' ');
+            const ubigeo = [data.distrito_ciudad, data.provincia, data.departamento].filter(Boolean).join('-');
+            const direccion = [partes, ubigeo].filter(Boolean).join(' ').toUpperCase();
+            if (direccion) {
+                establecimientos[0].local = direccion;
+                poblarSelectEstablecimiento();
+            }
+        }
+
+        function cambiarEstablecimiento() {
+            const i = Number(document.getElementById('trab-establecimiento').value || 0);
+            const e = establecimientos[i] || establecimientos[0];
+            document.getElementById('trab-cod-local').value = e.codLocal;
+            document.getElementById('trab-local').value = e.local;
+            document.getElementById('trab-tipo-estab').textContent = e.tipo ? 'Tipo: ' + e.tipo : '';
+        }
+
+        function abrirEstablecimientos() {
+            const tbody = document.getElementById('estab-filas');
+            tbody.innerHTML = establecimientos.map((e, i) =>
+                '<tr><td>' + e.empresa + '</td><td>' + e.codLocal + ' - ' + e.local + '</td><td>' + e.tipo + '</td>' +
+                '<td style="text-align:center;">' +
+                    (i === 0 ? '' :
+                    '<i class="fas fa-circle-xmark treg-icon-del" title="Eliminar" onclick="eliminarEstablecimiento(' + i + ');"></i>') +
+                '</td></tr>').join('');
+            document.getElementById('treg-modal-establecimientos').classList.add('open');
+        }
+
+        function cerrarEstablecimientos() {
+            document.getElementById('treg-modal-establecimientos').classList.remove('open');
+            poblarSelectEstablecimiento();
+        }
+
+        function eliminarEstablecimiento(i) {
+            establecimientos.splice(i, 1);
+            abrirEstablecimientos();
+        }
+
+        function abrirPeriodoEstablecimiento() {
+            const ruc = document.getElementById('ee-ruc');
+            ruc.innerHTML = '<option>' + empresaActual() + '</option>';
+            document.getElementById('ee-cod-local').value = '';
+            document.getElementById('ee-local').value = '';
+            document.getElementById('ee-tipo').selectedIndex = 0;
+            document.getElementById('treg-modal-estab-edit').classList.add('open');
+        }
+
+        function cerrarPeriodoEstablecimiento() {
+            document.getElementById('treg-modal-estab-edit').classList.remove('open');
+        }
+
+        function aceptarPeriodoEstablecimiento() {
+            const codLocal = document.getElementById('ee-cod-local').value.trim();
+            const local = document.getElementById('ee-local').value.trim().toUpperCase();
+            if (!codLocal || !local) {
+                alert('Ingrese el código de local y el nombre del local.');
+                return;
+            }
+            establecimientos.push({
+                empresa: document.getElementById('ee-ruc').value,
+                codLocal: codLocal,
+                local: local,
+                tipo: document.getElementById('ee-tipo').value
+            });
+            cerrarPeriodoEstablecimiento();
+            abrirEstablecimientos();
+        }
+
+        // ===== Datos de Seguridad Social =====
+        // Catálogos oficiales PLAME: T11 (régimen pensionario), T14 (entidades EPS).
+        // Orden y nombres tal como aparecen en el desplegable de SUNAT (T-Registro).
+        const T11_PENSIONES = [
+            'SIN REGIMEN PENSIONARIO/NO APLICA', 'SPP HABITAT', 'SPP PRIMA',
+            'SPP PROFUTURO', 'SPP HORIZONTE', 'SPP INTEGRA',
+            'DECRETO LEY 19990 - SISTEMA NACIONAL DE PENSIONES - ONP'
+        ];
+        const T14_EPS = [
+            'PERSALUD S.A. ENTIDAD PRESTADORA DE SALUD',
+            'PACÍFICO S.A. ENTIDAD PRESTADORA DE SALUD',
+            'RÍMAC INTERNACIONAL S.A. ENTIDAD PRESTADORA DE SALUD',
+            'SERVICIOS PROPIOS', 'MAPFRE PERU S.A. ENTIDAD PRESTADORA DE SALUD',
+            'COLSANITAS PERU S.A.  ENTIDAD PRESTADORA DE SALUD'
+        ];
+
+        // Crea una fila de periodo con iconos de editar/eliminar; el 4º arg es el handler de edición.
+        function filaPeriodoGenerica(celdas, editFn) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = celdas.map(c => '<td>' + c + '</td>').join('') +
+                '<td style="text-align:center;">' +
+                '<i class="fas fa-pen-to-square treg-icon-edit" title="Editar" onclick="' + editFn + '(this);"></i>' +
+                '<i class="fas fa-circle-xmark treg-icon-del" title="Eliminar" style="margin-left:6px;" onclick="this.closest(\'tr\').remove();"></i>' +
+                '</td>';
+            return tr;
+        }
+
+        // Siembra una grilla con las fechas de los periodos laborales (columnas de fecha por índice).
+        function sembrarDesdePeriodos(tbodyId, plantilla) {
+            const periodos = Array.from(document.getElementById('periodos-filas').rows);
+            const tbody = document.getElementById(tbodyId);
+            if (tbody.rows.length) return; // ya poblada: respetar lo cargado
+            periodos.forEach(p =>
+                tbody.appendChild(plantilla(p.cells[0].textContent.trim(), p.cells[1].textContent.trim())));
+        }
+
+        // Refleja en la ficha la fila más reciente (mayor fecha en la columna dada).
+        function volcarMasReciente(tbodyId, colFecha, setter) {
+            const filas = Array.from(document.getElementById(tbodyId).rows);
+            let fila = null, mayor = -1;
+            filas.forEach(f => {
+                const o = fechaOrden(f.cells[colFecha].textContent);
+                if (o >= mayor) { mayor = o; fila = f; }
+            });
+            setter(fila);
+        }
+
+        // ---- Régimen de salud ----
+        function plantillaSalud(ini, fin) {
+            return filaPeriodoGenerica(['', ini, fin, ''], 'editarPeriodoSalud');
+        }
+        function abrirPeriodosSalud() {
+            sembrarDesdePeriodos('salud-filas', plantillaSalud);
+            document.getElementById('treg-modal-salud').classList.add('open');
+        }
+        function cerrarPeriodosSalud() {
+            volcarMasReciente('salud-filas', 1, fila => {
+                const c = fila ? fila.cells : null;
+                document.getElementById('ss-salud-regimen').innerHTML =
+                    '<option>' + (c ? c[0].textContent : '') + '</option>';
+                document.getElementById('ss-salud-inicio').value = c ? c[1].textContent : '';
+                document.getElementById('ss-salud-fin').value = c ? c[2].textContent : '';
+            });
+            document.getElementById('treg-modal-salud').classList.remove('open');
+        }
+        let filaSaludEdit = null;
+        function abrirPeriodoSalud() {
+            const tr = plantillaSalud('', '');
+            document.getElementById('salud-filas').appendChild(tr);
+            editarPeriodoSalud(tr.querySelector('.treg-icon-edit'));
+        }
+        function editarPeriodoSalud(icono) {
+            filaSaludEdit = icono.closest('tr');
+            const c = filaSaludEdit.cells;
+            document.getElementById('se-regimen').value = c[0].textContent.trim();
+            document.getElementById('se-inicio').value = c[1].textContent.trim();
+            document.getElementById('se-fin').value = c[2].textContent.trim();
+            toggleEpsSalud();
+            if (document.getElementById('se-eps').style.display !== 'none')
+                document.getElementById('se-eps').value = c[3].textContent.trim();
+            document.getElementById('treg-modal-salud-edit').classList.add('open');
+        }
+        // La entidad prestadora solo aplica al régimen con EPS.
+        function toggleEpsSalud() {
+            const conEps = document.getElementById('se-regimen').value === 'ESSALUD REGULAR Y EPS/SERV. PROP.';
+            document.getElementById('se-eps-lbl').style.display = conEps ? '' : 'none';
+            const sel = document.getElementById('se-eps');
+            sel.style.display = conEps ? '' : 'none';
+            if (conEps && sel.options.length <= 1) llenarCatalogo('se-eps', T14_EPS);
+        }
+        function cerrarPeriodoSalud() {
+            document.getElementById('treg-modal-salud-edit').classList.remove('open');
+            filaSaludEdit = null;
+        }
+        function aceptarPeriodoSalud() {
+            if (!filaSaludEdit) return cerrarPeriodoSalud();
+            const reg = document.getElementById('se-regimen').value;
+            if (!reg) { alert('Seleccione el régimen de salud.'); return; }
+            const eps = document.getElementById('se-eps').style.display !== 'none'
+                ? document.getElementById('se-eps').value : '';
+            const c = filaSaludEdit.cells;
+            c[0].textContent = reg;
+            c[1].textContent = document.getElementById('se-inicio').value.trim();
+            c[2].textContent = document.getElementById('se-fin').value.trim();
+            c[3].textContent = eps;
+            cerrarPeriodoSalud();
+        }
+
+        // ---- Régimen pensionario ----
+        function plantillaPension(ini, fin) {
+            return filaPeriodoGenerica(['', ini, fin, ''], 'editarPeriodoPension');
+        }
+        function abrirPeriodosPension() {
+            sembrarDesdePeriodos('pension-filas', plantillaPension);
+            document.getElementById('treg-modal-pension').classList.add('open');
+        }
+        function cerrarPeriodosPension() {
+            volcarMasReciente('pension-filas', 1, fila => {
+                const c = fila ? fila.cells : null;
+                document.getElementById('ss-pension-regimen').innerHTML =
+                    '<option>' + (c ? c[0].textContent : '') + '</option>';
+                document.getElementById('ss-pension-inicio').value = c ? c[1].textContent : '';
+                document.getElementById('ss-pension-fin').value = c ? c[2].textContent : '';
+                if (c && c[3].textContent) document.getElementById('ss-cuspp').value = c[3].textContent;
+            });
+            document.getElementById('treg-modal-pension').classList.remove('open');
+        }
+        let filaPensionEdit = null;
+        function abrirPeriodoPension() {
+            if (document.getElementById('pe-regimen').options.length <= 1) llenarCatalogo('pe-regimen', T11_PENSIONES);
+            const tr = plantillaPension('', '');
+            document.getElementById('pension-filas').appendChild(tr);
+            editarPeriodoPension(tr.querySelector('.treg-icon-edit'));
+        }
+        function editarPeriodoPension(icono) {
+            filaPensionEdit = icono.closest('tr');
+            const c = filaPensionEdit.cells;
+            if (document.getElementById('pe-regimen').options.length <= 1) llenarCatalogo('pe-regimen', T11_PENSIONES);
+            document.getElementById('pe-regimen').value = c[0].textContent.trim();
+            document.getElementById('pe-p-inicio').value = c[1].textContent.trim();
+            document.getElementById('pe-p-fin').value = c[2].textContent.trim();
+            document.getElementById('pe-cuspp').value = c[3].textContent.trim();
+            document.getElementById('treg-modal-pension-edit').classList.add('open');
+        }
+        function cerrarPeriodoPension() {
+            document.getElementById('treg-modal-pension-edit').classList.remove('open');
+            filaPensionEdit = null;
+        }
+        function aceptarPeriodoPension() {
+            if (!filaPensionEdit) return cerrarPeriodoPension();
+            const reg = document.getElementById('pe-regimen').value;
+            if (!reg) { alert('Seleccione el régimen pensionario.'); return; }
+            const c = filaPensionEdit.cells;
+            c[0].textContent = reg;
+            c[1].textContent = document.getElementById('pe-p-inicio').value.trim();
+            c[2].textContent = document.getElementById('pe-p-fin').value.trim();
+            c[3].textContent = document.getElementById('pe-cuspp').value.trim().toUpperCase();
+            cerrarPeriodoPension();
+        }
+
+        // ---- SCTR / coberturas ----
+        function plantillaSctr(ini, fin) {
+            return filaPeriodoGenerica([ini, fin, '', ''], 'editarPeriodoSctr');
+        }
+        function abrirPeriodosSctr() {
+            sembrarDesdePeriodos('sctr-filas', plantillaSctr);
+            document.getElementById('treg-modal-sctr').classList.add('open');
+        }
+        function cerrarPeriodosSctr() {
+            volcarMasReciente('sctr-filas', 0, fila => {
+                const c = fila ? fila.cells : null;
+                document.getElementById('ss-sctr-inicio').value = c ? c[0].textContent : '';
+                document.getElementById('ss-sctr-fin').value = c ? c[1].textContent : '';
+            });
+            document.getElementById('treg-modal-sctr').classList.remove('open');
+        }
+        let filaSctrEdit = null;
+        function abrirPeriodoSctr() {
+            const tr = plantillaSctr('', '');
+            document.getElementById('sctr-filas').appendChild(tr);
+            editarPeriodoSctr(tr.querySelector('.treg-icon-edit'));
+        }
+        function editarPeriodoSctr(icono) {
+            filaSctrEdit = icono.closest('tr');
+            const c = filaSctrEdit.cells;
+            document.getElementById('sc-inicio').value = c[0].textContent.trim();
+            document.getElementById('sc-fin').value = c[1].textContent.trim();
+            document.getElementById('sc-pension').value = c[2].textContent.trim();
+            document.getElementById('sc-salud').value = c[3].textContent.trim();
+            document.getElementById('treg-modal-sctr-edit').classList.add('open');
+        }
+        function cerrarPeriodoSctr() {
+            document.getElementById('treg-modal-sctr-edit').classList.remove('open');
+            filaSctrEdit = null;
+        }
+        function aceptarPeriodoSctr() {
+            if (!filaSctrEdit) return cerrarPeriodoSctr();
+            const c = filaSctrEdit.cells;
+            c[0].textContent = document.getElementById('sc-inicio').value.trim();
+            c[1].textContent = document.getElementById('sc-fin').value.trim();
+            c[2].textContent = document.getElementById('sc-pension').value;
+            c[3].textContent = document.getElementById('sc-salud').value;
+            cerrarPeriodoSctr();
+        }
+
+        // ---- Consulta SBS ----
+        function abrirConsultaSBS() { document.getElementById('treg-modal-sbs-elegir').classList.add('open'); }
+        function cerrarConsultaSBS() { document.getElementById('treg-modal-sbs-elegir').classList.remove('open'); }
+
+        // La consulta real es la única acción que abre un sitio externo, y solo a
+        // pedido del usuario (clic en el botón). Se abre en una pestaña nueva.
+        function abrirSBSReal() {
+            cerrarConsultaSBS();
+            window.open('https://servicios.sbs.gob.pe/ReporteSituacionPrevisional/Afil_Consulta.aspx', '_blank', 'noopener');
+        }
+        function abrirSBSSimulada() {
+            cerrarConsultaSBS();
+            // Precarga con los datos de la persona ya ubicada, si los hay.
+            document.getElementById('sbs-num-doc').value = (document.getElementById('treg-doc').textContent.split('-').pop() || '').trim();
+            const partes = (document.getElementById('treg-nombres').textContent || '').trim().split(/\s+/);
+            document.getElementById('sbs-paterno').value = partes[0] || '';
+            document.getElementById('sbs-materno').value = partes[1] || '';
+            document.getElementById('sbs-nombre1').value = partes[2] || '';
+            document.getElementById('sbs-nombre2').value = partes[3] || '';
+            document.getElementById('sbs-sim-resultado').style.display = 'none';
+            document.getElementById('treg-modal-sbs-sim').classList.add('open');
+        }
+        function cerrarSBSSimulada() { document.getElementById('treg-modal-sbs-sim').classList.remove('open'); }
+        function buscarSBSSimulada() {
+            const doc = document.getElementById('sbs-num-doc').value.trim();
+            if (!doc) { alert('Ingrese el número de documento.'); return; }
+
+            const res = document.getElementById('sbs-sim-resultado');
+            res.style.display = 'block';
+
+            const afps = ['INTEGRA', 'PRIMA', 'PROFUTURO', 'HABITAT'];
+            const n = doc.split('').reduce((a, c) => a + (parseInt(c, 10) || 0), 0);
+            const afiliado = n % 3 !== 0;
+            const ahora = new Date();
+            const hoyTxt = fechaDDMMYYYY(ahora) + ' ' +
+                String(ahora.getHours()).padStart(2, '0') + ':' +
+                String(ahora.getMinutes()).padStart(2, '0') + ':' +
+                String(ahora.getSeconds()).padStart(2, '0');
+
+            if (!afiliado) {
+                res.innerHTML =
+                    '<div class="sbs-rep-titulo">REPORTE DE SITUACIÓN PREVISIONAL EN EL SISTEMA PRIVADO DE PENSIONES :</div>' +
+                    '<div class="sbs-rep-linea"><span>Información al :</span><b>' + hoyTxt + '</b></div>' +
+                    '<p style="margin:12px 0 0 0; color:#1B5AA0;">No se encontró afiliación en el Sistema Privado de Pensiones. ' +
+                    'La persona podría encontrarse en el Sistema Nacional de Pensiones (ONP - D.L. 19990).</p>';
+                return;
+            }
+
+            const afp = afps[n % afps.length];
+            // AFP INTEGRA -> régimen "SPP INTEGRA" en la ficha
+            const cuspp = (afp.slice(0, 2) + doc).slice(0, 12).toUpperCase().padEnd(12, 'X');
+            const desde = new Date(2018 + (n % 6), n % 12, 1 + (n % 27));
+            const devengue = String((n % 12) + 1).padStart(2, '0') + '/' + ahora.getFullYear();
+
+            res.innerHTML =
+                '<div class="sbs-rep-titulo">REPORTE DE SITUACIÓN PREVISIONAL EN EL SISTEMA PRIVADO DE PENSIONES :</div>' +
+                '<div class="sbs-rep-linea"><span>Información al :</span><b>' + hoyTxt + '</b></div>' +
+                '<p class="sbs-rep-p">Estimado usuario:</p>' +
+                '<p class="sbs-rep-p">Como resultado de la consulta realizada a través del Portal Web, se ha determinado lo siguiente:</p>' +
+                '<div class="sbs-rep-linea"><span>Se encuentra afiliado(a) al SPP desde el</span><b>' + fechaDDMMYYYY(desde) + '</b></div>' +
+                '<div class="sbs-rep-linea"><span>Actualmente se encuentra afiliado(a) a</span><b>' + afp[0] + afp.slice(1).toLowerCase() + '</b></div>' +
+                '<div class="sbs-rep-linea"><span>Su Código de Identificación del SPP es</span><b>' + cuspp + '</b></div>' +
+                '<div class="sbs-rep-linea"><span>Su situación actual es</span><b>Afiliado</b></div>' +
+                '<div class="sbs-rep-linea"><span>La fecha de devengue de su último aporte es</span><b>' + devengue + '</b></div>' +
+                '<div class="sbs-rep-box">' +
+                    '<div class="sbs-rep-box-tit">M U Y&nbsp;&nbsp;I M P O R T A N T E</div>' +
+                    '<p class="sbs-rep-sub">Situación del Afiliado</p>' +
+                    '<p class="sbs-rep-p">ACTIVO, según los datos que aparecen en la parte superior.</p>' +
+                    '<p class="sbs-rep-sub">Aportes Obligatorios</p>' +
+                    '<p class="sbs-rep-p">De acuerdo a la información proporcionada por la AFP, durante los últimos seis (6) meses el afiliado registra aportes obligatorios, motivo por el cual puede verificar la fecha de devengue del último aporte a efectos de determinar si éste corresponde al último que su empleador ha efectuado.</p>' +
+                '</div>' +
+                '<p class="sbs-rep-tel">En caso tuviera dudas con relación al presente documento, sírvase contactar a la Superintendencia al teléfono gratuito a nivel nacional : 0800-10840.</p>';
+
+            // Reflejar el resultado en la ficha de régimen pensionario (imagen 5).
+            document.getElementById('ss-pension-regimen').innerHTML = '<option>SPP ' + afp + '</option>';
+            document.getElementById('ss-cuspp').value = cuspp;
+        }
+
+        // ===== Situación educativa (T9) y datos tributarios (T25) =====
+        const T9_NIVEL_EDUCATIVO = [
+            'SIN EDUCACIÓN FORMAL', 'EDUCACIÓN ESPECIAL INCOMPLETA', 'EDUCACIÓN ESPECIAL COMPLETA',
+            'EDUCACIÓN PRIMARIA INCOMPLETA', 'EDUCACIÓN PRIMARIA COMPLETA',
+            'EDUCACIÓN SECUNDARIA INCOMPLETA', 'EDUCACIÓN SECUNDARIA COMPLETA',
+            'EDUCACIÓN TÉCNICA INCOMPLETA', 'EDUCACIÓN TÉCNICA COMPLETA',
+            'EDUCACIÓN SUPERIOR (INSTITUTO SUPERIOR, ETC) INCOMPLETA',
+            'EDUCACIÓN SUPERIOR (INSTITUTO SUPERIOR, ETC) COMPLETA',
+            'EDUCACIÓN UNIVERSITARIA INCOMPLETA', 'EDUCACIÓN UNIVERSITARIA COMPLETA',
+            'GRADO DE BACHILLER', 'TITULADO', 'ESTUDIOS DE MAESTRÍA INCOMPLETA',
+            'ESTUDIOS DE MAESTRÍA COMPLETA', 'GRADO DE MAESTRÍA', 'ESTUDIOS DE DOCTORADO INCOMPLETO',
+            'ESTUDIOS DE DOCTORADO COMPLETO', 'GRADO DE DOCTOR'
+        ];
+
+        // Convenios para evitar la doble imposición (lista del desplegable de SUNAT).
+        const CONVENIOS_DOBLE = ['NINGUNO', 'CANADA', 'CHILE', 'CAN', 'BRASIL', 'MEXICO', 'COREA', 'SUIZA', 'PORTUGAL'];
+
+        // El convenio solo se elige si se aplica un convenio de doble imposición.
+        function cambiarConvenio() {
+            const aplica = document.querySelector('input[name="trib-convenio-si"]:checked').value === 'SI';
+            const sel = document.getElementById('trib-convenio');
+            sel.disabled = !aplica;
+            sel.style.background = aplica ? '#FFF' : '#E9E9E9';
+            if (!aplica) sel.selectedIndex = 0;
+        }
+
+        // ===== Pensionista y Personal en formación laboral =====
+        const T17_MOTIVO_FIN = [
+            'RENUNCIA', 'RENUNCIA CON INCENTIVOS', 'DESPIDO O DESTITUCIÓN', 'CESE COLECTIVO',
+            'JUBILACIÓN', 'INVALIDEZ ABSOLUTA PERMANENTE',
+            'TERMINACIÓN DE LA OBRA O SERVICIO O VENCIMIENTO DEL PLAZO', 'MUTUO DISENSO',
+            'FALLECIMIENTO', 'SUSPENSIÓN DE LA PENSIÓN', 'REASIGNACIÓN SERVIDOR DE LA ADMINISTRACIÓN PÚBLICA'
+        ];
+        // Nombres tal como los muestra el desplegable de SUNAT en esta pantalla.
+        const T18_MODALIDAD = [
+            'APRENDIZ. CON PREDOM. EN LA EMPRESA',
+            'APRENDIZ. CON PREDOM. EN CFP - PRACT PRE PROF',
+            'PRACTICAS PROFESIONALES',
+            'PASANTIA EN LA EMPRESA',
+            'PASANTIA DE DOCENTES Y CATEDRATICOS'
+        ];
+
+        // --- Período reutilizable (pensionista / formación) ---
+        let psContexto = null; // { conMotivo, inicioId, finId, motivoId }
+        function plantillaSimple(ini, fin) {
+            return filaPeriodoGenerica([ini, fin, ''], 'editarPeriodoSimple');
+        }
+        function abrirPeriodosPensionista() {
+            psContexto = { conMotivo: true, inicioId: 'pen-inicio', finId: 'pen-fin', motivoId: 'pen-motivo' };
+            document.getElementById('ps-titulo').textContent = 'Períodos del pensionista';
+            document.getElementById('ps-th-motivo').style.display = '';
+            document.getElementById('ps-motivo-wrap').style.display = '';
+            sembrarDesdePeriodos('ps-filas', plantillaSimple);
+            document.getElementById('treg-modal-periodo-simple').classList.add('open');
+        }
+        // ---- Períodos de Formación: se escriben directo en la grilla ----
+        function filaFormacion(ini, fin) {
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td style="text-align:center;"><input type="text" class="form-fecha" maxlength="10" placeholder="dd/mm/aaaa" value="' + (ini || '') + '"></td>' +
+                '<td style="text-align:center;"><input type="text" class="form-fecha" maxlength="10" placeholder="dd/mm/aaaa" value="' + (fin || '') + '"></td>' +
+                '<td style="text-align:center;"><i class="fas fa-xmark treg-icon-del" title="Eliminar" onclick="this.closest(\'tr\').remove();"></i></td>';
+            return tr;
+        }
+
+        function abrirPeriodosFormacion() {
+            const tbody = document.getElementById('form-periodos-filas');
+            if (!tbody.rows.length) {
+                tbody.appendChild(filaFormacion(
+                    document.getElementById('pfl-inicio').value,
+                    document.getElementById('pfl-fin').value));
+            }
+            document.getElementById('treg-modal-form-periodos').classList.add('open');
+        }
+
+        function agregarPeriodoFormacion() {
+            document.getElementById('form-periodos-filas').appendChild(filaFormacion('', ''));
+        }
+
+        function cerrarPeriodosFormacion() {
+            document.getElementById('treg-modal-form-periodos').classList.remove('open');
+        }
+
+        // Al aceptar, la ficha muestra el período más reciente de la grilla.
+        function aceptarPeriodosFormacion() {
+            const filas = Array.from(document.getElementById('form-periodos-filas').rows);
+            let mejor = null, mayor = -1;
+            filas.forEach(f => {
+                const ini = f.cells[0].querySelector('input').value.trim();
+                const o = fechaOrden(ini);
+                if (o >= mayor) { mayor = o; mejor = f; }
+            });
+            document.getElementById('pfl-inicio').value = mejor ? mejor.cells[0].querySelector('input').value.trim() : '';
+            document.getElementById('pfl-fin').value = mejor ? mejor.cells[1].querySelector('input').value.trim() : '';
+            cerrarPeriodosFormacion();
+        }
+        function cerrarPeriodosSimple() {
+            volcarMasReciente('ps-filas', 0, fila => {
+                const c = fila ? fila.cells : null;
+                document.getElementById(psContexto.inicioId).value = c ? c[0].textContent : '';
+                document.getElementById(psContexto.finId).value = c ? c[1].textContent : '';
+                if (psContexto.conMotivo && c) {
+                    const m = document.getElementById(psContexto.motivoId);
+                    m.disabled = false; m.style.background = '#FFF';
+                    m.innerHTML = '<option>' + c[2].textContent + '</option>';
+                }
+            });
+            // Limpia la grilla para que la siguiente apertura vuelva a sembrar
+            document.getElementById('ps-filas').innerHTML = '';
+            document.getElementById('treg-modal-periodo-simple').classList.remove('open');
+        }
+        let filaSimpleEdit = null;
+        function agregarPeriodoSimple() {
+            const tr = plantillaSimple('', '');
+            document.getElementById('ps-filas').appendChild(tr);
+            editarPeriodoSimple(tr.querySelector('.treg-icon-edit'));
+        }
+        function editarPeriodoSimple(icono) {
+            filaSimpleEdit = icono.closest('tr');
+            const c = filaSimpleEdit.cells;
+            document.getElementById('ps-inicio').value = c[0].textContent.trim();
+            document.getElementById('ps-fin').value = c[1].textContent.trim();
+            if (psContexto.conMotivo) document.getElementById('ps-motivo').value = c[2].textContent.trim();
+            document.getElementById('treg-modal-periodo-simple-edit').classList.add('open');
+        }
+        function cerrarPeriodoSimpleEdit() {
+            document.getElementById('treg-modal-periodo-simple-edit').classList.remove('open');
+            filaSimpleEdit = null;
+        }
+        function aceptarPeriodoSimpleEdit() {
+            if (!filaSimpleEdit) return cerrarPeriodoSimpleEdit();
+            const c = filaSimpleEdit.cells;
+            c[0].textContent = document.getElementById('ps-inicio').value.trim();
+            c[1].textContent = document.getElementById('ps-fin').value.trim();
+            c[2].textContent = psContexto.conMotivo ? document.getElementById('ps-motivo').value : '';
+            cerrarPeriodoSimpleEdit();
+        }
+
+        // ===== Grabar el prestador y emitir la constancia =====
+        let numeroOrdenCIR = '';
+        let fechaHoraCIR = '';
+        let prestadorEnEdicion = null;   // índice en `prestadores` cuando se edita
+
+        // Reabre la ficha con los datos ya registrados para editarlos.
+        function modificarPrestador(i) {
+            const p = prestadores[i];
+            if (!p) return;
+            prestadorEnEdicion = i;
+
+            document.getElementById('treg-doc').textContent = p.documento;
+            document.getElementById('treg-fnac').textContent = p.fecNac;
+            document.getElementById('treg-pais').textContent = p.pais || '';
+            document.getElementById('treg-nombres').textContent = p.nombres;
+            document.getElementById('treg-sexo').textContent = p.sexo;
+            document.getElementById('treg-ecivil').textContent = p.ecivil || '';
+            document.getElementById('treg-dir1').textContent = p.dir1 || '';
+
+            document.getElementById('treg-contacto').style.display = 'block';
+            document.getElementById('treg-categoria').style.display = 'block';
+            document.getElementById('treg-acciones-nuevo').style.display = 'none';
+            cambiarTabCategoria('trabajador');
+
+            document.getElementById('treg-lista').style.display = 'none';
+            document.getElementById('treg-constancia').style.display = 'none';
+            document.getElementById('treg-nuevo').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function eliminarPrestador(i) {
+            if (!confirm('¿Desea eliminar el registro del prestador?')) return;
+            prestadores.splice(i, 1);
+            pintarPrestadores();
+        }
+
+        function grabarPrestador() {
+            const doc = document.getElementById('treg-doc').textContent.trim();
+            if (!doc) {
+                alert('Primero ubique a la persona con la opción Búsqueda de Persona.');
+                return;
+            }
+
+            numeroOrdenCIR = String(Math.floor(Math.random() * 9e8) + 1e8);
+            const ahora = new Date();
+            fechaHoraCIR = fechaDDMMYYYY(ahora) + ' a las ' +
+                String(ahora.getHours()).padStart(2, '0') + ':' +
+                String(ahora.getMinutes()).padStart(2, '0') + ':' +
+                String(ahora.getSeconds()).padStart(2, '0');
+
+            // Ficha completa: permite volver a abrirla desde Modificar
+            const registro = {
+                categoria: 'TRA',
+                documento: doc,
+                nombres: document.getElementById('treg-nombres').textContent.trim(),
+                fecNac: document.getElementById('treg-fnac').textContent.trim(),
+                sexo: document.getElementById('treg-sexo').textContent.trim(),
+                estado: 'Activo',
+                pais: document.getElementById('treg-pais').textContent.trim(),
+                ecivil: document.getElementById('treg-ecivil').textContent.trim(),
+                dir1: document.getElementById('treg-dir1').textContent.trim()
+            };
+
+            // Si se llegó desde Modificar se actualiza; si no, se agrega
+            if (prestadorEnEdicion !== null) prestadores[prestadorEnEdicion] = registro;
+            else prestadores.push(registro);
+            prestadorEnEdicion = null;
+
+            document.getElementById('cons-doc').textContent = doc;
+            document.getElementById('cons-pais').textContent = document.getElementById('treg-pais').textContent.trim();
+            document.getElementById('cons-nombres').textContent = document.getElementById('treg-nombres').textContent.trim();
+
+            document.getElementById('treg-nuevo').style.display = 'none';
+            document.getElementById('treg-constancia').style.display = 'block';
+            document.getElementById('treg-modal-msg-grabado').classList.add('open');
+            window.scrollTo(0, 0);
+        }
+
+        function cerrarMsgGrabado() {
+            document.getElementById('treg-modal-msg-grabado').classList.remove('open');
+        }
+
+        function retornarDesdeConstancia() {
+            document.getElementById('treg-constancia').style.display = 'none';
+            pintarPrestadores();
+            volverListaPrestadores();
+        }
+
+        // ===== CIR: Constancia de Alta del Trabajador (Formulario 1604-1) =====
+        function filasDeGrilla(tbodyId, cols) {
+            return Array.from(document.getElementById(tbodyId).rows)
+                .map(f => cols.map(i => (f.cells[i] ? f.cells[i].textContent.trim() : '') || '-'));
+        }
+
+        function imprimirCIR() {
+            if (!window.jspdf) { alert('No se pudo cargar el generador de PDF. Intente nuevamente.'); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            const M = 18;            // margen izquierdo
+            const ANCHO = 210 - M * 2;
+            let y = 16;
+
+            // Cabecera: logo SUNAT + rótulo del módulo
+            const logo = document.querySelector('.main-header img.logo');
+            if (logo) { try { doc.addImage(logo, 'PNG', M, y - 4, 34, 11); } catch (e) {} }
+            doc.setFontSize(9).setFont(undefined, 'bolditalic');
+            doc.text('T-Registro: Registro de Prestadores', 210 - M, y + 1, { align: 'right' });
+            y += 18;
+
+            doc.setFont(undefined, 'bold').setFontSize(13);
+            doc.text('CONSTANCIA DE ALTA DEL TRABAJADOR', 105, y, { align: 'center' }); y += 7;
+            doc.setFontSize(12);
+            doc.text('Formulario 1604-1', 105, y, { align: 'center' }); y += 7;
+            doc.text('Comprobante de Información Registrada', 105, y, { align: 'center' }); y += 10;
+
+            doc.setFont(undefined, 'normal').setFontSize(8.5);
+            doc.text('Con el número de orden ' + numeroOrdenCIR + ' se realizó satisfactoriamente el registro del trabajador el ' +
+                fechaHoraCIR + ', según el siguiente detalle:', M, y, { maxWidth: ANCHO }); y += 12;
+
+            // --- Secciones con título subrayado ---
+            const seccion = txt => {
+                doc.setFont(undefined, 'bold').setFontSize(11);
+                doc.text(txt, M, y); y += 2;
+                doc.setLineWidth(0.5).line(M, y, 210 - M, y); y += 5;
+                doc.setFont(undefined, 'normal').setFontSize(8.5);
+            };
+            const campo = (etq, val) => {
+                doc.setFont(undefined, 'bold'); doc.text(etq, M + 2, y);
+                doc.setFont(undefined, 'normal'); doc.text(String(val || '-'), M + 55, y, { maxWidth: ANCHO - 57 });
+                y += 5;
+            };
+
+            seccion('EMPLEADOR');
+            campo('Número de RUC:', empresaActual());
+            y += 4;
+
+            seccion('TRABAJADOR - Datos de identificación');
+            campo('Tipo y número de documento:', document.getElementById('treg-doc').textContent.trim());
+            campo('País emisor del documento:', document.getElementById('treg-pais').textContent.trim());
+            campo('Apellidos y nombres:', document.getElementById('treg-nombres').textContent.trim());
+            campo('Sexo:', document.getElementById('treg-sexo').textContent.trim() +
+                '     Estado civil: ' + document.getElementById('treg-ecivil').textContent.trim() +
+                '     Nacionalidad: ' + document.getElementById('treg-nacionalidad').value);
+            campo('Teléfono:', (document.getElementById('treg-tel-codigo').value + ' ' +
+                document.getElementById('treg-tel-numero').value).trim());
+            campo('Primera dirección:', document.getElementById('treg-dir1').textContent.trim());
+            campo('Segunda dirección:', document.getElementById('treg-dir2').textContent.trim());
+            y += 4;
+
+            seccion('TRABAJADOR - Datos laborales');
+
+            // Tabla simple: encabezado gris + filas
+            const tabla = (titulo, cabeceras, filas, anchos) => {
+                doc.setFont(undefined, 'bolditalic').setFontSize(8.5);
+                doc.text(titulo, M, y); y += 4;
+                doc.setFont(undefined, 'bold').setFontSize(8);
+                let x = M;
+                doc.setFillColor(224, 224, 224);
+                doc.rect(M, y - 4, anchos.reduce((a, b) => a + b, 0), 6, 'F');
+                cabeceras.forEach((c, i) => { doc.text(c, x + anchos[i] / 2, y, { align: 'center' }); x += anchos[i]; });
+                y += 2;
+                doc.setFont(undefined, 'normal');
+                (filas.length ? filas : [cabeceras.map(() => '-')]).forEach(fila => {
+                    y += 5; x = M;
+                    fila.forEach((c, i) => { doc.text(String(c), x + 2, y, { maxWidth: anchos[i] - 4 }); x += anchos[i]; });
+                    doc.rect(M, y - 4, anchos.reduce((a, b) => a + b, 0), 5.5);
+                });
+                y += 9;
+            };
+
+            tabla('Periodos laborales:', ['Fecha de inicio', 'Fecha de fin', 'Motivo de baja'],
+                filasDeGrilla('periodos-filas', [0, 1, 2]), [35, 35, 104]);
+
+            tabla('Tipos de trabajador:', ['Fecha de inicio', 'Fecha de fin', 'Tipo de trabajador'],
+                filasDeGrilla('tipos-trab-filas', [2, 3, 1]), [35, 35, 104]);
+
+            tabla('Establecimientos donde labora:', ['Código', 'Local', 'Tipo'],
+                establecimientos.map(e => [e.codLocal, e.local, e.tipo]), [25, 109, 40]);
+
+            doc.setFontSize(7).setTextColor(120);
+            doc.text('Documento generado por el Simulador del Laboratorio Tributario CERTUS. No es un documento oficial de SUNAT.',
+                105, 287, { align: 'center' });
+
+            doc.save('CIR_1604-1_' + numeroOrdenCIR + '.pdf');
+        }
+
         pintarPrestadores();
+        llenarTiposTrabajador();
+        llenarCatalogo('edu-nivel', T9_NIVEL_EDUCATIVO);
+        llenarCatalogo('trib-convenio', CONVENIOS_DOBLE);
+        llenarOcupaciones(); // datalist compartido por trabajador y formación
+        llenarCatalogo('pen-motivo', T17_MOTIVO_FIN);
+        llenarCatalogo('pen-regimen', T11_PENSIONES);
+        llenarCatalogo('pen-pago', T16_TIPO_PAGO);
+        llenarCatalogo('ps-motivo', T17_MOTIVO_FIN);
+        llenarCatalogo('pfl-modalidad', T18_MODALIDAD);
+        llenarCatalogo('pfl-educativa', T9_NIVEL_EDUCATIVO);
+        llenarCatalogo('trab-tipo-contrato', T12_CONTRATOS);
+        llenarCatalogo('trab-tipo-pago', T16_TIPO_PAGO);
+        llenarCatalogo('trab-periodicidad', T13_PERIODICIDAD);
+        poblarSelectEstablecimiento();
+        cargarDireccionEmpresa();
+        document.getElementById('se-regimen').addEventListener('change', toggleEpsSalud);
     </script>
     <script src="survey.js"></script>
+    <script src="finalizar.js"></script>
 </body>
 
 </html>

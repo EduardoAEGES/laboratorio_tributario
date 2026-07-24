@@ -168,6 +168,10 @@
 
         generarReportePDF(detectarModulo());
 
+        // Algunas pantallas (p. ej. el T-Registro) piden quedarse donde están
+        // tras descargar el reporte, en vez de volver al portal.
+        if (btn.hasAttribute('data-sin-redireccion')) return;
+
         // Destino: si hay sesión SOL activa, volver a sol.html; si no, al inicio.
         const destino = sessionStorage.getItem('sunat_auth') ? 'sol.html' : 'index.html';
         setTimeout(function () { window.location.href = destino; }, 800);
