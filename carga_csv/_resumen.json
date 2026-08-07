@@ -1,0 +1,22 @@
+{
+ "usuarios": 10,
+ "empresas": 62,
+ "registro_ventas": 4181,
+ "registro_compras": 4553,
+ "ventas_adicional": 4181,
+ "ventas_detalle": 7220,
+ "ventas_cuotas": 3270,
+ "compras_adicional": 4553,
+ "compras_detalle": 4775,
+ "compras_cuotas": 4344,
+ "t_registro": 115,
+ "plame_detalle": 1936,
+ "plame_resumen": 190,
+ "conceptos_plame": 18,
+ "catalogo_productos": 115,
+ "catalogo_compras": 127,
+ "resumen_fv621": 190,
+ "resumen_fv710": 20,
+ "parametros_tributarios": 27,
+ "empresas_simulador": 10
+}

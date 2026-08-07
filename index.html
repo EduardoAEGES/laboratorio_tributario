@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="auth.js"></script>
+    <script src="sesion.js"></script>
 </head>
 <body>
 
@@ -80,7 +81,7 @@
                     <a href="tregistro.html" class="quick-btn" style="flex: 1; min-width: 130px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; background: #D97706; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
                         <i class="fas fa-briefcase"></i> REMYPE
                     </a>
-                    <a href="login.html" class="quick-btn" style="flex: 1; min-width: 150px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; background: #4F46E5; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
+                    <a href="gestor.html" class="quick-btn" style="flex: 1; min-width: 150px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; background: #4F46E5; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; text-align: center;">
                         <i class="fas fa-users-cog"></i> GESTOR DE USUARIOS
                     </a>
                 </div>
@@ -305,8 +306,27 @@
 
         function cerrarSesionIndex() {
             sessionStorage.removeItem('sunat_auth');
-            actualizarBotonesAuth();
+            sessionStorage.removeItem('sunat_empresa');
+            location.reload();
         }
+
+        // Muestra a quién pertenece la sesión y con qué perfil entró
+        function mostrarPerfil() {
+            if (!window.Sesion || !window.Sesion.hay()) return;
+            const s = window.Sesion.datos();
+            const cont = document.getElementById('auth-header-btns');
+            if (!cont || document.getElementById('tl-perfil')) return;
+            const chip = document.createElement('span');
+            chip.id = 'tl-perfil';
+            chip.style.cssText = 'display:inline-flex;align-items:center;gap:8px;margin-right:12px;' +
+                'padding:6px 14px;background:rgba(255,255,255,.16);border-radius:20px;color:#fff;' +
+                'font-family:Roboto,sans-serif;font-size:13px;font-weight:600;';
+            chip.innerHTML = '<i class="fas fa-user-circle"></i>' +
+                (s.denominacion || s.usuario) +
+                ' <b style="font-weight:800;letter-spacing:.5px;">' + s.rol + '</b>';
+            cont.insertBefore(chip, cont.firstChild);
+        }
+        document.addEventListener('DOMContentLoaded', mostrarPerfil);
 
         // Abrir el modal directamente en modo Registro
         window.mostrarModalLoginRegistro = function () {
@@ -331,9 +351,11 @@
             }
             const targetUrl = (val === 'plame' || val === 'tributacion2' || val === 'sire') ? 'sol.html' : 'dinamica/index.html';
             
-            // Si no está autenticado, abrir ventana flotante encima de la pantalla
+            // Si no está autenticado, solo avisar (el modal se abre con "Iniciar Sesión")
             if (!sessionStorage.getItem('sunat_auth')) {
-                window.mostrarModalLogin(targetUrl, function() { actualizarBotonesAuth(); });
+                if (typeof window.mostrarAvisoLogin === 'function') {
+                    window.mostrarAvisoLogin('Debe iniciar sesión para abrir el aplicativo.');
+                }
             } else {
                 window.location.href = targetUrl;
             }

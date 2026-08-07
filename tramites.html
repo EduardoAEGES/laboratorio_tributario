@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="auth.js"></script>
+    <script src="sesion.js"></script>
 </head>
 <body>
 
@@ -4196,13 +4197,19 @@
 
         // === Emisión de GRE ===
         function showEmisionGRE() {
-            // Leer datos del usuario desde sessionStorage
+            // Leer la empresa elegida en la Clave SOL; si no hay, el usuario de plataforma
             let ruc = '20123456789';
             let denominacion = 'EMPRESA DEMO S.A.C.';
             try {
-                const authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-                if (authData.ruc) ruc = authData.ruc;
-                if (authData.denominacion) denominacion = authData.denominacion;
+                const emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
+                if (emp && (emp.razon_social || emp.ruc)) {
+                    if (emp.ruc) ruc = emp.ruc;
+                    if (emp.razon_social) denominacion = emp.razon_social;
+                } else {
+                    const authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+                    if (authData.ruc) ruc = authData.ruc;
+                    if (authData.denominacion) denominacion = authData.denominacion;
+                }
             } catch(e) {}
             
             // Actualizar los campos de RUC y denominación

@@ -1245,7 +1245,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
                 const mesText = mesSeleccionado.split('-')[0];
                 const searchPeriod = `${mesMap[mesText]}/${year}`;
-                const userRuc = '20123456789'; // Usuario demostrativo
+                // RUC de la empresa elegida en la Clave SOL (SimStore) o, si no hay,
+                // el de la sesion; por defecto la empresa demo. La propuesta del RVIE
+                // debe traer SOLO los comprobantes de esa empresa.
+                let userRuc = '20123456789';
+                try {
+                    userRuc = (window.SimStore && SimStore.rucActivo && SimStore.rucActivo())
+                        || (JSON.parse(sessionStorage.getItem('sunat_auth') || '{}').ruc)
+                        || '20123456789';
+                } catch (e) {}
 
                 // Periodo 'YYYYMM' usado para persistir/recuperar el contenido editado
                 currentPeriodoRvie = year + (mesMap[mesText] || '');
@@ -1271,7 +1279,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         const { data, error } = await authSupabaseClient
                             .from('registro_ventas')
                             .select('*')
-                            .eq('Periodo', searchPeriodBigInt);
+                            .eq('Periodo', searchPeriodBigInt)
+                            .eq('Ruc', parseInt(userRuc, 10));
 
                         if (error) throw error;
 

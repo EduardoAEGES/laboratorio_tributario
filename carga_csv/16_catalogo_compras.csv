@@ -1,0 +1,128 @@
+cod_empresa,ruc,razon_social,concepto_de_compra,tipo_bien_servicio,afectacion_igv,sujeto_detraccion,porc_detraccion,cod_bien_servicio_spot,gasto_recurrente_mensual
+E01,20123456789,EMPRESA DEMO S.A.C.,"Accesorios y perifericos (costo, lote)",Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Computadora de escritorio Core i5 (costo),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,"Disco duro / memoria RAM (costo, lote)",Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Equipos de redes y servidores (costo FOB),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Impresora multifuncional laser (costo),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Laptop Core i5 8GB/512GB SSD (costo),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Laptop y componentes electronicos (costo FOB),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,"Licencia de software (costo, lote)",Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Memorias RAM y discos SSD (costo FOB),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Monitor LED 24 pulgadas (costo),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura F002-2627 (03/2026),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura F050-1045 (12/2025),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura F500-2065 (01/2025),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura F500-2071 (03/2025),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura F500-2074 (04/2025),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura F500-2095 (09/2025),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,NC ref. Factura FN01-877 (06/2026),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Placas madre y procesadores (costo FOB),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Repuestos varios para mantenimiento,Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de Asesoria Contable,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de Asesoria Legal,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de Auditoria Externa,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de agua potable y alcantarillado,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de alquiler de local comercial,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de energia electrica,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de telefonia e internet,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servicio de transporte y flete de mercaderia,Servicio,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Servidor Torre Xeon (costo),Bien,Gravado,NO,0,,NO
+E01,20123456789,EMPRESA DEMO S.A.C.,Utiles de oficina (lote),Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Cemento Portland Tipo I (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Fierro corrugado surtido (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Ladrillos King Kong (millares) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Pinturas y solventes (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Tuberia y accesorios PVC (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Herramientas electricas (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Servicio de transporte de carga - traslado mercaderia,Servicio,Gravado,SI,0.04,027,NO
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Alquiler de local comercial (mes),Servicio,Gravado,SI,0.1,019,SI
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Agua potable y alcantarillado,Servicio,Gravado,NO,0,,SI
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Servicio de internet y telefonia fija,Servicio,Gravado,NO,0,,SI
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,Servicio de vigilancia y seguridad,Servicio,Gravado,SI,0.12,022,SI
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Carnes y menudencia (lote) - insumos,Bien,Gravado,NO,0,,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Verduras y tuberculos frescos (lote),Bien,Exonerado,NO,0,,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Abarrotes y condimentos (lote),Bien,Gravado,NO,0,,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Camarones y pescado fresco (lote),Bien,Exonerado,NO,0,,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Bebidas gaseosas y agua (lote),Bien,Gravado,NO,0,,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Gas licuado de petroleo (balones),Bien,Gravado,NO,0,,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Alquiler de local para restaurante (mes),Servicio,Gravado,SI,0.1,019,SI
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Agua potable y alcantarillado,Servicio,Gravado,NO,0,,SI
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Servicio de limpieza y fumigacion,Servicio,Gravado,SI,0.12,022,NO
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Servicio de delivery tercerizado,Servicio,Gravado,SI,0.12,022,SI
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,Publicidad en redes sociales,Servicio,Gravado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Medicamentos genericos (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Medicamentos oncologicos y diabetes (exonerado),Bien,Exonerado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Productos de tocador y dermocosmetica (lote),Bien,Gravado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Formulas infantiles y panales (lote),Bien,Gravado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Material de curacion e insumos medicos,Bien,Gravado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Bolsas plasticas biodegradables,Bien,Gravado,NO,0,,NO
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Alquiler de local comercial (mes),Servicio,Gravado,SI,0.1,019,SI
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Servicio de internet y telefonia fija,Servicio,Gravado,NO,0,,SI
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Sistema de gestion de farmacia (licencia mensual),Servicio,Gravado,NO,0,,SI
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,Servicio de quimico farmaceutico regente,Servicio,Gravado,SI,0.12,022,SI
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Fibra de alpaca clasificada (kg) - materia prima,Bien,Gravado,NO,0,,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Hilado industrial y lana mezcla (kg),Bien,Gravado,NO,0,,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Insumos quimicos para tenido,Bien,Gravado,NO,0,,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,"Etiquetas, empaques y hangtags",Bien,Gravado,NO,0,,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Repuestos para maquinas rectilineas,Bien,Gravado,NO,0,,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Servicio de maquila de tejido a terceros,Servicio,Gravado,SI,0.12,022,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Servicio de agenciamiento de aduanas,Servicio,Gravado,SI,0.12,022,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Flete internacional y courier de exportacion,Servicio,Gravado,NO,0,,NO
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Energia electrica - suministro industrial,Servicio,Gravado,NO,0,,SI
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Alquiler de planta industrial (mes),Servicio,Gravado,SI,0.1,019,SI
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,Servicio de certificacion textil y ensayos,Servicio,Gravado,SI,0.12,022,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Combustible diesel B5 (galones),Bien,Gravado,NO,0,,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Neumaticos radiales para camion,Bien,Gravado,NO,0,,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Repuestos y filtros para flota,Bien,Gravado,NO,0,,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Lubricantes y aceites de motor,Bien,Gravado,NO,0,,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Servicio de mantenimiento mecanico de flota,Servicio,Gravado,SI,0.12,022,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Peajes y servicios de ruta,Servicio,Gravado,NO,0,,SI
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,SOAT y seguro vehicular de flota,Servicio,Gravado,NO,0,,SI
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Servicio de GPS y monitoreo satelital,Servicio,Gravado,NO,0,,SI
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Alquiler de patio de maniobras (mes),Servicio,Gravado,SI,0.1,019,SI
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Servicio de transporte subcontratado,Servicio,Gravado,SI,0.04,027,NO
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,"Cemento, agregados y aditivos para obra",Bien,Gravado,NO,0,,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Fierro corrugado y alambre para obra,Bien,Gravado,NO,0,,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Ladrillos y bloquetas para obra,Bien,Gravado,NO,0,,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Instalaciones sanitarias y electricas (materiales),Bien,Gravado,NO,0,,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Servicio de subcontrato de mano de obra,Servicio,Gravado,SI,0.04,012,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Alquiler de maquinaria pesada con operador,Servicio,Gravado,SI,0.1,019,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Servicio de topografia y replanteo,Servicio,Gravado,SI,0.12,022,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Servicio de ensayo de laboratorio de suelos,Servicio,Gravado,SI,0.12,022,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Alquiler de oficina administrativa (mes),Servicio,Gravado,SI,0.1,019,SI
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Servicio de transporte de materiales a obra,Servicio,Gravado,SI,0.04,027,NO
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Cafe verde en grano - acopio a productores,Bien,Exonerado,NO,0,,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Quinua en grano - acopio a productores,Bien,Exonerado,NO,0,,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Palta Hass - acopio a productores,Bien,Exonerado,NO,0,,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Sacos de polipropileno y empaques,Bien,Gravado,NO,0,,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Servicio de secado y trilla (maquila),Servicio,Gravado,SI,0.12,022,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Servicio de certificacion organica y fitosanitaria,Servicio,Gravado,SI,0.12,022,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Servicio de agenciamiento de aduanas,Servicio,Gravado,SI,0.12,022,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Servicio de transporte de carga a puerto,Servicio,Gravado,SI,0.04,027,NO
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Alquiler de almacen y camara de frio (mes),Servicio,Gravado,SI,0.1,019,SI
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Energia electrica - suministro industrial,Servicio,Gravado,NO,0,,SI
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,Servicio de fumigacion de almacenes,Servicio,Gravado,SI,0.12,022,NO
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Alquiler de oficina (mes),Servicio,Gravado,SI,0.1,019,SI
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Servicio de internet y telefonia,Servicio,Gravado,NO,0,,SI
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Licencia de software contable (mes),Servicio,Gravado,NO,0,,SI
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Utiles de oficina y papeleria,Bien,Gravado,NO,0,,NO
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Suscripcion a base de datos tributaria,Servicio,Gravado,NO,0,,SI
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Servicio de mensajeria y courier,Servicio,Gravado,NO,0,,NO
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Capacitacion y actualizacion profesional,Servicio,Gravado,NO,0,,NO
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,Equipo de computo y accesorios,Bien,Gravado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Abarrotes surtidos (lote) - compra mercaderia,Bien,Gravado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Bebidas gaseosas y agua (lote),Bien,Gravado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Lacteos y embutidos (lote),Bien,Gravado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Pan y huevos (lote) - exonerado,Bien,Exonerado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Articulos de limpieza (lote),Bien,Gravado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Bolsas plasticas para despacho,Bien,Gravado,NO,0,,NO
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Alquiler de local comercial (mes),Servicio,Gravado,SI,0.1,019,SI
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Energia electrica - suministro comercial,Servicio,Gravado,NO,0,,SI
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Agua potable y alcantarillado,Servicio,Gravado,NO,0,,SI
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,Servicio de internet,Servicio,Gravado,NO,0,,SI

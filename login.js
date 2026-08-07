@@ -60,12 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
             modeLogin.style.background = '#ffffff';
             modeLogin.style.color = '#004B91';
 
-            if (loginSubtitle) loginSubtitle.textContent = 'Registra tu usuario en Supabase (Rol INVITADO por defecto)';
+            if (loginSubtitle) loginSubtitle.textContent = 'Registra tu usuario (Rol INVITADO por defecto)';
             if (denomField) denomField.style.display = 'block';
             if (regRoleBox) regRoleBox.style.display = 'block';
             if (rememberBox) rememberBox.style.display = 'none';
             if (forgotBox) forgotBox.style.display = 'none';
-            if (btnSubmit) btnSubmit.textContent = 'Registrar Cuenta en Supabase';
+            if (btnSubmit) btnSubmit.textContent = 'Registrar Cuenta';
         });
     }
 
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btnSubmit.disabled = true;
             const originalText = btnSubmit.textContent;
-            btnSubmit.textContent = 'Registrando en Supabase...';
+            btnSubmit.textContent = 'Registrando...';
 
             try {
                 const res = await registrarUsuarioExtendido(user, user, pass, denom, 'INVITADO');
@@ -148,15 +148,35 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSubmit.textContent = 'Verificando...';
 
             try {
-                // Pasar RUC si estamos en modo Clave SOL para que loginConSupabase
-                // busque directamente en la tabla 'usuarios'
-                const loginRes = await loginConSupabase(user, pass, isClaveSolMode ? ruc : null);
-                if (loginRes.success) {
-                    irADashboard();
-                } else if (loginRes.reason === 'ROL_RESTRINGIDO') {
-                    alert(`Acceso Restringido:\n\nTu usuario fue encontrado pero tiene el rol '${loginRes.rol || 'INVITADO'}'.\nDe momento sólo se permite el acceso a usuarios con el rol PRUEBA.`);
+                if (isClaveSolMode) {
+                    // ---- PUERTA 2: Clave SOL (RUC + SIST + NORTON) ----
+                    // Exige haber iniciado sesión antes y valida que el rol
+                    // tenga permitido ese RUC y ese aplicativo.
+                    if (!window.Sesion || !window.Sesion.hay()) {
+                        alert('Primero debes iniciar sesión en el laboratorio con tu usuario y contraseña.');
+                        sessionStorage.setItem('loginReferrer', redirectUrl);
+                        window.location.href = 'index.html?login=1';
+                        return;
+                    }
+                    const modulo = window.moduloDeDestino
+                        ? window.moduloDeDestino(redirectParam || '')
+                        : null;
+                    const res = await window.Sesion.claveSol(ruc, user, pass, modulo);
+                    if (res && res.ok) {
+                        // Cargar el avance guardado de este usuario para esa empresa
+                        try { await window.SimStore.hydrate(); } catch (e) {}
+                        irADashboard();
+                    } else {
+                        alert((res && res.mensaje) || 'No se pudo validar la Clave SOL.');
+                    }
                 } else {
-                    alert('Credenciales incorrectas o usuario no registrado.');
+                    // ---- PUERTA 1: usuario y contraseña de la plataforma ----
+                    const loginRes = await loginConSupabase(user, pass, null);
+                    if (loginRes.success) {
+                        irADashboard();
+                    } else {
+                        alert(loginRes.mensaje || 'Credenciales incorrectas o usuario no registrado.');
+                    }
                 }
             } catch (e) {
                 console.error('Error al iniciar sesión:', e);

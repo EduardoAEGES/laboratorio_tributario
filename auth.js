@@ -21,7 +21,12 @@ window.SimStore = (function () {
     // Se persiste CUALQUIER clave con prefijo 'sire_' (estado + contenido de los
     // registros, p. ej. sire_aceptado, sire_presentado, sire_export_tickets,
     // sire_rvie_content_<periodo>, sire_rce_content_<periodo>, ...).
+    //
+    // AVANCE INDEPENDIENTE: todo se guarda por la pareja (usuario, RUC de la
+    // empresa activa) en la tabla public.avance_usuario. Los roles en modo
+    // demostracion (INVITADO y PRUEBA) no persisten nada.
     const SIM_PREFIX = 'sire_';
+    const MODULO = 'sire';
 
     function esClaveSim(key) {
         return typeof key === 'string' && key.indexOf(SIM_PREFIX) === 0;
@@ -32,18 +37,43 @@ window.SimStore = (function () {
         catch (e) { return {}; }
     }
 
+    function uid() {
+        const u = usuarioActual();
+        return u.usuario_id || u.id || null;
+    }
+
+    /** RUC de la empresa elegida en la Clave SOL (puerta 2) */
+    function rucActivo() {
+        try {
+            const e = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
+            if (e && e.ruc) return e.ruc;
+        } catch (err) {}
+        return usuarioActual().ruc || null;
+    }
+
     function esMaster() {
         return String(usuarioActual().rol || '').toUpperCase() === 'MASTER';
     }
 
-    // Convención de nombre para localStorage: sim_<ruc>_<clave>
-    function nsKey(ruc, key) {
-        return 'sim_' + (ruc || 'anon') + '_' + key;
+    /** ¿Este perfil guarda su avance? Lo dice la matriz roles_permisos. */
+    function guardaAvance() {
+        const u = usuarioActual();
+        if (typeof u.puede_guardar === 'boolean') return u.puede_guardar;
+        return esMaster();   // sesiones antiguas sin permisos cargados
     }
 
-    // Recorre las claves sim_<ruc>_sire_* guardadas en localStorage
+    // Convención de nombre para localStorage: sim_<usuario_id>_<ruc>_<clave>
+    function nsKey(ruc, key) {
+        return 'sim_' + (uid() || 'anon') + '_' + (ruc || 'anon') + '_' + key;
+    }
+
+    function prefijoLocal(ruc) {
+        return 'sim_' + (uid() || 'anon') + '_' + (ruc || 'anon') + '_';
+    }
+
+    // Recorre las claves sim_<usuario>_<ruc>_sire_* guardadas en localStorage
     function clavesSimLocal(ruc) {
-        const prefijo = 'sim_' + (ruc || 'anon') + '_';
+        const prefijo = prefijoLocal(ruc);
         const out = [];
         for (let i = 0; i < localStorage.length; i++) {
             const full = localStorage.key(i);
@@ -55,19 +85,18 @@ window.SimStore = (function () {
     }
 
     function persistente(key) {
-        return esClaveSim(key) && esMaster();
+        return esClaveSim(key) && guardaAvance() && !!uid();
     }
 
-    // ---- Sincronización con Supabase (solo rol MASTER) ----
-    // Se guarda todo el estado del usuario (una fila por RUC) en la tabla
-    // public.sire_estado. La escritura es "debounced" para no saturar la red.
+    // ---- Sincronización con Supabase: una fila por (usuario, RUC, modulo) ----
     let _syncTimer = null;
 
     function syncToServer() {
-        if (!esMaster() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+        if (!persistente('sire_')) return;
+        if (typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
         clearTimeout(_syncTimer);
         _syncTimer = setTimeout(async function () {
-            const ruc = usuarioActual().ruc;
+            const ruc = rucActivo();
             if (!ruc) return;
             const estado = {};
             clavesSimLocal(ruc).forEach(function (item) {
@@ -75,26 +104,28 @@ window.SimStore = (function () {
                 if (v !== null) estado[item.key] = v;
             });
             try {
-                await authSupabaseClient
-                    .from('sire_estado')
-                    .upsert({ ruc: ruc, estado: estado, actualizado_at: new Date().toISOString() }, { onConflict: 'ruc' });
+                await authSupabaseClient.rpc('fn_guardar_avance', {
+                    p_usuario: uid(), p_ruc: ruc, p_modulo: MODULO, p_estado: estado
+                });
             } catch (e) {
-                console.warn('No se pudo sincronizar el estado con Supabase:', e);
+                console.warn('No se pudo sincronizar el avance:', e);
             }
         }, 600);
     }
 
-    // Carga el estado guardado en Supabase hacia localStorage (se llama al
-    // iniciar sesión, antes de entrar a los simuladores).
+    // Carga el avance del usuario para la empresa activa hacia localStorage.
+    // Se llama al iniciar sesión y al elegir empresa en la Clave SOL.
     async function hydrate() {
-        if (!esMaster() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
-        const ruc = usuarioActual().ruc;
+        if (!uid() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+        const ruc = rucActivo();
         if (!ruc) return;
         try {
             const { data, error } = await authSupabaseClient
-                .from('sire_estado')
+                .from('avance_usuario')
                 .select('estado')
+                .eq('usuario_id', uid())
                 .eq('ruc', ruc)
+                .eq('modulo', MODULO)
                 .maybeSingle();
             if (error || !data || !data.estado) return;
             Object.keys(data.estado).forEach(function (k) {
@@ -103,48 +134,52 @@ window.SimStore = (function () {
                 }
             });
         } catch (e) {
-            console.warn('No se pudo cargar el estado desde Supabase:', e);
+            console.warn('No se pudo cargar el avance:', e);
         }
     }
 
-    // Borra el estado del usuario actual en localStorage y en Supabase.
-    async function clearAll() {
-        const ruc = usuarioActual().ruc || 'anon';
-        // Claves de sesión conocidas (no llevan prefijo persistente para no-MASTER)
+    // Borra el avance del usuario actual (local y en el servidor si su rol lo permite)
+    async function clearAll(rucOpcional) {
+        const ruc = rucOpcional || rucActivo() || 'anon';
         ['sire_aceptado', 'sire_presentado', 'sire_resumen',
          'sire_export_tickets', 'sire_rce_export_tickets'].forEach(function (k) {
             sessionStorage.removeItem(k);
         });
-        // Todas las claves persistidas sim_<ruc>_sire_* del MASTER
         clavesSimLocal(ruc).forEach(function (item) {
             try { localStorage.removeItem(item.full); } catch (e) {}
         });
-        if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient && ruc !== 'anon') {
-            try { await authSupabaseClient.from('sire_estado').delete().eq('ruc', ruc); } catch (e) {}
+        if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient && uid()) {
+            try {
+                await authSupabaseClient.rpc('fn_reiniciar_avance', {
+                    p_actor: uid(), p_objetivo: uid(), p_ruc: ruc,
+                    p_motivo: 'Reinicio desde el simulador'
+                });
+            } catch (e) { /* el rol no puede reiniciar: queda solo el borrado local */ }
         }
     }
 
     return {
         esClaveSim: esClaveSim,
         esMaster: esMaster,
+        guardaAvance: guardaAvance,
+        rucActivo: rucActivo,
         hydrate: hydrate,
         clearAll: clearAll,
         getItem: function (key) {
-            if (persistente(key)) return localStorage.getItem(nsKey(usuarioActual().ruc, key));
+            if (persistente(key)) return localStorage.getItem(nsKey(rucActivo(), key));
             return sessionStorage.getItem(key);
         },
         setItem: function (key, val) {
             if (persistente(key)) {
-                localStorage.setItem(nsKey(usuarioActual().ruc, key), val);
+                localStorage.setItem(nsKey(rucActivo(), key), val);
                 syncToServer();
             } else {
                 sessionStorage.setItem(key, val);
             }
         },
         removeItem: function (key) {
-            // Elimina en ambos backends para evitar residuos al cambiar de rol
             sessionStorage.removeItem(key);
-            try { localStorage.removeItem(nsKey(usuarioActual().ruc, key)); } catch (e) {}
+            try { localStorage.removeItem(nsKey(rucActivo(), key)); } catch (e) {}
             if (esClaveSim(key)) syncToServer();
         }
     };
@@ -165,6 +200,22 @@ window.ROLES_SISTEMA = ['INVITADO', 'ESTUDIANTE', 'ASISTENTE', 'PRO', 'DOCENTE',
  * Asume una tabla pública en Supabase llamada 'usuarios' con columnas: ruc, usuario, clave, denominacion, rol
  */
 async function loginConSupabase(usuario, clave, ruc = null) {
+    // PUERTA 1 (usuario + contraseña, sin RUC): lo resuelve la función fn_login de
+    // Supabase, que valida el rol contra la matriz roles_permisos y devuelve en la
+    // sesión los módulos y empresas que ese rol tiene permitidos.
+    if (!ruc && window.Sesion) {
+        try {
+            const res = await window.Sesion.login(usuario, clave);
+            if (res && res.ok) return { success: true, user: res.sesion };
+            return {
+                success: false,
+                reason: (res && res.motivo) || 'INVALID_CREDENTIALS',
+                mensaje: (res && res.mensaje) || 'Credenciales incorrectas.'
+            };
+        } catch (e) {
+            console.error('[auth] fn_login falló, se usa el método anterior', e);
+        }
+    }
     if (!authSupabaseClient) {
         console.warn("Supabase no está configurado.");
         return { success: false, reason: 'NO_SUPABASE' };
@@ -220,18 +271,29 @@ async function loginConSupabase(usuario, clave, ruc = null) {
             return { success: false, reason: 'INVALID_CREDENTIALS' };
         }
 
-        // VERIFICACIÓN DE ROL: De momento sólo permite el ingreso si el rol es PRUEBA o MASTER
+        // VERIFICACIÓN DE ROL: entran todos los perfiles habilitados; lo que cada uno
+        // puede hacer lo decide la matriz roles_permisos (ver sesion.js y fn_permisos).
+        const ROLES_CON_ACCESO = ['INVITADO', 'ESTUDIANTE', 'ASISTENTE', 'PRO',
+                                  'DOCENTE', 'PRUEBA', 'MASTER'];
         const userRolUpper = (sessionUser.rol || '').toUpperCase();
-        if (userRolUpper !== 'PRUEBA' && userRolUpper !== 'MASTER') {
-            return { 
-                success: false, 
-                reason: 'ROL_RESTRINGIDO', 
+        if (ROLES_CON_ACCESO.indexOf(userRolUpper) === -1) {
+            return {
+                success: false,
+                reason: 'ROL_RESTRINGIDO',
                 rol: userRolUpper || 'INVITADO',
-                user: sessionUser 
+                mensaje: 'Tu perfil no tiene acceso al laboratorio.',
+                user: sessionUser
             };
         }
 
-        // Guardar sesión sólo si cumple el rol exigido
+        // Enriquecer la sesión con los permisos del rol antes de guardarla
+        try {
+            const perm = await authSupabaseClient.rpc('fn_permisos', { p_usuario: sessionUser.id });
+            if (perm && perm.data && !perm.data.error) {
+                sessionUser = Object.assign({}, sessionUser, perm.data);
+            }
+        } catch (e) { console.warn('[auth] no se pudieron cargar los permisos', e); }
+
         sessionStorage.setItem('sunat_auth', JSON.stringify(sessionUser));
 
         // Si es MASTER, cargar el estado guardado en Supabase antes de continuar
@@ -272,7 +334,7 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                         <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
                     </button>
                     <button type="button" id="modal-tab-register" style="flex: 1; padding: 9px 12px; border: none; border-radius: 6px; background: transparent; color: #004B91; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-                        <i class="fas fa-user-plus"></i> Registrarse (Supabase)
+                        <i class="fas fa-user-plus"></i> Registrarse
                     </button>
                 </div>
 
@@ -395,7 +457,7 @@ window.mostrarModalLogin = function (targetUrl, callback) {
             chkBox.style.display = 'block';
             roleInfo.style.display = 'block';
             userInp.placeholder = 'Crear Nombre de Usuario';
-            btnSubmit.textContent = 'Registrar en Supabase y Abrir';
+            btnSubmit.textContent = 'Registrar y Abrir';
             subtitle.textContent = 'Complete sus datos para crear su cuenta';
             errorMsg.style.display = 'none';
         };
@@ -439,14 +501,23 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                         nombres, paterno, materno, email, telefono, deseaCapacitaciones
                     };
 
-                    const res = await registrarUsuarioExtendido(user, user, pass, denom, 'INVITADO', extraData);
-                    if (res.success) {
+                    // El registro crea la cuenta como INVITADO y la deja lista para
+                    // entrar de inmediato con el acceso limitado de ese perfil.
+                    const res = window.Sesion
+                        ? await window.Sesion.registrar(user, pass, denom)
+                        : await registrarUsuarioExtendido(user, user, pass, denom, 'INVITADO', extraData);
+                    if (res.ok || res.success) {
                         errorMsg.style.color = '#0284C7';
                         errorMsg.style.background = '#E0F2FE';
                         errorMsg.style.padding = '10px';
                         errorMsg.style.borderRadius = '6px';
-                        errorMsg.innerHTML = `<i class="fas fa-check-circle"></i> <strong>¡Registro guardado exitosamente!</strong><br>Tu cuenta se creó con el rol <strong>INVITADO</strong>.<br><br><span style="color:#C2410C; font-weight:bold;"><i class="fas fa-lock"></i> De momento el ingreso está restringido sólo a usuarios con el rol PRUEBA.</span> Solicita a tu docente o administrador que active el rol PRUEBA en tu cuenta.`;
+                        errorMsg.innerHTML = `<i class="fas fa-check-circle"></i> <strong>¡Cuenta creada!</strong><br>Entras con el perfil <strong>INVITADO</strong>: puedes usar la <strong>Dinámica del Plan Contable</strong> y el <strong>Formulario Virtual 621</strong> con la empresa demo (RUC 20123456789).<br><br><span style="color:#B45309; font-weight:bold;"><i class="fas fa-flask"></i> Es un modo de demostración: tu avance no se guarda.</span> Para acceder a todos los aplicativos y guardar tu progreso, pide a tu docente que te matricule como estudiante.`;
                         errorMsg.style.display = 'block';
+                        setTimeout(function () {
+                            modal.style.display = 'none';
+                            const dest = modal.dataset.pendingUrl;
+                            if (dest) window.location.href = dest; else location.reload();
+                        }, 4000);
                     } else {
                         errorMsg.style.color = '#DC2626';
                         errorMsg.style.background = 'transparent';
@@ -458,23 +529,18 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                     const loginRes = await loginConSupabase(user, pass);
                     if (loginRes.success) {
                         modal.style.display = 'none';
-                        // Actualizar botones del header si existen
-                        if (typeof actualizarBotonesAuth === 'function') actualizarBotonesAuth();
                         const dest = modal.dataset.pendingUrl;
+                        // Recargamos (o navegamos al destino) para que TODO se rearme
+                        // ya con la sesion activa: nombre y rol en el header, y los
+                        // guardias de los enlaces dejan de pedir iniciar sesion.
                         if (dest) window.location.href = dest;
-                        else if (callback) callback();
-                    } else if (loginRes.reason === 'ROL_RESTRINGIDO') {
-                        errorMsg.style.color = '#B91C1C';
-                        errorMsg.style.background = '#FEF2F2';
-                        errorMsg.style.padding = '10px';
-                        errorMsg.style.borderRadius = '6px';
-                        errorMsg.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Acceso Restringido</strong><br>Tu cuenta tiene el rol <strong>${loginRes.rol || 'INVITADO'}</strong>.<br>De momento sólo se permite el ingreso a usuarios con el rol <strong>PRUEBA</strong>.`;
-                        errorMsg.style.display = 'block';
+                        else location.reload();
                     } else {
                         errorMsg.style.color = '#DC2626';
                         errorMsg.style.background = 'transparent';
                         errorMsg.style.padding = '0';
-                        errorMsg.textContent = 'Credenciales incorrectas o usuario no registrado.';
+                        errorMsg.textContent = loginRes.mensaje ||
+                            'Credenciales incorrectas o usuario no registrado.';
                         errorMsg.style.display = 'block';
                     }
                 }
@@ -486,7 +552,7 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                 errorMsg.style.display = 'block';
             } finally {
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = mode === 'register' ? 'Registrar en Supabase' : 'Entrar y Abrir Aplicativo';
+                btnSubmit.textContent = mode === 'register' ? 'Registrar' : 'Entrar y Abrir Aplicativo';
             }
         };
 
@@ -563,7 +629,37 @@ async function registrarUsuarioExtendido(ruc, usuario, clave, denominacion, rol 
 }
 
 /**
+ * Aviso breve "Debe iniciar sesión": un mensaje flotante que se borra solo a los
+ * pocos segundos. NO abre el modal de acceso; para iniciar sesión el usuario usa
+ * el botón "Iniciar Sesión" de la portada.
+ */
+let _avisoLoginTimer = null;
+window.mostrarAvisoLogin = function (texto) {
+    let aviso = document.getElementById('aviso-login-flash');
+    if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.id = 'aviso-login-flash';
+        aviso.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);' +
+            'z-index:1000000;background:#1E395B;color:#fff;padding:12px 22px;border-radius:10px;' +
+            'font-family:Roboto,Arial,sans-serif;font-size:14px;font-weight:600;' +
+            'box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;align-items:center;gap:10px;' +
+            'opacity:0;transition:opacity .2s ease;';
+        document.body.appendChild(aviso);
+    }
+    aviso.innerHTML = '<i class="fas fa-sign-in-alt"></i> ' +
+        (texto || 'Debe iniciar sesión para continuar.');
+    requestAnimationFrame(function () { aviso.style.opacity = '1'; });
+    clearTimeout(_avisoLoginTimer);
+    _avisoLoginTimer = setTimeout(function () {
+        aviso.style.opacity = '0';
+        setTimeout(function () { if (aviso.parentNode) aviso.remove(); }, 250);
+    }, 2500);
+};
+
+/**
  * Interceptar clics en botones de aplicativo si el usuario no está autenticado.
+ * Sin sesión sólo se muestra un aviso breve; el modal de acceso queda reservado
+ * para el botón "Iniciar Sesión" de la portada.
  */
 document.addEventListener('click', function (e) {
     const authData = sessionStorage.getItem('sunat_auth');
@@ -579,11 +675,11 @@ document.addEventListener('click', function (e) {
     }
     if (href.includes('login.html')) return;
 
-    // Detener navegación directa y mostrar la ventana flotante sobre la pantalla
+    // Detener navegación directa y avisar sin abrir el modal
     e.preventDefault();
     e.stopPropagation();
 
-    window.mostrarModalLogin(href, null);
+    window.mostrarAvisoLogin('Debe iniciar sesión para abrir el aplicativo.');
 }, true);
 
 /**
@@ -599,12 +695,14 @@ function checkAuth() {
 }
 
 /**
- * Cierra la sesión
+ * "Salir" de la empresa: cierra SOLO la Clave SOL (empresa activa) y vuelve a la
+ * portada. CONSERVA la sesión de plataforma (sunat_auth), por lo que NO se vuelve
+ * a pedir usuario y contraseña. Para cerrar la sesión de plataforma por completo
+ * está el botón "Cerrar Sesión" de la portada (cerrarSesionIndex).
  */
 function logout() {
-    // Cierra la sesión pero CONSERVA el estado temporal de la simulación
-    sessionStorage.removeItem('sunat_auth');
-    window.location.href = 'login.html';
+    sessionStorage.removeItem('sunat_empresa');
+    window.location.href = 'index.html';
 }
 
 /**
@@ -654,6 +752,49 @@ if (!isLoginPage && !isIndexPage && !isSolPage) {
     checkAuth();
 }
 
+/**
+ * Pinta en el header del simulador la EMPRESA elegida en la Clave SOL
+ * (sunat_empresa: razon_social + ruc). Si aun no se eligio empresa, cae al
+ * nombre del usuario de plataforma (sunat_auth). Cubre los distintos formatos
+ * de header de las paginas: #header-razon (dashboard), .company-name/.company-ruc
+ * (tramites) y los <span>Bienvenido, ...</span> del resto.
+ */
+window.pintarEmpresaEnHeader = function () {
+    let nombre = null, ruc = null;
+    try {
+        const emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
+        if (emp && (emp.razon_social || emp.ruc)) {
+            nombre = emp.razon_social || null;
+            ruc = emp.ruc || null;
+        }
+    } catch (e) {}
+    if (!nombre) {
+        try {
+            const a = JSON.parse(sessionStorage.getItem('sunat_auth') || 'null');
+            if (a) { nombre = a.denominacion || a.usuario || null; ruc = ruc || a.ruc || null; }
+        } catch (e) {}
+    }
+    if (!nombre) return;
+
+    // dashboard.html: <strong id="header-razon">
+    const razonEl = document.getElementById('header-razon');
+    if (razonEl) razonEl.textContent = nombre;
+
+    // tramites.html: nombre y RUC en el dropdown
+    document.querySelectorAll('.company-name').forEach(el => { el.textContent = nombre; });
+    if (ruc) document.querySelectorAll('.company-ruc').forEach(el => { el.textContent = 'RUC: ' + ruc; });
+
+    // Resto de paginas: <span>Bienvenido, EMPRESA ... <i caret></i></span>
+    const caret = '<i class="fas fa-caret-down"></i>';
+    document.querySelectorAll('span').forEach(function (sp) {
+        const t = (sp.textContent || '').replace(/^\s+/, '');
+        if (t.indexOf('Bienvenido,') !== 0) return;
+        if (sp.querySelector('#header-razon')) return; // dashboard: ya actualizado arriba
+        const tieneCaret = !!sp.querySelector('.fa-caret-down');
+        sp.innerHTML = 'Bienvenido, ' + nombre + (tieneCaret ? ' ' + caret : '');
+    });
+};
+
 // Adjuntar evento salir a botones de salir si existen
 document.addEventListener('DOMContentLoaded', () => {
     const btnSalir = document.querySelector('.btn-salir');
@@ -664,22 +805,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Autocompletar nombre de empresa si hay un lugar para ello en simuladores
+    // Nombre de la empresa (Clave SOL) en el header del simulador
+    window.pintarEmpresaEnHeader();
+
+    // Mostrar el tipo de usuario (rol de plataforma) junto al estado de domicilio
     const userSession = sessionStorage.getItem('sunat_auth');
     if (userSession) {
         try {
             const userData = JSON.parse(userSession);
-            // Si estemos en el header azul de los simuladores, lo reemplazamos
-            const nameDisplays = document.querySelectorAll('.user-info-right span:first-child');
-            if (nameDisplays.length > 0 && userData.denominacion) {
-                // Mantener la flecha si existe
-                nameDisplays.forEach(el => {
-                    const hasCaret = el.innerHTML.includes('fa-caret-down');
-                    el.innerHTML = `Bienvenido, ${userData.denominacion} ${hasCaret ? '<i class="fas fa-caret-down"></i>' : ''}`;
-                });
-            }
-
-            // Mostrar el tipo de usuario (rol) junto al estado de domicilio
             const domicilioEls = document.querySelectorAll('.domicilio, .user-status, .status-badge');
             if (domicilioEls.length > 0 && userData.rol) {
                 domicilioEls.forEach(el => {
@@ -739,4 +872,164 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
 
     window.playClickSound = playClickSound;
+})();
+
+// ============================================================================
+// Widget flotante "Ver empresas": boton con el logo del gato en movimiento que
+// abre el listado de las 10 empresas del laboratorio (RUC, razon social, regimen
+// tributario, actividad economica y regimen laboral). Recuerda que la Clave SOL
+// de TODAS es Usuario: SIST / Contrasena: NORTON. Se inyecta en todas las paginas.
+// ============================================================================
+(function initEmpresasWidget() {
+    'use strict';
+
+    // Datos de respaldo por si no hay conexion con Supabase (se refrescan al abrir)
+    var EMPRESAS_FALLBACK = [
+        { ruc: '20123456789', razon_social: 'EMPRESA DEMO S.A.C.', regimen_tributario: 'Regimen General', actividad_economica_sunat: 'Vta. May. de Computadoras, Equipo Periferico y Programas de Informatica', regimen_laboral: 'Regimen Laboral General' },
+        { ruc: '20455678120', razon_social: 'TRANSPORTES CARGA RAPIDA S.R.L.', regimen_tributario: 'Regimen MYPE Tributario', actividad_economica_sunat: 'Transporte de Carga por Carretera', regimen_laboral: 'Pequena Empresa (REMYPE)' },
+        { ruc: '20487563219', razon_social: 'TEXTILES ALPACA EXPORT S.A.C.', regimen_tributario: 'Regimen General', actividad_economica_sunat: 'Fabricacion de Prendas de Vestir, Excepto Prendas de Piel', regimen_laboral: 'Regimen Laboral General' },
+        { ruc: '20512347895', razon_social: 'BOTICA SALUD TOTAL S.A.C.', regimen_tributario: 'Regimen MYPE Tributario', actividad_economica_sunat: 'Vta. Min. de Productos Farmaceuticos y Articulos de Tocador en Comercios Especializados', regimen_laboral: 'Regimen Laboral General' },
+        { ruc: '20530147852', razon_social: 'AGROEXPORT VALLE VERDE S.A.C.', regimen_tributario: 'Regimen General', actividad_economica_sunat: 'Vta. May. de Otras Materias Primas Agropecuarias', regimen_laboral: 'Regimen Laboral Agrario' },
+        { ruc: '20548912343', razon_social: 'RESTAURANTES SABOR ANDINO E.I.R.L.', regimen_tributario: 'Regimen MYPE Tributario', actividad_economica_sunat: 'Actividades de Restaurantes y de Servicio Movil de Comidas', regimen_laboral: 'Pequena Empresa (REMYPE)' },
+        { ruc: '20601458722', razon_social: 'COMERCIAL FERRETERA SUR S.A.C.', regimen_tributario: 'Regimen General', actividad_economica_sunat: 'Vta. May. de Materiales de Construccion, Articulos de Ferreteria y Equipo', regimen_laboral: 'Regimen Laboral General' },
+        { ruc: '20601987458', razon_social: 'CONSTRUCTORA HORIZONTE ANDINO S.A.C.', regimen_tributario: 'Regimen General', actividad_economica_sunat: 'Construccion de Edificios Completos', regimen_laboral: 'Regimen Laboral de Construccion Civil' },
+        { ruc: '20602345671', razon_social: 'CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.', regimen_tributario: 'Regimen Especial de Renta (RER)', actividad_economica_sunat: 'Actividades de Contabilidad, Teneduria de Libros y Auditoria', regimen_laboral: 'Microempresa (REMYPE)' },
+        { ruc: '20609876540', razon_social: 'MINIMARKET DON PEPE E.I.R.L.', regimen_tributario: 'Regimen Especial de Renta (RER)', actividad_economica_sunat: 'Vta. Min. en Almacenes No Especializados con Surtido de Alimentos', regimen_laboral: 'Microempresa (REMYPE)' }
+    ];
+
+    var CSS = [
+        '#emp-fab{position:fixed;bottom:20px;right:20px;z-index:100000;display:flex;align-items:center;gap:10px;',
+        'background:#004B91;color:#fff;padding:6px 18px 6px 6px;border-radius:40px;cursor:pointer;',
+        'font-family:Roboto,Arial,sans-serif;font-weight:700;font-size:14px;border:2px solid #fff;',
+        'box-shadow:0 8px 22px rgba(0,0,0,.28);transition:transform .15s ease,background .15s ease;}',
+        '#emp-fab:hover{transform:translateY(-2px) scale(1.03);background:#003a72;}',
+        '#emp-fab .emp-fab-cat{width:52px;height:52px;border-radius:50%;overflow:hidden;flex-shrink:0;',
+        'background:#fff;border:2px solid #EAF3FB;}',
+        '#emp-fab .emp-fab-cat video{width:100%;height:100%;object-fit:cover;display:block;}',
+        '#emp-fab .emp-fab-text{white-space:nowrap;line-height:1;}',
+        '#emp-fab .emp-fab-text small{display:block;font-weight:400;font-size:10.5px;opacity:.85;margin-top:2px;}',
+        '#emp-modal-ov{position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);',
+        'display:flex;align-items:center;justify-content:center;padding:16px;font-family:Roboto,Arial,sans-serif;}',
+        '#emp-modal{background:#fff;width:100%;max-width:1000px;max-height:92vh;border-radius:14px;overflow:hidden;',
+        'display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,.45);}',
+        '#emp-modal .emp-head{background:#004B91;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;}',
+        '#emp-modal .emp-head .emp-cat{width:38px;height:38px;border-radius:50%;overflow:hidden;background:#fff;flex-shrink:0;}',
+        '#emp-modal .emp-head .emp-cat video{width:100%;height:100%;object-fit:cover;display:block;}',
+        '#emp-modal .emp-head b{font-size:16px;letter-spacing:.3px;}',
+        '#emp-modal .emp-head span{font-size:12px;opacity:.9;display:block;font-weight:400;}',
+        '#emp-modal .emp-x{margin-left:auto;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;line-height:1;}',
+        '#emp-modal .emp-cred{background:#FEF3C7;border-bottom:1px solid #F59E0B;color:#7C4A03;padding:11px 20px;',
+        'font-size:13.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}',
+        '#emp-modal .emp-cred .k{background:#B45309;color:#fff;padding:2px 10px;border-radius:6px;font-weight:700;letter-spacing:.5px;}',
+        '#emp-modal .emp-body{overflow:auto;padding:0;}',
+        '#emp-modal table{border-collapse:collapse;width:100%;font-size:12.5px;color:#1f2937;}',
+        '#emp-modal thead th{position:sticky;top:0;background:#EAF3FB;color:#004B91;text-align:left;padding:10px 12px;',
+        'font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #CDE0EE;white-space:nowrap;}',
+        '#emp-modal tbody td{padding:9px 12px;border-bottom:1px solid #EEF2F7;vertical-align:top;}',
+        '#emp-modal tbody tr:nth-child(even){background:#F8FAFC;}',
+        '#emp-modal tbody tr:hover{background:#EFF6FF;}',
+        '#emp-modal td.ruc{font-variant-numeric:tabular-nums;font-weight:700;color:#004B91;white-space:nowrap;}',
+        '#emp-modal td.emp{font-weight:600;}',
+        '#emp-modal .emp-foot{padding:8px 20px;font-size:11.5px;color:#64748b;border-top:1px solid #E2E8F0;background:#F8FAFC;}',
+        '@media(max-width:640px){#emp-fab .emp-fab-text{display:none;}#emp-fab{padding:6px;} #emp-modal table{font-size:11.5px;}}'
+    ].join('');
+
+    function inyectarCss() {
+        if (document.getElementById('emp-widget-css')) return;
+        var st = document.createElement('style');
+        st.id = 'emp-widget-css';
+        st.textContent = CSS;
+        document.head.appendChild(st);
+    }
+
+    function catVideo(clase) {
+        return '<div class="' + clase + '"><video src="logo_gif_gato.mp4" autoplay loop muted playsinline></video></div>';
+    }
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function filas(lista) {
+        return lista.map(function (e, i) {
+            return '<tr><td>' + (i + 1) + '</td>' +
+                '<td class="ruc">' + esc(e.ruc) + '</td>' +
+                '<td class="emp">' + esc(e.razon_social) + '</td>' +
+                '<td>' + esc(e.regimen_tributario) + '</td>' +
+                '<td>' + esc(e.actividad_economica_sunat) + '</td>' +
+                '<td>' + esc(e.regimen_laboral) + '</td></tr>';
+        }).join('');
+    }
+
+    function abrirModal() {
+        inyectarCss();
+        var ov = document.getElementById('emp-modal-ov');
+        if (ov) { ov.style.display = 'flex'; return; }
+
+        ov = document.createElement('div');
+        ov.id = 'emp-modal-ov';
+        ov.innerHTML =
+            '<div id="emp-modal">' +
+                '<div class="emp-head">' + catVideo('emp-cat') +
+                    '<div><b>Empresas del laboratorio</b>' +
+                    '<span>Elige el RUC en la Clave SOL para trabajar con esa empresa</span></div>' +
+                    '<button class="emp-x" title="Cerrar">&times;</button>' +
+                '</div>' +
+                '<div class="emp-cred"><i class="fas fa-key"></i>' +
+                    '<span>La Clave SOL es la misma para <b>todas</b> las empresas:</span>' +
+                    '<span class="k">Usuario: SIST</span>' +
+                    '<span class="k">Contrase&ntilde;a: NORTON</span></div>' +
+                '<div class="emp-body">' +
+                    '<table><thead><tr>' +
+                        '<th>N&deg;</th><th>RUC</th><th>Empresa</th>' +
+                        '<th>R&eacute;gimen Tributario</th><th>Actividad Econ&oacute;mica</th>' +
+                        '<th>R&eacute;gimen Laboral</th>' +
+                    '</tr></thead><tbody id="emp-tbody">' + filas(EMPRESAS_FALLBACK) + '</tbody></table>' +
+                '</div>' +
+                '<div class="emp-foot"><i class="fas fa-info-circle"></i> Datos ficticios para fines academicos. ' +
+                    'Son ' + EMPRESAS_FALLBACK.length + ' empresas simuladas.</div>' +
+            '</div>';
+        document.body.appendChild(ov);
+
+        ov.querySelector('.emp-x').onclick = function () { ov.style.display = 'none'; };
+        ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.style.display = 'none'; });
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Escape' && ov.style.display !== 'none') ov.style.display = 'none';
+        });
+
+        // Refrescar desde Supabase (si esta disponible) para no depender del respaldo
+        try {
+            if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient) {
+                authSupabaseClient.from('empresas_simulador')
+                    .select('ruc, razon_social, regimen_tributario, actividad_economica_sunat, regimen_laboral')
+                    .order('razon_social', { ascending: true })
+                    .then(function (r) {
+                        if (!r.error && r.data && r.data.length) {
+                            var tb = document.getElementById('emp-tbody');
+                            if (tb) tb.innerHTML = filas(r.data);
+                        }
+                    });
+            }
+        } catch (e) { /* queda el respaldo */ }
+    }
+
+    function crearBoton() {
+        if (document.getElementById('emp-fab')) return;
+        inyectarCss();
+        var fab = document.createElement('div');
+        fab.id = 'emp-fab';
+        fab.title = 'Ver las empresas del laboratorio';
+        fab.innerHTML = catVideo('emp-fab-cat') +
+            '<span class="emp-fab-text">Ver empresas<small>RUC y datos</small></span>';
+        fab.addEventListener('click', abrirModal);
+        document.body.appendChild(fab);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', crearBoton);
+    } else {
+        crearBoton();
+    }
+
+    window.verEmpresas = abrirModal;
 })();

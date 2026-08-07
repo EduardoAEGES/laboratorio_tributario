@@ -1,0 +1,116 @@
+cod_empresa,ruc,razon_social,codigo_sku,descripcion,unidad_medida,tipo_bien_servicio,precio_venta_unitario_sin_igv,afectacion_igv,sujeto_detraccion,porc_detraccion,moneda
+E01,20123456789,EMPRESA DEMO S.A.C.,EXP-B01,Laptop Core i7 (exportacion),NIU,Bien,829.54,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,EXP-B02,Kit de accesorios informaticos (exportacion),NIU,Bien,94.97,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,EXP-S01,"Soporte tecnico remoto (exportacion, por hora)",ZZ,Bien,32.19,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,EXP-S02,"Mantenimiento remoto de sistemas (exportacion, mensual)",ZZ,Bien,425.76,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,NC-AJUSTE,Ajuste por: Otros Conceptos,ZZ,Bien,-829.48,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-001,Laptop Core i5 8GB/512GB SSD,NIU,Bien,2441.43,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-002,Laptop Core i7 16GB/1TB SSD,NIU,Bien,3412.66,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-003,Computadora de escritorio Core i5,NIU,Bien,1833,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-004,Impresora multifuncional laser,NIU,Bien,893.52,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-005,Monitor LED 24 pulgadas,NIU,Bien,602.94,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-006,Servidor Torre Xeon,NIU,Bien,9901.23,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-007,Mouse inalambrico,NIU,Bien,49.79,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-008,Teclado USB,NIU,Bien,59.95,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-009,Licencia Windows 11 Pro,NIU,Bien,574.81,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-010,Licencia Microsoft Office 365,NIU,Bien,355.77,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-011,Switch de red 24 puertos,NIU,Bien,1136.17,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-012,Router WiFi 6,NIU,Bien,483.74,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-013,Disco duro externo 2TB,NIU,Bien,310.52,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-014,Memoria RAM DDR4 16GB,NIU,Bien,255.44,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-015,UPS 1500VA,NIU,Bien,527.37,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,PROD-016,Estabilizador de voltaje,NIU,Bien,162.34,Gravado,NO,0,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-001,Mantenimiento preventivo de equipo de computo,ZZ,Servicio,194.24,Gravado,SI,0.12,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-002,Mantenimiento correctivo de equipo de computo,ZZ,Servicio,277.04,Gravado,SI,0.12,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-003,Soporte tecnico especializado (hora),ZZ,Servicio,88.74,Gravado,SI,0.12,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-004,Instalacion y configuracion de red,ZZ,Servicio,597.86,Gravado,SI,0.12,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-005,Mantenimiento de servidores,ZZ,Servicio,841.17,Gravado,SI,0.12,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-006,Limpieza tecnica de equipos,ZZ,Servicio,68.93,Gravado,SI,0.12,PEN
+E01,20123456789,EMPRESA DEMO S.A.C.,SERV-007,Actualizacion de software,ZZ,Servicio,119.87,Gravado,SI,0.12,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-001,Cemento Portland Tipo I bolsa 42.5 kg,NIU,Bien,28.5,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-002,Fierro corrugado 1/2 pulg x 9 m,NIU,Bien,34.2,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-003,Ladrillo King Kong 18 huecos (millar),MIL,Bien,980,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-004,Pintura latex supermate galon,GLL,Bien,62.4,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-005,Tubo PVC 4 pulg x 3 m desague,NIU,Bien,41.8,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-006,Cable THW 12 AWG (rollo 100 m),ROL,Bien,148.6,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-007,Juego de herramientas 120 piezas,SET,Bien,289,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-008,Taladro percutor 800 W,NIU,Bien,345.7,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-009,Griferia monocomando para lavatorio,NIU,Bien,129.9,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-010,Carretilla buggy reforzada,NIU,Bien,178.3,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,FER-011,Malla electrosoldada 2.4 x 6 m,NIU,Bien,96.5,Gravado,NO,0,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,SER-F01,Servicio de corte y doblado de fierro,ZZ,Servicio,180,Gravado,SI,0.12,PEN
+E02,20601458722,COMERCIAL FERRETERA SUR S.A.C.,SER-F02,Servicio de transporte y entrega en obra,ZZ,Servicio,220,Gravado,SI,0.04,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-001,Menu ejecutivo completo,ZZ,Servicio,22,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-002,Rocoto relleno con pastel de papa,ZZ,Servicio,38,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-003,Adobo arequipeno,ZZ,Servicio,34,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-004,Chupe de camarones,ZZ,Servicio,46,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-005,Lomo saltado,ZZ,Servicio,36,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-006,Ceviche mixto,ZZ,Servicio,42,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-007,Jarra de chicha morada 1 L,ZZ,Servicio,16,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-008,Postre queso helado,ZZ,Servicio,12,Gravado,NO,0,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-009,Servicio de catering por persona,ZZ,Servicio,65,Gravado,SI,0.12,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-010,Buffet para evento corporativo (paquete),ZZ,Servicio,1850,Gravado,SI,0.12,PEN
+E03,20548912343,RESTAURANTES SABOR ANDINO E.I.R.L.,RES-011,Coffee break ejecutivo por persona,ZZ,Servicio,28,Gravado,SI,0.12,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-001,Paracetamol 500 mg (caja x 100),CJA,Bien,18.6,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-002,Amoxicilina 500 mg (caja x 100),CJA,Bien,42.3,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-003,Ibuprofeno 400 mg (blister x 10),BLI,Bien,6.8,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-004,Insulina glargina 100 UI/ml (exonerado),NIU,Bien,128.4,Exonerado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-005,Oncologico - Tamoxifeno 20 mg (exonerado),CJA,Bien,96.5,Exonerado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-006,Formula infantil lata 900 g,NIU,Bien,68.9,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-007,Panal talla M paquete x 40,PAQ,Bien,44.2,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-008,Alcohol medicinal 96 grados 1 L,LTR,Bien,12.7,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-009,Prueba rapida de glucosa (tiras x 50),CJA,Bien,78.4,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-010,Protector solar SPF 50 x 120 ml,NIU,Bien,56.3,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-011,Bolsa plastica biodegradable (ICBPER),NIU,Bien,0.3,Gravado,NO,0,PEN
+E04,20512347895,BOTICA SALUD TOTAL S.A.C.,FAR-012,Servicio de inyectables y control de presion,ZZ,Servicio,15,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-001,Chompa 100% baby alpaca cuello redondo,NIU,Bien,245,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-002,Chalina de alpaca 30 x 180 cm,NIU,Bien,98,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-003,Poncho de alpaca unisex,NIU,Bien,310,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-004,Guantes de alpaca tejidos a mano (par),PAR,Bien,52,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-005,Manta de alpaca 1.5 x 2 m,NIU,Bien,420,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-006,Hilado de alpaca 2/8 (kg),KGM,Bien,186,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,TEX-007,Gorro chullo de alpaca,NIU,Bien,64,Gravado,NO,0,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,SER-T01,Servicio de maquila de tejido por prenda,ZZ,Servicio,38,Gravado,SI,0.12,PEN
+E05,20487563219,TEXTILES ALPACA EXPORT S.A.C.,SER-T02,Servicio de tenido industrial (kg),KGM,Servicio,22,Gravado,SI,0.12,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-001,Flete carga completa Arequipa - Lima,ZZ,Servicio,3200,Gravado,SI,0.04,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-002,Flete carga completa Arequipa - Cusco,ZZ,Servicio,2400,Gravado,SI,0.04,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-003,Flete Matarani - Juliaca (por tonelada),TNE,Servicio,145,Gravado,SI,0.04,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-004,Paqueteria y carga fraccionada (por m3),MTQ,Servicio,180,Gravado,SI,0.04,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-005,Alquiler de camion con conductor (dia),DAY,Servicio,950,Gravado,SI,0.12,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-006,Servicio de almacenaje temporal (m2/mes),MTK,Servicio,42,Gravado,SI,0.12,PEN
+E06,20455678120,TRANSPORTES CARGA RAPIDA S.R.L.,TRA-007,Servicio de carga y estiba (tonelada),TNE,Servicio,65,Gravado,SI,0.12,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-001,Valorizacion de obra - edificio multifamiliar,ZZ,Servicio,48000,Gravado,SI,0.04,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-002,Valorizacion pistas y veredas,ZZ,Servicio,32000,Gravado,SI,0.04,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-003,Obra de saneamiento - red de agua potable,ZZ,Servicio,56000,Gravado,SI,0.04,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-004,Remodelacion de local comercial,ZZ,Servicio,18500,Gravado,SI,0.04,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-005,Construccion de muro de contencion,ZZ,Servicio,26400,Gravado,SI,0.04,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-006,Supervision y residencia de obra (mes),ZZ,Servicio,9500,Gravado,SI,0.12,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-007,Elaboracion de expediente tecnico,ZZ,Servicio,14200,Gravado,SI,0.12,PEN
+E07,20601987458,CONSTRUCTORA HORIZONTE ANDINO S.A.C.,OBR-008,Alquiler de encofrado metalico (mes),ZZ,Servicio,6800,Gravado,SI,0.1,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,AGR-001,Cafe verde en grano arabica (quintal 46 kg),QT,Bien,980,Gravado,NO,0,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,AGR-002,Quinua organica blanca (saco 50 kg),SAC,Bien,620,Exonerado,NO,0,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,AGR-003,Palta Hass calibre 16 (caja 4 kg),CJA,Bien,48,Exonerado,NO,0,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,AGR-004,Oregano seco seleccionado (kg),KGM,Bien,22.5,Exonerado,NO,0,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,AGR-005,Cafe tostado y molido 250 g,NIU,Bien,26,Gravado,NO,0,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,SER-A01,Servicio de acopio y seleccion (tonelada),TNE,Servicio,320,Gravado,SI,0.12,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,SER-A02,Servicio de maquila de secado (tonelada),TNE,Servicio,280,Gravado,SI,0.12,PEN
+E08,20530147852,AGROEXPORT VALLE VERDE S.A.C.,SER-A03,Alquiler de camara de frio (mes),ZZ,Servicio,4200,Gravado,SI,0.1,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-001,Servicio contable mensual - plan basico,ZZ,Servicio,450,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-002,Servicio contable mensual - plan integral,ZZ,Servicio,1200,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-003,Elaboracion de planillas y PLAME (mes),ZZ,Servicio,380,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-004,Asesoria tributaria especializada (hora),HUR,Servicio,180,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-005,Declaracion Jurada Anual de Renta,ZZ,Servicio,1500,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-006,Auditoria financiera anual,ZZ,Servicio,8500,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-007,Constitucion de empresa e inscripcion RUC,ZZ,Servicio,950,Gravado,SI,0.12,PEN
+E09,20602345671,CONSULTORES CONTABLES & ASOCIADOS E.I.R.L.,CON-008,Defensa en fiscalizacion SUNAT,ZZ,Servicio,2800,Gravado,SI,0.12,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-001,Arroz extra bolsa 5 kg,NIU,Bien,22.8,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-002,Aceite vegetal 1 L,LTR,Bien,8.4,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-003,Azucar rubia bolsa 1 kg,KGM,Bien,4.6,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-004,Leche evaporada tarro 400 g,NIU,Bien,4.2,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-005,Gaseosa 3 L,NIU,Bien,9.3,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-006,Pan frances (unidad),NIU,Bien,0.35,Exonerado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-007,Huevos de gallina (kg),KGM,Bien,7.8,Exonerado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-008,Detergente en polvo 800 g,NIU,Bien,11.5,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-009,Fideos tallarin 500 g,NIU,Bien,3.9,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-010,Embutido jamonada 1 kg,KGM,Bien,16.4,Gravado,NO,0,PEN
+E10,20609876540,MINIMARKET DON PEPE E.I.R.L.,MIN-011,Bolsa plastica (ICBPER),NIU,Bien,0.3,Gravado,NO,0,PEN

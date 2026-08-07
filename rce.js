@@ -2019,10 +2019,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         const parts = searchPeriod.split('/');
                         const searchPeriodBigInt = parseInt(parts[1] + parts[0]); // '01/2025' -> 202501
 
+                        // RUC de la empresa elegida (Clave SOL) o el de la sesion; por
+                        // defecto la empresa demo. El RCE trae solo sus compras.
+                        let userRucRce = '20123456789';
+                        try {
+                            userRucRce = (window.SimStore && SimStore.rucActivo && SimStore.rucActivo())
+                                || (JSON.parse(sessionStorage.getItem('sunat_auth') || '{}').ruc)
+                                || '20123456789';
+                        } catch (e) {}
+
                         let { data, error } = await authSupabaseClient
                             .from('registro_compras')
                             .select('*')
-                            .eq('Periodo', searchPeriodBigInt);
+                            .eq('Periodo', searchPeriodBigInt)
+                            .eq('RUC', parseInt(userRucRce, 10));
 
                         if (error) throw error;
 
