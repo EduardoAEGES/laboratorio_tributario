@@ -177,8 +177,10 @@
             '<th>Último acceso</th><th>Acciones</th></tr>';
     us.forEach(function (u) {
       var puedo = u.mio;
+      var contacto = [u.correo, u.telefono].filter(Boolean).map(esc).join(' · ');
       h += '<tr><td><b>' + esc(u.usuario) + '</b>' +
            '<div class="mini">' + esc(u.denominacion || '') + (u.activo ? '' : ' · <b>inactivo</b>') +
+           (contacto ? '<br>' + contacto : '') +
            '</div></td>' +
            '<td>' + (YO.rol === 'MASTER'
              ? '<select onchange="cambiarRol(' + u.id + ',this.value)">' +

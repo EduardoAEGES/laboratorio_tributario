@@ -196,8 +196,10 @@ if (typeof window.supabase !== 'undefined' && AUTH_SUPABASE_URL !== 'URL_DE_SUPA
 window.ROLES_SISTEMA = ['INVITADO', 'ESTUDIANTE', 'ASISTENTE', 'PRO', 'DOCENTE', 'PRUEBA', 'MASTER'];
 
 /**
- * Función central para iniciar sesión verificando contra la tabla 'usuarios'
- * Asume una tabla pública en Supabase llamada 'usuarios' con columnas: ruc, usuario, clave, denominacion, rol
+ * Función central para iniciar sesión verificando contra la tabla 'usuarios'.
+ * La tabla 'usuarios' es SOLO personas (sin RUC): usuario, clave, nombres,
+ * apellido_paterno, apellido_materno, correo, telefono, rol. El RUC y los datos
+ * de cada empresa viven en 'empresas_simulador' (Puerta 2 / Clave SOL).
  */
 async function loginConSupabase(usuario, clave, ruc = null) {
     // PUERTA 1 (usuario + contraseña, sin RUC): lo resuelve la función fn_login de
@@ -474,10 +476,23 @@ window.mostrarModalLogin = function (targetUrl, callback) {
 
             if (mode === 'register') {
                 const nombres = nombresInp.value.trim();
+                const paterno = paternoInp.value.trim();
+                const materno = maternoInp.value.trim();
                 const email = emailInp.value.trim();
+                const telefono = telefonoInp.value.trim();
 
-                if (!nombres || !email) {
-                    errorMsg.textContent = 'Por favor complete sus Nombres y Correo Electrónico.';
+                if (!nombres || !paterno || !materno || !email || !telefono) {
+                    errorMsg.textContent = 'Completa nombres, apellido paterno, apellido materno, correo y teléfono.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+                    errorMsg.textContent = 'Ingresa un correo electrónico válido.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                if (telefono.replace(/\D/g, '').length < 6) {
+                    errorMsg.textContent = 'Ingresa un número de teléfono válido.';
                     errorMsg.style.display = 'block';
                     return;
                 }
@@ -497,6 +512,14 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                     const deseaCapacitaciones = chkCapacitaciones.checked;
                     const denom = `${nombres} ${paterno} ${materno}`.trim() || user;
 
+                    // Datos personales que ahora viven en la tabla usuarios (sin RUC).
+                    const datos = {
+                        nombres: nombres,
+                        apellido_paterno: paterno,
+                        apellido_materno: materno,
+                        correo: email,
+                        telefono: telefono
+                    };
                     const extraData = {
                         nombres, paterno, materno, email, telefono, deseaCapacitaciones
                     };
@@ -504,7 +527,7 @@ window.mostrarModalLogin = function (targetUrl, callback) {
                     // El registro crea la cuenta como INVITADO y la deja lista para
                     // entrar de inmediato con el acceso limitado de ese perfil.
                     const res = window.Sesion
-                        ? await window.Sesion.registrar(user, pass, denom)
+                        ? await window.Sesion.registrar(user, pass, datos)
                         : await registrarUsuarioExtendido(user, user, pass, denom, 'INVITADO', extraData);
                     if (res.ok || res.success) {
                         errorMsg.style.color = '#0284C7';
@@ -585,46 +608,33 @@ async function registrarUsuarioExtendido(ruc, usuario, clave, denominacion, rol 
     }
 
     try {
-        const userRol = window.ROLES_SISTEMA.includes(rol) ? rol : 'INVITADO';
-
-        const recordParticipante = {
-            usuario: usuario,
-            clave: clave,
-            nombres: extra.nombres || '',
-            apellido_paterno: extra.paterno || '',
-            apellido_materno: extra.materno || '',
-            email: extra.email || '',
-            telefono: extra.telefono || '',
-            desea_capacitaciones: extra.deseaCapacitaciones !== false,
-            rol: userRol
-        };
-
-        // Intentar registrar en tabla dedicada 'participantes'
-        let { data, error } = await authSupabaseClient
-            .from('participantes')
-            .insert([recordParticipante]);
-
+        // El alta SIEMPRE pasa por la función fn_registrar_usuario (SECURITY DEFINER):
+        // anon no puede escribir en usuarios directamente, y ese RPC es el único
+        // camino sancionado. Crea la cuenta como INVITADO con sus datos personales.
+        const { data, error } = await authSupabaseClient.rpc('fn_registrar_usuario', {
+            p_usuario: usuario,
+            p_clave: clave,
+            p_nombres: extra.nombres || null,
+            p_apellido_paterno: extra.paterno || null,
+            p_apellido_materno: extra.materno || null,
+            p_correo: extra.email || null,
+            p_telefono: extra.telefono || null
+        });
         if (error) {
-            console.warn("No se pudo insertar en 'participantes', intentando en 'usuarios'...", error.message);
-            // Fallback a tabla 'usuarios' guardando denominacion
-            const recordUsuario = {
-                ruc: usuario,
-                usuario: usuario,
-                clave: clave,
-                denominacion: denominacion || `${extra.nombres || ''} ${extra.paterno || ''}`.trim() || usuario,
-                rol: userRol
-            };
-            const { error: err2 } = await authSupabaseClient.from('usuarios').insert([recordUsuario]);
-            if (err2) {
-                console.error("Error al registrar en Supabase:", err2);
-                return { success: false, error: err2.message };
-            }
+            console.error("Error al registrar en Supabase:", error);
+            return { success: false, error: error.message };
         }
-
-        return { success: true, rol: userRol };
+        if (!data || !data.ok) {
+            return { success: false, error: (data && data.mensaje) || 'No se pudo registrar el usuario.' };
+        }
+        // Deja la sesión activa igual que Sesion.registrar
+        if (window.Sesion && data.sesion) {
+            try { sessionStorage.setItem('sunat_auth', JSON.stringify(data.sesion)); } catch (e) {}
+        }
+        return { success: true, ok: true, rol: 'INVITADO', sesion: data.sesion };
     } catch (e) {
         console.error("Error al registrar participante:", e);
-        return { success: true, rol: 'INVITADO' };
+        return { success: false, error: e.message };
     }
 }
 

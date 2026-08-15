@@ -87,10 +87,18 @@
       return res;
     },
 
-    registrar: async function (usuario, clave, denominacion) {
+    // datos = { nombres, apellido_paterno, apellido_materno, correo, telefono }
+    registrar: async function (usuario, clave, datos) {
       if (!cli) return { ok: false, mensaje: 'Sin conexion con el servidor.' };
+      datos = datos || {};
       var r = await cli.rpc('fn_registrar_usuario', {
-        p_usuario: usuario, p_clave: clave, p_denominacion: denominacion || null
+        p_usuario: usuario,
+        p_clave: clave,
+        p_nombres: datos.nombres || null,
+        p_apellido_paterno: datos.apellido_paterno || null,
+        p_apellido_materno: datos.apellido_materno || null,
+        p_correo: datos.correo || null,
+        p_telefono: datos.telefono || null
       });
       if (r.error) return { ok: false, mensaje: r.error.message };
       var res = r.data || {};

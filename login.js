@@ -5,8 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const rucField = document.getElementById('ruc-field');
     const userField = document.getElementById('user-field');
-    const denomField = document.getElementById('denom-field');
     const passField = document.getElementById('pass-field');
+    // Datos personales (registro): la tabla usuarios ya no lleva RUC
+    const regFieldsExtra = document.getElementById('reg-fields-extra');
+    const nombresField = document.getElementById('nombres-field');
+    const paternoField = document.getElementById('paterno-field');
+    const maternoField = document.getElementById('materno-field');
+    const emailField = document.getElementById('email-field');
+    const telefonoField = document.getElementById('telefono-field');
+    const chkCapacitacionesBox = document.getElementById('chk-capacitaciones-box');
     const regRoleBox = document.getElementById('reg-role-box');
     const rememberBox = document.getElementById('remember-box');
     const forgotBox = document.getElementById('forgot-box');
@@ -44,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
             modeRegister.style.color = '#004B91';
 
             if (loginSubtitle) loginSubtitle.textContent = 'Ingresa tu Usuario y Contraseña';
-            if (denomField) denomField.style.display = 'none';
+            if (regFieldsExtra) regFieldsExtra.style.display = 'none';
+            if (chkCapacitacionesBox) chkCapacitacionesBox.style.display = 'none';
             if (regRoleBox) regRoleBox.style.display = 'none';
             if (rememberBox) rememberBox.style.display = 'flex';
             if (forgotBox) forgotBox.style.display = 'block';
@@ -61,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
             modeLogin.style.color = '#004B91';
 
             if (loginSubtitle) loginSubtitle.textContent = 'Registra tu usuario (Rol INVITADO por defecto)';
-            if (denomField) denomField.style.display = 'block';
+            if (regFieldsExtra) regFieldsExtra.style.display = 'flex';
+            if (chkCapacitacionesBox) chkCapacitacionesBox.style.display = 'block';
             if (regRoleBox) regRoleBox.style.display = 'block';
             if (rememberBox) rememberBox.style.display = 'none';
             if (forgotBox) forgotBox.style.display = 'none';
@@ -87,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSubmit.addEventListener('click', async () => {
         const ruc = rucField ? rucField.value.trim() : '';
         const user = userField.value.trim();
-        const denom = denomField ? denomField.value.trim() : user;
         const pass = passField.value.trim();
 
         // Get redirect parameter or fallback
@@ -103,8 +111,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentMode === 'register') {
             // REGISTRO EN SUPABASE (solo disponible sin redirect)
+            const nombres = nombresField ? nombresField.value.trim() : '';
+            const paterno = paternoField ? paternoField.value.trim() : '';
+            const materno = maternoField ? maternoField.value.trim() : '';
+            const email = emailField ? emailField.value.trim() : '';
+            const telefono = telefonoField ? telefonoField.value.trim() : '';
+
             if (!user || !pass) {
                 alert('Por favor ingrese Usuario y Contraseña para registrarse.');
+                return;
+            }
+            if (!nombres || !paterno || !materno || !email || !telefono) {
+                alert('Completa nombres, apellido paterno, apellido materno, correo y teléfono.');
+                return;
+            }
+            if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+                alert('Ingresa un correo electrónico válido.');
+                return;
+            }
+            if (telefono.replace(/\D/g, '').length < 6) {
+                alert('Ingresa un número de teléfono válido.');
                 return;
             }
 
@@ -113,11 +139,22 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSubmit.textContent = 'Registrando...';
 
             try {
-                const res = await registrarUsuarioExtendido(user, user, pass, denom, 'INVITADO');
-                if (res.success) {
-                    alert(`¡Registro guardado exitosamente en Supabase!\n\nUsuario: ${user}\nRol asignado: INVITADO\n\nNota: De momento el ingreso está restringido sólo a usuarios con el rol PRUEBA. Solicita a un administrador activar tu rol PRUEBA.`);
+                const datos = {
+                    nombres: nombres,
+                    apellido_paterno: paterno,
+                    apellido_materno: materno,
+                    correo: email,
+                    telefono: telefono
+                };
+                const res = window.Sesion
+                    ? await window.Sesion.registrar(user, pass, datos)
+                    : await registrarUsuarioExtendido('', user, pass, '', 'INVITADO',
+                        { nombres, paterno, materno, email, telefono });
+                if (res.ok || res.success) {
+                    alert('¡Cuenta creada! Entras con el perfil INVITADO: Plan Contable y FV 621 con la empresa demo (RUC 20123456789). Tu avance no se guarda hasta que un docente te matricule como estudiante.');
+                    irADashboard();
                 } else {
-                    alert('No se pudo completar el registro: ' + (res.error || 'Error desconocido'));
+                    alert('No se pudo completar el registro: ' + (res.mensaje || res.error || 'Error desconocido'));
                 }
             } catch (err) {
                 console.error('Error al registrar usuario:', err);
@@ -189,7 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Iniciar sesión/Registro al presionar la tecla ENTER en los campos
-    const inputs = [rucField, userField, denomField, passField];
+    const inputs = [rucField, userField, nombresField, paternoField, maternoField,
+                    emailField, telefonoField, passField];
     inputs.forEach(input => {
         if (input) {
             input.addEventListener('keydown', (e) => {
