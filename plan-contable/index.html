@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA CONTABLE 2026 1</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Aplicativo móvil web interactivo para buscar asientos contables comunes del PCGE en Perú, calcular importes en tiempo real y explorar la dinámica de cuentas oficiales.">
+  <meta name="keywords" content="contabilidad, PCGE, asientos contables, debe, haber, impuestos, planilla, igv, peru, dinámica contable, app movil">
+  <meta name="author" content="Antigravity Dev">
+  
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- CONTENEDOR ENCUADRE MÓVIL -->
+  <div class="mobile-frame" id="mobile-frame">
+    
+    <!-- CABECERA DE LA APP -->
+    <header id="app-header">
+      <div class="logo-section">
+        <button class="back-btn btn-regresar-pill" id="back-btn" aria-label="Regresar a la pantalla anterior">
+          Regresar
+        </button>
+        <img src="GATITO.png" alt="Laboratorio Tributario CERTUS" class="logo-img" id="logo-icon">
+        <h1 id="logo-text">LABORATORIO TRIBUTARIO CERTUS</h1>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Cambiar Tema" aria-label="Alternar tema claro/oscuro">
+        🌙
+      </button>
+    </header>
+
+    <!-- ÁREA DE CONTENIDO (PANTALLAS INTERCAMBIABLES) -->
+    <div class="app-content" id="app-content">
+      
+      <!-- PANTALLA PRINCIPAL: PORTAL/HUB (oculta: la app entra directo a Dinámica) -->
+      <main class="screen" id="screen-hub">
+        <div class="hub-hero">
+          <h2>Centro de Aprendizaje Contable</h2>
+          <p>Explora cursos interactivos y herramientas de simulación para dominar la contabilidad.</p>
+        </div>
+        
+
+        <!-- Grid de Widgets PWA (Segunda Imagen / Dashboard de Gekko) -->
+        <div class="courses-pwa-grid">
+          
+          <!-- Widget 1: Dinámica PCGE (Teal) -->
+          <button class="pwa-card pwa-card-teal" data-screen="dinamica">
+            <div class="pwa-card-header">
+              <span class="pwa-card-icon">📊</span>
+              <span class="pwa-card-title">DINÁMICA DEL PCGE</span>
+            </div>
+            <div class="pwa-card-body">
+              <div class="pwa-card-circle">10</div>
+              <div class="pwa-card-details">
+                <div class="detail-line"><span>PCGE</span><strong>Elem.</strong></div>
+                <div class="detail-line"><span>CUENTAS</span><strong>Plan</strong></div>
+              </div>
+            </div>
+          </button>
+          
+          <!-- Widget 2: Contabilidad Gerencial (Amber) -->
+          <button class="pwa-card pwa-card-amber" data-screen="costos">
+            <div class="pwa-card-header">
+              <span class="pwa-card-icon">📉</span>
+              <span class="pwa-card-title">CONTABILIDAD GERENCIAL</span>
+            </div>
+            <div class="pwa-card-body">
+              <div class="pwa-card-circle">MCU</div>
+              <div class="pwa-card-details">
+                <div class="detail-line"><span>P.EQ</span><strong>CVP</strong></div>
+                <div class="detail-line"><span>COSTOS</span><strong>Toma Dec.</strong></div>
+              </div>
+            </div>
+          </button>
+          
+          <!-- Widget 3: Control Interno (Orange) -->
+          <button class="pwa-card pwa-card-orange" data-screen="auditoria">
+            <div class="pwa-card-header">
+              <span class="pwa-card-icon">🔍</span>
+              <span class="pwa-card-title">CONTROL INTERNO</span>
+            </div>
+            <div class="pwa-card-body">
+              <div class="pwa-card-circle">COSO</div>
+              <div class="pwa-card-details">
+                <div class="detail-line"><span>RIESGOS</span><strong>Matriz</strong></div>
+                <div class="detail-line"><span>CTRLS</span><strong>Proced.</strong></div>
+              </div>
+            </div>
+          </button>
+
+          <!-- Widget 4: Pensamiento Lógico (Purple) -->
+          <button class="pwa-card pwa-card-purple" data-screen="logica">
+            <div class="pwa-card-header">
+              <span class="pwa-card-icon">🧠</span>
+              <span class="pwa-card-title">PENSAMIENTO LOGICO</span>
+            </div>
+            <div class="pwa-card-body">
+              <div class="pwa-card-circle">V/F</div>
+              <div class="pwa-card-details">
+                <div class="detail-line"><span>TABLA</span><strong>Verdad</strong></div>
+                <div class="detail-line"><span>LOGIC</span><strong>Retos</strong></div>
+              </div>
+            </div>
+          </button>
+          
+        </div>
+      </main>
+
+      <!-- PANTALLA DE DINAMICA CONTABLE (pantalla inicial) -->
+      <main class="screen active" id="screen-dinamica">
+        
+        <div class="sub-panels-wrapper" style="height: 100%;">
+          
+          <!-- PANEL PRINCIPAL (HUB DE DINÁMICA) -->
+          <div class="sub-panel active" id="panel-dinamica-hub" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            
+            <!-- Contenedor de Botones de Navegación -->
+            <div class="dinamica-hub-buttons-wrapper">
+              <button class="dinamica-hub-btn" id="btn-to-catalogo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <span style="font-size: 1.5rem;">📖</span>
+                <span style="font-family: var(--font-title); font-size: 0.78rem; font-weight: 700; color: var(--text-main);">Catálogo de Cuentas</span>
+              </button>
+              <button class="dinamica-hub-btn" id="btn-to-asientos" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <span style="font-size: 1.5rem;">📋</span>
+                <span style="font-family: var(--font-title); font-size: 0.78rem; font-weight: 700; color: var(--text-main);">Asientos más Comunes</span>
+              </button>
+              <button class="dinamica-hub-btn" id="btn-to-plan" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <span style="font-size: 1.5rem;">⚙️</span>
+                <span style="font-family: var(--font-title); font-size: 0.78rem; font-weight: 700; color: var(--text-main);">Dinámica del Plan</span>
+              </button>
+              <button class="dinamica-hub-btn" id="btn-to-generalidades" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.65rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <span style="font-size: 1.5rem;">💡</span>
+                <span style="font-family: var(--font-title); font-size: 0.78rem; font-weight: 700; color: var(--text-main);">Generalidades NIIF</span>
+              </button>
+            </div>
+
+            <!-- Tabla de Resumen de Elementos (Segunda Imagen) -->
+            <div class="summary-table-container" style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-card); margin-bottom: 0.85rem; box-shadow: var(--shadow-sm);">
+              <table class="elements-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.68rem; text-align: left;">
+                <thead>
+                  <tr style="background: #1e1b4b; color: white; text-align: center; font-weight: 700;">
+                    <th style="padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--border); width: 45px;">Elem.</th>
+                    <th style="padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--border); text-align: left;">Denominación</th>
+                    <th style="padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--border); width: 42px; text-align: center;">Debe</th>
+                    <th style="padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--border); width: 42px; text-align: center;">Haber</th>
+                    <th style="padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--border); text-align: left;">Excepciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">1</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Activo disponible y exigible</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">122, 132, 19</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">2</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Activo realizable</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">29</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">3</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Activo inmovilizado</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">39</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">4</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Pasivo</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">4011(c), 422, 432</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">5</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Patrimonio</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">592</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">6</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Gasto</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">61 (compra)</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">7</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Ingreso</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">74</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">8</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600; color: var(--text-muted);">Saldos Intermedios de gestión</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: var(--border);"></td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: var(--border);"></td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">-</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">9</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600;">Cuentas analíticas de explotación</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #22c55e; color: white; font-weight: 800;">(+)</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: #ef4444; color: white; font-weight: 800;">(-)</td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">-</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 800; text-align: center; color: var(--primary);">0</td>
+                    <td style="padding: 0.35rem 0.4rem; font-weight: 600; color: var(--text-muted);">Cuentas de orden</td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: var(--border);"></td>
+                    <td style="padding: 0.35rem 0.4rem; text-align: center; background: var(--border);"></td>
+                    <td style="padding: 0.35rem 0.4rem; color: var(--text-muted); font-size: 0.62rem;">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- PANEL: ASIENTOS COMUNES -->
+          <div class="sub-panel" id="panel-asientos" style="height: 100%;">
+            <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; background: var(--glass-bg);">
+              <button class="btn-back-to-dinamica-hub btn-regresar-pill">Regresar</button>
+              <span style="font-size: 0.85rem; font-weight: 700; font-family: var(--font-title);">Asientos más Comunes</span>
+            </div>
+            
+            <div class="search-panel" style="padding: 0.75rem 1rem;">
+              <div class="input-wrapper">
+                <span class="input-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="search-input" 
+                  class="search-input" 
+                  placeholder="Buscar operación contable (ej. compra)..."
+                  aria-label="Buscar operación contable por nombre o concepto"
+                >
+              </div>
+            </div>
+            
+            <div class="operations-menu" id="operations-menu" style="height: calc(100% - 110px); overflow-y: auto;">
+              <!-- Cargado dinámicamente desde JS -->
+            </div>
+          </div>
+
+          <!-- PANEL: CATÁLOGO DE CUENTAS (EX-BUSCADOR PCGE) -->
+          <div class="sub-panel" id="panel-catalogo" style="height: 100%; display: flex; flex-direction: column;">
+            <div style="padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; background: var(--glass-bg); flex-shrink: 0;">
+              <button class="btn-back-to-dinamica-hub btn-regresar-pill">Regresar</button>
+              <span style="font-size: 0.95rem; font-weight: 700; font-family: var(--font-title);">Catálogo de Cuentas PCGE</span>
+            </div>
+
+            <!-- Árbol desglosable del PCGE (elementos → cuentas → subcuentas) -->
+            <div class="pcge-results-list" id="pcge-results-list" style="flex: 1; overflow-y: auto; padding: 1rem 1rem 6rem 1rem;">
+              <!-- Acordeón del PCGE cargado dinámicamente -->
+            </div>
+
+            <!-- Barra Flotante de Acciones -->
+            <div class="floating-actions-bar absolute-floating">
+              <button class="btn-floating-action atras" id="btn-catalogo-atras" aria-label="Retornar un nivel">
+                <span class="btn-floating-icon">⬅️</span>
+                <span class="btn-floating-text">Atrás</span>
+              </button>
+              <button class="btn-floating-action menu" id="btn-catalogo-menu" aria-label="Volver al menú inicial">
+                <span class="btn-floating-icon">🏠</span>
+                <span class="btn-floating-text">Menú</span>
+              </button>
+              <button class="btn-floating-action asientos" id="btn-catalogo-asientos" aria-label="Ir a la lista de asientos más comunes">
+                <span class="btn-floating-icon">📋</span>
+                <span class="btn-floating-text">Asientos</span>
+              </button>
+            </div>
+
+
+
+            <!-- Bottom Sheet para Detalles de la Cuenta -->
+            <div class="modal-backdrop" id="modal-backdrop"></div>
+            <div class="bottom-sheet" id="pcge-bottom-sheet" role="dialog" aria-labelledby="bs-title">
+              <div class="bottom-sheet-handle" id="bottom-sheet-handle"></div>
+              <div class="bottom-sheet-header">
+                <h3 id="bs-title" style="font-family: var(--font-title); font-size: 1.15rem; font-weight: 700;">Detalle de Cuenta</h3>
+                <button class="bottom-sheet-close" id="bottom-sheet-close" aria-label="Cerrar modal">&times;</button>
+              </div>
+              <div id="pcge-detail-container">
+                <!-- Detalles cargados por JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: DINÁMICA DEL PLAN DE CUENTAS (EXPLICATIVO) -->
+          <div class="sub-panel" id="panel-dinamica-plan" style="height: 100%;">
+            <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; background: var(--glass-bg);">
+              <button class="btn-back-to-dinamica-hub btn-regresar-pill">Regresar</button>
+              <span style="font-size: 0.85rem; font-weight: 700; font-family: var(--font-title);">Dinámica del Plan</span>
+            </div>
+            
+            <div class="course-content-scroll" style="padding: 1rem; overflow-y: auto; height: calc(100% - 45px);">
+              <div class="calc-card" style="margin-bottom:0.75rem;">
+                <h3 style="color:var(--primary); font-size:0.95rem; margin-bottom:0.4rem;">Reglas de la Dinámica Contable</h3>
+                <p style="font-size:0.78rem; line-height:1.45; color:var(--text-muted);">
+                  El Plan Contable General Empresarial (PCGE) se estructura bajo la teoría del Cargo y el Abono (partida doble):
+                </p>
+                <ul style="font-size:0.76rem; color:var(--text-muted); margin-left:1rem; margin-top:0.4rem; line-height:1.4;">
+                  <li><strong>Activos (1, 2, 3) / Gastos (6, 9)</strong>: Aumentan por el <strong>Debe</strong> (+) y disminuyen por el <strong>Haber</strong> (-).</li>
+                  <li><strong>Pasivos (4) / Patrimonio (5) / Ingresos (7)</strong>: Aumentan por el <strong>Haber</strong> (+) y disminuyen por el <strong>Debe</strong> (-).</li>
+                </ul>
+              </div>
+
+              <div class="calc-card" style="margin-bottom:0.75rem;">
+                <h3 style="font-size:0.9rem; margin-bottom:0.4rem;">Estructura del PCGE</h3>
+                <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.75rem;">
+                  <div style="border-bottom:1px dashed var(--border); padding-bottom:0.25rem;"><strong>Elemento (1 dígito)</strong>: Clasificación general (ej. 1: Activos corrientes).</div>
+                  <div style="border-bottom:1px dashed var(--border); padding-bottom:0.25rem;"><strong>Cuenta (2 dígitos)</strong>: Rubro contable (ej. 10: Efectivo).</div>
+                  <div style="border-bottom:1px dashed var(--border); padding-bottom:0.25rem;"><strong>Subcuenta (3 dígitos)</strong>: Detalle operativo (ej. 104: Ctas Corrientes).</div>
+                  <div><strong>Divisionaria / Subdiv. (4 o 5 dígitos)</strong>: Auxiliar contable para registrar bancos u operaciones específicas.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: GENERALIDADES NIIF -->
+          <div class="sub-panel" id="panel-generalidades" style="height: 100%;">
+            <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; background: var(--glass-bg);">
+              <button class="btn-back-to-dinamica-hub btn-regresar-pill">Regresar</button>
+              <span style="font-size: 0.85rem; font-weight: 700; font-family: var(--font-title);">Generalidades NIIF</span>
+            </div>
+            
+            <div class="course-content-scroll" style="padding: 1rem; overflow-y: auto; height: calc(100% - 45px);">
+              <div class="calc-card" style="margin-bottom:0.75rem;">
+                <h3 style="color:var(--debe); font-size:0.95rem; margin-bottom:0.4rem;">Marco Conceptual de las NIIF</h3>
+                <p style="font-size:0.78rem; line-height:1.45; color:var(--text-muted);">
+                  Las Normas Internacionales de Información Financiera (NIIF o IFRS) establecen los requisitos de reconocimiento, medición, presentación y revelación de las transacciones económicas:
+                </p>
+                <div style="margin-top:0.5rem; display:flex; flex-direction:column; gap:0.4rem; font-size:0.76rem;">
+                  <p><strong>1. Devengado</strong>: Los efectos de las transacciones se reconocen cuando ocurren (no cuando se cobra o paga).</p>
+                  <p><strong>2. Empresa en Marcha</strong>: La entidad se proyecta a continuar operaciones en el futuro previsible.</p>
+                  <p><strong>3. Relevancia y Representación Fiel</strong>: Características cualitativas fundamentales para que la información financiera sea útil en la toma de decisiones.</p>
+                </div>
+              </div>
+
+              <div class="calc-card">
+                <h3 style="font-size:0.9rem; margin-bottom:0.4rem;">Los Estados Financieros Clave</h3>
+                <ul style="font-size:0.75rem; color:var(--text-muted); margin-left:1rem; line-height:1.45;">
+                  <li><strong>Estado de Situación Financiera</strong>: Activos, Pasivos y Patrimonio (Elemento 1 al 5).</li>
+                  <li><strong>Estado de Resultados</strong>: Ingresos y Gastos (Elemento 6 y 7).</li>
+                  <li><strong>Estado de Cambios en el Patrimonio</strong>: Evolución del capital neto.</li>
+                  <li><strong>Estado de Flujos de Efectivo</strong>: Origen y aplicación del dinero (actividades de operación, inversión y financiamiento).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- PANTALLA DETALLE DE OPERACIÓN -->
+      <section class="screen" id="screen-op-detail" aria-live="polite">
+        <div class="op-detail-info">
+          <h2 id="op-title">Operación</h2>
+          <p id="op-description">Descripción de la operación contable.</p>
+        </div>
+
+        <!-- Calculadora -->
+        <div class="calc-card">
+          <div class="calc-inputs-list" id="calc-inputs">
+            <!-- Inputs autogenerados por JS -->
+          </div>
+          
+          <div class="calc-horizontal-summary">
+            <div class="summary-col">
+              <label id="sum-label-1">Valor Base</label>
+              <span id="sum-val-1">S/ 0.00</span>
+            </div>
+            <div class="summary-col">
+              <label id="sum-label-2">IGV (18%)</label>
+              <span id="sum-val-2">S/ 0.00</span>
+            </div>
+            <div class="summary-col">
+              <label id="sum-label-3">Total</label>
+              <span class="total" id="sum-val-3">S/ 0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Libro Diario Apilado (Ledger) -->
+        <div class="ledger-view" id="ledger-view">
+          <!-- Asientos de naturaleza/destino generados por JS -->
+        </div>
+
+        <!-- Barra Flotante de Acciones -->
+        <div class="floating-actions-bar">
+          <button class="btn-floating-action regresar" id="btn-asiento-regresar" aria-label="Regresar al listado de asientos">
+            <span class="btn-floating-icon">⬅️</span>
+            <span class="btn-floating-text">Regresar</span>
+          </button>
+          <button class="btn-floating-action explicacion" id="btn-asiento-explicacion" aria-label="Ver video explicativo del asiento">
+            <span class="btn-floating-icon">🎥</span>
+            <span class="btn-floating-text">Explicación</span>
+          </button>
+          <button class="btn-floating-action catalogo" id="btn-asiento-catalogo" aria-label="Abrir el catálogo de cuentas">
+            <span class="btn-floating-icon">📖</span>
+            <span class="btn-floating-text">Catálogo</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- PANTALLA: GERENCIAL - COSTOS -->
+      <main class="screen" id="screen-costos">
+        <div class="course-header-desc">
+          <h2>Gerencial - Costos</h2>
+          <p>Aprende a analizar costos y a determinar el Punto de Equilibrio para la toma de decisiones.</p>
+        </div>
+        
+        <div class="course-content-scroll">
+          <div class="calc-card">
+            <h3>Calculadora de Punto de Equilibrio</h3>
+            
+            <div class="input-group">
+              <label for="costos-fijos">Costos Fijos Totales (S/.)</label>
+              <input type="number" id="costos-fijos" value="6000" min="0" step="100">
+            </div>
+            <div class="input-group">
+              <label for="precio-unitario">Precio de Venta Unitario (S/.)</label>
+              <input type="number" id="precio-unitario" value="50" min="1" step="1">
+            </div>
+            <div class="input-group">
+              <label for="costo-variable">Costo Variable Unitario (S/.)</label>
+              <input type="number" id="costo-variable" value="30" min="0" step="1">
+            </div>
+            
+            <button class="btn-primary" id="btn-calc-costos" style="width:100%; margin-top:0.75rem;">Calcular Punto de Equilibrio</button>
+          </div>
+          
+          <div class="results-card" id="costos-results" style="display:none;">
+            <h3>Resultados del Análisis CVP</h3>
+            <div class="result-row">
+              <span>Margen de Contribución Unitario (MCU):</span>
+              <strong id="res-mcu">S/ 20.00</strong>
+            </div>
+            <div class="result-row">
+              <span>Margen de Contribución (%):</span>
+              <strong id="res-mcu-pct">40.00%</strong>
+            </div>
+            <div class="result-row">
+              <span>Punto de Equilibrio (Q en Unidades):</span>
+              <strong id="res-pe-unidades" class="text-primary">300 Unidades</strong>
+            </div>
+            <div class="result-row">
+              <span>Punto de Equilibrio (Ventas en Soles):</span>
+              <strong id="res-pe-soles">S/ 15,000.00</strong>
+            </div>
+            
+            <div class="progress-bar-container" style="margin-top: 1rem;">
+              <label style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.25rem; display:block;">Estructura del Precio de Venta:</label>
+              <div class="progress-bar" style="display:flex; height:24px; border-radius:6px; overflow:hidden; font-size:0.75rem; font-weight:700; color:white; text-align:center; line-height:24px;">
+                <div class="progress-segment" id="bar-cvu" style="background:#f43f5e; width: 60%;">CVU: 60%</div>
+                <div class="progress-segment" id="bar-mcu" style="background:#10b981; width: 40%;">MCU: 40%</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="theory-card">
+            <h3>Fórmulas Contables Utilizadas</h3>
+            <div class="formula-box">
+              <p class="formula-title"><strong>Punto de Equilibrio (Q)</strong></p>
+              <p class="formula-math">\(Q = \frac{\text{Costos Fijos}}{\text{Precio} - \text{Costo Variable Unitario}}\)</p>
+              <p style="margin-top:0.5rem; font-size:0.8rem; color:var(--text-muted);">Define el volumen de ventas donde las utilidades netas son exactamente cero (la empresa no gana ni pierde).</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- PANTALLA: AUDITORIA - CONTROL INTERNO -->
+      <main class="screen" id="screen-auditoria">
+        <div class="sub-tabs-container">
+          <div class="sub-tabs">
+            <button class="sub-tab-btn active" id="tab-aud-riesgos" data-panel="panel-riesgos">Matriz de Riesgos (COSO)</button>
+            <button class="sub-tab-btn" id="tab-aud-programa" data-panel="panel-programa">Programa de Auditoría</button>
+          </div>
+        </div>
+        
+        <div class="sub-panels-wrapper">
+          <!-- Panel Riesgos -->
+          <div class="sub-panel active" id="panel-riesgos">
+            <div class="search-panel" style="padding:0.75rem 1rem;">
+              <select id="select-area-riesgo" class="search-input" style="padding: 0.5rem; height: auto; font-size:0.9rem;">
+                <option value="todos">Todas las Áreas de Riesgo</option>
+                <option value="caja">Efectivo y Equivalentes de Efectivo</option>
+                <option value="inventarios">Inventarios y Almacenes</option>
+                <option value="cobrar">Cuentas por Cobrar y Ventas</option>
+                <option value="compras">Compras y Cuentas por Pagar</option>
+              </select>
+            </div>
+            
+            <div class="course-content-scroll" style="height: calc(100% - 60px);">
+              <div class="risk-matrix-list" id="risk-matrix-list" style="display:flex; flex-direction:column; gap:0.75rem; padding:0 1rem 1rem 1rem;">
+                <!-- Cargado dinámicamente desde JS -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Panel Programa de Auditoría -->
+          <div class="sub-panel" id="panel-programa">
+            <div class="course-content-scroll">
+              <div class="calc-card" style="padding: 0.75rem 1rem;">
+                <h3 style="margin-bottom:0.5rem;">Generador de Procedimientos</h3>
+                <div class="audit-btn-group" style="display:flex; gap:0.4rem;">
+                  <button class="btn-audit-select active" data-audit="efectivo" style="flex:1; padding:0.4rem; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer; background:var(--primary); color:white; border:none;">Efectivo</button>
+                  <button class="btn-audit-select" data-audit="ventas" style="flex:1; padding:0.4rem; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer; background:var(--border); color:var(--text-main); border:none;">Ventas / Cobrar</button>
+                  <button class="btn-audit-select" data-audit="inventarios" style="flex:1; padding:0.4rem; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer; background:var(--border); color:var(--text-main); border:none;">Inventarios</button>
+                </div>
+              </div>
+              
+              <div class="results-card" style="margin-top:0.75rem;">
+                <h3 id="audit-title-text" style="font-size:1rem; border-bottom:1px solid var(--border); padding-bottom:0.25rem;">Procedimientos de Auditoría</h3>
+                <div class="checklist-container" id="audit-checklist" style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.75rem;">
+                  <!-- Checkboxes de auditoría cargados por JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- PANTALLA: PENSAMIENTO LOGICO -->
+      <main class="screen" id="screen-logica">
+        
+        <div class="sub-panels-wrapper" style="height: 100%;">
+          
+          <!-- PANEL PRINCIPAL (HUB DE LÓGICA) -->
+          <div class="sub-panel active" id="panel-logica-hub" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <div class="course-header-desc" style="padding: 0 0 0.85rem 0;">
+              <h2 style="font-size: 1.2rem; font-family: var(--font-title); font-weight: 800;">Temarios y Recursos</h2>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Consulta tus notas de evaluación continua o selecciona una semana de estudio.</p>
+            </div>
+            
+            <div class="logica-hub-grid">
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-notas" style="border-color: var(--primary);">
+                <div class="logica-hub-btn-left" style="background: rgba(16, 185, 129, 0.15); color: var(--primary);">🎓</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title" style="color: var(--primary); font-weight: 800;">Notas</span>
+                  <span class="logica-hub-btn-desc" style="color: var(--primary);">Notas de Evaluación</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-1">
+                <div class="logica-hub-btn-left">📝</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 1</span>
+                  <span class="logica-hub-btn-desc">Enunciados y Proposiciones</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-2">
+                <div class="logica-hub-btn-left">🔢</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 2</span>
+                  <span class="logica-hub-btn-desc">Simples y Compuestas</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-3">
+                <div class="logica-hub-btn-left">📊</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 3</span>
+                  <span class="logica-hub-btn-desc">Tablas de Verdad</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-4">
+                <div class="logica-hub-btn-left">🔄</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 4</span>
+                  <span class="logica-hub-btn-desc">Equivalencias Lógicas</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-5">
+                <div class="logica-hub-btn-left">🧠</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 5</span>
+                  <span class="logica-hub-btn-desc">Inferencias Lógicas</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-6">
+                <div class="logica-hub-btn-left">🔮</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 6</span>
+                  <span class="logica-hub-btn-desc">Inductivo y Deductivo</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-7">
+                <div class="logica-hub-btn-left">🧬</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 7</span>
+                  <span class="logica-hub-btn-desc">Teoría de Conjuntos</span>
+                </div>
+              </button>
+              <button class="logica-hub-btn" data-logica-panel="panel-logica-semana-8">
+                <div class="logica-hub-btn-left">🧩</div>
+                <div class="logica-hub-btn-right">
+                  <span class="logica-hub-btn-title">Semana 8</span>
+                  <span class="logica-hub-btn-desc">Desafíos Lógicos</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 1 -->
+          <div class="sub-panel" id="panel-logica-semana-1" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Semana 1: Enunciados y Proposiciones</h3>
+                <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <strong>Enunciado:</strong> Es cualquier expresión, frase u oración de nuestro lenguaje.<br>
+                  <strong>Proposición:</strong> Es un enunciado aseverativo del cual tiene sentido afirmar que es <em>verdadero (V)</em> o <em>falso (F)</em>, pero no ambos a la vez. No son proposiciones las preguntas, órdenes, deseos ni exclamaciones.
+                </p>
+                <div class="quiz-card" id="quiz-s1">
+                  <div class="quiz-question">¿Cuál de las siguientes expresiones es una proposición lógica?</div>
+                  <div class="quiz-options">
+                    <button class="quiz-option-btn" data-correct="false">¡Qué hermoso día!</button>
+                    <button class="quiz-option-btn" data-correct="false">¿Qué hora es?</button>
+                    <button class="quiz-option-btn" data-correct="true">El Cusco es la capital histórica de Perú.</button>
+                    <button class="quiz-option-btn" data-correct="false">Cierra la puerta por favor.</button>
+                  </div>
+                  <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 2 -->
+          <div class="sub-panel" id="panel-logica-semana-2" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Semana 2: Proposiciones Simples y Compuestas</h3>
+                <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <strong>Proposiciones Simples (Atómicas):</strong> Son aquellas que tienen un solo sujeto y predicado, y no contienen conectores lógicos (ej. "p: Juan es contador").<br>
+                  <strong>Proposiciones Compuestas (Moleculares):</strong> Se forman al unir dos o más proposiciones simples mediante conectores lógicos o la negación (ej. "p ∧ q: Juan es contador y trabaja en Certus").
+                </p>
+                <div class="quiz-card" id="quiz-s2">
+                  <div class="quiz-question">Identifica la proposición compuesta:</div>
+                  <div class="quiz-options">
+                    <button class="quiz-option-btn" data-correct="false">El oro es un metal precioso.</button>
+                    <button class="quiz-option-btn" data-correct="true">Si estudio contabilidad entonces seré auditor.</button>
+                    <button class="quiz-option-btn" data-correct="false">Lima es una ciudad muy poblada.</button>
+                    <button class="quiz-option-btn" data-correct="false">El número 15 es impar.</button>
+                  </div>
+                  <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 3 (TABLAS DE VERDAD) -->
+          <div class="sub-panel" id="panel-logica-semana-3" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="calc-card" style="margin-bottom: 0px;">
+                <h3 style="font-family: var(--font-title); font-weight: 800; color: var(--primary);">Semana 3: Generador de Tabla de Verdad</h3>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 0.5rem;">Arma tu fórmula lógica con las proposiciones p y q y evalúa su validez:</p>
+                
+                <div class="logic-ops-row" style="display:flex; gap:0.25rem; margin-bottom:0.75rem;">
+                  <button class="btn-op-logic" data-op="∧" style="flex:1; padding:0.35rem; font-size:0.75rem; font-weight:700; border-radius:4px; border:1px solid var(--border); cursor:pointer; background:var(--bg-input); color:var(--text-main);">Conj (∧)</button>
+                  <button class="btn-op-logic" data-op="∨" style="flex:1; padding:0.35rem; font-size:0.75rem; font-weight:700; border-radius:4px; border:1px solid var(--border); cursor:pointer; background:var(--bg-input); color:var(--text-main);">Disy (∨)</button>
+                  <button class="btn-op-logic" data-op="→" style="flex:1; padding:0.35rem; font-size:0.75rem; font-weight:700; border-radius:4px; border:1px solid var(--border); cursor:pointer; background:var(--bg-input); color:var(--text-main);">Cond (→)</button>
+                  <button class="btn-op-logic" data-op="↔" style="flex:1; padding:0.35rem; font-size:0.75rem; font-weight:700; border-radius:4px; border:1px solid var(--border); cursor:pointer; background:var(--bg-input); color:var(--text-main);">Bicond (↔)</button>
+                  <button class="btn-op-logic" data-op="~" style="flex:1; padding:0.35rem; font-size:0.75rem; font-weight:700; border-radius:4px; border:1px solid var(--border); cursor:pointer; background:var(--bg-input); color:var(--text-main);">Neg (~)</button>
+                </div>
+                
+                <div class="input-group">
+                  <label for="logic-expr">Fórmula a Evaluar:</label>
+                  <input type="text" id="logic-expr" value="p → q" readonly class="search-input" style="text-align: center; font-weight: 700; font-size: 1.15rem; background: var(--bg-input); border:1px solid var(--border);">
+                </div>
+                
+                <div class="button-group-row" style="margin-top:0.75rem; display:flex; gap:0.5rem;">
+                  <button class="btn-primary" id="btn-generate-table" style="flex:2;">Generar Tabla</button>
+                  <button class="btn-secondary" id="btn-clear-logic" style="flex:1;">Limpiar</button>
+                </div>
+              </div>
+              
+              <div class="results-card" id="logic-table-results" style="display:none; overflow-x: auto; margin-top:0.75rem;">
+                <table class="truth-table" id="truth-table-el" style="width:100%; border-collapse:collapse; text-align:center; font-size:0.8rem;">
+                  <!-- Cabecera y cuerpo generados dinámicamente -->
+                </table>
+                <p style="font-size:0.8rem; text-align:center; margin-top:0.5rem; font-weight:700; color:var(--primary);" id="logic-classification-text"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 4 -->
+          <div class="sub-panel" id="panel-logica-semana-4" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Semana 4: Equivalencias Lógicas</h3>
+                <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <strong>Equivalencia Lógica (≡):</strong> Dos fórmulas son equivalentes si tienen la misma tabla de verdad.<br>
+                  <strong>Leyes Principales:</strong><br>
+                  • <em>Leyes de De Morgan:</em> ~(p ∧ q) ≡ ~p ∨ ~q ;  ~(p ∨ q) ≡ ~p ∧ ~q<br>
+                  • <em>Condicional:</em> p → q ≡ ~p ∨ q<br>
+                  • <em>Doble Negación:</em> ~(~p) ≡ p
+                </p>
+                <div class="quiz-card" id="quiz-s4">
+                  <div class="quiz-question">¿A qué fórmula es equivalente la condicional "p → q"?</div>
+                  <div class="quiz-options">
+                    <button class="quiz-option-btn" data-correct="false">~p ∧ q</button>
+                    <button class="quiz-option-btn" data-correct="true">~p ∨ q</button>
+                    <button class="quiz-option-btn" data-correct="false">p ∧ ~q</button>
+                    <button class="quiz-option-btn" data-correct="false">~p → ~q</button>
+                  </div>
+                  <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 5 -->
+          <div class="sub-panel" id="panel-logica-semana-5" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Semana 5: Inferencias Lógicas</h3>
+                <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <strong>Inferencia Lógica:</strong> Es una estructura formal donde, a partir de premisas, se llega a una conclusión. Es válida si no es posible que las premisas sean verdaderas y la conclusión falsa.<br>
+                  <strong>Reglas de Inferencia Clásicas:</strong><br>
+                  • <em>Modus Ponens (MP):</em> Si tienes "p → q" y tienes "p", concluyes "q".<br>
+                  • <em>Modus Tollens (MT):</em> Si tienes "p → q" y tienes "~q", concluyes "~p".
+                </p>
+                <div class="quiz-card" id="quiz-s5">
+                  <div class="quiz-question">Si es verdad que "Si hay inflación entonces suben los precios" y sabemos que "No subieron los precios", ¿qué se infiere por Modus Tollens?</div>
+                  <div class="quiz-options">
+                    <button class="quiz-option-btn" data-correct="false">Subieron los precios.</button>
+                    <button class="quiz-option-btn" data-correct="true">No hay inflación.</button>
+                    <button class="quiz-option-btn" data-correct="false">Hay inflación y suben los precios.</button>
+                    <button class="quiz-option-btn" data-correct="false">No se puede concluir nada.</button>
+                  </div>
+                  <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 6 -->
+          <div class="sub-panel" id="panel-logica-semana-6" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Semana 6: Razonamiento Inductivo y Deductivo</h3>
+                <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <strong>Deductivo:</strong> Parte de premisas generales para llegar a una conclusión particular necesariamente verdadera (ej. "Todos los mamíferos tienen pelo. El perro es mamífero. El perro tiene pelo").<br>
+                  <strong>Inductivo:</strong> Analiza casos particulares para inducir una regla general probable (ej. "El oro se dilata con el calor, el cobre también. Conclusión: Todos los metales se dilatan con el calor").
+                </p>
+                <div class="quiz-card" id="quiz-s6">
+                  <div class="quiz-question">¿Qué tipo de razonamiento es: "He observado 100 cisnes y todos son blancos, por lo tanto todos los cisnes son blancos"?</div>
+                  <div class="quiz-options">
+                    <button class="quiz-option-btn" data-correct="true">Razonamiento Inductivo</button>
+                    <button class="quiz-option-btn" data-correct="false">Razonamiento Deductivo</button>
+                    <button class="quiz-option-btn" data-correct="false">Inferencia Silogística</button>
+                    <button class="quiz-option-btn" data-correct="false">Falacia Formal</button>
+                  </div>
+                  <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 7 -->
+          <div class="sub-panel" id="panel-logica-semana-7" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Semana 7: Teoría de Conjuntos</h3>
+                <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <strong>Conjuntos:</strong> Colección de objetos bien definidos. Las operaciones básicas son:<br>
+                  • <em>Unión (A ∪ B):</em> Elementos que están en A, en B o en ambos.<br>
+                  • <em>Intersección (A ∩ B):</em> Elementos comunes a A y B.<br>
+                  • <em>Diferencia (A - B):</em> Elementos que están en A pero no en B.
+                </p>
+                <div class="quiz-card" id="quiz-s7">
+                  <div class="quiz-question">Si A = {1, 2, 3} y B = {3, 4, 5}, ¿cuál es el resultado de la intersección (A ∩ B)?</div>
+                  <div class="quiz-options">
+                    <button class="quiz-option-btn" data-correct="false">{1, 2, 3, 4, 5}</button>
+                    <button class="quiz-option-btn" data-correct="false">{1, 2}</button>
+                    <button class="quiz-option-btn" data-correct="true">{3}</button>
+                    <button class="quiz-option-btn" data-correct="false">{4, 5}</button>
+                  </div>
+                  <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL SEMANA 8 (DESAFÍOS LÓGICOS) -->
+          <div class="sub-panel" id="panel-logica-semana-8" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            <div class="course-content-scroll" style="padding: 0;">
+              <div class="challenge-card" id="challenge-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 0px;">
+                <div class="challenge-num" style="display:inline-block; padding:0.2rem 0.5rem; background:var(--primary-light); color:var(--primary); font-size:0.75rem; font-weight:800; border-radius:4px; margin-bottom:0.5rem;" id="challenge-num-lbl">Desafío #1</div>
+                <h3 id="challenge-question" style="font-size:1.05rem; font-family:var(--font-title); font-weight:700; line-height:1.25;">¿Cuál es el saldo final de la cuenta de efectivo?</h3>
+                <p id="challenge-body" style="font-size:0.85rem; margin-top:0.5rem; margin-bottom:1rem; line-height: 1.4; color:var(--text-muted);"></p>
+                
+                <div class="challenge-options" id="challenge-options" style="display:flex; flex-direction:column; gap:0.5rem;">
+                  <!-- Botones de opción -->
+                </div>
+                
+                <div id="challenge-feedback" style="display:none; margin-top:1rem; padding:0.75rem; border-radius:8px; font-size:0.8rem; font-weight:700;"></div>
+                <button class="btn-primary" id="btn-next-challenge" style="display:none; width:100%; margin-top:1rem;">Siguiente Desafío →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL NOTAS -->
+          <div class="sub-panel" id="panel-logica-notas" style="overflow-y: auto; padding: 0.85rem 1rem;">
+            <button class="btn-secondary btn-back-to-logica-hub" style="align-self: flex-start; margin-bottom: 0.75rem; font-size: 0.75rem; padding: 0.35rem 0.6rem;">← Volver a Temas</button>
+            
+            <div class="grade-lookup-container" style="display: flex; flex-direction: column; gap: 0.85rem;">
+              
+              <!-- Tarjeta de consulta -->
+              <div class="theory-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; gap: 0.6rem;">
+                <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0.15rem;">Consulta de Calificaciones</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.3;">Ingresa tu número de DNI para consultar el detalle de tus notas de evaluación continua y promedios.</p>
+                
+                <div class="input-group" style="margin-top: 0.25rem;">
+                  <label for="dni-lookup" style="font-weight: 700; font-size: 0.75rem; margin-bottom: 0.25rem;">Número de DNI:</label>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <input type="tel" id="dni-lookup" placeholder="Ingresa tu DNI (8 dígitos)" maxlength="8" class="search-input" style="flex: 1; padding: 0.5rem; font-size: 0.95rem; font-weight: 700; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px;">
+                    <button class="btn-primary" id="btn-search-dni" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;">Consultar</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Resultados de notas -->
+              <div id="grade-results-card" class="results-card" style="display: none; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; flex-direction: column; gap: 0.75rem;">
+                
+                <!-- VISTA MÁSTER: LISTA DE ALUMNOS -->
+                <div id="master-students-view" style="display: none; flex-direction: column; gap: 0.75rem;">
+                  <div style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; color: var(--primary);">Consolidado General (Máster)</h4>
+                    <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; background: var(--primary-light); color: var(--primary); font-weight: 800; border-radius: 4px;">Profesor</span>
+                  </div>
+                  
+                  <div style="margin-bottom: 0.25rem;">
+                    <input type="text" id="master-search-input" placeholder="🔍 Buscar por nombre o DNI..." class="search-input" style="width: 100%; padding: 0.45rem; font-size: 0.8rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;">
+                  </div>
+                  
+                  <div style="overflow-x: auto; max-height: 350px;">
+                    <table class="truth-table" style="width: 100%; border-collapse: collapse; font-size: 0.72rem; text-align: left;">
+                      <thead>
+                        <tr style="background: var(--bg-input); border-bottom: 2px solid var(--border);">
+                          <th style="padding: 0.4rem; font-weight: 700;">Alumno</th>
+                          <th style="padding: 0.4rem; text-align: center; font-weight: 700;">DNI</th>
+                          <th style="padding: 0.4rem; text-align: center; font-weight: 700;">AA1</th>
+                          <th style="padding: 0.4rem; text-align: center; font-weight: 700;">AA2</th>
+                          <th style="padding: 0.4rem; text-align: center; font-weight: 700;">AA3</th>
+                          <th style="padding: 0.4rem; text-align: center; font-weight: 700;">Prom.</th>
+                          <th style="padding: 0.4rem; text-align: center; font-weight: 700;">Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody id="master-students-list-body">
+                        <!-- Filas de estudiantes generadas por JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- VISTA INDIVIDUAL (DETALLE DEL ALUMNO) -->
+                <div id="single-student-view" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  
+                  <!-- Botón para regresar a la lista (solo en modo Máster) -->
+                  <button class="btn-secondary" id="btn-back-to-master-list" style="display: none; align-self: flex-start; font-size: 0.7rem; padding: 0.25rem 0.5rem; margin-bottom: 0.25rem;">← Volver a la Lista</button>
+
+                  <!-- Detalles de alumno -->
+                  <div style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.25rem;">
+                    <div>
+                      <h4 id="student-fullname" style="font-family: var(--font-title); font-size: 1.05rem; font-weight: 800; color: var(--text-main);">POLLETHE LUCIA ARENAS KALINOWSKI</h4>
+                      <p style="font-size: 0.7rem; color: var(--text-muted);">DNI: <span id="student-dni" style="font-weight: 700;">71336870</span> &nbsp;|&nbsp; Equipo: <span id="student-team" style="font-weight: 700;">1</span></p>
+                    </div>
+                    <div style="text-align: right;">
+                      <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600; display: block; text-transform: uppercase;">Promedio del Curso</span>
+                      <strong id="final-course-average" style="font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; color: var(--debe);">18.75</strong>
+                    </div>
+                  </div>
+                  
+                  <!-- Calificaciones AA1 y AA2 -->
+                  <div class="aa-grids-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.85rem; margin-top: 0.25rem;">
+                  
+                  <!-- AA1 -->
+                  <div style="border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: var(--bg-input);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
+                      <h5 style="font-family: var(--font-title); font-size: 0.85rem; font-weight: 800; color: var(--primary);">EVALUACIÓN AA1</h5>
+                      <span id="promedio-aa1-badge" style="padding: 0.15rem 0.4rem; border-radius: 4px; font-family: var(--font-title); font-size: 0.8rem; font-weight: 800; background: var(--debe-light); color: var(--debe);">Prm: 19</span>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.72rem;">
+                      <div style="display: flex; justify-content: space-between;">
+                        <span><strong>INFORME AA1:</strong></span>
+                        <strong id="informe-aa1-val">20</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R1.1 (Costos en alimentación):</span>
+                          <span id="r11-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R2.1 (Proyección de ingresos y gastos):</span>
+                          <span id="r21-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R3.1 (Ecuación lineal):</span>
+                          <span id="r31-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R4.1 (Propuestas de negocio):</span>
+                          <span id="r41-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R5.1 (Análisis de rentabilidad y sostenibilidad):</span>
+                          <span id="r51-val">4</span>
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; border-top: 1px dashed var(--border); padding-top: 0.35rem; margin-top: 0.15rem;">
+                        <span><strong>EXPOSICIÓN AA1:</strong></span>
+                        <strong id="exposicion-aa1-val">18</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Presentación y puntualidad (max 3):</span>
+                          <span id="r12_1-val">3</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Aspectos verbales (max 2):</span>
+                          <span id="r22_1-val">2</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Contenido y tiempo (max 10):</span>
+                          <span id="r32_1-val">10</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Lenguaje no verbal (max 5):</span>
+                          <span id="r42_1-val">3</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- AA2 -->
+                  <div style="border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: var(--bg-input);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
+                      <h5 style="font-family: var(--font-title); font-size: 0.85rem; font-weight: 800; color: var(--primary);">EVALUACIÓN AA2</h5>
+                      <span id="promedio-aa2-badge" style="padding: 0.15rem 0.4rem; border-radius: 4px; font-family: var(--font-title); font-size: 0.8rem; font-weight: 800; background: var(--debe-light); color: var(--debe);">Prm: 18.5</span>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.72rem;">
+                      <div style="display: flex; justify-content: space-between;">
+                        <span><strong>INFORME AA2:</strong></span>
+                        <strong id="informe-aa2-val">20</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R1.1 (Ventajas tecnológicas):</span>
+                          <span id="r11_2-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R2.1 (Modelo matemático):</span>
+                          <span id="r21_2-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R3.1 (Análisis de rentabilidad):</span>
+                          <span id="r31_2-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R4.1 (Ecuación de la demanda):</span>
+                          <span id="r41_2-val">4</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R5.1 (Viabilidad financiera y propuesta de mejora):</span>
+                          <span id="r52_2-val">4</span>
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; border-top: 1px dashed var(--border); padding-top: 0.35rem; margin-top: 0.15rem;">
+                        <span><strong>EXPOSICIÓN AA2:</strong></span>
+                        <strong id="exposicion-aa2-val">17</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Presentación y puntualidad (max 3):</span>
+                          <span id="r12_2-val">3</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Aspectos verbales (max 2):</span>
+                          <span id="r22_2-val">2</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Contenido y tiempo (max 10):</span>
+                          <span id="r32_2-val">7</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Lenguaje no verbal (max 5):</span>
+                          <span id="r42_2-val">5</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- AA3 -->
+                  <div style="border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: var(--bg-input);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
+                      <h5 style="font-family: var(--font-title); font-size: 0.85rem; font-weight: 800; color: var(--primary);">EVALUACIÓN AA3</h5>
+                      <span id="promedio-aa3-badge" style="padding: 0.15rem 0.4rem; border-radius: 4px; font-family: var(--font-title); font-size: 0.8rem; font-weight: 800; background: var(--debe-light); color: var(--debe);">Prm: -</span>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.72rem;">
+                      <div style="display: flex; justify-content: space-between;">
+                        <span><strong>INFORME AA3:</strong></span>
+                        <strong id="informe-aa3-val">-</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R1.1 (Identificación de proposiciones):</span>
+                          <span id="r11_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R2.1 (Formalización de enunciados):</span>
+                          <span id="r21_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R3.1 (Construcción de tablas de verdad):</span>
+                          <span id="r31_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R4.1 (Determinación de validez lógica):</span>
+                          <span id="r41_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>R5.1 (Interpretación de resultados):</span>
+                          <span id="r52_3-val">-</span>
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; border-top: 1px dashed var(--border); padding-top: 0.35rem; margin-top: 0.15rem;">
+                        <span><strong>EXPOSICIÓN AA3:</strong></span>
+                        <strong id="exposicion-aa3-val">-</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Presentación y puntualidad (max 3):</span>
+                          <span id="r12_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Aspectos verbales (max 2):</span>
+                          <span id="r22_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Contenido y tiempo (max 10):</span>
+                          <span id="r32_3-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>Lenguaje no verbal (max 5):</span>
+                          <span id="r42_3-val">-</span>
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 0.35rem; margin-top: 0.35rem; font-weight: 700;">
+                        <span>Promedio AA3 (Peso: 30%):</span>
+                        <strong id="promedio-aa3-val">-</strong>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- E4 -->
+                  <div style="border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: var(--bg-input);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
+                      <h5 style="font-family: var(--font-title); font-size: 0.85rem; font-weight: 800; color: var(--primary);">EVALUACIÓN E4</h5>
+                      <span id="promedio-e4-badge" style="padding: 0.15rem 0.4rem; border-radius: 4px; font-family: var(--font-title); font-size: 0.8rem; font-weight: 800; background: var(--debe-light); color: var(--debe);">E4: -</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.72rem;">
+                      <div style="display: flex; justify-content: space-between;">
+                        <span><strong>Nota E4 (AA4*0.7 + PA*0.3):</strong></span>
+                        <strong id="promedio-e4-val">-</strong>
+                      </div>
+                      <div style="padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; color: var(--text-muted); border-left: 2px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>AA4 (Evidencia AA4):</span>
+                          <span id="aa4-val">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <span>PA (Participación Activa):</span>
+                          <span id="pa-val">-</span>
+                        </div>
+                      </div>
+                      <p style="font-size: 0.62rem; color: var(--text-muted); margin-top: 0.25rem; line-height: 1.35;">La evidencia E4 representa el 35% de la nota final del curso.</p>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div> <!-- Fin de single-student-view -->
+              
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) -->
+    <nav class="bottom-nav" id="bottom-nav" aria-label="Menú de navegación inferior">
+      <button class="nav-item active" id="nav-dinamica" data-screen="dinamica">
+        <span class="nav-icon">🏠</span>
+        <span>Inicio</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Ventana flotante del video explicativo (YouTube) -->
+  <div class="video-float-backdrop" id="video-float-backdrop"></div>
+  <div class="video-float" id="video-float" role="dialog" aria-label="Video explicativo">
+    <div class="video-float-header">
+      <span class="video-float-title">🎬 Explicación en video</span>
+      <div class="video-float-actions">
+        <button type="button" id="video-float-max" title="Maximizar / Restaurar" aria-label="Maximizar o restaurar la ventana">⛶</button>
+        <button type="button" id="video-float-close" title="Cerrar" aria-label="Cerrar el video">✕</button>
+      </div>
+    </div>
+    <div class="video-float-body">
+      <iframe id="video-float-iframe" src="" title="Video explicativo en YouTube"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+    <div id="video-float-extras" class="video-float-extras" style="display:none;"></div>
+  </div>
+
+  <!-- Alerta Toast -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
