@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de Comprobantes para Reemplazo</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="survey.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <script src="sesion.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 25px;
+            background: #f4f6f9;
+            font-size: 12px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin: 4px;
+            border: none;
+            background: #1a73e8;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #1558b0;
+        }
+
+        .info-box {
+            background: white;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1a73e8;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CONTENEDOR CON SCROLL: alto según la ventana para que la barra
+           horizontal quede siempre visible sin bajar hasta el fondo */
+        .table-container {
+            max-height: calc(100vh - 300px);
+            min-height: 260px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #ccc;
+            background: white;
+        }
+
+        /* TABLA */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1200px;
+            font-size: 11px;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+
+        /* FILAS ALTERNADAS */
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #e9edf3;
+        }
+
+        /* CLASIFICACION DE CASILLAS */
+        td.celda-req {
+            background: #fff6d9;
+        }
+
+        td.celda-lock {
+            background: #e3e6e8;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        th .marca-req {
+            color: #ffd54f;
+            font-weight: bold;
+        }
+
+        /* INPUT CON AUTOCOMPLETADO DENTRO DE CELDA */
+        .cell-input {
+            width: 100%;
+            min-width: 90px;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            font-family: inherit;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .cell-input:focus {
+            outline: 1px solid #1a73e8;
+            background: #fff;
+        }
+
+        .leyenda span {
+            display: inline-block;
+            padding: 2px 10px;
+            margin-right: 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        /* ====== ENCABEZADO COMPACTO ====== */
+        .encabezado {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .encabezado h2 {
+            margin: 0 0 0 6px;
+            font-size: 16px;
+        }
+
+        .fila-opciones {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        /* ====== PANEL RESUMEN DE COMPROBANTES ====== */
+        .panel-resumen {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .chip {
+            background: #fff;
+            border: 1px solid #cfd8dc;
+            border-radius: 14px;
+            padding: 3px 12px;
+            font-size: 11px;
+        }
+
+        .chip b {
+            font-size: 12px;
+        }
+
+        .chip-error {
+            background: #fdecea;
+            border-color: #e53935;
+            color: #b71c1c;
+        }
+
+        .chip-ok {
+            background: #e8f5e9;
+            border-color: #66bb6a;
+            color: #1b5e20;
+        }
+
+        /* ====== CELDAS CON ERROR DE VALIDACIÓN ====== */
+        td.celda-error {
+            outline: 2px solid #e53935;
+            outline-offset: -2px;
+            background: #fdecea !important;
+        }
+
+        /* ====== COMBO DE AUTOCOMPLETADO (dropdown estético) ====== */
+        .combo-list {
+            position: fixed;
+            z-index: 9999;
+            background: #fff;
+            border: 1px solid #b0bec5;
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            max-height: 260px;
+            overflow-y: auto;
+            min-width: 280px;
+            max-width: 420px;
+            font-size: 12px;
+        }
+
+        .combo-item {
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .combo-item:last-child {
+            border-bottom: none;
+        }
+
+        .combo-item:hover {
+            background: #e8f0fe;
+        }
+
+        .combo-item .cod {
+            font-weight: bold;
+            color: #1a73e8;
+            min-width: 38px;
+        }
+
+        .combo-item .desc {
+            color: #555;
+        }
+
+        /* ====== ENCABEZADO: etiqueta + botón de ayuda alineados ====== */
+        .th-content {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .th-label {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .th-help {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            user-select: none;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .th-help:hover {
+            background: #fff;
+            color: #2c3e50;
+        }
+
+        /* ====== TARJETA DE AYUDA FIJA (se cierra con la X) ====== */
+        .help-card {
+            position: fixed;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            width: 92%;
+            max-width: 500px;
+            background: #fff;
+            border: 1px solid #90a4ae;
+            border-radius: 8px;
+            box-shadow: 0 12px 44px rgba(0, 0, 0, 0.32);
+            display: none;
+        }
+
+        .help-card-header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .help-card-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .help-card-close {
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+            padding: 0 4px;
+            user-select: none;
+        }
+
+        .help-card-close:hover {
+            color: #ffcdd2;
+        }
+
+        .help-card-body {
+            padding: 14px 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        /* Tabla de catálogo dentro de la tarjeta de ayuda */
+        .help-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .help-table caption {
+            text-align: left;
+            font-weight: 700;
+            color: #2c3e50;
+            padding: 6px 0 4px;
+        }
+
+        .help-table th {
+            background: #2c3e50;
+            color: #fff;
+            padding: 5px 8px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+
+        .help-table td {
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+        }
+
+        .help-table td.cod {
+            font-weight: 700;
+            color: #1a73e8;
+            white-space: nowrap;
+        }
+
+        .btn-tablas {
+            background: #00695c;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+
+<body>
+
+    <div class="encabezado">
+        <img src="LOGO_SUNAT.png" alt="Logo" style="height:36px;">
+        <span style="font-family:'Roboto',Arial,sans-serif; font-size:12px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO CONTABLE</span>
+        <h2 id="tituloPrincipal">Editor de Comprobantes para Reemplazo de RCE</h2>
+    </div>
+
+    <div class="fila-opciones">
+        <span>
+            <label style="margin-right: 14px; font-weight: bold; cursor: pointer;">
+                <input type="radio" name="mode" value="RCE" checked onchange="cambiarModo()"> Reemplazo RCE (Compras)
+            </label>
+            <label style="font-weight: bold; cursor: pointer;">
+                <input type="radio" name="mode" value="RVIE" onchange="cambiarModo()"> Reemplazo RVIE (Ventas)
+            </label>
+        </span>
+        <!-- LEYENDA DE CASILLAS -->
+        <span class="leyenda">
+            <span style="background:#fff6d9; border:1px solid #e0c96a;">Obligatorio *</span>
+            <span style="background:#fff; border:1px solid #ccc;">Opcional / según condición</span>
+            <span style="background:#e3e6e8; color:#777; border:1px solid #bbb;">&#128274; No llenar (se completa automáticamente)</span>
+        </span>
+    </div>
+
+    <input type="file" id="csvFile" accept=".csv, .txt">
+    <button onclick="agregarFila()">Agregar Fila</button>
+    <button onclick="copiarFilas()" style="background:#6a1b9a;">Copiar Fila(s)</button>
+    <button onclick="eliminarFilas()" style="background:#d93025;">Eliminar Fila(s)</button>
+    <button onclick="exportarArchivo()">Exportar</button>
+    <a href="RVIE RCE - Tablas y Anexos (Club Contable).xlsx" target="_blank"
+        style="display:inline-block; padding:6px 12px; margin:4px; background:#00695c; color:#fff; text-decoration:none; border-radius:4px; font-size:12px;">
+        &#128218; Ver Tablas y Anexos</a>
+
+    <span style="margin-left: 20px;">Formato:</span>
+    <select id="selFormato">
+        <option value="txt">TXT</option>
+        <option value="csv">CSV</option>
+    </select>
+
+    <span>Separador:</span>
+    <select id="selSeparador">
+        <option value="|">Pipe ( | )</option>
+        <option value=";">Punto y coma ( ; )</option>
+        <option value=",">Coma ( , )</option>
+    </select>
+
+    <!-- CONTENEDOR DE METADATOS EDITABLES -->
+    <div class="info-box" style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; padding:8px 12px; margin-bottom:8px;">
+
+        <div>
+            <label><strong>RUC:</strong></label>
+            <input type="text" id="txtRuc" placeholder="Ej: 20100123456" style="padding:4px;">
+        </div>
+
+        <div>
+            <label><strong>Denominación:</strong></label>
+            <input type="text" id="txtDenom" placeholder="Ej: EMPRESA S.A.C" style="padding:4px; width:250px;">
+        </div>
+
+        <div>
+            <label><strong>Periodo:</strong></label>
+            <select id="selMes" style="padding:4px;">
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+            <select id="selAnio" style="padding:4px;"></select>
+        </div>
+
+        <button onclick="actualizarTodo()" style="background:#f39c12;">Actualizar RUC/Periodo</button>
+
+    </div>
+
+    <!-- PANEL RESUMEN: conteo de comprobantes y errores de validación -->
+    <div id="panelResumen" class="panel-resumen"></div>
+
+    <div class="table-container">
+        <table id="tabla">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+
+        // CONFIGURACION DE COLUMNAS
+        const COLUMNS = {
+            RCE: [
+                "RUC", "Apellidos y Nombres o Razón Social", "Periodo", "CAR SUNAT", "Fecha de emisión",
+                "Fecha Vcto/Pago", "Tipo CP/Doc.", "Serie del CDP", "Año", "Nro CP o Doc. Nro Inicial (Rango)",
+                "Nro Final (Rango)", "Tipo Doc Identidad", "Nro Doc Identidad", "Apellidos Nombres/ Razón Social",
+                "BI Gravado DG", "IGV / IPM DG", "BI Gravado DGNG", "IGV / IPM DGNG", "BI Gravado DNG",
+                "IGV / IPM DNG", "Valor Adq. NG", "ISC", "ICBPER", "Otros Trib/ Cargos", "Total CP",
+                "Moneda", "Tipo de Cambio", "Fecha Emisión Doc Modificado", "Tipo CP Modificado",
+                "Serie CP Modificado", "COD. DAM O DSI", "Nro CP Modificado", "Clasif de Bss y Sss",
+                "ID Proyecto Operadores", "PorcPart", "IMB", "CAR Orig/ Ind E o I", "Detracción",
+                "Tipo de Nota", "Est. Comp.", "Incal"
+            ],
+            RVIE: [
+                "RUC", "Apellidos y Nombres o Razón Social", "Periodo", "CAR SUNAT", "Fecha de emisión",
+                "Fecha Vcto/Pago", "Tipo CP/Doc.", "Serie del CDP", "Nro CP o Doc. Nro Inicial (Rango)",
+                "Nro Final (Rango)", "Tipo Doc Identidad", "Nro Doc Identidad", "Apellidos Nombres/ Razón Social",
+                "Valor Facturado Exportación", "BI Gravada", "Dscto BI", "IGV / IPM", "Dscto IGV / IPM",
+                "Mto Exonerado", "Mto Inafecto", "ISC", "BI Grav IVAP", "IVAP", "ICBPER", "Otros Tributos",
+                "Total CP", "Moneda", "Tipo de Cambio", "Fecha Emisión Doc Modificado", "Tipo CP Modificado",
+                "Serie CP Modificado", "Nro CP Modificado", "ID Proyecto Operadores Atribución", "Tipo de Nota",
+                "Est. Comp", "Valor FOB Embarcado", "Valor OP Gratuitas", "Tipo Operación", "DAM / CP", "CLU"
+            ]
+        };
+
+        // Agregar CLU1-39 a RCE
+        for (let i = 1; i <= 39; i++) COLUMNS.RCE.push("CLU" + i);
+
+        // ===================== TABLAS SUNAT (Anexo N.° 1) =====================
+        // Tabla 1: Tipo de Documento de Identidad
+        const TABLA_DOC_IDENTIDAD = [
+            ["0", "Doc. trib. no dom. sin RUC"],
+            ["1", "DNI - Doc. Nacional de Identidad"],
+            ["4", "Carnet de extranjería"],
+            ["6", "RUC - Registro Único de Contribuyentes"],
+            ["7", "Pasaporte"],
+            ["A", "Céd. diplomática de identidad"],
+            ["B", "Doc. identidad país residencia - no dom."],
+            ["C", "TIN - Doc. trib. PP.NN."],
+            ["D", "IN - Doc. trib. PP.JJ."],
+            ["E", "TAM - Tarjeta Andina de Migración"],
+            ["F", "Permiso Temporal de Permanencia (PTP)"],
+            ["G", "Salvoconducto"]
+        ];
+
+        // Tabla 3: Tipo de Comprobante de Pago o Documento (RVIE)
+        const TABLA_CP_RVIE = [
+            ["00", "Otros"], ["01", "Factura"], ["03", "Boleta de venta"], ["04", "Liquidación de compra"],
+            ["05", "Boleto de transporte aéreo (BME)"], ["06", "Carta de porte aéreo"],
+            ["07", "Nota de crédito"], ["08", "Nota de débito"],
+            ["11", "Póliza emitida por las bolsas de valores"], ["12", "Ticket de máquina registradora o Ticket POS"],
+            ["13", "Documento de bancos y empresas supervisadas SBS"], ["14", "Recibo de servicios públicos / Recibo electrónico SP"],
+            ["15", "Boleto de transporte urbano o ferroviario de pasajeros"], ["16", "Boleto de viaje - transporte interprovincial"],
+            ["17", "Documento de la Iglesia Católica por arrendamiento"], ["18", "Documento emitido por las AFP"],
+            ["19", "Boleto por atracciones y espectáculos públicos"], ["21", "Conocimiento de embarque - carga marítima"],
+            ["23", "Póliza de adjudicación por remate"], ["24", "Certificado de pago de regalías PERUPETRO"],
+            ["27", "Seguro Complementario de Trabajo de Riesgo"], ["28", "Etiquetas TUUA"],
+            ["29", "Documentos emitidos por COFOPRI"], ["30", "Documento rol adquirente - tarjetas de crédito/débito"],
+            ["32", "Documento recaudadoras Garantía de Red Principal"], ["34", "Documento del Operador"],
+            ["35", "Documento del Partícipe"], ["36", "Recibo de distribución de gas natural"],
+            ["37", "Documento de revisiones técnicas vehiculares"], ["42", "Documento rol adquiriente - tarjetas propias"],
+            ["43", "Boleto de aviación - transporte no regular"], ["44", "Billetes de lotería, rifas y apuestas"],
+            ["45", "Documento de centros educativos y culturales"], ["48", "Comprobante de Operaciones - Ley 29972"],
+            ["49", "Constancia de depósito - IVAP"], ["55", "BVME transporte ferroviario de pasajeros"],
+            ["56", "Comprobante de pago SEAE"], ["64", "Servicios complementarios al transporte aéreo"],
+            ["87", "Nota de crédito especial"], ["88", "Nota de débito especial"],
+            ["89", "Nota de Ajuste de Operaciones - Ley 29972"]
+        ];
+
+        // Tabla 11: Tipo de Comprobante de Pago o Documento (RCE)
+        const TABLA_CP_RCE = [
+            ["00", "Otros"], ["01", "Factura"], ["02", "Recibo por honorarios"], ["03", "Boleta de venta"],
+            ["04", "Liquidación de compra"], ["05", "Boleto de transporte aéreo (BME)"], ["06", "Carta de porte aéreo"],
+            ["07", "Nota de crédito"], ["08", "Nota de débito"], ["10", "Recibo por arrendamiento (Form. 1683)"],
+            ["11", "Póliza emitida por las bolsas de valores"], ["12", "Ticket de máquina registradora o Ticket POS"],
+            ["13", "Documento de bancos y empresas supervisadas SBS"], ["14", "Recibo de servicios públicos / Recibo electrónico SP"],
+            ["15", "Boleto de transporte urbano o ferroviario de pasajeros"], ["16", "Boleto de viaje - transporte interprovincial"],
+            ["17", "Documento de la Iglesia Católica por arrendamiento"], ["18", "Documento emitido por las AFP y EPS"],
+            ["19", "Boleto por atracciones y espectáculos públicos"], ["21", "Conocimiento de embarque - carga marítima"],
+            ["22", "Formulario 820 - Operaciones no habituales"], ["23", "Póliza de adjudicación por remate"],
+            ["24", "Certificado de pago de regalías PERUPETRO"], ["25", "Documento de atribución"],
+            ["27", "Seguro Complementario de Trabajo de Riesgo"], ["28", "Documentos de servicios aeroportuarios CORPAC"],
+            ["29", "Documentos emitidos por COFOPRI"], ["30", "Documento rol adquirente - tarjetas de crédito/débito"],
+            ["32", "Documento recaudadoras Garantía de Red Principal"], ["34", "Documento del Operador"],
+            ["35", "Documento del Partícipe"], ["36", "Recibo de distribución de gas natural"],
+            ["37", "Documento de revisiones técnicas vehiculares"], ["42", "Documento rol adquiriente - tarjetas propias"],
+            ["43", "Boleto de aviación - transporte no regular"], ["44", "Billetes de lotería, rifas y apuestas"],
+            ["45", "Documento de centros educativos y culturales"], ["46", "Formulario de declaración - pago de tributos internos"],
+            ["48", "Comprobante de Operaciones - Ley 29972"], ["50", "DAM - Importación definitiva"],
+            ["51", "Póliza o DUI fraccionada"], ["52", "Despacho simplificado - Importación simplificada"],
+            ["53", "Declaración de mensajería o courier"], ["54", "Liquidación de cobranza"],
+            ["55", "BVME transporte ferroviario de pasajeros"], ["56", "Comprobante de pago SEAE"],
+            ["64", "Servicios complementarios al transporte aéreo"], ["87", "Nota de crédito especial"],
+            ["88", "Nota de débito especial"], ["89", "Nota de Ajuste de Operaciones - Ley 29972"],
+            ["91", "Comprobante emitido por sujeto no domiciliado"], ["96", "Exceso de crédito fiscal por retiro de bienes"],
+            ["97", "Nota de crédito - No domiciliado"], ["98", "Nota de débito - No domiciliado"]
+        ];
+
+        // Tabla 2: Código de Moneda (ISO 4217)
+        const TABLA_MONEDA = [
+            ["PEN", "Sol"], ["USD", "Dólar de Norte América"], ["EUR", "Euro"],
+            ["GBP", "Libra Esterlina"], ["JPY", "Yen Japonés"], ["CHF", "Franco Suizo"],
+            ["CAD", "Dólar Canadiense"], ["AUD", "Dólar Australiano"], ["SEK", "Corona Sueca"],
+            ["NOK", "Corona Noruega"], ["DKK", "Corona Danesa"], ["CNY", "Yuan Chino"],
+            ["KRW", "Won Coreano"], ["BOB", "Boliviano"], ["BRL", "Real Brasileño"],
+            ["CLP", "Peso Chileno"], ["COP", "Peso Colombiano"], ["MXN", "Peso Mexicano"],
+            ["ARS", "Peso Argentino"], ["UYU", "Peso Uruguayo"]
+        ];
+
+        // Catálogo 51: Código de tipo de operación
+        const TABLA_TIPO_OPERACION = [
+            ["0101", "Venta interna"],
+            ["0112", "Venta Interna - Sustenta Gastos Deducibles Persona Natural"],
+            ["0113", "Venta Interna - NRUS"],
+            ["0200", "Exportación de Bienes"],
+            ["0201", "Exportación de Servicios - Prestación servicios realizados íntegramente en el país"],
+            ["0202", "Exportación de Servicios - Prestación de servicios de hospedaje No Domiciliado"],
+            ["0203", "Exportación de Servicios - Transporte de navieras"],
+            ["0204", "Exportación de Servicios - Servicios a naves y aeronaves de bandera extranjera"],
+            ["0205", "Exportación de Servicios - Servicios que conformen un paquete turístico"],
+            ["0206", "Exportación de Servicios - Servicios complementarios al transporte de carga"],
+            ["0207", "Exportación de Servicios - Suministro de energía eléctrica a favor de sujetos domiciliados en ZED"],
+            ["0208", "Exportación de Servicios - Prestación servicios realizados parcialmente en el extranjero"],
+            ["0301", "Operaciones con Carta de porte aéreo (emitidas en el ámbito nacional)"],
+            ["0302", "Operaciones de Transporte ferroviario de pasajeros"],
+            ["0401", "Ventas no domiciliados que no califican como exportación"],
+            ["0501", "Compra interna"],
+            ["0502", "Anticipos"],
+            ["0503", "Compra de oro"],
+            ["1001", "Operación Sujeta a Detracción"],
+            ["1002", "Operación Sujeta a Detracción - Recursos Hidrobiológicos"],
+            ["1003", "Operación Sujeta a Detracción - Servicios de Transporte Pasajeros"],
+            ["1004", "Operación Sujeta a Detracción - Servicios de Transporte Carga"],
+            ["2001", "Operación Sujeta a Percepción"],
+            ["2100", "Créditos a empresas"],
+            ["2101", "Créditos de consumo revolvente"],
+            ["2102", "Créditos de consumo no revolvente"],
+            ["2103", "Otras operaciones no gravadas - Empresas del sistema financiero y cooperativas de ahorro y crédito no autorizadas a captar recursos del público"],
+            ["2104", "Otras operaciones no gravadas - Empresas del sistema de seguros"]
+        ];
+
+        // Descripción de cada campo (tooltip al pasar el mouse por la cabecera)
+        const DESCRIPCIONES = {
+            "RUC": "RUC del generador del registro. 11 dígitos numéricos.",
+            "Apellidos y Nombres o Razón Social": "Nombre o razón social del generador; debe corresponder al RUC informado.",
+            "Periodo": "Periodo a generar/reemplazar en formato AAAAMM (mes entre 01 y 12).",
+            "CAR SUNAT": "Código de Anotación de Registro. No llenar: lo completa SUNAT automáticamente.",
+            "Fecha de emisión": "Fecha de emisión del comprobante. Formato DD/MM/AAAA, menor o igual al periodo.",
+            "Fecha Vcto/Pago": "Fecha de vencimiento o pago. Obligatoria solo para ciertos tipos de CP (ej. 14 - Recibos de servicios públicos). Formato DD/MM/AAAA.",
+            "Tipo CP/Doc.": "Código del tipo de comprobante de pago (Tablas 3/11 del Anexo 1). Ej: 01 Factura, 03 Boleta, 07 Nota de Crédito, 08 Nota de Débito.",
+            "Serie del CDP": "Serie del comprobante o de la máquina registradora; para DAM/DSI, código de la dependencia aduanera.",
+            "Año": "Año de emisión de la DAM o DSI. Obligatorio solo para tipos 50, 51, 52, 53 y 54.",
+            "Nro CP o Doc. Nro Inicial (Rango)": "Número del comprobante o número inicial del rango consolidado.",
+            "Nro Final (Rango)": "Número final del rango consolidado. Solo se permite para ciertos tipos de CP.",
+            "Tipo Doc Identidad": "Tipo de documento de identidad del cliente/proveedor (Tabla 1 del Anexo 1). Ej: 6 = RUC, 1 = DNI.",
+            "Nro Doc Identidad": "Número de RUC o documento de identidad del cliente/proveedor. Hasta 15 caracteres.",
+            "Apellidos Nombres/ Razón Social": "Apellidos y nombres o razón social del cliente/proveedor (Ap. paterno, Ap. materno, nombres).",
+            "Valor Facturado Exportación": "Valor facturado de la exportación. Positivo; negativo solo con Tipo CP 07 y 87.",
+            "BI Gravada": "Base imponible de la operación gravada. No incluye ISC.",
+            "Dscto BI": "Descuento de la base imponible. Valor negativo, solo con notas de crédito de periodos anteriores.",
+            "IGV / IPM": "IGV y/o Impuesto de Promoción Municipal de la operación.",
+            "Dscto IGV / IPM": "Descuento del IGV/IPM. Valor negativo, solo con notas de crédito de periodos anteriores.",
+            "Mto Exonerado": "Importe total de la operación exonerada.",
+            "Mto Inafecto": "Importe total de la operación inafecta.",
+            "ISC": "Impuesto Selectivo al Consumo, de ser el caso.",
+            "BI Grav IVAP": "Base imponible del IVAP. Obligatorio si Tipo CP = 49.",
+            "IVAP": "Impuesto a la Venta de Arroz Pilado. Obligatorio si Tipo CP = 49.",
+            "ICBPER": "Impuesto al Consumo de Bolsas de Plástico. Obligatorio con Tipo CP 01, 03, 07, 08 y 12.",
+            "Otros Tributos": "Otros tributos, cargos y descuentos que no forman parte de la base imponible.",
+            "Total CP": "Importe total del comprobante de pago.",
+            "Moneda": "Código de la moneda del comprobante (Tabla 2, ISO 4217). Ej: PEN, USD.",
+            "Tipo de Cambio": "Tipo de cambio. Obligatorio si la moneda es distinta de PEN. Formato #.### (3 decimales).",
+            "Tipo Cambio": "Tipo de cambio. Obligatorio si la moneda es distinta de PEN. Formato #.### (3 decimales).",
+            "Fecha Emisión Doc Modificado": "Fecha de emisión del documento que se modifica. Solo para notas de crédito/débito (07, 08, 87, 88).",
+            "Tipo CP Modificado": "Tipo del comprobante que se modifica. Solo para notas de crédito/débito (07, 08, 87, 88). Validar con Tablas 3/11.",
+            "Serie CP Modificado": "Serie del comprobante que se modifica. Solo para notas de crédito/débito.",
+            "Nro CP Modificado": "Número del comprobante que se modifica. Solo para notas de crédito/débito.",
+            "COD. DAM O DSI": "Código de la dependencia aduanera de la DAM o DSI (solo si el CP modificado es 50 o 52).",
+            "Clasif de Bss y Sss": "Clasificación de los bienes y servicios adquiridos (1 al 5). Aplicable a contribuyentes con ingresos > 1500 UIT.",
+            "ID Proyecto Operadores": "Identificación del contrato o proyecto (contratos de colaboración empresarial).",
+            "ID Proyecto Operadores Atribución": "Identificación del contrato o proyecto (operadores de contratos de colaboración empresarial).",
+            "PorcPart": "Porcentaje de participación en el contrato o proyecto.",
+            "IMB": "Impuesto materia de beneficio (Ley 31053).",
+            "CAR Orig/ Ind E o I": "CAR del comprobante original o indicador de exportación/importación.",
+            "Detracción": "Indicador de operación sujeta a detracción.",
+            "Tipo de Nota": "Tipo de nota de crédito o débito (Tabla 5 del Anexo 1).",
+            "Est. Comp.": "Estado del comprobante. Ej: 1 = Activo.",
+            "Est. Comp": "Estado del comprobante. Ej: 1 = Activo.",
+            "Incal": "Indicador de inconsistencia / incalificable.",
+            "BI Gravado DG": "Base imponible de adquisiciones gravadas destinadas exclusivamente a operaciones gravadas y/o de exportación.",
+            "IGV / IPM DG": "IGV/IPM de las adquisiciones destinadas exclusivamente a operaciones gravadas.",
+            "BI Gravado DGNG": "Base imponible de adquisiciones gravadas destinadas a operaciones gravadas y no gravadas.",
+            "IGV / IPM DGNG": "IGV/IPM de las adquisiciones destinadas a operaciones gravadas y no gravadas.",
+            "BI Gravado DNG": "Base imponible de adquisiciones gravadas que no dan derecho a crédito fiscal.",
+            "IGV / IPM DNG": "IGV/IPM de las adquisiciones que no dan derecho a crédito fiscal.",
+            "Valor Adq. NG": "Valor de las adquisiciones no gravadas (exoneradas más inafectas).",
+            "Otros Trib/ Cargos": "Otros conceptos, tributos y cargos que no forman parte de la base imponible.",
+            "Valor FOB Embarcado": "Valor FOB embarcado en la exportación de bienes.",
+            "Valor OP Gratuitas": "Valor de las operaciones gratuitas.",
+            "Tipo Operación": "Código de tipo de operación (Catálogo 51). Formato de 4 dígitos. Ej: 0101 Venta interna, 0200 Exportación de bienes.",
+            "DAM / CP": "Número de la DAM o comprobante de pago relacionado.",
+            "CLU": "Campo de libre utilización. Si no lo usa, no incluya la información."
+        };
+
+        function descripcionColumna(nombre) {
+            if (DESCRIPCIONES[nombre]) return DESCRIPCIONES[nombre];
+            if (nombre.startsWith("CLU")) return "Campo de libre utilización. Si no lo usa, no incluya ni la información ni los palotes.";
+            return nombre;
+        }
+
+        // Catálogo que corresponde a una columna segun su nombre y el modo actual
+        function catalogoParaColumna(nombre) {
+            if (nombre === "Tipo Doc Identidad") return TABLA_DOC_IDENTIDAD;
+            if (nombre === "Moneda") return TABLA_MONEDA;
+            if (nombre === "Tipo Operación") return TABLA_TIPO_OPERACION;
+            if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
+                return currentMode === "RVIE" ? TABLA_CP_RVIE : TABLA_CP_RCE;
+            }
+            return null;
+        }
+
+        // ============== COMBO DE AUTOCOMPLETADO (dropdown estético) ==============
+        // Reemplaza al <datalist> nativo: lista flotante con código y descripción.
+        let comboDiv = null;
+        let comboSeleccionando = false;
+
+        function obtenerComboDiv() {
+            if (!comboDiv) {
+                comboDiv = document.createElement("div");
+                comboDiv.className = "combo-list";
+                comboDiv.style.display = "none";
+                document.body.appendChild(comboDiv);
+            }
+            return comboDiv;
+        }
+
+        function cerrarCombo() {
+            if (comboDiv) comboDiv.style.display = "none";
+        }
+
+        function mostrarCombo(inp, catalogo) {
+            const div = obtenerComboDiv();
+            const filtro = inp.value.trim().toLowerCase();
+            const items = catalogo.filter(([cod, desc]) =>
+                !filtro || cod.toLowerCase().startsWith(filtro) || desc.toLowerCase().includes(filtro)
+            );
+            div.innerHTML = "";
+            if (!items.length) { div.style.display = "none"; return; }
+            items.forEach(([cod, desc]) => {
+                const item = document.createElement("div");
+                item.className = "combo-item";
+                const spanCod = document.createElement("span");
+                spanCod.className = "cod";
+                spanCod.textContent = cod;
+                const spanDesc = document.createElement("span");
+                spanDesc.className = "desc";
+                spanDesc.textContent = desc;
+                item.appendChild(spanCod);
+                item.appendChild(spanDesc);
+                // mousedown: se dispara antes del blur del input
+                item.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    comboSeleccionando = true;
+                    inp.value = cod;
+                    inp.dispatchEvent(new Event("input", { bubbles: true }));
+                    comboSeleccionando = false;
+                    cerrarCombo();
+                });
+                div.appendChild(item);
+            });
+            const r = inp.getBoundingClientRect();
+            div.style.left = Math.max(4, Math.min(r.left, window.innerWidth - 440)) + "px";
+            if (r.bottom + 270 > window.innerHeight) {
+                div.style.top = "auto";
+                div.style.bottom = (window.innerHeight - r.top + 2) + "px";
+            } else {
+                div.style.bottom = "auto";
+                div.style.top = (r.bottom + 2) + "px";
+            }
+            div.style.display = "block";
+        }
+
+        function activarCombo(inp, catalogo) {
+            inp.addEventListener("focus", () => mostrarCombo(inp, catalogo));
+            inp.addEventListener("input", () => { if (!comboSeleccionando) mostrarCombo(inp, catalogo); });
+            inp.addEventListener("blur", () => setTimeout(cerrarCombo, 150));
+            inp.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" || e.key === "Tab" || e.key === "Enter") cerrarCombo();
+            });
+        }
+
+        // La lista es de posición fija: se cierra al hacer scroll o cambiar el tamaño
+        window.addEventListener("scroll", cerrarCombo, true);
+        window.addEventListener("resize", cerrarCombo);
+
+        // ============== TARJETA DE AYUDA POR CAMPO (fija hasta cerrar) ==============
+        let helpCard = null;
+
+        function obtenerHelpCard() {
+            if (!helpCard) {
+                helpCard = document.createElement("div");
+                helpCard.className = "help-card";
+                helpCard.innerHTML =
+                    '<div class="help-card-header">' +
+                    '<h3 id="help-card-title"></h3>' +
+                    '<span class="help-card-close" title="Cerrar">&times;</span>' +
+                    '</div>' +
+                    '<div class="help-card-body" id="help-card-body"></div>';
+                document.body.appendChild(helpCard);
+                helpCard.querySelector(".help-card-close").addEventListener("click", cerrarHelpCard);
+            }
+            return helpCard;
+        }
+
+        // Nombre de la tabla del Anexo N.° 1 que corresponde a cada columna
+        function nombreTablaCatalogo(nombre) {
+            if (nombre === "Tipo Doc Identidad") return "Tabla 1: Tipo de Documento de Identidad";
+            if (nombre === "Moneda") return "Tabla 2: Código de Moneda (ISO 4217)";
+            if (nombre === "Tipo Operación") return "Catálogo 51: Tipo de Operación";
+            if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
+                return currentMode === "RVIE"
+                    ? "Tabla 3: Tipo de Comprobante de Pago o Documento"
+                    : "Tabla 11: Tipo de Comprobante de Pago o Documento";
+            }
+            return "";
+        }
+
+        // Construye la tabla HTML (Código / Descripción) de un catálogo
+        function construirTablaAyuda(nombreColumna, catalogo) {
+            const tabla = document.createElement("table");
+            tabla.className = "help-table";
+
+            const caption = document.createElement("caption");
+            caption.textContent = nombreTablaCatalogo(nombreColumna) || "Códigos válidos";
+            tabla.appendChild(caption);
+
+            const thead = document.createElement("thead");
+            const trH = document.createElement("tr");
+            ["Código", "Descripción"].forEach(t => {
+                const th = document.createElement("th");
+                th.textContent = t;
+                trH.appendChild(th);
+            });
+            thead.appendChild(trH);
+            tabla.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            catalogo.forEach(([cod, desc]) => {
+                const tr = document.createElement("tr");
+                const tdCod = document.createElement("td");
+                tdCod.className = "cod";
+                tdCod.textContent = cod;
+                const tdDesc = document.createElement("td");
+                tdDesc.textContent = desc;
+                tr.appendChild(tdCod);
+                tr.appendChild(tdDesc);
+                tbody.appendChild(tr);
+            });
+            tabla.appendChild(tbody);
+            return tabla;
+        }
+
+        function mostrarHelpCard(titulo, texto) {
+            const card = obtenerHelpCard();
+            card.querySelector("#help-card-title").textContent = titulo;
+
+            const body = card.querySelector("#help-card-body");
+            body.innerHTML = "";
+
+            const p = document.createElement("p");
+            p.style.margin = "0 0 10px";
+            p.textContent = texto;
+            body.appendChild(p);
+
+            // Si la columna tiene un catálogo asociado, mostrar la tabla completa
+            const catalogo = catalogoParaColumna(titulo);
+            if (catalogo) {
+                body.appendChild(construirTablaAyuda(titulo, catalogo));
+            }
+
+            card.style.display = "block";
+        }
+
+        function cerrarHelpCard() {
+            if (helpCard) helpCard.style.display = "none";
+        }
+
+        // Comodidad: la tecla Escape también cierra la tarjeta de ayuda
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") cerrarHelpCard();
+        });
+
+        // Ancho mínimo por columna: nombres/razón social más anchos, serie y
+        // códigos cortos más angostos; el resto usa un ancho estándar.
+        function anchoColumna(nombre) {
+            const anchos = {
+                "Apellidos y Nombres o Razón Social": 230,
+                "Apellidos Nombres/ Razón Social": 230,
+                "Serie del CDP": 85,
+                "Serie CP Modificado": 95,
+                "Año": 65,
+                "Periodo": 90,
+                "Moneda": 90,
+                "Tipo de Cambio": 95,
+                "Est. Comp.": 80,
+                "Est. Comp": 80,
+                "ISC": 80,
+                "ICBPER": 80,
+                "IVAP": 80
+            };
+            return anchos[nombre] || 110;
+        }
+
+        // ============== CLASIFICACION DE CASILLAS POR MODO ==============
+        // req = obligatorio | opt = opcional o segun condicion | lock = no llenar
+        const TIPOS_CAMPO = {
+            RCE: [
+                "req", "req", "req", "lock", "req", "opt", "req", "opt", "opt", "req",
+                "opt", "req", "req", "req", "req", "req", "req", "req", "req", "req",
+                "opt", "opt", "opt", "opt", "req", "req", "opt", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt",
+                "opt"
+            ],
+            RVIE: [
+                "req", "req", "req", "lock", "req", "opt", "req", "opt", "req", "opt",
+                "req", "req", "req", "opt", "opt", "opt", "opt", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "req", "req", "opt", "opt", "opt",
+                "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt", "opt"
+            ]
+        };
+
+        // CLU1-39 de RCE son opcionales
+        for (let i = 1; i <= 39; i++) TIPOS_CAMPO.RCE.push("opt");
+
+        // Configura una celda de datos segun su columna: clasificacion + autocompletado
+        function configurarCelda(td, colIdx, valor) {
+            const nombre = COLUMNS[currentMode][colIdx];
+            const tipo = TIPOS_CAMPO[currentMode][colIdx] || "opt";
+            td.className = "celda-" + tipo;
+
+            if (tipo === "lock") {
+                td.contentEditable = false;
+                td.title = "No llenar: se completa automáticamente";
+                td.innerText = "";
+                return;
+            }
+
+            const catalogo = catalogoParaColumna(nombre);
+            if (catalogo) {
+                td.contentEditable = false;
+                const inp = document.createElement("input");
+                inp.className = "cell-input";
+                inp.value = valor || "";
+                activarCombo(inp, catalogo);
+                td.appendChild(inp);
+            } else {
+                td.contentEditable = true;
+                td.innerText = valor || "";
+            }
+        }
+
+        // Lee el valor de una celda (input de autocompletado o texto editable)
+        function valorCelda(td) {
+            const inp = td.querySelector("input");
+            return inp ? inp.value : td.innerText;
+        }
+
+        let currentMode = "RCE";
+
+        // INICIALIZACION
+        window.onload = function () {
+            // Llenar Select de Años (Año actual - 5 a Año actual + 5)
+            const currentYear = new Date().getFullYear();
+            const selAnio = document.getElementById("selAnio");
+            for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.innerText = y;
+                if (y === currentYear) opt.selected = true;
+                selAnio.appendChild(opt);
+            }
+
+            // Crear Tabla por Defecto
+            crearTablaDefault();
+
+            // Revalidar mientras se edita cualquier celda
+            document.getElementById("tabla").addEventListener("input", validarConRetraso);
+        };
+
+        function cambiarModo() {
+            const radios = document.getElementsByName('mode');
+            for (const r of radios) {
+                if (r.checked) {
+                    currentMode = r.value;
+                    break;
+                }
+            }
+
+            // Actualizar Titulo
+            document.getElementById("tituloPrincipal").innerText =
+                currentMode === "RCE" ? "Editor de Comprobantes para Reemplazo de RCE" : "Editor de Comprobantes para Reemplazo RVIE";
+
+            // Limpiar y resetear la tabla con las columnas correctas
+            crearTablaDefault();
+        }
+
+        function crearTablaDefault() {
+            const tabla = document.getElementById("tabla");
+            const thead = tabla.querySelector("thead");
+            const tbody = tabla.querySelector("tbody");
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+
+            // Headers especificos segun modo
+            const headers = COLUMNS[currentMode];
+
+            const trHead = document.createElement("tr");
+
+            // Checkbox "Seleccionar todo / Deseleccionar todo"
+            const thCheck = document.createElement("th");
+            thCheck.appendChild(document.createTextNode("Sel. "));
+            const chkTodos = document.createElement("input");
+            chkTodos.type = "checkbox";
+            chkTodos.title = "Seleccionar todo / Deseleccionar todo";
+            chkTodos.style.cursor = "pointer";
+            chkTodos.addEventListener("change", () => {
+                document.querySelectorAll("#tabla tbody td:first-child input[type='checkbox']")
+                    .forEach(c => c.checked = chkTodos.checked);
+            });
+            thCheck.appendChild(chkTodos);
+            trHead.appendChild(thCheck);
+
+            // N°
+            const thNum = document.createElement("th");
+            thNum.innerText = "N°";
+            trHead.appendChild(thNum);
+
+            headers.forEach((h, idx) => {
+                const th = document.createElement("th");
+                const desc = descripcionColumna(h);
+                th.title = desc;
+                th.style.minWidth = anchoColumna(h) + "px";
+
+                const tipo = TIPOS_CAMPO[currentMode][idx];
+
+                // Contenedor flex: etiqueta a la izquierda, botón de ayuda arriba a la derecha
+                const cont = document.createElement("div");
+                cont.className = "th-content";
+
+                const label = document.createElement("span");
+                label.className = "th-label";
+                label.appendChild(document.createTextNode(h));
+                if (tipo === "req") {
+                    const marca = document.createElement("span");
+                    marca.className = "marca-req";
+                    marca.innerText = " *";
+                    label.appendChild(marca);
+                } else if (tipo === "lock") {
+                    label.appendChild(document.createTextNode(" \u{1F512}"));
+                }
+                cont.appendChild(label);
+
+                // Botón de ayuda: abre una tarjeta fija con la explicación del campo
+                const help = document.createElement("span");
+                help.className = "th-help";
+                help.textContent = "?";
+                help.title = "Ver ayuda de este campo";
+                help.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    mostrarHelpCard(h, desc);
+                });
+                cont.appendChild(help);
+
+                th.appendChild(cont);
+                trHead.appendChild(th);
+            });
+
+            thead.appendChild(trHead);
+
+            // Crear 1 fila vacia
+            agregarFilaVaciaInicial(tbody, headers.length + 2);
+
+            validarTabla();
+        }
+
+        function agregarFilaVaciaInicial(tbody, totalCols) {
+            const tr = document.createElement("tr");
+
+            // Checkbox
+            const tdCheck = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            tdCheck.appendChild(checkbox);
+            tdCheck.style.textAlign = "center";
+            tr.appendChild(tdCheck);
+
+            // Numero
+            const tdNum = document.createElement("td");
+            tdNum.innerText = "1";
+            tdNum.style.fontWeight = "bold";
+            tdNum.contentEditable = false;
+            tr.appendChild(tdNum);
+
+            // Datos
+            for (let k = 2; k < totalCols; k++) {
+                const td = document.createElement("td");
+                configurarCelda(td, k - 2, "");
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        }
+
+
+        document.getElementById('csvFile').addEventListener('change', function (e) {
+            if (!e.target.files.length) return;
+
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                crearTablaDesdeArchivo(event.target.result);
+            };
+            reader.readAsText(file);
+
+            // Reset input value to allow re-uploading same file
+            e.target.value = '';
+        });
+
+        function crearTablaDesdeArchivo(texto) {
+            if (!texto || !texto.trim()) return;
+
+            const lineas = texto.trim().split(/\r?\n/);
+            if (lineas.length === 0) return;
+
+            // 1. DETECTAR SEPARADOR
+            // Check first line
+            const linea1 = lineas[0];
+            const pipes = (linea1.match(/\|/g) || []).length;
+            const comas = (linea1.match(/,/g) || []).length;
+            const puntosycoma = (linea1.match(/;/g) || []).length;
+
+            let separador = "|";
+            if (puntosycoma > pipes && puntosycoma > comas) separador = ";";
+            if (comas > pipes && comas > puntosycoma) separador = ",";
+
+            // 2. VALIDACION DE ESTRUCTURA Y CABECERA INTELIGENTE
+            let dataStartIndex = 0;
+            const cols1 = linea1.split(separador);
+            const regexRUC = /^\d{11}$/;
+            const regexPeriodo = /^\d{6}$/;
+
+            // Verificamos Linea 1
+            const esValidoL1 = (cols1.length >= 3) && regexRUC.test(cols1[0]) && regexPeriodo.test(cols1[2]);
+
+            if (!esValidoL1) {
+                // Si Linea 1 falla, verificamos Linea 2 (por si L1 es Header)
+                if (lineas.length > 1) {
+                    const linea2 = lineas[1];
+                    const cols2 = linea2.split(separador);
+                    const esValidoL2 = (cols2.length >= 3) && regexRUC.test(cols2[0]) && regexPeriodo.test(cols2[2]);
+
+                    if (esValidoL2) {
+                        // Linea 1 era Header, empezamos desde Linea 2
+                        dataStartIndex = 1;
+                    } else {
+                        // Ni linea 1 ni linea 2 validas -> Error
+                        alert("Archivo inválido o archivo no cumple con la estructura mínima.\n\nEstructura requerida:\nRUC (11 dígitos) | Denominación (Texto) | Periodo (AAAAMM, 6 dígitos)");
+                        document.getElementById('csvFile').value = '';
+                        return;
+                    }
+                } else {
+                    // Solo hay 1 linea y es invalida -> Error
+                    alert("Archivo inválido o archivo no cumple con la estructura mínima.\n\nEstructura requerida:\nRUC (11 dígitos) | Denominación (Texto) | Periodo (AAAAMM, 6 dígitos)");
+                    document.getElementById('csvFile').value = '';
+                    return;
+                }
+            }
+
+            // 3. NO TOCAR EL HEADER (thead)
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            tbody.innerHTML = "";
+
+            // 4. PROCESAR LINEAS
+            let rucDetectado = "", denominacionDetectada = "", periodoDetectado = "";
+            let rowCounter = 0;
+
+            for (let i = dataStartIndex; i < lineas.length; i++) {
+                const linea = lineas[i];
+                if (!linea.trim()) continue;
+
+                rowCounter++;
+                const tr = document.createElement("tr");
+                const columnas = linea.split(separador);
+
+                // 1. Checkbox Column
+                const tdCheck = document.createElement("td");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                tdCheck.appendChild(checkbox);
+                tdCheck.style.textAlign = "center";
+                tr.appendChild(tdCheck);
+
+                // 2. Columna Numero de Registro
+                const tdRegistro = document.createElement("td");
+                tdRegistro.innerText = rowCounter;
+                tdRegistro.style.fontWeight = "bold";
+                tdRegistro.contentEditable = false;
+                tr.appendChild(tdRegistro);
+
+                // 3. Data Columns
+                // Detectar metadata en la primera fila de DATOS
+                if (i === dataStartIndex) {
+                    if (columnas.length > 0) rucDetectado = columnas[0];
+                    if (columnas.length > 1) denominacionDetectada = columnas[1];
+                    if (columnas.length > 2) periodoDetectado = columnas[2];
+                }
+
+                // Llenar datos
+                const totalHeaders = tabla.querySelectorAll("thead th").length - 2; // -chk -num
+
+                for (let k = 0; k < totalHeaders; k++) {
+                    const td = document.createElement("td");
+                    // La columna CAR SUNAT queda bloqueada y vacia (configurarCelda)
+                    const valorImportado = (k < columnas.length) ? columnas[k] : "";
+                    configurarCelda(td, k, valorImportado);
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            }
+
+            // 5. ACTUALIZAR METADATOS
+            if (rucDetectado) document.getElementById("txtRuc").value = rucDetectado;
+            if (denominacionDetectada) document.getElementById("txtDenom").value = denominacionDetectada;
+
+            if (periodoDetectado && periodoDetectado.length >= 6) {
+                // Formato esperado YYYYMM
+                const anio = periodoDetectado.substring(0, 4);
+                const mes = periodoDetectado.substring(4, 6);
+                document.getElementById("selAnio").value = anio;
+                document.getElementById("selMes").value = mes;
+            }
+
+            validarTabla();
+        }
+
+        function actualizarTodo() {
+            const txtRuc = document.getElementById("txtRuc").value;
+            const txtDenom = document.getElementById("txtDenom").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const periodoFull = anio + mes;
+
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const filas = tbody.rows;
+
+            for (let i = 0; i < filas.length; i++) {
+                const celdas = filas[i].cells;
+                // Indices en TBODY: 0=chk, 1=Num, 2=RUC, 3=Denom, 4=Periodo
+                if (celdas.length > 4) {
+                    celdas[2].innerText = txtRuc;
+                    celdas[3].innerText = txtDenom;
+                    celdas[4].innerText = periodoFull;
+                }
+            }
+
+            validarTabla();
+        }
+
+        function agregarFila() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+
+            // Calculate columns based on header
+            const headerCells = tabla.querySelector("thead tr").cells;
+            const totalColumns = headerCells.length;
+
+            const tr = document.createElement("tr");
+
+            // 1. Checkbox
+            const tdCheck = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            tdCheck.appendChild(checkbox);
+            tdCheck.style.textAlign = "center";
+            tr.appendChild(tdCheck);
+
+            // 2. Número automático
+            const numeroActual = tbody.rows.length + 1;
+            const tdRegistro = document.createElement("td");
+            tdRegistro.innerText = numeroActual;
+            tdRegistro.style.fontWeight = "bold";
+            tdRegistro.contentEditable = false;
+            tr.appendChild(tdRegistro);
+
+            // OBTENER VALORES ACTUALES
+            const currentRuc = document.getElementById("txtRuc").value;
+            const currentDenom = document.getElementById("txtDenom").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const currentPeriodo = anio + mes;
+
+            // 3. Data Columns
+            // Empezamos desde i=2 (que corresponde a la columna de datos 0)
+            for (let i = 2; i < totalColumns; i++) {
+                const td = document.createElement("td");
+
+                // Auto-fill logic based on column index
+                // i=2 -> RUC, i=3 -> Denom, i=4 -> Periodo
+                let valor = "";
+                if (i == 2) valor = currentRuc;
+                else if (i == 3) valor = currentDenom;
+                else if (i == 4) valor = currentPeriodo;
+
+                configurarCelda(td, i - 2, valor);
+                tr.appendChild(td);
+            }
+
+            tbody.appendChild(tr);
+            validarTabla();
+        }
+
+        function eliminarFilas() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const filas = Array.from(tbody.rows);
+
+            filas.forEach(fila => {
+                const checkbox = fila.cells[0].querySelector("input[type='checkbox']");
+                if (checkbox && checkbox.checked) {
+                    tbody.removeChild(fila);
+                }
+            });
+
+            // Reordenar Numeros
+            renumerarFilas();
+            validarTabla();
+        }
+
+        function renumerarFilas() {
+            const tbody = document.querySelector("#tabla tbody");
+            Array.from(tbody.rows).forEach((fila, index) => {
+                fila.cells[1].innerText = index + 1;
+            });
+        }
+
+        // Duplica las filas seleccionadas al final de la tabla
+        function copiarFilas() {
+            const tabla = document.getElementById("tabla");
+            const tbody = tabla.querySelector("tbody");
+            const seleccionadas = Array.from(tbody.rows).filter(f => {
+                const chk = f.cells[0].querySelector("input[type='checkbox']");
+                return chk && chk.checked;
+            });
+
+            if (!seleccionadas.length) {
+                alert("Seleccione al menos una fila para copiar.");
+                return;
+            }
+
+            seleccionadas.forEach(fila => {
+                const valores = [];
+                for (let i = 2; i < fila.cells.length; i++) valores.push(valorCelda(fila.cells[i]));
+
+                const tr = document.createElement("tr");
+
+                const tdCheck = document.createElement("td");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                tdCheck.appendChild(checkbox);
+                tdCheck.style.textAlign = "center";
+                tr.appendChild(tdCheck);
+
+                const tdNum = document.createElement("td");
+                tdNum.style.fontWeight = "bold";
+                tdNum.contentEditable = false;
+                tr.appendChild(tdNum);
+
+                valores.forEach((v, k) => {
+                    const td = document.createElement("td");
+                    configurarCelda(td, k, v);
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+
+                // Desmarcar la fila original
+                fila.cells[0].querySelector("input[type='checkbox']").checked = false;
+            });
+
+            renumerarFilas();
+            validarTabla();
+        }
+
+        // ==================== VALIDACIÓN Y PANEL RESUMEN ====================
+        const REGEX_FECHA_DDMMAAAA = /^\d{2}\/\d{2}\/\d{4}$/;
+        const REGEX_MONTO = /^-?\d+(\.\d{1,2})?$/;
+        const REGEX_TC = /^\d{1,2}\.\d{3}$/;
+
+        const COLUMNAS_MONTO = new Set([
+            "BI Gravado DG", "IGV / IPM DG", "BI Gravado DGNG", "IGV / IPM DGNG", "BI Gravado DNG",
+            "IGV / IPM DNG", "Valor Adq. NG", "ISC", "ICBPER", "Otros Trib/ Cargos", "Total CP",
+            "Valor Facturado Exportación", "BI Gravada", "Dscto BI", "IGV / IPM", "Dscto IGV / IPM",
+            "Mto Exonerado", "Mto Inafecto", "BI Grav IVAP", "IVAP", "Otros Tributos",
+            "Valor FOB Embarcado", "Valor OP Gratuitas", "IMB", "PorcPart"
+        ]);
+
+        function codigosDe(tabla) {
+            return new Set(tabla.map(([c]) => c));
+        }
+
+        // Valida una celda según los parámetros del RVIE/RCE. Devuelve el mensaje
+        // de error o null si es válida.
+        function validarCelda(nombre, valor, tipo, moneda) {
+            const v = (valor || "").trim();
+
+            if (!v) {
+                if (tipo === "req") return "Campo obligatorio: no puede estar vacío.";
+                if ((nombre === "Tipo de Cambio" || nombre === "Tipo Cambio") && moneda && moneda !== "PEN")
+                    return "Tipo de cambio obligatorio cuando la moneda es distinta de PEN.";
+                return null;
+            }
+
+            if (nombre === "RUC") return /^\d{11}$/.test(v) ? null : "El RUC debe tener 11 dígitos numéricos.";
+            if (nombre === "Periodo") {
+                if (!/^\d{6}$/.test(v)) return "El periodo debe tener formato AAAAMM.";
+                const mm = parseInt(v.substring(4), 10);
+                return (mm >= 1 && mm <= 12) ? null : "El mes del periodo debe estar entre 01 y 12.";
+            }
+            if (nombre.startsWith("Fecha")) return REGEX_FECHA_DDMMAAAA.test(v) ? null : "La fecha debe tener formato DD/MM/AAAA.";
+            if (nombre === "Año") return /^\d{4}$/.test(v) ? null : "El año debe tener 4 dígitos.";
+            if (nombre === "Tipo CP/Doc." || nombre === "Tipo CP Modificado") {
+                const t = currentMode === "RVIE" ? TABLA_CP_RVIE : TABLA_CP_RCE;
+                return codigosDe(t).has(v) ? null : "Código de comprobante no válido (Tablas 3/11 del Anexo 1).";
+            }
+            if (nombre === "Tipo Doc Identidad") return codigosDe(TABLA_DOC_IDENTIDAD).has(v) ? null : "Tipo de documento de identidad no válido (Tabla 1 del Anexo 1).";
+            if (nombre === "Moneda") return codigosDe(TABLA_MONEDA).has(v) ? null : "Código de moneda no válido (Tabla 2, ISO 4217). Ej: PEN, USD.";
+            if (nombre === "Tipo Operación") return codigosDe(TABLA_TIPO_OPERACION).has(v) ? null : "Tipo de operación no válido (Catálogo 51). Use 4 dígitos, ej: 0101.";
+            if (nombre === "Tipo de Cambio" || nombre === "Tipo Cambio") return REGEX_TC.test(v) ? null : "Formato del tipo de cambio: #.### (3 decimales). Ej: 3.755";
+            if (COLUMNAS_MONTO.has(nombre)) return REGEX_MONTO.test(v) ? null : "Importe no válido: use números con hasta 2 decimales.";
+
+            return null;
+        }
+
+        // Recorre toda la tabla: marca las celdas con error y actualiza el panel
+        // con el conteo de comprobantes por tipo.
+        function validarTabla() {
+            const tbody = document.querySelector("#tabla tbody");
+            if (!tbody) return;
+            const cols = COLUMNS[currentMode];
+            const tipos = TIPOS_CAMPO[currentMode];
+            const idxTipoCp = cols.indexOf("Tipo CP/Doc.");
+            const idxMoneda = cols.indexOf("Moneda");
+
+            const conteo = { total: 0, facturas: 0, boletas: 0, nc: 0, nd: 0, otros: 0, errores: 0 };
+
+            Array.from(tbody.rows).forEach(fila => {
+                const celdas = fila.cells;
+                const valores = [];
+                for (let i = 2; i < celdas.length; i++) valores.push(valorCelda(celdas[i]).trim());
+
+                // Fila totalmente vacía: no cuenta ni marca errores
+                const vacia = valores.every(v => !v);
+
+                let filaConError = false;
+                for (let i = 2; i < celdas.length; i++) {
+                    const td = celdas[i];
+                    const colIdx = i - 2;
+                    const tipo = tipos[colIdx] || "opt";
+                    td.classList.remove("celda-error");
+                    if (tipo === "lock") continue;
+                    td.title = "";
+                    if (vacia) continue;
+
+                    const moneda = idxMoneda >= 0 ? valores[idxMoneda] : "";
+                    const error = validarCelda(cols[colIdx], valores[colIdx], tipo, moneda);
+                    if (error) {
+                        td.classList.add("celda-error");
+                        td.title = error;
+                        filaConError = true;
+                    }
+                }
+
+                if (vacia) return;
+                conteo.total++;
+                if (filaConError) conteo.errores++;
+
+                const tipoCp = idxTipoCp >= 0 ? valores[idxTipoCp] : "";
+                if (tipoCp === "01") conteo.facturas++;
+                else if (tipoCp === "03") conteo.boletas++;
+                else if (["07", "87", "97"].includes(tipoCp)) conteo.nc++;
+                else if (["08", "88", "98"].includes(tipoCp)) conteo.nd++;
+                else conteo.otros++;
+            });
+
+            renderPanelResumen(conteo);
+        }
+
+        function renderPanelResumen(c) {
+            const panel = document.getElementById("panelResumen");
+            if (!panel) return;
+            panel.innerHTML =
+                `<span class="chip">Comprobantes: <b>${c.total}</b></span>` +
+                `<span class="chip">Facturas (01): <b>${c.facturas}</b></span>` +
+                `<span class="chip">Boletas (03): <b>${c.boletas}</b></span>` +
+                `<span class="chip">Notas de Crédito (07): <b>${c.nc}</b></span>` +
+                `<span class="chip">Notas de Débito (08): <b>${c.nd}</b></span>` +
+                `<span class="chip">Otros: <b>${c.otros}</b></span>` +
+                (c.errores > 0
+                    ? `<span class="chip chip-error" title="Las celdas con error se resaltan en rojo: pase el mouse sobre ellas para ver el detalle.">&#9888; Filas con errores: <b>${c.errores}</b></span>`
+                    : `<span class="chip chip-ok">&#10004; Sin errores</span>`);
+        }
+
+        // Revalidar mientras se edita (con una pequeña espera)
+        let timerValidacion = null;
+        function validarConRetraso() {
+            clearTimeout(timerValidacion);
+            timerValidacion = setTimeout(validarTabla, 400);
+        }
+
+        function exportarArchivo() {
+            const tabla = document.getElementById("tabla");
+            let contenido = "";
+
+            const formato = document.getElementById("selFormato").value; // txt or csv
+            const separador = document.getElementById("selSeparador").value;
+
+            // Solo datos (sin header)
+
+            // Body
+            const filas = tabla.querySelectorAll("tbody tr");
+            filas.forEach(fila => {
+                let datos = [];
+                const celdas = fila.querySelectorAll("td");
+                // Skip index 0 (checkbox) and index 1 (number)
+                for (let i = 2; i < celdas.length; i++) {
+                    datos.push(valorCelda(celdas[i]));
+                }
+                contenido += datos.join(separador) + "\n";
+            });
+
+            // Generar Nombre de Archivo
+            const ruc = document.getElementById("txtRuc").value;
+            const anio = document.getElementById("selAnio").value;
+            const mes = document.getElementById("selMes").value;
+            const periodo = anio + mes;
+
+            let extension = "." + formato;
+            let nombreBase = "exportado";
+
+            if (ruc && periodo) {
+                // Logica de nombre segun modo
+                if (currentMode === "RCE") {
+                    // RCE: codigo de libro 08.04.00
+                    nombreBase = `LE${ruc}${periodo}00080400021112`;
+                } else {
+                    // RVIE (Ventas): codigo de libro 14.04.00
+                    nombreBase = `LE${ruc}${periodo}00140400021112`;
+                }
+            }
+
+            let nombreArchivo = nombreBase + extension;
+
+            // 1. Descargar Archivo Principal (TXT o CSV)
+            let mimeType = "text/plain";
+            if (formato === "csv") mimeType = "text/csv";
+
+            const blob = new Blob([contenido], { type: mimeType });
+            const enlace = document.createElement("a");
+            enlace.href = URL.createObjectURL(blob);
+            enlace.download = nombreArchivo;
+            enlace.click();
+
+            // 2. Descargar ZIP
+            const zip = new JSZip();
+            zip.file(nombreArchivo, contenido);
+
+            zip.generateAsync({ type: "blob" })
+                .then(function (content) {
+                    const enlaceZip = document.createElement("a");
+                    enlaceZip.href = URL.createObjectURL(content);
+                    enlaceZip.download = `${nombreBase}.zip`;
+                    enlaceZip.click();
+                });
+        }
+
+    </script>
+
+    <footer
+        style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; margin:30px -25px -25px; font-family:'Roboto',Arial,sans-serif;">
+        <span>Simulador de prueba | Elaborado por <strong style="color:#fff;">Eduardo Estrategico</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+    <script src="survey.js"></script>
+</body>
+
+</html>

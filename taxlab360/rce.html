@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNAT - Sistema Integrado de Registros Electrónicos</title>
+    <link rel="stylesheet" href="rvie.css">
+    <link rel="stylesheet" href="rce.css">
+    <link rel="stylesheet" href="survey.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="auth.js"></script>
+    <script src="sesion.js"></script>
+</head>
+
+<body>
+
+    <!-- Modal Informativo -->
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Mensaje Informativo</h2>
+                <button class="close-btn" id="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Estimado contribuyente, si al 30.09.2023 estuvo en el RER o Régimen MYPE Tributario y, además, obligado a llevar sus registros en el SLE-PLE o SLE-Portal, debe llevar el RVIE y RCE en el SIRE desde el periodo 10-2023. De lo contrario, debe llevar ambos registros en el SIRE desde 01-2024.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-aceptar" id="accept-modal-btn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Encabezado -->
+        <header class="main-header">
+            <div class="logo-area" style="display:flex; align-items:center; gap:10px;">
+                <a href="tramites.html"><img src="LOGO_SUNAT.png" alt="SUNAT Logo" class="logo"></a>
+                <span style="font-family:'Roboto',sans-serif; font-size:13px; font-weight:700; color:#1E395B; border-left:2px solid #006699; padding-left:10px;">LABORATORIO TRIBUTARIO CERTUS</span>
+            </div>
+            <div class="header-right">
+                <div class="top-links">
+                    <a href="#"><i class="fas fa-envelope"></i> Buzón Electrónico</a>
+                    <a href="#"><i class="fas fa-star"></i> Favoritos <i class="fas fa-caret-down"></i></a>
+                    <a href="#"><i class="fas fa-print"></i> Imprimir</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Barra de Usuario -->
+        <div class="user-bar">
+            <div class="date-display" id="clock">15/02/2026 18:27:00</div>
+            <div class="user-info">
+                <span>Bienvenido, EMPRESA DEMO S.A.C. <i class="fas fa-caret-down"></i></span>
+                <span class="domicilio">Domicilio: Habido</span>
+                <a href="index.html" class="btn-salir">Salir</a>
+            </div>
+        </div>
+
+        <div class="main-body">
+            <!-- Barra Lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <a href="tramites.html" class="home-link"><i class="fas fa-home"></i> Ir al inicio</a>
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="sidebar-title">
+                    <li><a href="#"><i class="fas fa-home"></i> Ir al Inicio</a></li>
+                    <h3 class="sidebar-title">SISTEMA INTEGRADO DE REGISTROS ELECTRONICOS</h3>
+
+                    <li class="has-submenu open">
+                        <a href="#" class="submenu-toggle">
+                            <i class="fas fa-caret-down"></i> Registros Electronicos
+                        </a>
+
+                        <ul class="nested-menu" style="display: block;">
+                            <li class="has-submenu-level2 open">
+                                <a href="#" class="submenu-toggle-level2">
+                                    <i class="fas fa-caret-down"></i> Registro de Ventas e Ingresos Electronico
+                                </a>
+                                <ul class="nested-menu-level2" style="display: block;">
+                                    <li class="has-submenu-level3">
+                                        <ul class="nested-menu-level3" style="display: block;">
+                                            <li><a href="rvie.html">Gestión de Ventas e Ingresos Electrónicos</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="has-submenu-level2 open">
+                                <a href="#" class="submenu-toggle-level2">
+                                    <i class="fas fa-caret-down"></i> Registro de Compras Electronico
+                                </a>
+                                <ul class="nested-menu-level2" style="display: block;">
+                                    <li class="has-submenu-level3 open">
+                                        <ul class="nested-menu-level3" style="display: block;">
+                                            <li><a href="rce.html" class="active-item-rvie">Gestión de Compras <i
+                                                        class="fas fa-chevron-right float-right"></i></a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="has-submenu-level2">
+                                <a href="#" class="submenu-toggle-level2">
+                                    <i class="fas fa-caret-right"></i> Generacion de Registros Electronicos
+                                </a>
+                                <ul class="nested-menu-level2">
+                                    <li class="has-submenu-level3">
+                                        <ul class="nested-menu-level3" style="display: block;">
+                                            <li><a href="#" id="menu-generacion-registros">Generación de Registros Electrónicos</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="has-submenu">
+                        <a href="#" class="submenu-toggle">
+                            <i class="fas fa-caret-right"></i> Modulo de reportes
+                        </a>
+                    </li>
+
+                    <li class="has-submenu">
+                        <a href="#" class="submenu-toggle">
+                            <i class="fas fa-caret-right"></i> Registros Electronicos
+                        </a>
+                    </li>
+                    </li>
+                    </ul>
+
+                    <a href="reemplazo.html" target="_blank" id="btn-abrir-reemplazo"
+                        style="display:flex; align-items:center; justify-content:center; gap:8px; margin:20px 12px 12px; padding:10px 12px; background:#1E395B; color:#fff; border-radius:6px; text-decoration:none; font-size:12px; font-weight:700; text-align:center;">
+                        <i class="fas fa-table"></i> ABRIR APLICATIVO DE REEMPLAZO
+                    </a>
+
+                    <a href="ajustes.html" target="_blank" id="btn-abrir-ajustes"
+                        style="display:flex; align-items:center; justify-content:center; gap:8px; margin:0 12px 12px; padding:10px 12px; background:#1e8e3e; color:#fff; border-radius:6px; text-decoration:none; font-size:12px; font-weight:700; text-align:center;">
+                        <i class="fas fa-table"></i> ABRIR APLICATIVO DE AJUSTES POSTERIORES
+                    </a>
+                    </nav>
+            </aside>
+
+            <!-- Contenido -->
+            <main class="content-area">
+                <div class="page-header">
+                    <h1>Registro de Compras Electrónico</h1>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label>Periodo:</label>
+                        <div class="custom-select-container">
+                            <div class="custom-select" id="periodo-select">
+                                <span>Seleccionar</span>
+                                <i class="fas fa-caret-down"></i>
+                            </div>
+                            <div class="dropdown-options" id="periodo-options">
+                                <div class="option-item">2026</div>
+                                <div class="option-item">2025</div>
+                            </div>
+                        </div>
+
+                        <div class="custom-select-container">
+                            <div class="custom-select" id="mes-select">
+                                <span>Seleccionar</span>
+                                <i class="fas fa-caret-down"></i>
+                            </div>
+                            <div class="dropdown-options" id="mes-options">
+                                <!-- Loaded dynamically via JS -->
+                            </div>
+                        </div>
+                        <button class="btn-aceptar" id="btn-aceptar-periodo"
+                            style="opacity: 0.5; pointer-events: none;">Aceptar</button>
+                    </div>
+                    <div class="contabilidad-label">
+                        Tipo de Contabilidad: Moneda Nacional (PEN)
+                    </div>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="main-tabs">
+                        <button class="tab-btn active" id="main-tab-generacion-rce">Generación de Registro</button>
+                        <button class="tab-btn" id="main-tab-info-gestion-rce">Información de Gestión</button>
+                    </div>
+
+                    <div class="sub-tabs-container">
+                        <div class="sub-tabs">
+                            <button class="sub-tab-btn active" data-target="resumen-cp">Resumen de CP</button>
+                            <button class="sub-tab-btn" data-target="propuesta-rce">Propuesta del RCE</button>
+                            <button class="sub-tab-btn" data-target="preliminar-rce">Preliminar del RCE</button>
+                            <button class="sub-tab-btn" data-target="inconsistencias">Inconsistencias</button>
+                            <button class="sub-tab-btn" data-target="generacion-rce">Generación de Registro</button>
+                            <button class="sub-tab-btn" data-target="ajustes-rce">Ajustes Posteriores</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="main-content-display" style="border-top: none; display: none;">
+
+                        <!-- RESUMEN DE CP -->
+                        <div id="resumen-cp" class="sub-content-view" style="display: block;">
+                            <div class="proposal-tabs">
+                                <button class="proposal-tab active">Resumen Propuesta RCE</button>
+                                <button class="proposal-tab">Resumen CP Excluidos</button>
+                                <button class="proposal-tab">Resumen Preliminar RCE</button>
+                                <button class="proposal-tab">Resumen RCE Generado</button>
+                            </div>
+
+                            <div class="results-container mt-3">
+                                <div class="table-controls-top">
+                                    <div class="show-rows">
+                                        Mostrar:
+                                        <select>
+                                            <option>20</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                    <button class="btn-exportar"><i class="fas fa-download"></i> Exportar <i
+                                            class="fas fa-caret-down"></i></button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="summary-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Tipo de Documento</th>
+                                                <th>Total Documentos</th>
+                                                <th>BI Gravado DG</th>
+                                                <th>IGV/IPM DG</th>
+                                                <th>BI Gravado DGNG</th>
+                                                <th>IGV/IPM DGNG</th>
+                                                <th>BI Gravado DNG</th>
+                                                <th>IGV/IPM DNG</th>
+                                                <th>Valor de las Adquisiciones No Gravadas</th>
+                                                <th>Otros Tributos / Cargos</th>
+                                                <th>Total Importe</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="summary-table-body">
+                                            <tr>
+                                                <td colspan="11" class="text-center">Cargando datos...</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot id="summary-table-foot">
+                                            <tr class="totals-row totals-row-red">
+                                                <td>TOTAL:</td>
+                                                <td>0</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                                <td>0.00</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="dashboard-area mt-4">
+                                    <div class="pagination-info text-center text-muted mb-4" id="summary-pagination-info">Mostrando del 1 al 1 de un
+                                        total 1 registros</div>
+
+                                    <div class="charts-container">
+                                        <div class="chart-box">
+                                            <h4 class="chart-title">CP con Inconsistencias (Cantidad de CP)</h4>
+                                            <div class="pie-chart-wrapper">
+                                                <div class="pie-chart success-chart">
+                                                    <div class="chart-center">
+                                                        <div class="chart-value" id="chart-qty">0</div>
+                                                        <div class="chart-perc">100.0%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="chart-legend">
+                                                <span class="legend-item"><span class="color-box bg-red"></span>
+                                                    Relacionadas al Fiscal</span>
+                                                <span class="legend-item"><span class="color-box bg-orange"></span> No
+                                                    relacionadas al Fiscal</span>
+                                                <span class="legend-item"><span class="color-box bg-green"></span> Sin
+                                                    Inconsistencias</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="chart-box">
+                                            <h4 class="chart-title">CP con Inconsistencias (Monto de CP)</h4>
+                                            <div class="pie-chart-wrapper">
+                                                <div class="pie-chart success-chart">
+                                                    <div class="chart-center">
+                                                        <div class="chart-value" id="chart-amount">0.00</div>
+                                                        <div class="chart-perc">100.0%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="chart-legend">
+                                                <span class="legend-item"><span class="color-box bg-red"></span>
+                                                    Relacionadas al Fiscal</span>
+                                                <span class="legend-item"><span class="color-box bg-orange"></span> No
+                                                    relacionadas al Fiscal</span>
+                                                <span class="legend-item"><span class="color-box bg-green"></span> Sin
+                                                    Inconsistencias</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PROPUESTA DEL RCE -->
+                        <div id="propuesta-rce" class="sub-content-view" style="display: none;">
+                            <div class="proposal-tabs">
+                                <button class="proposal-tab active">Incluidos</button>
+                                <button class="proposal-tab">No Incluidos</button>
+                            </div>
+
+                            <!-- Barra de botones superiores -->
+                            <div class="propuesta-toolbar">
+                                <!-- Botón Filtros (toggle) -->
+                                <button class="btn-toolbar btn-toolbar-dark" id="btn-toggle-filtros" onclick="toggleFiltrosPanel()">
+                                    <i class="fas fa-caret-down" id="filtros-caret"></i> Filtros
+                                </button>
+
+                                <!-- Botón Datos FV621 (toggle) + Tipo Cambio -->
+                                <div class="toolbar-group-right">
+                                    <button class="btn-toolbar btn-toolbar-dark" id="btn-toggle-fv621" onclick="toggleFV621Panel()">
+                                        <i class="fas fa-caret-down" id="fv621-caret"></i> Datos FV621
+                                    </button>
+                                    <button class="btn-toolbar btn-toolbar-teal" id="btn-tipo-cambio" onclick="openTipoCambioModal()">
+                                        Tipo Cambio
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Panel de Filtros (colapsable) -->
+                            <div class="filtros-panel" id="filtros-panel" style="display:none;">
+                                <div class="filtros-grid">
+                                    <div class="filtro-group">
+                                        <label>Monto Total</label>
+                                        <div class="range-inputs-inline">
+                                            <input type="text" placeholder="Desde" class="filtro-input">
+                                            <input type="text" placeholder="Hasta" class="filtro-input">
+                                        </div>
+                                    </div>
+                                    <div class="filtro-group">
+                                        <label>Fecha de emisión</label>
+                                        <div class="range-inputs-inline">
+                                            <div class="input-cal-wrapper">
+                                                <input type="text" placeholder="Desde" class="filtro-input">
+                                                <i class="far fa-calendar-alt cal-icon"></i>
+                                            </div>
+                                            <div class="input-cal-wrapper">
+                                                <input type="text" placeholder="Hasta" class="filtro-input">
+                                                <i class="far fa-calendar-alt cal-icon"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="filtro-group">
+                                        <label>RUC Proveedor</label>
+                                        <input type="text" class="filtro-input filtro-input-full">
+                                    </div>
+                                </div>
+                                <div class="filtros-grid mt-2">
+                                    <div class="filtro-group">
+                                        <label>Tipo de Documento</label>
+                                        <select class="filtro-select">
+                                            <option>Seleccionar</option>
+                                            <option>01 - Factura</option>
+                                            <option>02 - Recibo por Honorarios</option>
+                                            <option>03 - Boleta de Venta</option>
+                                            <option>07 - Nota de Crédito</option>
+                                            <option>08 - Nota de Débito</option>
+                                            <option>50 - DAM - Importación definitiva</option>
+                                        </select>
+                                    </div>
+                                    <div class="filtro-group">
+                                        <label>Comprobante</label>
+                                        <div class="range-inputs-inline">
+                                            <input type="text" placeholder="SERIE" class="filtro-input">
+                                            <input type="text" placeholder="NRO. DE CP" class="filtro-input">
+                                        </div>
+                                    </div>
+                                    <div class="filtro-group">
+                                        <label>CAR SUNAT (0/27)</label>
+                                        <input type="text" placeholder="Nro. de CAR" class="filtro-input filtro-input-full">
+                                    </div>
+                                </div>
+                                <div class="filtros-grid mt-2">
+                                    <div class="filtro-group" style="grid-column: 1 / 2;">
+                                        <label>Inconsistencias</label>
+                                        <select class="filtro-select">
+                                            <option>Seleccionar</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="filtros-actions">
+                                    <button class="btn-filtro-buscar"><i class="fas fa-search"></i> Buscar</button>
+                                    <button class="btn-filtro-limpiar"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                                </div>
+                            </div>
+
+                            <!-- Panel Datos FV621 (colapsable) -->
+                            <div class="fv621-panel" id="fv621-panel" style="display:none;">
+                                <div class="fv621-grid">
+                                    <div class="fv621-field">
+                                        <label>Coeficiente de la prorrata:</label>
+                                        <input type="text" value="0.0000" class="fv621-input" readonly>
+                                    </div>
+                                    <div class="fv621-field">
+                                        <label>Reintegro del Crédito Fiscal:</label>
+                                        <input type="text" value="0.00" class="fv621-input" readonly>
+                                    </div>
+                                    <div class="fv621-field">
+                                        <label>Crédito Fiscal Especial:</label>
+                                        <input type="text" value="0.00" class="fv621-input" readonly>
+                                    </div>
+                                </div>
+                                <div class="fv621-info-msg">
+                                    Estimado contribuyente, si usted ha obtenido ingresos mayores a 1500 UIT en el ejercicio anterior debe informar la clasificación de los bienes y servicios adquiridos.
+                                </div>
+                            </div>
+
+                            <!-- Results Section -->
+                            <div class="results-container">
+                                <div class="table-controls-top">
+                                    <div class="show-rows">
+                                        Mostrar:
+                                        <select>
+                                            <option>20</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                    <button class="btn-exportar"><i class="fas fa-download"></i> Exportar <i
+                                            class="fas fa-caret-down"></i></button>
+                                </div>
+
+                                <!-- Barra de edición (solo perfil MASTER) -->
+                                <div id="rce-master-toolbar" class="action-buttons-row" style="display:none; margin-bottom:8px;">
+                                    <button class="btn-action btn-blue" id="btn-agregar-cp-rce"><i class="fas fa-plus-circle"></i> Agregar fila</button>
+                                    <button class="btn-action btn-blue-light" id="btn-editar-cp-rce"><i class="fas fa-pen"></i> Editar</button>
+                                    <button class="btn-action btn-blue-light" id="btn-eliminar-cp-rce"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                    <button class="btn-action" id="btn-toggle-presentado-rce" style="background:#6a1b9a; color:#fff;"><i class="fas fa-flag"></i> Cambiar Estado</button>
+                                </div>
+
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table">
+                                        <thead>
+                                            <!-- Group Headers -->
+                                            <tr>
+                                                <th colspan="11" class="group-header">Datos del CP</th>
+                                                <th colspan="4" class="group-header">Datos del Proveedor</th>
+                                                <th colspan="13" class="group-header">Montos y Tasas</th>
+                                                <th colspan="3" class="group-header">Totales y Moneda</th>
+                                                <th colspan="5" class="group-header">Referencias</th>
+                                                <th colspan="9" class="group-header">Detalle y Detracción/Retención</th>
+                                                <th colspan="10" class="group-header">Otros</th>
+                                            </tr>
+                                            <!-- Main Columns -->
+                                            <tr>
+                                                <th><input type="checkbox"></th>
+                                                <th>Inc.</th>
+                                                <th>Des. Per.</th>
+                                                <th>Fecha de emisión</th>
+                                                <th>Fecha Vcto/Pago</th>
+                                                <th>Tipo CP/Doc.</th>
+                                                <th>Comprobante</th>
+                                                <th>Serie del CDP</th>
+                                                <th>Año</th>
+                                                <th>Nro CP o Doc. Nro Inicial (Rango)</th>
+                                                <th>Nro Final (Rango)</th>
+
+                                                <!-- Proveedor -->
+                                                <th>Tipo Doc Identidad</th>
+                                                <th>Nro Doc Identidad</th>
+                                                <th>Apellidos Nombres/ Razón Social</th>
+                                                <th>Tipo de Proveedor</th>
+
+                                                <!-- Montos -->
+                                                <th>BI Gravado DG</th>
+                                                <th>IGV / IPM DG</th>
+                                                <th>BI Gravado DGNG</th>
+                                                <th>IGV / IPM DGNG</th>
+                                                <th>BI Gravado DNG</th>
+                                                <th>IGV / IPM DNG</th>
+                                                <th>Valor de las Adquisiciones No Gravadas</th>
+                                                <th>ISC</th>
+                                                <th>ICBPER</th>
+                                                <th>Otros Tributos / Cargos</th>
+                                                <th>Anticipos</th>
+                                                <th>Otros Cargos</th>
+                                                <th>Monto de Redondeo</th>
+
+                                                <!-- Totales/Moneda -->
+                                                <th>Total CP</th>
+                                                <th>Moneda</th>
+                                                <th>Tipo Cambio</th>
+
+                                                <!-- Referencias -->
+                                                <th>Comp.</th>
+                                                <th>Fecha Emisión Doc Modificado</th>
+                                                <th>Tipo CP Modificado</th>
+                                                <th>Serie CP Modificado</th>
+                                                <th>Nro CP Modificado</th>
+
+                                                <!-- Detalle y Detracción/Retención -->
+                                                <th>Detalle de la Operación</th>
+                                                <th>Descripción</th>
+                                                <th>Forma de Pago</th>
+                                                <th>Motivo Nota de Crédito</th>
+                                                <th>Sujeto a Detracción / Retención</th>
+                                                <th>Tipo (Detracción / Retención Renta 4ta)</th>
+                                                <th>% Aplicado</th>
+                                                <th>Monto Detracción/Retención</th>
+                                                <th>N° Constancia Depósito</th>
+
+                                                <!-- Otros -->
+                                                <th>ID Proyecto Operadores Atribución</th>
+                                                <th>Tipo de Nota</th>
+                                                <th>Est. Comp</th>
+                                                <th>Desc. Comp</th>
+                                                <th>Valor FOB Embarcado</th>
+                                                <th>Valor OP Gratuitas</th>
+                                                <th>Tipo Operación</th>
+                                                <th>DAM / CP</th>
+                                                <th>CLU</th>
+                                                <th>CAR SUNAT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="55" class="text-center">Cargando datos...</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="totals-row">
+                                                <td colspan="15" class="total-label-text">TOTALES</td>
+                                                <td id="total-bi-grav-dg">0.00</td>
+                                                <td id="total-igv-dg">0.00</td>
+                                                <td id="total-bi-grav-dgng">0.00</td>
+                                                <td id="total-igv-dgng">0.00</td>
+                                                <td id="total-bi-grav-dng">0.00</td>
+                                                <td id="total-igv-dng">0.00</td>
+                                                <td id="total-val-no-grav">0.00</td>
+                                                <td id="total-isc">0.00</td>
+                                                <td id="total-icbper">0.00</td>
+                                                <td id="total-otros">0.00</td>
+                                                <td id="total-anticipos">0.00</td>
+                                                <td id="total-otros-cargos">0.00</td>
+                                                <td id="total-redondeo">0.00</td>
+                                                <td id="total-total-cp" class="strong">0.00</td>
+                                                <td colspan="26"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="pagination-area">
+                                    <div class="pagination-info" id="detailed-pagination-info">Mostrando del 1 al 1 de un total 1 registros</div>
+                                    <div class="pagination-controls">
+                                        <button disabled><i class="fas fa-arrow-left"></i> Anterior</button>
+                                        <button class="active">1</button>
+                                        <button>Siguiente <i class="fas fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+
+                                <!-- Mensaje informativo -->
+                                <div class="propuesta-info-msg">
+                                    Estimado contribuyente, por defecto todas sus adquisiciones gravadas serán consideradas con destino a operaciones gravadas y/o de exportación; de corresponder, podrá modificar el tipo de destino de su adquisición.
+                                </div>
+
+                                <!-- Botones de acción inferiores (estilo SUNAT) -->
+                                <div class="propuesta-action-bar">
+                                    <button class="btn-pa btn-pa-blue" id="btn-actualizar-propuesta" onclick="this.innerHTML='<i class=\'fas fa-sync fa-spin\'></i> Actualizando...'; setTimeout(()=>{this.innerHTML='<i class=\'fas fa-sync\'></i> Actualizar';},1500)">
+                                        <i class="fas fa-sync"></i> Actualizar
+                                    </button>
+
+                                    <div class="btn-pa-dropdown">
+                                        <button class="btn-pa btn-pa-outline" id="btn-complementar">
+                                            Complementar Propuesta <i class="fas fa-caret-up"></i>
+                                        </button>
+                                        <div class="btn-pa-dropdown-menu" id="menu-complementar">
+                                            <div class="btn-pa-dropdown-item">Agregar CP</div>
+                                            <div class="btn-pa-dropdown-item">Importación de CP</div>
+                                            <div class="btn-pa-dropdown-item">Carga masiva de complemento</div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-pa btn-pa-blue" id="btn-excluidos">
+                                        <i class="fas fa-check"></i> Excluidos
+                                    </button>
+
+                                    <div class="btn-pa-dropdown">
+                                        <button class="btn-pa btn-pa-outline" id="btn-comparar-exportar">
+                                            Comparar Reemplazar Exportar <i class="fas fa-caret-up"></i>
+                                        </button>
+                                        <div class="btn-pa-dropdown-menu" id="menu-comparar">
+                                            <div class="btn-pa-dropdown-item">Comparar documentos</div>
+                                            <div class="btn-pa-dropdown-item" id="item-reemplazar-rce">Reemplazar Propuesta</div>
+                                            <div class="btn-pa-dropdown-item btn-pa-submenu-parent">
+                                                Exportar <i class="fas fa-caret-right" style="float:right; margin-top:2px;"></i>
+                                                <div class="btn-pa-submenu">
+                                                    <div class="btn-pa-dropdown-item rce-exportar-option" data-format="CSV">CSV</div>
+                                                    <div class="btn-pa-dropdown-item rce-exportar-option" data-format="TXT">TXT</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-pa btn-pa-green" id="btn-aceptar-propuesta-rce" onclick="abrirConfirmarPropuesta()">
+                                        <i class="fas fa-check"></i> Aceptar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== PRELIMINAR DEL RCE ===== -->
+                        <div id="preliminar-rce" class="sub-content-view" style="display: none;">
+                            <div class="content-header-blue">
+                                <h2>Preliminar del RCE</h2>
+                            </div>
+
+                            <div class="results-container">
+                                <div class="table-controls-top">
+                                    <div class="show-rows">
+                                        Mostrar:
+                                        <select>
+                                            <option>20</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="11" class="group-header">Datos del CP</th>
+                                                <th colspan="4" class="group-header">Datos del Proveedor</th>
+                                                <th colspan="13" class="group-header">Montos y Tasas</th>
+                                                <th colspan="3" class="group-header">Totales y Moneda</th>
+                                                <th colspan="5" class="group-header">Referencias</th>
+                                                <th colspan="9" class="group-header">Detalle y Detracción/Retención</th>
+                                                <th colspan="10" class="group-header">Otros</th>
+                                            </tr>
+                                            <tr>
+                                                <th><input type="checkbox"></th>
+                                                <th>Inc.</th>
+                                                <th>Des. Per.</th>
+                                                <th>Fecha de emisión</th>
+                                                <th>Fecha Vcto/Pago</th>
+                                                <th>Tipo CP/Doc.</th>
+                                                <th>Comprobante</th>
+                                                <th>Serie del CDP</th>
+                                                <th>Año</th>
+                                                <th>Nro CP o Doc. Nro Inicial (Rango)</th>
+                                                <th>Nro Final (Rango)</th>
+                                                <th>Tipo Doc Identidad</th>
+                                                <th>Nro Doc Identidad</th>
+                                                <th>Apellidos Nombres/ Razón Social</th>
+                                                <th>Tipo de Proveedor</th>
+                                                <th>BI Gravado DG</th>
+                                                <th>IGV / IPM DG</th>
+                                                <th>BI Gravado DGNG</th>
+                                                <th>IGV / IPM DGNG</th>
+                                                <th>BI Gravado DNG</th>
+                                                <th>IGV / IPM DNG</th>
+                                                <th>Valor de las Adquisiciones No Gravadas</th>
+                                                <th>ISC</th>
+                                                <th>ICBPER</th>
+                                                <th>Otros Tributos / Cargos</th>
+                                                <th>Anticipos</th>
+                                                <th>Otros Cargos</th>
+                                                <th>Monto de Redondeo</th>
+                                                <th>Total CP</th>
+                                                <th>Moneda</th>
+                                                <th>Tipo Cambio</th>
+                                                <th>Comp.</th>
+                                                <th>Fecha Emisión Doc Modificado</th>
+                                                <th>Tipo CP Modificado</th>
+                                                <th>Serie CP Modificado</th>
+                                                <th>Nro CP Modificado</th>
+                                                <th>Detalle de la Operación</th>
+                                                <th>Descripción</th>
+                                                <th>Forma de Pago</th>
+                                                <th>Motivo Nota de Crédito</th>
+                                                <th>Sujeto a Detracción / Retención</th>
+                                                <th>Tipo (Detracción / Retención Renta 4ta)</th>
+                                                <th>% Aplicado</th>
+                                                <th>Monto Detracción/Retención</th>
+                                                <th>N° Constancia Depósito</th>
+                                                <th>ID Proyecto Operadores Atribución</th>
+                                                <th>Tipo de Nota</th>
+                                                <th>Est. Comp</th>
+                                                <th>Desc. Comp</th>
+                                                <th>Valor FOB Embarcado</th>
+                                                <th>Valor OP Gratuitas</th>
+                                                <th>Tipo Operación</th>
+                                                <th>DAM / CP</th>
+                                                <th>CLU</th>
+                                                <th>CAR SUNAT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr class="totals-row">
+                                                <td colspan="15" class="total-label-text">TOTALES</td>
+                                                <td id="prelim-total-bi-grav-dg">0.00</td>
+                                                <td id="prelim-total-igv-dg">0.00</td>
+                                                <td id="prelim-total-bi-grav-dgng">0.00</td>
+                                                <td id="prelim-total-igv-dgng">0.00</td>
+                                                <td id="prelim-total-bi-grav-dng">0.00</td>
+                                                <td id="prelim-total-igv-dng">0.00</td>
+                                                <td id="prelim-total-val-no-grav">0.00</td>
+                                                <td id="prelim-total-isc">0.00</td>
+                                                <td id="prelim-total-icbper">0.00</td>
+                                                <td id="prelim-total-otros">0.00</td>
+                                                <td id="prelim-total-anticipos">0.00</td>
+                                                <td id="prelim-total-otros-cargos">0.00</td>
+                                                <td id="prelim-total-redondeo">0.00</td>
+                                                <td id="prelim-total-total-cp" class="strong">0.00</td>
+                                                <td colspan="26"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="pagination-area">
+                                    <div class="pagination-info" id="prelim-pagination-info">Mostrando del 1 al 0 de un total 0 registros</div>
+                                    <div class="pagination-controls">
+                                        <button disabled><i class="fas fa-arrow-left"></i> Anterior</button>
+                                        <button class="active">1</button>
+                                        <button>Siguiente <i class="fas fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="propuesta-action-bar">
+                                    <button class="btn-pa btn-pa-outline" id="btn-prelim-eliminar-rce"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                    <button class="btn-pa btn-pa-green" id="btn-registrar-preliminar-rce"><i class="fas fa-check"></i> Registrar Preliminar</button>
+                                    <button class="btn-pa btn-pa-red" id="btn-eliminar-preliminar-rce"><i class="fas fa-times"></i> Eliminar Preliminar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OTHER SUBTABS (FALLBACK VIEWS) -->
+                        <div id="inconsistencias" class="sub-content-view" style="display: none;">
+                            <div class="p-4 text-center text-muted">Vista de Inconsistencias en desarrollo.</div>
+                        </div>
+                        <div id="generacion-rce" class="sub-content-view" style="display: none;">
+                            <div class="p-4 text-center text-muted">Vista de Generación del RCE en desarrollo.</div>
+                        </div>
+                        <div id="ajustes-rce" class="sub-content-view" style="display: none;">
+                            <!-- Sub-pestañas de Ajustes Posteriores -->
+                            <div class="ap-subtabs">
+                                <button class="ap-subtab-btn active" data-ap-tab="ap-sire">AP SIRE</button>
+                                <button class="ap-subtab-btn" data-ap-tab="ap-per-ant">AP PER. ANT. SIRE</button>
+                            </div>
+
+                            <div class="ap-panel">
+                                <div class="ap-radios">
+                                    <label><input type="radio" name="ap-tipo-rc" value="RC" checked> RC</label>
+                                    <label><input type="radio" name="ap-tipo-rc" value="RCND"> RC No Domiciliados</label>
+                                </div>
+
+                                <!-- Datos Generales del contribuyente (campos 1, 2 y 3 del Anexo 12) -->
+                                <fieldset class="ap-datos-generales">
+                                    <legend>Datos Generales:</legend>
+                                    <div><strong>RUC:</strong> <span id="ap-rce-ruc"></span></div>
+                                    <div><strong>Apellidos y Nombres o Razón Social:</strong> <span id="ap-rce-razon"></span></div>
+                                    <div><strong>Período:</strong> <span id="ap-rce-periodo"></span></div>
+                                </fieldset>
+
+                                <div class="table-controls-top" style="justify-content:flex-end;">
+                                    <div class="show-rows">mostrar:
+                                        <select id="ap-rce-mostrar">
+                                            <option>20</option>
+                                            <option>50</option>
+                                            <option>100</option>
+                                        </select> registros
+                                    </div>
+                                </div>
+
+                                <!-- La cabecera y el detalle se generan desde rce.js con la
+                                     estructura completa del Anexo N.° 12 (campos 4 al 37). -->
+                                <div class="table-responsive results-table-wrapper">
+                                    <table class="results-table ap-table">
+                                        <thead id="ap-rce-thead"></thead>
+                                        <tbody id="ap-rce-tbody"></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="ap-footer">
+                                    <span id="ap-rce-paginacion" class="ap-pag-info">Mostrando del 0 al 0 de un total de 0 registros</span>
+                                    <div class="ap-pag-controls">
+                                        <button class="ap-pag-btn" disabled>&larr; Anterior</button>
+                                        <span class="ap-pag-num">1</span>
+                                        <button class="ap-pag-btn" disabled>Siguiente &rarr;</button>
+                                    </div>
+                                </div>
+
+                                <div class="ap-actions">
+                                    <button class="ap-btn ap-btn-grey" id="ap-rce-eliminar"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rce-mostrar-eventos"><i class="fas fa-sync-alt"></i> Mostrar eventos posteriores de CP</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rce-carga"><i class="fas fa-upload"></i> Carga de Ajustes Posteriores</button>
+                                    <button class="ap-btn ap-btn-green" id="ap-rce-enviar"><i class="fas fa-check"></i> Envió ajustes posteriores</button>
+                                    <button class="ap-btn ap-btn-blue" id="ap-rce-exportar"><i class="fas fa-download"></i> Exportar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- INFORMACIÓN DE GESTIÓN (RCE): Estado de envío de Ticket -->
+                        <div id="info-gestion-view-rce" class="sub-content-view info-gestion-main" style="display: none;">
+                            <div class="info-gestion-subtabs">
+                                <button class="info-gestion-tab active">Consultas y Descargas</button>
+                                <button class="info-gestion-tab">Gestión de Información Estadística</button>
+                                <button class="info-gestion-tab">Reporte de Cumplimiento</button>
+                            </div>
+
+                            <div id="ig-estado-ticket-panel-rce" class="ig-panel" style="display:block;">
+                                <div class="content-header-blue" style="margin-bottom:16px;">
+                                    <h2>Estado de envío de Ticket - RCE</h2>
+                                </div>
+                                <div class="search-form-container" style="padding:12px 16px;">
+                                    <div class="search-title">Buscar por:</div>
+                                    <div class="ig-search-grid">
+                                        <div class="ig-search-field">
+                                            <label>Desde</label>
+                                            <div class="input-icon-wrapper">
+                                                <input type="text" id="ig-rce-desde" class="ig-input">
+                                                <i class="far fa-calendar-alt"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ig-search-field">
+                                            <label>Hasta</label>
+                                            <div class="input-icon-wrapper">
+                                                <input type="text" id="ig-rce-hasta" class="ig-input">
+                                                <i class="far fa-calendar-alt"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ig-search-field">
+                                            <label>Número de Ticket</label>
+                                            <input type="text" id="ig-rce-nro-ticket" class="ig-input" placeholder="Número de Ticket">
+                                        </div>
+                                        <div class="ig-search-actions">
+                                            <button class="btn-search" id="ig-rce-btn-buscar"><i class="fas fa-search"></i> Buscar</button>
+                                            <button class="btn-clear" id="ig-rce-btn-limpiar"><i class="fas fa-sync-alt"></i> Limpiar</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="results-container" style="margin-top:12px;">
+                                    <div class="show-rows" style="padding:8px 0; font-size:13px;">
+                                        Mostrar:
+                                        <select id="ig-rce-show-rows" style="padding:2px 6px;">
+                                            <option>20</option>
+                                            <option>50</option>
+                                        </select>
+                                        registros
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="summary-table ig-ticket-table" style="width:100%;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Número Ticket</th>
+                                                    <th>Fecha y Hora de Envío</th>
+                                                    <th>Nombre Archivo</th>
+                                                    <th>Tipo de Proceso</th>
+                                                    <th>Estado Proceso</th>
+                                                    <th>Detalle Ticket</th>
+                                                    <th>Reportes y descargas</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ig-rce-ticket-tbody">
+                                                <!-- Filas generadas por JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer Equipo Académico CERTUS -->
+    <footer style="background:#222; color:#CCC; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; border-top:1px solid #444; width:100%; box-sizing:border-box; font-family:'Roboto',Arial,sans-serif;">
+        <span style="display:flex; align-items:center; gap:5px;"><i class="fas fa-laptop-code" style="color:#00AEEF;"></i> Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
+        <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
+    </footer>
+
+    <!-- Modal: Carga Individual de complemento (editar tipo de cambio) -->
+    <div id="modal-editar-tc" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:820px; width:92%;">
+            <div class="modal-header">
+                <h2>Carga Individual de complemento</h2>
+                <button class="close-btn" id="close-editar-tc">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="tc-edit-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha de Emisión</th>
+                            <th>Tipo de Moneda</th>
+                            <th>Tipo de cambio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="tc-edit-fecha"></td>
+                            <td id="tc-edit-moneda"></td>
+                            <td><input type="number" id="tc-edit-input" step="0.001" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:30px;">
+                <button class="btn-modal-si" id="btn-grabar-tc" style="background:#4caf50;"><i class="fas fa-check"></i> Grabar</button>
+                <button class="btn-modal-no" id="btn-cancelar-tc" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tipo de Cambio -->
+    <div id="tipo-cambio-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:560px; width:90%;">
+            <div class="modal-header" style="background:#1a5a96; color:#fff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:600; font-size:15px;">Agregar Tipo de Cambio</span>
+                <button onclick="closeTipoCambioModal()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                        <tr style="background:#e8edf2;">
+                            <th style="padding:10px 12px; text-align:center; font-weight:700; border-bottom:1px solid #ccc; text-transform:uppercase; font-size:12px;">FECHA DE EMISIÓN</th>
+                            <th style="padding:10px 12px; text-align:center; font-weight:700; border-bottom:1px solid #ccc; text-transform:uppercase; font-size:12px;">TIPO DE MONEDA</th>
+                            <th style="padding:10px 12px; text-align:center; font-weight:700; border-bottom:1px solid #ccc; text-transform:uppercase; font-size:12px;">TIPO DE CAMBIO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tipo-cambio-tbody">
+                        <tr>
+                            <td colspan="3" style="text-align:center; padding:20px; color:#555;">Ningún registro encontrado</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="padding:10px 14px; border-top:1px solid #ddd;">
+                    <button style="background:#1a5a96; color:#fff; border:none; padding:6px 14px; border-radius:4px; font-size:13px; cursor:pointer;">Acciones</button>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding:10px 14px; display:flex; gap:8px; justify-content:flex-start; border-top:1px solid #ddd; background:#f9f9f9;">
+                <button style="background:#e0e0e0; color:#444; border:none; padding:7px 16px; border-radius:4px; font-size:13px; cursor:not-allowed; opacity:0.6;" disabled>Grabar</button>
+                <button style="background:#e0e0e0; color:#1a5a96; border:none; padding:7px 16px; border-radius:4px; font-size:13px; cursor:pointer;"><i class="fas fa-plus-circle"></i> Descargar</button>
+                <button style="background:#e0e0e0; color:#1a5a96; border:none; padding:7px 16px; border-radius:4px; font-size:13px; cursor:pointer;"><i class="fas fa-plus-circle"></i> Importar</button>
+                <button onclick="closeTipoCambioModal()" style="background:#1a5a96; color:#fff; border:none; padding:7px 18px; border-radius:4px; font-size:13px; font-weight:600; cursor:pointer; margin-left:auto;">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         CADENA DE MODALES ACEPTAR PROPUESTA RCE
+         ========================================================= -->
+
+    <!-- MODAL 1: Info FV621 -->
+    <div id="rce-modal-1" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:480px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente, para aceptar la propuesta debe ingresar la información de los Datos FV621: Coeficiente de la prorrata del crédito fiscal, Reintegro del Crédito Fiscal y Crédito Fiscal Especial, de corresponder</p>
+            </div>
+            <div class="rce-modal-footer">
+                <button class="rce-btn rce-btn-outline" onclick="cerrarTodosModalesRCE()">Regresar</button>
+                <button class="rce-btn rce-btn-primary" onclick="rceModalSiguiente(1, 2)">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ¿Operaciones con No Domiciliados? -->
+    <div id="rce-modal-2" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:480px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente ¿tiene operaciones con sujetos No Domiciliados?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn rce-btn-outline-gray" onclick="rceModalSiguiente(2, 3)">No</button>
+                <button class="rce-btn rce-btn-primary" onclick="rceModalSiguiente(2, 3)">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Confirmación generar Preliminar -->
+    <div id="rce-modal-3" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:520px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado Contribuyente, ¿está seguro que desea generar el Preliminar Registrado del RCE con movimiento y RC Operaciones con No Domiciliados sin movimiento?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn rce-btn-outline-gray" onclick="cerrarTodosModalesRCE()">No</button>
+                <button class="rce-btn rce-btn-primary" onclick="rceModalSiguiente(3, 4)">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Ticket generado -->
+    <div id="rce-modal-4" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:500px;">
+            <div class="rce-modal-header">
+                <span>Mensaje Informativo</span>
+                <button class="rce-modal-close" onclick="cerrarTodosModalesRCE()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>El número de ticket generado es <strong>20260100000005</strong>, por favor verificar que el estado de ticket sea diferente a "En Proceso". Puede consultar el ticket a través de la sub opción Estado de envío de Ticket de la opción Consultas y Descargas de la pestaña Información de Gestión.</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="rceAceptarTicket()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Reemplazo de la Propuesta del RCE -->
+    <div id="rce-modal-reemplazo" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:880px; width:92%;">
+            <div class="rce-modal-header">
+                <span>Reemplazo de la Propuesta del RCE</span>
+                <button class="rce-modal-close" onclick="cerrarModalReemplazoRce()">&times;</button>
+            </div>
+            <div class="rce-modal-body" style="font-size:13px; line-height:1.55;">
+                <p>Señor contribuyente:</p>
+                <p style="margin-top:10px;">Usted va a reemplazar la propuesta de información elaborada por la Administración Tributaria - SUNAT para la generación del Registro de Compras Electrónico.</p>
+                <p style="margin-top:10px;">Mediante la siguiente opción de carga de datos, podrá importar el archivo plano conteniendo la estructura del Registro de Compras Electrónico que haya elaborado de acuerdo a las instrucciones sobre el contenido, señalado en .... (link Guía de carga)</p>
+                <p style="margin-top:10px;">El contenido numérico de cada línea de información referida a importes debe expresarse en Moneda Nacional (Soles) a excepción de los contribuyentes que lleven su contabilidad en moneda extranjera.</p>
+                <p style="margin-top:10px;">Se efectuarán validaciones a la información importada verificando su consistencia, y la existencia de los comprobantes de pago consignados en ella, seguidamente le mostrará examinar archivo y la sub opción importar. Cuando importe el archivo el sistema mostrará la información de su txt en la Opción "Preliminar del RCE".</p>
+                <p style="margin-top:18px;">El archivo de texto (txt) a importar debe estar comprimido en formato zip.</p>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                    <label style="white-space:nowrap; font-weight:600;">Archivo a importar</label>
+                    <input type="text" id="rce-reemplazo-filename" readonly placeholder="Ningún archivo seleccionado" style="flex:1; padding:7px 10px; border:1px solid #ccc; border-radius:3px; background:#f5f5f5; font-size:13px;">
+                    <button class="rce-btn rce-btn-primary" onclick="document.getElementById('rce-reemplazo-file').click()"><i class="fas fa-search"></i> Examinar</button>
+                    <input type="file" id="rce-reemplazo-file" accept=".zip" style="display:none;">
+                </div>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="btn-cargar-archivo-rce" style="background:#4caf50; color:#fff;"><i class="fas fa-check"></i> Cargar archivo</button>
+                <button class="rce-btn" onclick="cerrarModalReemplazoRce()" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket Generado (reemplazo de propuesta) -->
+    <div id="rce-modal-ticket-reemplazo" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:480px;">
+            <div class="rce-modal-header">
+                <span>Ticket Generado</span>
+                <button class="rce-modal-close" onclick="cerrarModalTicketReemplazoRce()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p><strong>Estimado Contribuyente,</strong> nos encontramos procesando su archivo. El número de ticket generado es <strong id="rce-ticket-reemplazo-numero">20260100000015</strong>, para verificar el estado del ticket puede consultarlo a través de la sub opción <strong>Estado de Envío de Ticket RCE</strong> de la opción "Consultas y Descargas" de la pestaña "Información de Gestión".</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModalTicketReemplazoRce()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmación de importación de Ajustes Posteriores -->
+    <div id="rce-modal-ap-confirm" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:460px;">
+            <div class="rce-modal-header">
+                <span>Mensaje de confirmación</span>
+                <button class="rce-modal-close" id="ap-confirm-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>¿Está seguro de importar ajustes posteriores?</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="ap-confirm-no" style="background:#eee; color:#333;">No</button>
+                <button class="rce-btn rce-btn-primary" id="ap-confirm-si">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Carga Ajustes Posteriores (importar zip) -->
+    <div id="rce-modal-ap-carga" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:720px; width:92%;">
+            <div class="rce-modal-header">
+                <span>Carga Ajustes Posteriores</span>
+                <button class="rce-modal-close" id="ap-carga-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>El archivo de texto (txt) a importar debe estar comprimido en formato zip.</p>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+                    <label style="white-space:nowrap; font-weight:600;">Archivo a importar</label>
+                    <input type="text" id="ap-carga-filename" readonly placeholder="Ningún archivo seleccionado" style="flex:1; padding:7px 10px; border:1px solid #ccc; border-radius:3px; background:#f5f5f5; font-size:13px;">
+                    <button class="rce-btn rce-btn-primary" id="ap-carga-examinar"><i class="fas fa-search"></i> Examinar</button>
+                    <input type="file" id="ap-carga-file" accept=".zip" style="display:none;">
+                </div>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:flex-end; gap:10px;">
+                <button class="rce-btn" id="ap-carga-cargar" style="background:#4caf50; color:#fff;"><i class="fas fa-check"></i> Cargar archivo</button>
+                <button class="rce-btn" id="ap-carga-cancelar" style="background:#e53935; color:#fff;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket Generado (Ajustes Posteriores) -->
+    <div id="rce-modal-ap-ticket" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:520px;">
+            <div class="rce-modal-header">
+                <span>Ticket Generado</span>
+                <button class="rce-modal-close" id="ap-ticket-x">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p><strong>Estimado Contribuyente,</strong> nos encontramos procesando su archivo. El número de ticket generado es <strong id="ap-ticket-numero">20260100000007</strong>, para verificar el estado del ticket puede consultarlo a través de la sub opción <strong>Estado de Envío de Ticket RCE</strong> de la opción "Consultas y Descargas" de la pestaña "Información de Gestión".</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" id="ap-ticket-aceptar">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ticket de exportación de propuesta (CSV) -->
+    <div id="rce-modal-exportar-csv" class="rce-modal-overlay" style="display:none;">
+        <div class="rce-modal-box" style="max-width:540px;">
+            <div class="rce-modal-header">
+                <span>Mensaje informativo</span>
+                <button class="rce-modal-close" onclick="cerrarModalExportarCsvRce()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>"Se ha generado un ticket para realizar la exportación. El número de ticket generado es <strong id="rce-export-ticket-number">20260300000001</strong>, para verificar el estado del ticket puede consultarlo a través de la opción <strong>Estado de envío de ticket</strong> de la opción <strong>Consultas y Descargas</strong>"</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModalExportarCsvRce()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA: Generación de Registros (RCE) + Modal 5 de 12 horas -->
+    <div id="rce-generacion-overlay" class="rce-modal-overlay" style="display:none; align-items:flex-start; padding-top:0; background:rgba(0,0,0,0.55);">
+        <!-- Vista de fondo: Generación de Registros -->
+        <div style="position:fixed; inset:0; background:#f0f4f8; z-index:0; pointer-events:none; overflow:hidden;">
+            <div style="background:#1a5a96; color:#fff; padding:14px 24px; font-size:17px; font-weight:700; letter-spacing:.3px;">
+                Generación de Registros
+            </div>
+            <div style="padding:20px 24px; font-size:13px;">
+                <!-- Tabla Registros -->
+                <table style="width:100%; border-collapse:collapse; margin-bottom:24px; font-size:12px;">
+                    <thead>
+                        <tr style="background:#dce6f0; color:#1a5a96; font-weight:700;">
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">REGISTRO</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">PERIODO</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:center;">VALIDACIÓN DEL PRELIMINAR</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background:#fff;">
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Registro de compras</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;" id="rce-gen-periodo-1">2025-01</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0; text-align:center;"><span style="color:#c00; font-size:16px;">&#10060;</span></td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Actualizado</td>
+                        </tr>
+                        <tr style="background:#f7fafd;">
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Registro de Ventas e Ingresos</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;" id="rce-gen-periodo-2">2025-01</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0; text-align:center;"><span style="color:#c00; font-size:16px;">&#10060;</span></td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Actualizado</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Tabla Propuesta de Casillas -->
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="background:#dce6f0; color:#1a5a96; font-weight:700;">
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">PROPUESTA DE CASILLAS</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">PERIODO</th>
+                            <th style="padding:8px 12px; border:1px solid #c8d4e0; text-align:left;">INCLUYE CASILLA FV621</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background:#fff;">
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Casilla FV621</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;" id="rce-gen-periodo-3">2025-01</td>
+                            <td style="padding:8px 12px; border:1px solid #e0e8f0;">Sí</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MODAL 5: Aviso 12 horas (superpuesto sobre la vista) -->
+        <div id="rce-modal-5" class="rce-modal-box" style="max-width:520px; position:relative; z-index:10; margin:100px auto 0; animation: fadeInScale 0.25s ease;">
+            <div class="rce-modal-header">
+                <span>Mensaje</span>
+                <button class="rce-modal-close" onclick="cerrarModalAviso12h()">&times;</button>
+            </div>
+            <div class="rce-modal-body">
+                <p>Estimado contribuyente habiendo transcurrido más de 12 horas desde el Registro de su Preliminar, le recomendamos revisar la opción "Inconsistencias" y verificar si existe alguna actualización. De encontrarse alguna inconsistencia actualizada, le sugerimos eliminar su Preliminar Registrado para volverlo a registrar, considerando que el "Reporte de Inconsistencias" a generarse con su RCE se mostrará actualizados.</p>
+            </div>
+            <div class="rce-modal-footer" style="justify-content:center;">
+                <button class="rce-btn rce-btn-primary" onclick="cerrarModalAviso12h()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="rce.js"></script>
+    <script src="survey.js"></script>
+
+
+</body>
+
+</html>
