@@ -37,6 +37,32 @@ document.addEventListener('DOMContentLoaded', () => {
         // Actualizar textos
         if (loginSubtitle) loginSubtitle.textContent = 'Ingresa los datos de tu Clave SOL';
         if (btnSubmit) btnSubmit.textContent = 'Entrar';
+
+        // Campo del estudiante (su nombre saldrá en los PDF y reportes)
+        const estBox = document.getElementById('estudiante-box');
+        const estField = document.getElementById('estudiante-field');
+        const estSwitch = document.getElementById('estudiante-switch');
+        if (estBox) estBox.style.display = 'block';
+        if (estField) {
+            // Recuperar el nombre ya usado en esta sesión, si existe
+            try {
+                const prev = sessionStorage.getItem('taxlab_estudiante');
+                if (prev && prev !== 'USER') estField.value = prev;
+            } catch (e) {}
+            // Seleccionar "USER" al enfocar para reemplazarlo cómodamente
+            estField.addEventListener('focus', () => { if (estField.value.trim() === 'USER') estField.select(); });
+        }
+        if (estSwitch && estField) {
+            estSwitch.addEventListener('change', () => {
+                if (estSwitch.checked) {
+                    estField.style.display = 'block';
+                    if (!estField.value.trim()) estField.value = 'USER';
+                } else {
+                    estField.style.display = 'none';
+                    estField.value = 'USER';
+                }
+            });
+        }
     }
 
     // Alternar entre Iniciar Sesión y Registrarse (solo si NO es modo Clave SOL)
@@ -200,6 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         : null;
                     const res = await window.Sesion.claveSol(ruc, user, pass, modulo);
                     if (res && res.ok) {
+                        // Guardar el nombre del estudiante para los PDF/reportes
+                        try {
+                            const estF = document.getElementById('estudiante-field');
+                            const estS = document.getElementById('estudiante-switch');
+                            const nombre = (estS && !estS.checked) ? 'USER'
+                                : ((estF && estF.value.trim()) ? estF.value.trim() : 'USER');
+                            sessionStorage.setItem('taxlab_estudiante', nombre);
+                        } catch (e) {}
                         // Cargar el avance guardado de este usuario para esa empresa
                         try { await window.SimStore.hydrate(); } catch (e) {}
                         irADashboard();

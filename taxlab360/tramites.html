@@ -771,7 +771,7 @@
                             <div class="preliminar-issuer-col">
                                 <div class="name-short">EMPRESA DEMO</div>
                                 <div class="name-full">EMPRESA DEMO S.A.C.</div>
-                                <div class="address">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                <div class="address emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                             </div>
                             <div class="preliminar-number-box">
                                 <div class="type-title">BOLETA DE VENTA ELECTRONICA</div>
@@ -925,7 +925,7 @@
                             <div class="preliminar-issuer-col">
                                 <div class="name-short">EMPRESA DEMO</div>
                                 <div class="name-full">EMPRESA DEMO S.A.C.</div>
-                                <div class="address">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                <div class="address emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                             </div>
                             <div class="preliminar-number-box">
                                 <div class="type-title" style="font-size: 14px; font-weight: bold; color: #1E395B;">BOLETA DE VENTA ELECTRÓNICA</div>
@@ -1514,7 +1514,7 @@
                             <div class="preliminar-issuer-col">
                                 <div class="name-short">EMPRESA DEMO</div>
                                 <div class="name-full">EMPRESA DEMO S.A.C.</div>
-                                <div class="address">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                <div class="address emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                             </div>
                             <div class="preliminar-number-box">
                                 <div class="type-title">FACTURA ELECTRONICA</div>
@@ -1747,7 +1747,7 @@
                             <div class="preliminar-issuer-col">
                                 <div class="name-short">EMPRESA DEMO</div>
                                 <div class="name-full">EMPRESA DEMO S.A.C.</div>
-                                <div class="address">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                <div class="address emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                             </div>
                             <div class="preliminar-number-box">
                                 <div class="type-title" style="font-size: 14px; font-weight: bold; color: #1E395B;">FACTURA ELECTRÓNICA</div>
@@ -2317,7 +2317,7 @@
                                 <div style="width: 60%; line-height: 1.4;">
                                     <div style="font-weight: bold; font-size: 13px; color: #000; margin-bottom: 4px;">EMPRESA DEMO</div>
                                     <div style="font-weight: bold; margin-bottom: 4px;">EMPRESA DEMO S.A.C.</div>
-                                    <div>AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                    <div class="emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                                 </div>
                                 <!-- Right Box RUC and Invoice number -->
                                 <div style="width: 35%; border: 2px solid #000000; padding: 10px; text-align: center; line-height: 1.5; align-self: flex-start;">
@@ -3605,7 +3605,7 @@
                             <div class="preliminar-issuer-col" style="width: 60%; line-height: 1.4;">
                                 <div style="font-weight: bold; font-size: 13px; color: #000; margin-bottom: 4px;">EMPRESA DEMO</div>
                                 <div style="font-weight: bold; margin-bottom: 4px;">EMPRESA DEMO S.A.C.</div>
-                                <div>AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                <div class="emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                                 <div style="margin-top: 4px; font-weight: bold;">Fecha de Emisión: <span id="preview-nota-fecha-emision" style="font-weight: normal;">05/07/2026</span></div>
                             </div>
                             <div class="preliminar-number-box" style="width: 35%; border: 2.5px solid #1E395B; padding: 10px; text-align: center; line-height: 1.5; align-self: flex-start; background-color: #FFFFFF;">
@@ -3779,7 +3779,7 @@
                             <div class="preliminar-issuer-col" style="width: 60%; line-height: 1.4;">
                                 <div style="font-weight: bold; font-size: 13px; color: #000; margin-bottom: 4px;">EMPRESA DEMO</div>
                                 <div style="font-weight: bold; margin-bottom: 4px;">EMPRESA DEMO S.A.C.</div>
-                                <div>AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
+                                <div class="emisor-direccion">AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA</div>
                                 <div style="margin-top: 4px; font-weight: bold;">Fecha de Emisión: <span id="final-nota-fecha-emision" style="font-weight: normal;">05/07/2026</span></div>
                             </div>
                             <div class="preliminar-number-box" style="width: 35%; border: 2.5px solid #1E395B; padding: 10px; text-align: center; line-height: 1.5; align-self: flex-start; background-color: #FFFFFF;">
@@ -6348,6 +6348,54 @@
             direccion_legal: ''
         };
 
+        // ===== Datos del EMISOR (empresa activa de la Clave SOL) =====
+        // Se cargan desde Supabase (empresas_simulador): dirección fiscal y serie.
+        window.currentEmisorData = { ruc: '', razon_social: '', nombre_comercial: '', direccion: '', serie_factura: 'F001' };
+
+        async function cargarEmisor() {
+            let ruc = '20123456789', razon = 'EMPRESA DEMO S.A.C.';
+            try {
+                const emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
+                if (emp && emp.ruc) { ruc = emp.ruc; razon = emp.razon_social || razon; }
+                else {
+                    const a = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
+                    if (a.ruc) ruc = a.ruc;
+                    if (a.denominacion) razon = a.denominacion;
+                }
+            } catch (e) {}
+            window.currentEmisorData.ruc = ruc;
+            window.currentEmisorData.razon_social = razon;
+            if (supabaseClient) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('empresas_simulador')
+                        .select('razon_social, nombre_comercial, direccion_fiscal, distrito, provincia, departamento, serie_factura')
+                        .eq('ruc', ruc).maybeSingle();
+                    if (data) {
+                        const partes = [data.direccion_fiscal, data.distrito, data.provincia, data.departamento]
+                            .map(x => (x || '').trim()).filter(Boolean);
+                        if (partes.length) {
+                            const dir = partes[0] + (partes.length > 1 ? ', ' + partes.slice(1).join(' - ') : '');
+                            window.currentEmisorData.direccion = dir.toUpperCase();
+                        }
+                        if (data.nombre_comercial) window.currentEmisorData.nombre_comercial = data.nombre_comercial;
+                        if (data.razon_social) window.currentEmisorData.razon_social = data.razon_social;
+                        if (data.serie_factura) window.currentEmisorData.serie_factura = data.serie_factura;
+                    }
+                } catch (e) { console.warn('No se pudo cargar el emisor:', e); }
+            }
+            pintarEmisorDireccion();
+            return window.currentEmisorData;
+        }
+
+        function pintarEmisorDireccion() {
+            const dir = window.currentEmisorData.direccion;
+            if (!dir) return;
+            document.querySelectorAll('.emisor-direccion').forEach(function (el) { el.textContent = dir; });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () { cargarEmisor(); });
+
         function clearCurrency(input) {
             let val = input.value.replace('S/', '').trim();
             if (parseFloat(val) === 0) {
@@ -6990,12 +7038,13 @@
             const estRadioSi = document.querySelector('input[name="establecimientoEmisor"][value="si"]');
             const dirRadioSi = document.querySelector('input[name="direccionEntrega"][value="si"]');
             
+            const dirEmisor = (window.currentEmisorData && window.currentEmisorData.direccion) || 'AV LOS INCAS S/N';
             if (estRadioSi && estRadioSi.checked) {
-                document.getElementById('step2-establecimiento').value = 'AV LOS INCAS S/N';
+                document.getElementById('step2-establecimiento').value = dirEmisor;
             } else if (dirRadioSi && dirRadioSi.checked) {
-                document.getElementById('step2-establecimiento').value = currentReceptorData.direccion_legal || 'AV LOS INCAS S/N';
+                document.getElementById('step2-establecimiento').value = currentReceptorData.direccion_legal || dirEmisor;
             } else {
-                document.getElementById('step2-establecimiento').value = 'AV LOS INCAS S/N';
+                document.getElementById('step2-establecimiento').value = dirEmisor;
             }
             
             // Populate Currency
