@@ -6374,8 +6374,13 @@
                     if (a.denominacion) razon = a.denominacion;
                 }
             } catch (e) {}
+            // Reset: si la empresa no está en empresas_simulador, no debe quedar
+            // pegada la dirección/serie de una empresa consultada antes.
             window.currentEmisorData.ruc = ruc;
             window.currentEmisorData.razon_social = razon;
+            window.currentEmisorData.nombre_comercial = '';
+            window.currentEmisorData.direccion = '';
+            window.currentEmisorData.serie_factura = 'F001';
             if (supabaseClient) {
                 try {
                     const { data } = await supabaseClient
@@ -7086,18 +7091,21 @@
             document.getElementById('step2-ruc').value = rucVal;
             document.getElementById('step2-razon').value = currentReceptorData.razon_social || document.getElementById('ruc-nombre-display').innerText || 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
             
-            // Determine Establishment Address
-            const estRadioSi = document.querySelector('input[name="establecimientoEmisor"][value="si"]');
-            const dirRadioSi = document.querySelector('input[name="direccionEntrega"][value="si"]');
-            
-            const dirEmisor = (window.currentEmisorData && window.currentEmisorData.direccion) || 'AV LOS INCAS S/N';
-            if (estRadioSi && estRadioSi.checked) {
-                document.getElementById('step2-establecimiento').value = dirEmisor;
-            } else if (dirRadioSi && dirRadioSi.checked) {
-                document.getElementById('step2-establecimiento').value = currentReceptorData.direccion_legal || dirEmisor;
-            } else {
-                document.getElementById('step2-establecimiento').value = dirEmisor;
-            }
+            // Dirección del establecimiento del EMISOR según la empresa activa.
+            // Se recarga el emisor (fresco desde Supabase) por si cambió la empresa.
+            const setEstablecimiento = function () {
+                const dirRadioSi = document.querySelector('input[name="direccionEntrega"][value="si"]');
+                const dirEmisor = (window.currentEmisorData && window.currentEmisorData.direccion) || '(Sin dirección registrada en el sistema)';
+                const campo = document.getElementById('step2-establecimiento');
+                if (!campo) return;
+                if (dirRadioSi && dirRadioSi.checked) {
+                    campo.value = currentReceptorData.direccion_legal || dirEmisor;
+                } else {
+                    campo.value = dirEmisor;
+                }
+            };
+            setEstablecimiento();
+            if (typeof cargarEmisor === 'function') { cargarEmisor().then(setEstablecimiento); }
             
             // Populate Currency
             const monSelect = document.getElementById('moneda-factura');
