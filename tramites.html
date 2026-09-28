@@ -2286,27 +2286,26 @@
                             <span style="color: #3c763d; font-weight: bold; font-size: 13px; font-family: 'Roboto', sans-serif;">¡Simulación Completada!</span>
                             <button class="sunat-modal-close" onclick="closeSimulationSuccessModal()" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: #999;">&times;</button>
                         </div>
-                        <div class="sunat-modal-body" style="padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                            <div style="width: 70px; height: 70px; background-color: #dff0d8; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(92,184,92,0.3);">
-                                <i class="fas fa-check-circle" style="color: #5cb85c; font-size: 48px;"></i>
+                        <div class="sunat-modal-body" style="padding: 26px 22px; display: flex; flex-direction: column; align-items: center; gap: 12px; background: linear-gradient(180deg,#f4fbf4 0%, #ffffff 65%);">
+                            <div style="width: 82px; height: 82px; background: radial-gradient(circle at 32% 30%, #eaffea, #d3f0d3); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 22px rgba(76,174,76,0.38); border: 3px solid #b6e2b6;">
+                                <i class="fas fa-check-circle" style="color: #43a047; font-size: 54px;"></i>
                             </div>
-                            <h2 style="font-size: 16px; font-weight: bold; color: #3c763d; margin: 0; font-family: 'Roboto', sans-serif;">SIMULACIÓN REALIZADA CON EXITO</h2>
-                            <p style="font-size: 11.5px; color: #555555; margin: 0; line-height: 1.5; font-family: 'Roboto', sans-serif;">
-                                Su comprobante de pago electrónico ha sido procesado de manera correcta en el entorno de simulación SUNAT SOL.
+                            <h2 style="font-size: 18px; font-weight: 800; color: #2e7d32; margin: 4px 0 0; letter-spacing: .5px; font-family: 'Roboto', sans-serif;">¡SIMULACIÓN REALIZADA CON ÉXITO!</h2>
+                            <div id="success-comprobante" style="display:none; background:#004B91; color:#fff; padding:6px 18px; border-radius:20px; font-weight:700; font-size:13px; letter-spacing:.6px; box-shadow:0 3px 8px rgba(0,75,145,.3);"></div>
+                            <p style="font-size: 12px; color: #555555; margin: 4px 6px 0; line-height: 1.55; font-family: 'Roboto', sans-serif;">
+                                Tu comprobante de pago electrónico fue procesado correctamente en el entorno de simulación <strong>SUNAT&nbsp;SOL</strong>. &iexcl;Buen trabajo! &#127881;
                             </p>
                         </div>
                         <div class="sunat-modal-footer" style="padding: 15px; border-top: 1px dotted #dff0d8; background-color: #f8fff8; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; display: flex; flex-direction: column; gap: 8px; font-family: 'Roboto', sans-serif;">
                             <button onclick="otraFactura(); return false;" style="padding: 9px 14px; font-size: 12px; background-color: #004B91; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                                 <i class="fas fa-file-invoice"></i> Generar otra factura
                             </button>
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="finishAndGoToStart(); return false;" style="flex: 1; padding: 9px 10px; font-size: 12px; background-color: #5cb85c; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-                                    <i class="fas fa-list"></i> Trámites
-                                </button>
-                                <button onclick="volverASolTaxlab(); return false;" style="flex: 1; padding: 9px 10px; font-size: 12px; background-color: #1E395B; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-                                    <i class="fas fa-home"></i> SOL TAXLAB
-                                </button>
-                            </div>
+                            <button onclick="finishAndGoToStart(); return false;" style="padding: 9px 12px; font-size: 12px; background-color: #5cb85c; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                <i class="fas fa-list"></i> VOLVER A MIS TRÁMITES Y CONSULTAS
+                            </button>
+                            <button onclick="volverASolTaxlab(); return false;" style="padding: 9px 12px; font-size: 12px; background-color: #1E395B; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                <i class="fas fa-home"></i> VOLVER A MENÚ INICIAL
+                            </button>
                             <button onclick="generarReporteFacturas(); return false;" style="padding: 9px 14px; font-size: 12px; background-color: #fff; border: 1px solid #B45309; border-radius: 5px; cursor: pointer; color: #B45309; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                                 <i class="fas fa-file-pdf"></i> Descargar reporte de la simulación (PDF)
                             </button>
@@ -7521,6 +7520,12 @@
 
         // --- SIMULATION SUCCESS MODAL FUNCTIONS ---
         function showSimulationSuccessModal() {
+            const el = document.getElementById('success-comprobante');
+            const num = (window.__ultimaFactura && window.__ultimaFactura.id) || '';
+            if (el) {
+                if (num) { el.textContent = 'Comprobante ' + num; el.style.display = 'inline-block'; }
+                else { el.style.display = 'none'; }
+            }
             document.getElementById('simulation-success-modal').style.display = 'flex';
         }
 
@@ -7637,17 +7642,27 @@
                 doc.text('Comprobantes emitidos: ' + facturas.length, 15, y); y += 11;
                 doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Comprobantes generados', 15, y);
                 doc.line(15, y + 1.5, 195, y + 1.5); y += 8;
-                doc.setFontSize(9.5); doc.setFont('helvetica', 'bold');
-                doc.text('N', 15, y); doc.text('Comprobante', 24, y); doc.text('Receptor', 66, y); doc.text('RUC', 150, y); doc.text('Total', 180, y); y += 5;
+                doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+                var colN = 15, colComp = 22, colRec = 56, colRuc = 140, colTot = 195;
+                var recMaxW = colRuc - colRec - 3;
+                var trunc = function (txt, maxW) {
+                    txt = String(txt == null ? '-' : txt);
+                    if (doc.getTextWidth(txt) <= maxW) return txt;
+                    while (txt.length > 1 && doc.getTextWidth(txt + '...') > maxW) txt = txt.slice(0, -1);
+                    return txt + '...';
+                };
+                doc.text('N', colN, y); doc.text('Comprobante', colComp, y); doc.text('Receptor', colRec, y);
+                doc.text('RUC', colRuc, y); doc.text('Total', colTot, y, { align: 'right' });
+                y += 2; doc.setDrawColor(200, 200, 200); doc.line(15, y, 195, y); y += 4;
                 doc.setFont('helvetica', 'normal');
-                if (!facturas.length) { doc.text('No se emitieron comprobantes en esta simulacion.', 15, y); y += 6; }
+                if (!facturas.length) { doc.text('No se emitieron comprobantes en esta simulacion.', colN, y); y += 6; }
                 facturas.forEach(function (f, i) {
                     if (y > 275) { doc.addPage(); y = 20; }
-                    doc.text(String(i + 1), 15, y);
-                    doc.text(String(f.comprobante || '-'), 24, y);
-                    doc.text(String(f.receptor || '-').substring(0, 44), 66, y);
-                    doc.text(String(f.receptor_ruc || '-'), 150, y);
-                    doc.text(String(f.total || '-'), 180, y);
+                    doc.text(String(i + 1), colN, y);
+                    doc.text(trunc(f.comprobante, colRec - colComp - 3), colComp, y);
+                    doc.text(trunc(f.receptor, recMaxW), colRec, y);
+                    doc.text(String(f.receptor_ruc || '-'), colRuc, y);
+                    doc.text(String(f.total || '-'), colTot, y, { align: 'right' });
                     y += 6;
                 });
                 doc.setFontSize(9); doc.setTextColor(120, 120, 120);
