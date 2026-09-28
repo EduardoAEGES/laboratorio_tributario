@@ -100,23 +100,28 @@
                 </div>
 
                 <div class="forgot-link-simple" id="forgot-box">
-                    <a href="#" onclick="event.preventDefault()">Si olvidaste tu usuario y/o contraseña solicítalos a un docente PTC de contabilidad CERTUS</a>
+                    <a href="#" onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=emamanir@certus.edu.pe&su=' + encodeURIComponent('Recuperación de acceso - Laboratorio Tributario CERTUS') + '&body=' + encodeURIComponent('Hola, olvidé mi usuario y/o contraseña del laboratorio. Mis datos son:'), '_blank'); return false;">Si olvidaste tu usuario y/o contraseña solicítalos a un docente PTC de contabilidad CERTUS</a>
                 </div>
 
                 <button class="btn-entrar-simple" id="btn-submit-form">Entrar</button>
             </div>
         </div>
 
-        <div style="margin-top: 15px; text-align: center;">
-            <a href="index.html" class="btn-back-home">
-                <i class="fas fa-arrow-left"></i> Volver a pantalla inicial
+        <div style="margin-top: 18px; text-align: center;">
+            <a href="index.html" class="btn-back-home" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;padding:7px 20px 7px 7px;border-radius:30px;background:#eef4fb;border:1px solid #cfe0f2;color:#004B91;font-family:'Roboto',sans-serif;font-weight:700;font-size:13px;transition:all .25s ease;box-shadow:0 2px 6px rgba(0,75,145,.10);"
+               onmouseover="this.style.background='#004B91';this.style.color='#fff';this.style.boxShadow='0 8px 18px rgba(0,75,145,.32)';var i=this.querySelector('.bh-ico');i.style.transform='translateX(-3px)';i.style.background='rgba(255,255,255,.22)';"
+               onmouseout="this.style.background='#eef4fb';this.style.color='#004B91';this.style.boxShadow='0 2px 6px rgba(0,75,145,.10)';var i=this.querySelector('.bh-ico');i.style.transform='';i.style.background='#004B91';">
+                <span class="bh-ico" style="width:32px;height:32px;border-radius:50%;background:#004B91;color:#fff;display:inline-flex;align-items:center;justify-content:center;transition:transform .25s ease,background .25s ease;box-shadow:0 2px 6px rgba(0,75,145,.25);">
+                    <i class="fas fa-arrow-left" style="font-size:13px;"></i>
+                </span>
+                Volver a pantalla inicial
             </a>
         </div>
     </main>
 
     <footer class="dashboard-footer-slim">
         <div class="footer-left" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;">
-            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>Eduardo Estrategico</strong></span>
+            <span><i class="fas fa-laptop-code"></i> Simulador de prueba | Elaborado por <strong>el Equipo Académico de Contabilidad CERTUS</strong></span>
             <span style="font-size:11px; color:#A0C4E2;">Para mayor información contactar al <strong>973590390 (WhatsApp)</strong> o correo <strong>edu.mamaniroque@gmail.com</strong></span>
         </div>
         <div class="footer-right">

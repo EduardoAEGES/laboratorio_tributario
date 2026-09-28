@@ -7603,6 +7603,28 @@
             window.location.href = 'sol.html';
         }
 
+        // Toast de confirmación (reemplaza el alert del navegador que parecía error)
+        function mostrarToastExito(titulo, detalle) {
+            let t = document.getElementById('taxlab-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'taxlab-toast';
+                t.style.cssText = 'position:fixed;top:24px;right:24px;z-index:1000000;min-width:290px;max-width:380px;' +
+                    'background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;padding:14px 18px;border-radius:14px;' +
+                    'font-family:Roboto,Arial,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.28);display:flex;align-items:center;' +
+                    'gap:13px;transform:translateX(120%);opacity:0;transition:transform .38s cubic-bezier(.2,.85,.25,1),opacity .38s;';
+                document.body.appendChild(t);
+            }
+            t.innerHTML =
+                '<div style="width:38px;height:38px;flex-shrink:0;background:rgba(255,255,255,.22);border-radius:50%;display:flex;align-items:center;justify-content:center;">' +
+                '<i class="fas fa-check" style="font-size:17px;"></i></div>' +
+                '<div style="line-height:1.35;"><div style="font-weight:800;font-size:14px;letter-spacing:.2px;">' + (titulo || '¡Listo!') + '</div>' +
+                '<div style="font-size:12px;opacity:.93;margin-top:1px;">' + (detalle || '') + '</div></div>';
+            requestAnimationFrame(function () { t.style.transform = 'translateX(0)'; t.style.opacity = '1'; });
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(function () { t.style.transform = 'translateX(120%)'; t.style.opacity = '0'; }, 3800);
+        }
+
         // Imprime la factura usando la serie-número como nombre de archivo sugerido
         // (la ventana de impresión "Guardar como PDF" usa el título del documento).
         function imprimirFactura() {
@@ -7666,7 +7688,7 @@
                     y += 6;
                 });
                 doc.setFontSize(9); doc.setTextColor(120, 120, 120);
-                doc.text('Simulador de prueba | Elaborado por el Equipo de Contabilidad CERTUS', 105, 288, { align: 'center' });
+                doc.text('Simulador de prueba | Elaborado por el Equipo Académico de Contabilidad CERTUS', 105, 288, { align: 'center' });
                 var serie = (facturas[0] && String(facturas[0].comprobante || '').split('-')[0]) || (emisor.serie_factura || 'F001');
                 var slug = String(estudiante).replace(/[^A-Za-z0-9]+/g, '_');
                 doc.save('Reporte_' + serie + '_' + slug + '.pdf');
@@ -8042,7 +8064,8 @@
             }
             
             registrarFacturaEnSesion();
-            alert('Simulación: Factura emitida con éxito.');
+            mostrarToastExito('¡Factura emitida con éxito!',
+                'Comprobante ' + ((window.__ultimaFactura && window.__ultimaFactura.id) || '') + ' generado en la simulación.');
         }
 
         // ========================================================

@@ -391,7 +391,7 @@ window.mostrarModalLogin = function (targetUrl, callback) {
 
                 <!-- Footer con información de contacto -->
                 <div style="background: #F8FAFC; padding: 10px 16px; border-top: 1px solid #E2E8F0; text-align: center; font-size: 11px; color: #475569; flex-shrink: 0; line-height: 1.4;">
-                    <div>Simulador de prueba | <strong>Eduardo Estrategico</strong></div>
+                    <div>Simulador de prueba | <strong>el Equipo Académico de Contabilidad CERTUS</strong></div>
                     <div style="color: #0369A1; font-weight: 500; margin-top: 3px;">
                         Para mayor información contactar al <a href="https://wa.me/51973590390" target="_blank" style="color: #0284C7; text-decoration: none; font-weight: bold;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> 973590390 (WhatsApp)</a> o correo <a href="mailto:edu.mamaniroque@gmail.com" style="color: #0284C7; text-decoration: none; font-weight: bold;"><i class="fas fa-envelope"></i> edu.mamaniroque@gmail.com</a>
                     </div>
