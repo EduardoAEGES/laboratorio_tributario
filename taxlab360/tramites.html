@@ -1057,7 +1057,7 @@
                     </div>
                     
                     <div class="factura-buttons-row">
-                        <button class="btn-factura-action" onclick="window.print();">
+                        <button class="btn-factura-action" onclick="imprimirFactura();">
                             <i class="fas fa-print" style="color: #006699;"></i> Imprimir
                         </button>
                         <button class="btn-factura-action" onclick="showSimulationSuccessModal(); return false;">
@@ -1958,7 +1958,7 @@
                     </div>
                     
                     <div class="factura-buttons-row">
-                        <button class="btn-factura-action" onclick="window.print();">
+                        <button class="btn-factura-action" onclick="imprimirFactura();">
                             <i class="fas fa-print" style="color: #006699;"></i> Imprimir
                         </button>
                         <button class="btn-factura-action" onclick="showSimulationSuccessModal(); return false;">
@@ -2295,9 +2295,20 @@
                                 Su comprobante de pago electrónico ha sido procesado de manera correcta en el entorno de simulación SUNAT SOL.
                             </p>
                         </div>
-                        <div class="sunat-modal-footer" style="padding: 15px; text-align: center; border-top: 1px dotted #dff0d8; background-color: #f8fff8; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; display: block;">
-                            <button onclick="finishAndGoToStart(); return false;" style="padding: 6px 20px; font-size: 11px; background-color: #5cb85c; border: 1px solid #4cae4c; border-radius: 4px; cursor: pointer; color: #fff; font-weight: bold; font-family: 'Roboto', sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: inline-flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-home"></i> Volver al inicio
+                        <div class="sunat-modal-footer" style="padding: 15px; border-top: 1px dotted #dff0d8; background-color: #f8fff8; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; display: flex; flex-direction: column; gap: 8px; font-family: 'Roboto', sans-serif;">
+                            <button onclick="otraFactura(); return false;" style="padding: 9px 14px; font-size: 12px; background-color: #004B91; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fas fa-file-invoice"></i> Generar otra factura
+                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="finishAndGoToStart(); return false;" style="flex: 1; padding: 9px 10px; font-size: 12px; background-color: #5cb85c; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <i class="fas fa-list"></i> Trámites
+                                </button>
+                                <button onclick="volverASolTaxlab(); return false;" style="flex: 1; padding: 9px 10px; font-size: 12px; background-color: #1E395B; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <i class="fas fa-home"></i> SOL TAXLAB
+                                </button>
+                            </div>
+                            <button onclick="generarReporteFacturas(); return false;" style="padding: 9px 14px; font-size: 12px; background-color: #fff; border: 1px solid #B45309; border-radius: 5px; cursor: pointer; color: #B45309; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fas fa-file-pdf"></i> Descargar reporte de la simulación (PDF)
                             </button>
                         </div>
                     </div>
@@ -6394,11 +6405,51 @@
             document.querySelectorAll('.emisor-direccion').forEach(function (el) { el.textContent = dir; });
         }
 
+        // Correlativo persistente e incremental por (emisor + serie). Se guarda en
+        // sessionStorage, así al emitir otra factura continúa el número y se pierde
+        // al cerrar el navegador.
+        function siguienteCorrelativo() {
+            const serie = (window.currentEmisorData && window.currentEmisorData.serie_factura) || 'F001';
+            const emisorRuc = (window.currentEmisorData && window.currentEmisorData.ruc) || 'anon';
+            const key = 'taxlab_correlativo_' + emisorRuc + '_' + serie;
+            let n = parseInt(sessionStorage.getItem(key) || '0', 10);
+            if (!n || n < 0) n = 0;
+            n += 1;
+            try { sessionStorage.setItem(key, String(n)); } catch (e) {}
+            return { serie: serie, numero: String(n).padStart(8, '0') };
+        }
+
+        // Guarda cada factura emitida en la sesión (para el reporte final).
+        function registrarFacturaEnSesion() {
+            try {
+                const g = function (id) { const el = document.getElementById(id); return el ? (el.textContent || '').trim() : ''; };
+                const f = {
+                    comprobante: (window.__ultimaFactura && window.__ultimaFactura.id) || g('final-invoice-number'),
+                    fecha: g('final-fecha'),
+                    receptor_ruc: g('final-ruc'),
+                    receptor: g('final-señor'),
+                    total: g('final-total-importe'),
+                    emisor: (window.currentEmisorData && window.currentEmisorData.razon_social) || '',
+                    emisor_ruc: (window.currentEmisorData && window.currentEmisorData.ruc) || ''
+                };
+                const arr = JSON.parse(sessionStorage.getItem('taxlab_facturas') || '[]');
+                arr.push(f);
+                sessionStorage.setItem('taxlab_facturas', JSON.stringify(arr));
+            } catch (e) {}
+        }
+
         document.addEventListener('DOMContentLoaded', function () { cargarEmisor(); });
 
+        // Formatea un número con separador de miles y 2 decimales: 2904.38 -> "2,904.38"
+        window.fmtMiles = function (n) {
+            var num = (typeof n === 'number') ? n : parseFloat(String(n).replace(/[^\d.-]/g, '')) || 0;
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
         function clearCurrency(input) {
-            let val = input.value.replace('S/', '').trim();
-            if (parseFloat(val) === 0) {
+            // Al enfocar: mostrar el número puro (sin "S/" ni comas) para editar cómodo
+            let val = input.value.replace(/[^\d.]/g, '');
+            if (!val || parseFloat(val) === 0) {
                 input.value = '';
             } else {
                 input.value = val;
@@ -6406,8 +6457,9 @@
         }
 
         function formatCurrency(input) {
-            let val = parseFloat(input.value) || 0;
-            input.value = 'S/ ' + val.toFixed(2);
+            // Al salir: mostrar "S/ 1,230.67" con separador de miles
+            let val = parseFloat(String(input.value).replace(/[^\d.]/g, '')) || 0;
+            input.value = 'S/ ' + window.fmtMiles(val);
         }
 
         // Variables for Boleta de Venta Electrónica
@@ -6595,10 +6647,10 @@
             const cant = parseFloat(document.getElementById('modal-cantidad').value) || 0;
             
             // Parse Valor Unitario & Descuento
-            const valUnitStr = document.getElementById('modal-valor-unitario').value.replace('S/', '').trim();
+            const valUnitStr = document.getElementById('modal-valor-unitario').value.replace(/[^\d.]/g, '');
             const valUnit = parseFloat(valUnitStr) || 0;
             
-            const descStr = document.getElementById('modal-descuento').value.replace('S/', '').trim();
+            const descStr = document.getElementById('modal-descuento').value.replace(/[^\d.]/g, '');
             const desc = parseFloat(descStr) || 0;
             
             // Subtotal
@@ -6614,7 +6666,7 @@
                 igv = subtotal * (igvPercent / 100);
             }
             
-            document.getElementById('modal-igv-display').value = 'S/ ' + igv.toFixed(2);
+            document.getElementById('modal-igv-display').value = 'S/ ' + window.fmtMiles(igv);
 
             // ICBPER (Plastic Bags Tax)
             const bolsasPlast = document.querySelector('input[name="modal-bolsas-plasticas"]:checked').value;
@@ -6639,7 +6691,7 @@
 
             // Total del Item
             const total = subtotal + igv + icbperTotal;
-            document.getElementById('modal-total-item').value = 'S/ ' + total.toFixed(2);
+            document.getElementById('modal-total-item').value = 'S/ ' + window.fmtMiles(total);
         }
 
         function acceptItem() {
@@ -6662,16 +6714,16 @@
             const igvAfect = document.querySelector('input[name="modal-igv-afectacion"]:checked').value;
             
             // Parse Valor Unitario & Descuento
-            const valUnitStr = document.getElementById('modal-valor-unitario').value.replace('S/', '').trim();
+            const valUnitStr = document.getElementById('modal-valor-unitario').value.replace(/[^\d.]/g, '');
             const valUnit = parseFloat(valUnitStr) || 0;
             
-            const descStr = document.getElementById('modal-descuento').value.replace('S/', '').trim();
+            const descStr = document.getElementById('modal-descuento').value.replace(/[^\d.]/g, '');
             const desc = parseFloat(descStr) || 0;
             
-            const igvStr = document.getElementById('modal-igv-display').value.replace('S/', '').trim();
+            const igvStr = document.getElementById('modal-igv-display').value.replace(/[^\d.]/g, '');
             const igv = parseFloat(igvStr) || 0;
             
-            const icbperStr = document.getElementById('modal-impuesto-icbper').value.replace('S/', '').trim();
+            const icbperStr = document.getElementById('modal-impuesto-icbper').value.replace(/[^\d.]/g, '');
             const icbper = parseFloat(icbperStr) || 0;
             
             const subtotal = (cant * valUnit) - desc;
@@ -6814,7 +6866,7 @@
             });
 
             // Format monetary helper
-            const formatVal = (num) => `S/ ${num.toFixed(2)}`;
+            const formatVal = (num) => `S/ ${window.fmtMiles(num)}`;
 
             // Populate the totals table input values
             // Buscar por id: existen varias tablas .factura-totals-table (boleta y factura),
@@ -7516,6 +7568,88 @@
             }
         }
 
+        // --- Opciones al finalizar la simulación ---
+        function otraFactura() {
+            closeSimulationSuccessModal();
+            if (typeof showEmitirFactura === 'function') showEmitirFactura();
+            ['factura-step-2', 'factura-step-3', 'factura-step-4', 'factura-step-5'].forEach(function (id) {
+                var el = document.getElementById(id); if (el) el.style.display = 'none';
+            });
+            var s1 = document.getElementById('factura-step-1'); if (s1) s1.style.display = 'block';
+        }
+
+        function volverASolTaxlab() {
+            window.location.href = 'sol.html';
+        }
+
+        // Imprime la factura usando la serie-número como nombre de archivo sugerido
+        // (la ventana de impresión "Guardar como PDF" usa el título del documento).
+        function imprimirFactura() {
+            var num = (window.__ultimaFactura && window.__ultimaFactura.id)
+                || ((document.getElementById('final-invoice-number') || {}).textContent || '').trim()
+                || 'Factura';
+            var prev = document.title;
+            document.title = String(num).replace(/\s+/g, '');
+            window.print();
+            setTimeout(function () { document.title = prev; }, 800);
+        }
+
+        // Reporte PDF de todas las facturas emitidas en la sesión + nombre del estudiante
+        function generarReporteFacturas() {
+            function build() {
+                if (!window.jspdf) { alert('No se pudo cargar el generador de PDF. Intente de nuevo.'); return; }
+                var jsPDF = window.jspdf.jsPDF;
+                var doc = new jsPDF();
+                var estudiante = 'USER', facturas = [];
+                try { estudiante = sessionStorage.getItem('taxlab_estudiante') || 'USER'; } catch (e) {}
+                try { facturas = JSON.parse(sessionStorage.getItem('taxlab_facturas') || '[]'); } catch (e) {}
+                var emisor = window.currentEmisorData || {};
+                var ahora = new Date();
+                var azul = [30, 57, 91];
+                doc.setFillColor(azul[0], azul[1], azul[2]); doc.rect(0, 0, 210, 26, 'F');
+                doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(15);
+                doc.text('LABORATORIO TRIBUTARIO CERTUS', 105, 11, { align: 'center' });
+                doc.setFontSize(11); doc.text('Reporte de Simulación - Comprobantes de Pago (SEE - SOL)', 105, 19, { align: 'center' });
+                doc.setTextColor(40, 40, 40); var y = 38;
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Datos de la simulación', 15, y);
+                doc.setLineWidth(0.4); doc.line(15, y + 1.5, 195, y + 1.5); y += 9;
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5);
+                doc.text('Estudiante: ' + estudiante, 15, y); y += 6.5;
+                doc.text('Emisor: ' + (emisor.razon_social || '-') + '  (RUC ' + (emisor.ruc || '-') + ')', 15, y); y += 6.5;
+                if (emisor.direccion) { doc.text('Direccion: ' + emisor.direccion, 15, y, { maxWidth: 180 }); y += 6.5; }
+                doc.text('Fecha y hora del reporte: ' + ahora.toLocaleString('es-PE'), 15, y); y += 6.5;
+                doc.text('Comprobantes emitidos: ' + facturas.length, 15, y); y += 11;
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Comprobantes generados', 15, y);
+                doc.line(15, y + 1.5, 195, y + 1.5); y += 8;
+                doc.setFontSize(9.5); doc.setFont('helvetica', 'bold');
+                doc.text('N', 15, y); doc.text('Comprobante', 24, y); doc.text('Receptor', 66, y); doc.text('RUC', 150, y); doc.text('Total', 180, y); y += 5;
+                doc.setFont('helvetica', 'normal');
+                if (!facturas.length) { doc.text('No se emitieron comprobantes en esta simulacion.', 15, y); y += 6; }
+                facturas.forEach(function (f, i) {
+                    if (y > 275) { doc.addPage(); y = 20; }
+                    doc.text(String(i + 1), 15, y);
+                    doc.text(String(f.comprobante || '-'), 24, y);
+                    doc.text(String(f.receptor || '-').substring(0, 44), 66, y);
+                    doc.text(String(f.receptor_ruc || '-'), 150, y);
+                    doc.text(String(f.total || '-'), 180, y);
+                    y += 6;
+                });
+                doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+                doc.text('Simulador de prueba | Elaborado por el Equipo de Contabilidad CERTUS', 105, 288, { align: 'center' });
+                var serie = (facturas[0] && String(facturas[0].comprobante || '').split('-')[0]) || (emisor.serie_factura || 'F001');
+                var slug = String(estudiante).replace(/[^A-Za-z0-9]+/g, '_');
+                doc.save('Reporte_' + serie + '_' + slug + '.pdf');
+            }
+            if (window.jspdf) { build(); }
+            else {
+                var s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                s.onload = build;
+                s.onerror = function () { alert('No se pudo cargar el generador de PDF (sin conexión).'); };
+                document.head.appendChild(s);
+            }
+        }
+
         function addCreditoCuotaRow(fecha = '', monto = '') {
             const tbody = document.getElementById('credito-cuotas-tbody');
             const rowCount = tbody.rows.length;
@@ -7692,7 +7826,7 @@
                 importeTotal += item.total;
             });
             
-            const fmt = (num) => `S/ ${num.toFixed(2)}`;
+            const fmt = (num) => `S/ ${window.fmtMiles(num)}`;
             document.getElementById('preliminar-total-subtotal').textContent = fmt(subtotalVentas);
             document.getElementById('preliminar-total-descuentos').textContent = fmt(descuentos);
             document.getElementById('preliminar-total-valorventa').textContent = fmt(valorVenta);
@@ -7801,10 +7935,10 @@
             document.getElementById('factura-step-4').style.display = 'none';
             document.getElementById('factura-step-5').style.display = 'block';
             
-            // Generate sequential/random invoice number
-            const randomNum = Math.floor(Math.random() * 100000000);
-            const formattedNum = String(randomNum).padStart(8, '0');
-            document.getElementById('final-invoice-number').textContent = `F001-${formattedNum}`;
+            // Correlativo persistente e incremental (continúa al emitir otra factura)
+            const cor = siguienteCorrelativo();
+            window.__ultimaFactura = { id: cor.serie + '-' + cor.numero, serie: cor.serie, numero: cor.numero };
+            document.getElementById('final-invoice-number').textContent = `${cor.serie}-${cor.numero}`;
             
             // Copy text details
             document.getElementById('final-fecha').textContent = document.getElementById('preliminar-fecha').textContent;
@@ -7876,6 +8010,7 @@
                 }
             }
             
+            registrarFacturaEnSesion();
             alert('Simulación: Factura emitida con éxito.');
         }
 
@@ -8383,7 +8518,7 @@
             });
             
             const currencySymbol = monedaSelect.value === 'PEN' ? 'S/' : (monedaSelect.value === 'USD' ? '$' : '€');
-            const formatPreviewVal = (num) => `${currencySymbol} ${num.toFixed(2)}`;
+            const formatPreviewVal = (num) => `${currencySymbol} ${window.fmtMiles(num)}`;
             
             document.getElementById('boleta-preliminar-total-subtotal').innerText = formatPreviewVal(subtotalVentas);
             document.getElementById('boleta-preliminar-total-descuentos').innerText = formatPreviewVal(descuentos);
@@ -8520,7 +8655,7 @@
             });
             
             const currencySymbol = monedaSelect.value === 'PEN' ? 'S/' : (monedaSelect.value === 'USD' ? '$' : '€');
-            const formatFinalVal = (num) => `${currencySymbol} ${num.toFixed(2)}`;
+            const formatFinalVal = (num) => `${currencySymbol} ${window.fmtMiles(num)}`;
             
             document.getElementById('boleta-final-total-subtotal').innerText = formatFinalVal(subtotalVentas);
             document.getElementById('boleta-final-total-descuentos').innerText = formatFinalVal(descuentos);
@@ -8632,7 +8767,7 @@
                 importeTotal += item.total;
             });
 
-            const formatVal = (num) => `S/ ${num.toFixed(2)}`;
+            const formatVal = (num) => `S/ ${window.fmtMiles(num)}`;
 
             const totalsTable = document.getElementById('boleta-totals-table');
             if (totalsTable) {
