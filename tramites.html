@@ -6833,7 +6833,22 @@
                 display.style.color = '#666';
                 return;
             }
-            
+
+            // URL del proxy servidor (Edge Function) que consulta SUNAT + API de respaldo
+            const RUC_LOOKUP_URL = 'https://klmjmlhwuzhymrplemgw.supabase.co/functions/v1/consultar-ruc';
+            // Caché en memoria: evita reconsultar el mismo RUC en la misma sesión
+            window.__rucCache = window.__rucCache || {};
+            if (window.__rucCache[ruc]) {
+                const info = window.__rucCache[ruc];
+                display.innerText = info.razon_social;
+                display.style.backgroundColor = '#E2EDF4';
+                display.style.color = '#1E395B';
+                currentReceptorData.ruc = ruc;
+                currentReceptorData.razon_social = info.razon_social;
+                currentReceptorData.direccion_legal = info.direccion_legal || 'AV. MOCK RECEPTOR S/N';
+                return;
+            }
+
             // Intentar buscar primero en el caché de empresas registradas localmente en esta sesión
             if (localEmpresas[ruc]) {
                 const data = localEmpresas[ruc];
@@ -6871,20 +6886,52 @@
                 }
             }
             
-            // Fallback local si no está en Supabase o no está configurado
+            // RUCs de prueba conocidos (empresas demo): se resuelven al instante
             if (rucs[ruc]) {
                 display.innerText = rucs[ruc];
                 currentReceptorData.ruc = ruc;
                 currentReceptorData.razon_social = rucs[ruc];
                 currentReceptorData.direccion_legal = dirs[ruc] || 'AV. MOCK RECEPTOR S/N';
-            } else {
-                display.innerText = 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
-                currentReceptorData.ruc = ruc;
-                currentReceptorData.razon_social = 'CONTRIBUYENTE ACTIVO - SOCIEDAD DE PRUEBA S.A.C.';
-                currentReceptorData.direccion_legal = 'AV. MOCK RECEPTOR S/N';
+                display.style.backgroundColor = '#E2EDF4';
+                display.style.color = '#1E395B';
+                return;
             }
-            display.style.backgroundColor = '#E2EDF4';
-            display.style.color = '#1E395B';
+
+            // Consulta real a SUNAT (proxy servidor: scraping SUNAT + API de respaldo)
+            display.innerText = 'Consultando SUNAT...';
+            display.style.backgroundColor = '#fff';
+            display.style.color = '#666';
+            try {
+                const resp = await fetch(RUC_LOOKUP_URL + '?ruc=' + ruc);
+                // Si el usuario ya cambió el RUC mientras esperábamos, ignorar esta respuesta
+                if (document.getElementById('ruc-receptor').value.trim() !== ruc) return;
+                if (resp.ok) {
+                    const info = await resp.json();
+                    if (info && info.ok && info.razon_social) {
+                        window.__rucCache[ruc] = info;
+                        display.innerText = info.razon_social;
+                        display.style.backgroundColor = '#E2EDF4';
+                        display.style.color = '#1E395B';
+                        currentReceptorData.ruc = ruc;
+                        currentReceptorData.razon_social = info.razon_social;
+                        currentReceptorData.direccion_legal = info.direccion_legal || 'AV. MOCK RECEPTOR S/N';
+                        return;
+                    }
+                }
+                // No encontrado en SUNAT ni en la API de respaldo
+                display.innerText = 'RUC NO ENCONTRADO EN SUNAT';
+                display.style.backgroundColor = '#FDECEA';
+                display.style.color = '#B71C1C';
+                currentReceptorData.ruc = ruc;
+                currentReceptorData.razon_social = '';
+                currentReceptorData.direccion_legal = '';
+            } catch (e) {
+                console.warn('No se pudo consultar el RUC:', e);
+                if (document.getElementById('ruc-receptor').value.trim() !== ruc) return;
+                display.innerText = 'No se pudo consultar SUNAT (verifique su conexión)';
+                display.style.backgroundColor = '#FDECEA';
+                display.style.color = '#B71C1C';
+            }
         }
 
         function continueInvoice() {
