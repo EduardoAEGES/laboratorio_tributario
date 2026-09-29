@@ -975,6 +975,9 @@ document.addEventListener('DOMContentLoaded', () => {
         '#emp-modal td.ruc{font-variant-numeric:tabular-nums;font-weight:700;color:#004B91;white-space:nowrap;}',
         '#emp-modal td.emp{font-weight:600;}',
         '#emp-modal .emp-foot{padding:8px 20px;font-size:11.5px;color:#64748b;border-top:1px solid #E2E8F0;background:#F8FAFC;}',
+        '#emp-fab-menu{position:fixed;bottom:84px;right:20px;z-index:100000;display:flex;flex-direction:column;gap:8px;font-family:Roboto,Arial,sans-serif;}',
+        '#emp-fab-menu .emp-fab-menu-item{background:#fff;color:#004B91;border:1px solid #cfe0f2;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.20);display:flex;align-items:center;gap:10px;white-space:nowrap;transition:transform .15s ease,background .15s ease,color .15s ease;}',
+        '#emp-fab-menu .emp-fab-menu-item:hover{background:#004B91;color:#fff;transform:translateY(-1px);}',
         '@media(max-width:640px){#emp-fab .emp-fab-text{display:none;}#emp-fab{padding:6px;} #emp-modal table{font-size:11.5px;}}'
     ].join('');
 
@@ -1057,15 +1060,40 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { /* queda el respaldo */ }
     }
 
+    function cerrarMenuFab() {
+        var m = document.getElementById('emp-fab-menu');
+        if (m) m.remove();
+    }
+
+    function abrirEncuestaVentana() {
+        window.open('encuesta.html', 'encuestaCertus',
+            'width=560,height=800,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=yes');
+    }
+
+    function toggleMenuFab(e) {
+        if (e) e.stopPropagation();
+        if (document.getElementById('emp-fab-menu')) { cerrarMenuFab(); return; }
+        inyectarCss();
+        var m = document.createElement('div');
+        m.id = 'emp-fab-menu';
+        m.innerHTML =
+            '<button type="button" class="emp-fab-menu-item" data-act="empresas"><i class="fas fa-building"></i> Ver empresas</button>' +
+            '<button type="button" class="emp-fab-menu-item" data-act="encuesta"><i class="fas fa-clipboard-list"></i> Responder encuesta</button>';
+        document.body.appendChild(m);
+        m.querySelector('[data-act="empresas"]').addEventListener('click', function (ev) { ev.stopPropagation(); cerrarMenuFab(); abrirModal(); });
+        m.querySelector('[data-act="encuesta"]').addEventListener('click', function (ev) { ev.stopPropagation(); cerrarMenuFab(); abrirEncuestaVentana(); });
+        setTimeout(function () { document.addEventListener('click', cerrarMenuFab, { once: true }); }, 0);
+    }
+
     function crearBoton() {
         if (document.getElementById('emp-fab')) return;
         inyectarCss();
         var fab = document.createElement('div');
         fab.id = 'emp-fab';
-        fab.title = 'Ver las empresas del laboratorio';
+        fab.title = 'Empresas del laboratorio y encuesta';
         fab.innerHTML = catVideo('emp-fab-cat') +
-            '<span class="emp-fab-text">Ver empresas<small>RUC y datos</small></span>';
-        fab.addEventListener('click', abrirModal);
+            '<span class="emp-fab-text">Opciones<small>Empresas &middot; Encuesta</small></span>';
+        fab.addEventListener('click', toggleMenuFab);
         document.body.appendChild(fab);
     }
 

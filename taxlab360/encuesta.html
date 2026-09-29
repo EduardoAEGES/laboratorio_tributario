@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta de Satisfacción - CERTUS</title>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="survey.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #004B91 0%, #0072CE 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        /* La encuesta se muestra en su modal (survey.css); dejamos el fondo visible. */
+    </style>
+</head>
+<body>
+    <script src="survey.js"></script>
+    <script>
+        (function () {
+            function abrir() {
+                // El usuario abrió la encuesta a propósito: mostrarla siempre.
+                try {
+                    Object.keys(sessionStorage)
+                        .filter(function (k) { return k.indexOf('survey_') === 0; })
+                        .forEach(function (k) { sessionStorage.removeItem(k); });
+                } catch (e) {}
+                if (typeof window.mostrarEncuestaLaboratorio === 'function') {
+                    window.mostrarEncuestaLaboratorio('', function () { try { window.close(); } catch (e) {} });
+                    // Ir directo al formulario (saltar la invitación)
+                    var acc = document.getElementById('survey-btn-accept');
+                    if (acc) acc.click();
+                } else {
+                    setTimeout(abrir, 120);
+                }
+            }
+            if (document.readyState === 'complete') abrir();
+            else window.addEventListener('load', abrir);
+        })();
+    </script>
+</body>
+</html>

@@ -37,7 +37,7 @@
             return 'SIRE';
         }
         if (path.includes('tramites') || path.includes('comprobantes')) {
-            return 'CDP - SEE SOL';
+            return 'Comprobantes de pago';
         }
         if (path.includes('ajustes')) {
             return 'SIRE';
@@ -93,10 +93,12 @@
                         <select id="survey-module" class="survey-select" required>
                             <option value="SIRE">SIRE</option>
                             <option value="FV 621">FV 621</option>
-                            <option value="T-Registro">T-Registro</option>
-                            <option value="PLAME Web">PLAME Web</option>
-                            <option value="CDP - SEE SOL">CDP - SEE SOL</option>
                             <option value="FV 710">FV 710</option>
+                            <option value="Comprobantes de pago">Comprobantes de pago</option>
+                            <option value="Excel (mañana)">Excel (mañana)</option>
+                            <option value="Excel (noche)">Excel (noche)</option>
+                            <option value="Asientos contables">Asientos contables</option>
+                            <option value="Estados financieros">Estados financieros</option>
                         </select>
                     </div>
 
