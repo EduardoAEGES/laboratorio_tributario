@@ -1,0 +1,156 @@
+CASOS DE PRACTICA - EMITIR FACTURA ELECTRONICA (AL CONTADO)
+SEE - SOL > Factura Electronica > Emitir Factura   |   IGV 18%
+El receptor es el cliente (escribes su RUC y el nombre lo trae solo).
+
+--------------------------------------------------------------------
+CASO 1
+--------------------------------------------------------------------
+Tipo de transaccion .............. AL CONTADO
+Operaciones con detraccion ....... NO
+Factura de exportacion ........... NO
+RUC del receptor ................. 20607502316
+  (CONSTRUCTORA AREQUIPA SUR S.R.L.)
+Establecimiento del emisor ....... SI
+Direccion de entrega ............. NO
+Tipo de moneda ................... SOLES
+
+Item:
+  Codigo ......... LAP-001
+  Descripcion .... LAPTOP CORE I5 16GB RAM 512GB SSD
+  Bien/Servicio .. BIEN
+  Cantidad ....... 3   (UNIDAD)
+  Valor unitario . S/ 2,650.00
+  Descuento ...... S/ 0.00
+  IGV ............ 18% - Gravado
+
+Resultado esperado:
+  Valor de venta ...... S/ 7,950.00
+  IGV (18%) ........... S/ 1,431.00
+  IMPORTE TOTAL ....... S/ 9,381.00
+
+--------------------------------------------------------------------
+CASO 2
+--------------------------------------------------------------------
+Tipo de transaccion .............. AL CONTADO
+Operaciones con detraccion ....... NO
+Factura de exportacion ........... NO
+RUC del receptor ................. 20562707108
+  (CONSORCIO TRANSPORTE AREQUIPA S.A.)
+Establecimiento del emisor ....... SI
+Direccion de entrega ............. SI  (se entrega en almacen del cliente)
+Tipo de moneda ................... SOLES
+
+Informacion adicional:
+  Orden de compra ...... OC-2026-0154
+Documentos relacionados:
+  Tipo ................. GUIA DE REMISION REMITENTE
+  Serie ................ T001
+  Numero ............... 000455
+
+Item:
+  Codigo ......... DSK-1TB
+  Descripcion .... DISCO SOLIDO SSD 1TB NVME
+  Bien/Servicio .. BIEN
+  Cantidad ....... 15   (UNIDAD)
+  Valor unitario . S/ 310.00
+  Descuento ...... S/ 0.00
+  IGV ............ 18% - Gravado
+
+Resultado esperado:
+  Valor de venta ...... S/ 4,650.00
+  IGV (18%) ........... S/ 837.00
+  IMPORTE TOTAL ....... S/ 5,487.00
+
+--------------------------------------------------------------------
+CASO 3
+--------------------------------------------------------------------
+Tipo de transaccion .............. AL CONTADO
+Operaciones con detraccion ....... NO
+Factura de exportacion ........... NO
+RUC del receptor ................. 20606927283
+  (DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.)
+Establecimiento del emisor ....... SI
+Direccion de entrega ............. NO
+Tipo de moneda ................... SOLES
+
+Item:
+  Codigo ......... SRV-INST
+  Descripcion .... SERVICIO DE INSTALACION DE SOFTWARE
+  Bien/Servicio .. SERVICIO
+  Cantidad ....... 1   (SERVICIO)
+  Valor unitario . S/ 250.00
+  Descuento ...... S/ 0.00
+  IGV ............ 18% - Gravado
+
+Resultado esperado:
+  Valor de venta ...... S/ 250.00
+  IGV (18%) ........... S/ 45.00
+  IMPORTE TOTAL ....... S/ 295.00
+
+--------------------------------------------------------------------
+CASO 4
+--------------------------------------------------------------------
+Tipo de transaccion .............. AL CONTADO
+Operaciones con detraccion ....... NO
+Factura de exportacion ........... NO
+RUC del receptor ................. 20613448706
+  (GRUPO EMPRESARIAL LOS ANDES S.A.C.)
+Establecimiento del emisor ....... SI
+Direccion de entrega ............. NO
+Tipo de moneda ................... SOLES
+
+Item:
+  Codigo ......... IMP-MF01
+  Descripcion .... IMPRESORA MULTIFUNCIONAL TINTA CONTINUA
+  Bien/Servicio .. BIEN
+  Cantidad ....... 2   (UNIDAD)
+  Valor unitario . S/ 720.00
+  Descuento ...... S/ 0.00
+  IGV ............ 18% - Gravado
+
+Resultado esperado:
+  Valor de venta ...... S/ 1,440.00
+  IGV (18%) ........... S/ 259.20
+  IMPORTE TOTAL ....... S/ 1,699.20
+
+--------------------------------------------------------------------
+CASO 5
+--------------------------------------------------------------------
+Tipo de transaccion .............. AL CONTADO
+Operaciones con detraccion ....... NO
+Factura de exportacion ........... NO
+RUC del receptor ................. 20517941507
+  (SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL)
+Establecimiento del emisor ....... SI
+Direccion de entrega ............. NO
+Tipo de moneda ................... SOLES
+
+Item 1:
+  Codigo ......... MON-24
+  Descripcion .... MONITOR LED 24 PULGADAS FULL HD
+  Bien/Servicio .. BIEN
+  Cantidad ....... 5   (UNIDAD)
+  Valor unitario . S/ 480.00
+  Descuento ...... S/ 200.00
+  IGV ............ 18% - Gravado
+  (Subtotal item 1: 5 x 480 - 200 = S/ 2,200.00)
+
+Item 2:
+  Codigo ......... KIT-TM
+  Descripcion .... KIT TECLADO Y MOUSE INALAMBRICO
+  Bien/Servicio .. BIEN
+  Cantidad ....... 10   (UNIDAD)
+  Valor unitario . S/ 95.00
+  Descuento ...... S/ 0.00
+  IGV ............ 18% - Gravado
+  (Subtotal item 2: 10 x 95 = S/ 950.00)
+
+Resultado esperado:
+  Valor de venta ...... S/ 3,150.00
+  IGV (18%) ........... S/ 567.00
+  IMPORTE TOTAL ....... S/ 3,717.00
+
+--------------------------------------------------------------------
+Los RUC de receptor son de practica; el sistema trae su razon social
+automaticamente. Puedes usar cualquier RUC real (lo consulta en SUNAT).
+Elaborado por el Equipo Academico de Contabilidad CERTUS.
