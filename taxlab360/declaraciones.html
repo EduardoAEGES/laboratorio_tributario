@@ -4881,8 +4881,8 @@
         function llenarResumenTransacciones(total, pagado) {
             const periodo = document.getElementById('periodo-input').value; // mm-aaaa
             const periodoSUNAT = periodo.length === 7 ? periodo.slice(3) + periodo.slice(0, 2) : periodo;
-            const nombre = document.querySelector('.user-info-right span').textContent
-                .replace('Bienvenido,', '').trim();
+            const nombre = (window.razonSocialPorRuc && window.razonSocialPorRuc(rucDeclarante())) ||
+                document.querySelector('.user-info-right span').textContent.replace('Bienvenido,', '').trim();
             const igv = val('c189'), renta = val('c307');
             const tributo = (igv > 0 && renta > 0) ? 'Varios'
                 : (igv > 0 ? '1011' : (renta > 0 ? tributoRenta()[0] : '-'));
@@ -5446,8 +5446,10 @@
         // RUC de la empresa con la que se trabaja (queda en la sesión al iniciar sesión)
         function rucDeclarante() {
             try {
-                const sesion = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-                return String(sesion.ruc || '').replace(/\D/g, '');
+                // Primero la empresa elegida con la Clave SOL; si no hay, la de la sesión
+                const emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || '{}') || {};
+                const sesion = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}') || {};
+                return String(emp.ruc || sesion.ruc || '').replace(/\D/g, '');
             } catch (e) { return ''; }
         }
 

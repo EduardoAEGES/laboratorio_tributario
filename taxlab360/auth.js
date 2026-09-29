@@ -799,6 +799,16 @@ if (!isLoginPage && !isIndexPage && !isSolPage) {
  * de header de las paginas: #header-razon (dashboard), .company-name/.company-ruc
  * (tramites) y los <span>Bienvenido, ...</span> del resto.
  */
+// Razones sociales que se imponen a lo que venga de la base o de la sesion,
+// para RUC reales que la data del laboratorio tiene con otro nombre.
+window.RAZON_SOCIAL_FORZADA = {
+    '20606966823': 'FABRINSUR GROUP S.R.L.'
+};
+
+window.razonSocialPorRuc = function (ruc) {
+    return window.RAZON_SOCIAL_FORZADA[String(ruc || '').replace(/\D/g, '')] || null;
+};
+
 window.pintarEmpresaEnHeader = function () {
     let nombre = null, ruc = null;
     try {
@@ -814,6 +824,10 @@ window.pintarEmpresaEnHeader = function () {
             if (a) { nombre = a.denominacion || a.usuario || null; ruc = ruc || a.ruc || null; }
         } catch (e) {}
     }
+    if (!ruc) {
+        try { ruc = (JSON.parse(sessionStorage.getItem('sunat_auth') || 'null') || {}).ruc || null; } catch (e) {}
+    }
+    nombre = window.razonSocialPorRuc(ruc) || nombre;
     if (!nombre) return;
 
     // dashboard.html: <strong id="header-razon">
