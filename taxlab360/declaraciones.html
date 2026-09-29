@@ -3074,13 +3074,13 @@
                                 <td id="const-tributo">Varios</td>
                                 <td>-</td>
                                 <td class="ta-r" id="const-monto"></td>
-                                <td class="ta-c"><a href="javascript:void(0);" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Ver detalle</a> &nbsp; <a href="javascript:void(0);" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Ver constancia</a></td>
+                                <td class="ta-c"><a href="javascript:void(0);" onclick="verDetalle621();">Ver detalle</a> &nbsp; <a href="javascript:void(0);" onclick="verConstancia621();">Ver constancia</a></td>
                             </tr>
                             <tr>
                                 <td colspan="5"></td>
                                 <td>Cantidad de formularios</td>
                                 <td class="ta-r">1</td>
-                                <td class="ta-c"><a href="javascript:void(0);" onclick="alert('EN PROCESO DE IMPLEMENTACION');">Ver todas las constancias</a></td>
+                                <td class="ta-c"><a href="javascript:void(0);" onclick="verConstancia621();">Ver todas las constancias</a></td>
                             </tr>
                             <tr>
                                 <td colspan="5"></td>
@@ -3092,8 +3092,9 @@
                     </table>
                 </div>
 
-                <div style="display: flex; justify-content: center; margin: 25px 0;">
-                    <button class="btn-ant" style="padding: 10px 60px;" onclick="salirConstancia621();"><i class="fas fa-chevron-left"></i> Ir al inicio</button>
+                <div style="display: flex; justify-content: center; gap: 15px; margin: 25px 0;">
+                    <button class="btn-ant" style="padding: 10px 40px;" onclick="volverPaso3621();"><i class="fas fa-chevron-left"></i> Volver al Paso 3</button>
+                    <button class="btn-ant" style="padding: 10px 60px;" onclick="salirConstancia621();"><i class="fas fa-home"></i> Ir al inicio</button>
                 </div>
             </div>
 
@@ -4701,6 +4702,11 @@
                 return;
             }
 
+            medioPago621 = !medio ? 'Sin importe a pagar'
+                : ({ banco: 'Cargo en Cuenta Bancaria', detraccion: 'Cargo en Cuenta de Detracciones - Banco de la Nación',
+                     tarjeta: 'Tarjeta de Crédito o Débito', nps: 'NPS - Número de Pago SUNAT' })[medio.value];
+            npsEmitido621 = '';
+
             // Con NPS no se paga en línea: SUNAT emite la constancia con el número de pago.
             if (medio && medio.value === 'nps') {
                 mostrarConstanciaNPS(total);
@@ -4721,6 +4727,9 @@
         // ===== Pasarela de tarjeta / Yape =====
         // Simulación didáctica: nada de lo que se escriba aquí se guarda ni se envía.
         let totalPagoOnline = 0;
+        let medioPago621 = '';     // medio de pago elegido en el Paso 3 (sale en la constancia)
+        let npsEmitido621 = '';    // NPS generado, si se eligió ese medio
+        let operacionPago621 = ''; // número de operación de la pasarela de tarjeta / Yape
 
         function importeSoles(n) {
             return 'S/ ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -4736,7 +4745,8 @@
 
         function abrirPagoTarjeta(total) {
             totalPagoOnline = total;
-            document.getElementById('pt-operacion').textContent = String(Math.floor(Math.random() * 9e9) + 1e9);
+            operacionPago621 = String(Math.floor(Math.random() * 9e9) + 1e9);
+            document.getElementById('pt-operacion').textContent = operacionPago621;
             document.getElementById('pt-importe').textContent = importeSoles(total);
             document.getElementById('btn-pagar-visa').textContent = 'Pagar ' + importeSoles(total);
             document.getElementById('btn-pagar-yape').textContent = 'Yapear ' + importeSoles(total);
@@ -4773,6 +4783,7 @@
         function confirmarPagoYape() {
             cerrarModal('m-pago-yape');
             limpiarCamposPago();
+            medioPago621 = 'Pago con Yape';
             mostrarConstanciaPago(totalPagoOnline);
         }
 
@@ -4819,6 +4830,7 @@
             const nps = '0004' + String(Math.floor(Math.random() * 1e9)).padStart(9, '0');
 
             document.getElementById('const-nps-numero').textContent = nps;
+            npsEmitido621 = nps;
             document.getElementById('const-nps-vence').textContent = fechaDDMMYYYY(vence);
             fechas.forEach((f, i) => {
                 document.getElementById('const-f' + (i + 1)).textContent = f;
@@ -4878,8 +4890,18 @@
             document.getElementById('const-ruc').textContent = rucDeclarante() || '-';
             document.getElementById('const-nombre').textContent = nombre;
             document.getElementById('const-fecha-pres').textContent = fechaDDMMYYYY(new Date());
-            document.getElementById('const-orden').textContent =
-                String(Math.floor(Math.random() * 9e9) + 1e9);
+            const ahora = new Date();
+            presentacion621 = {
+                orden: String(Math.floor(Math.random() * 9e8) + 1e8),
+                fecha: fechaDDMMYYYY(ahora),
+                hora: ahora.toTimeString().slice(0, 8),
+                periodo: periodoSUNAT,
+                ruc: rucDeclarante() || '-',
+                nombre: nombre,
+                total: total,
+                pagado: pagado
+            };
+            document.getElementById('const-orden').textContent = presentacion621.orden;
             document.getElementById('const-periodo').textContent = periodoSUNAT;
             document.getElementById('const-tributo').textContent = tributo;
             document.getElementById('const-monto').textContent = soles(total);
@@ -4894,12 +4916,316 @@
             document.getElementById('ctab-resumen').classList.toggle('active', !esNPS);
         }
 
+        // Regresa del Paso 4 a la pasarela (Paso 3) sin perder lo declarado
+        function volverPaso3621() {
+            document.getElementById('view-constancia-621').style.display = 'none';
+            const medio = document.querySelector('input[name="pay-method-621"]:checked');
+            if (medio) medio.checked = false;
+            document.querySelector('.badge-count').textContent = '1';
+            mostrarPasarela621();
+        }
+
         function salirConstancia621() {
             document.getElementById('view-constancia-621').style.display = 'none';
             document.querySelector('.paso-bar').style.display = '';
             const medio = document.querySelector('input[name="pay-method-621"]:checked');
             if (medio) medio.checked = false;
             volverDeclaracion621();
+        }
+
+        // ===== Reportes del Paso 4: "Ver detalle" y "Ver constancia" =====
+        // Réplica de los PDF de SUNAT (DECLARACIÓN PAGO 0621 y Constancia Formulario - 0621),
+        // llenados con lo que el alumno declaró. Se abren en otra ventana y se descargan en PDF.
+        let presentacion621 = null;   // datos de la última presentación (se llenan al pagar)
+
+        const URL_HTML2PDF = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+
+        function escHTML(t) {
+            return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+        }
+
+        // Casillas que son coeficientes o porcentajes: se muestran tal como están en el formulario
+        const CASILLAS_TASA = [380, 315, 894, 173];
+
+        // Importe de una casilla con dos decimales ("" si la casilla no existe o está vacía)
+        function importeCasilla(n) {
+            const el = document.getElementById('c' + n);
+            const v = el ? String(el.value).trim() : '';
+            if (v === '') return '';
+            if (CASILLAS_TASA.includes(n)) return v;
+            const num = parseFloat(v.replace(/,/g, ''));
+            return isNaN(num) ? v : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function textoTipoDeclaracion() {
+            const sel = document.getElementById('tipo-declaracion');
+            return sel && sel.selectedIndex > 0 ? sel.options[sel.selectedIndex].text : 'Original';
+        }
+
+        function solesConstancia(n) {
+            return 'S/. ' + Math.round(n).toLocaleString('en-US');
+        }
+
+        function abrirHojaReporte(titulo, archivo, hojas) {
+            if (!presentacion621) {
+                alert('Primero presente la declaración en el Paso 3 (botón Presentar/Pagar) para generar este documento.');
+                return;
+            }
+            const w = window.open('', '_blank');
+            if (!w) {
+                alert('Su navegador bloqueó la ventana del documento. Permita las ventanas emergentes para este sitio y vuelva a hacer clic.');
+                return;
+            }
+            w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">' +
+                '<title>' + escHTML(titulo) + ' - ' + presentacion621.orden + '</title>' +
+                '<style>' + ESTILO_HOJA_621 + '</style></head><body>' +
+                '<div class="barra no-print"><span>' + escHTML(titulo) + '</span><div>' +
+                '<button onclick="descargarPDF()">Descargar PDF</button>' +
+                '<button onclick="window.print()">Imprimir</button></div></div>' +
+                '<div id="doc">' + hojas.map((h, i) => '<div class="hoja' + (i ? ' salto' : '') + '">' + h + '</div>').join('') + '</div>' +
+                '<script>' +
+                // html2pdf se carga recién al pedir la descarga, así el documento se ve al instante
+                'function generarPDF() {' +
+                '  document.body.classList.add("exportando");' +
+                '  html2pdf().set({ margin: 0, filename: ' + JSON.stringify(archivo) + ',' +
+                '    image: { type: "jpeg", quality: 0.98 }, html2canvas: { scale: 2 },' +
+                '    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },' +
+                '    pagebreak: { mode: "css", before: ".salto" } })' +
+                '  .from(document.getElementById("doc")).save()' +
+                '  .then(function () { document.body.classList.remove("exportando"); });' +
+                '}' +
+                'function descargarPDF() {' +
+                '  if (window.html2pdf) { generarPDF(); return; }' +
+                '  var s = document.createElement("script");' +
+                '  s.src = ' + JSON.stringify(URL_HTML2PDF) + ';' +
+                '  s.onload = generarPDF;' +
+                '  s.onerror = function () { alert("No se pudo cargar el generador de PDF (revise su conexión a internet). Mientras tanto, use Imprimir y elija Guardar como PDF."); };' +
+                '  document.head.appendChild(s);' +
+                '}<\/script></body></html>');
+            w.document.close();
+        }
+
+        const ESTILO_HOJA_621 = `
+            * { box-sizing: border-box; }
+            body { margin: 0; background: #525659; font-family: Arial, Helvetica, sans-serif; color: #000; }
+            .barra { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center;
+                     background: #323639; color: #FFF; padding: 10px 20px; font-size: 14px; }
+            .barra button { background: #1B6CB0; color: #FFF; border: none; padding: 8px 16px; margin-left: 8px;
+                            border-radius: 3px; cursor: pointer; font-size: 13px; }
+            .hoja { width: 210mm; height: 296mm; overflow: hidden; margin: 20px auto; background: #FFF;
+                    padding: 12mm 10mm; box-shadow: 0 0 8px rgba(0,0,0,.4); font-size: 7.5pt; }
+            body.exportando .hoja { margin: 0; box-shadow: none; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            td { border: 1px solid #000; overflow-wrap: break-word; padding: 1.5px 4px; height: 14px; }
+            .c { text-align: center; } .r { text-align: right; }
+            .sin { border: none; }
+            .num { text-align: center; width: 7%; }
+            .val { text-align: center; width: 12%; }
+
+            /* Cabecera de la DECLARACIÓN PAGO */
+            .cab td { font-size: 7.5pt; }
+            .cab .sunat { text-align: center; width: 18%; font-size: 8pt; }
+            .cab .sunat b { display: block; font-size: 15pt; }
+            .cab .sunat .form { display: block; font-size: 11pt; font-weight: bold; margin-top: 10px; }
+            .cab .copia { text-align: center; width: 13%; font-size: 6.5pt; }
+            .cab .tit { text-align: center; font-weight: bold; font-size: 8pt; height: 22px; }
+            .seccion { font-weight: bold; font-size: 7.5pt; margin: 20px 0 2px 0; }
+            .bloque { display: flex; align-items: flex-end; }
+            .bloque .seccion { flex: 1; }
+            .grupo { position: relative; font-size: 6pt; font-weight: bold; padding: 0; }
+            .grupo span { position: absolute; left: 50%; top: 50%; white-space: nowrap;
+                          transform: translate(-50%, -50%) rotate(-90deg); }
+
+            /* Constancia Formulario */
+            .ctit { display: flex; justify-content: space-between; font-size: 10pt; margin: 4px 0 16px 0; }
+            .ctit span:first-child { flex: 1; text-align: center; padding-left: 120px; }
+            .ctit small { font-size: 8pt; }
+            fieldset { border: 1px solid #000; margin: 0 0 18px 0; padding: 14px 18px; font-size: 9.5pt; line-height: 2; }
+            legend { padding: 0 8px; font-size: 9.5pt; }
+            .caja { border: 1px solid #000; padding: 16px 18px; font-size: 9.5pt; margin-bottom: 18px; min-height: 180px; }
+            .ctab { width: 94%; margin: 0 auto; font-size: 9.5pt; }
+            .ctab td { border: 1px solid #000; padding: 1px 4px; height: auto; }
+            .ctab .th td { background: #4BACC6; color: #FFF; }
+            .ficticio { position: absolute; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 6.5pt; color: #999; }
+            .hoja { position: relative; }
+            @media print {
+                @page { size: A4; margin: 0; }
+                body { background: #FFF; }
+                .no-print { display: none; }
+                .hoja { margin: 0; box-shadow: none; page-break-after: always; }
+                .ctab .th td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }`;
+
+        const AVISO_FICTICIO = '<div class="ficticio">Documento generado por el simulador TAXLAB 360 con fines educativos. No tiene validez ante SUNAT.</div>';
+
+        function cabeceraDeclaracionPago(pagina) {
+            const p = presentacion621;
+            return '<table class="cab">' +
+                '<tr><td class="sunat" rowspan="5"><b>SUNAT</b>DECLARACIÓN PAGO<span class="form">0621</span></td>' +
+                '<td class="tit" colspan="4">PDT IGV - RENTA MENSUAL</td>' +
+                '<td class="copia" rowspan="5">Copia para el contribuyente<br>(Pag. ' + pagina + ')</td></tr>' +
+                '<tr><td style="width:14%">RUC</td><td colspan="3">' + escHTML(p.ruc) + '</td></tr>' +
+                '<tr><td>Razón Social</td><td>' + escHTML(p.nombre) + '</td><td class="c" style="width:14%">Período</td><td class="c" style="width:12%">' + p.periodo + '</td></tr>' +
+                '<tr><td>Número de Orden</td><td>' + p.orden + '</td><td class="c">Fecha de Presentación</td><td class="c">' + p.fecha + '</td></tr>' +
+                '<tr><td>Tipo de Declaración</td><td>' + escHTML(textoTipoDeclaracion()) + '</td><td class="c">Tipo de Moneda</td><td class="c">Soles</td></tr>' +
+                '</table>';
+        }
+
+        // Par "casilla | importe"; null deja el espacio en blanco
+        function parCasilla(n) {
+            return n === null ? '<td class="sin" colspan="2"></td>'
+                : '<td class="num">' + n + '</td><td class="val">' + importeCasilla(n) + '</td>';
+        }
+
+        function encabezadoBloque(titulo, subtitulo) {
+            return '<div class="bloque"><div class="seccion">' + titulo + '</div>' +
+                '<table style="width:38%"><tr><td class="c" colspan="2">' + subtitulo + '</td></tr>' +
+                '<tr><td class="c" style="width:50%">BASE</td><td class="c">TRIBUTO</td></tr></table></div>';
+        }
+
+        // Fila con descripción (y grupo vertical opcional) + casilla base + casilla tributo
+        function filaDetalle(desc, base, trib, grupo) {
+            const celdaDesc = grupo === undefined ? '<td colspan="3">' + desc + '</td>'
+                : (grupo ? grupo : '') + '<td colspan="2">' + desc + '</td>';
+            return '<tr>' + celdaDesc + parCasilla(base) + parCasilla(trib) + '</tr>';
+        }
+
+        function grupoVertical(texto, filas) {
+            return '<td class="grupo" rowspan="' + filas + '"><span>' + texto + '</span></td>';
+        }
+
+        const COLS_DETALLE = '<colgroup><col style="width:3%"><col style="width:14%"><col><col style="width:7%"><col style="width:12%"><col style="width:7%"><col style="width:12%"></colgroup>';
+
+        // "Ver detalle": DECLARACIÓN PAGO 0621 (2 páginas)
+        function verDetalle621() {
+            if (!presentacion621) { abrirHojaReporte('', '', []); return; }
+            // El coeficiente (173) solo se declara cuando hay compras destinadas a ventas gravadas y no gravadas
+            const filaCoef = document.getElementById('row-173');
+            const conCoef = filaCoef && filaCoef.style.display !== 'none';
+            const pag1 = cabeceraDeclaracionPago(1) +
+                encabezadoBloque('IGV VENTAS', 'IGV CUENTA PROPIA') +
+                '<table>' + COLS_DETALLE +
+                filaDetalle('Ventas Netas', 100, 101, grupoVertical('Gravadas', 5)) +
+                filaDetalle('Ventas Netas Gravadas Ley N° 31556 y modificatorias', 154, 155, '') +
+                filaDetalle('Descuentos Concedidos y/o devoluciones de Ventas', 102, 103, '') +
+                filaDetalle('Ventas de bienes (ley 27037 inc. 11.1, 12.1, 12.3 y 12.4)', 160, 161, '') +
+                filaDetalle('Descuentos y devoluciones (ley 27037)', 162, 163, '') +
+                '<tr><td colspan="2" rowspan="2" class="c">Exportaciones</td><td>Facturadas en el período</td>' + parCasilla(106) + parCasilla(null) + '</tr>' +
+                '<tr><td>Embarcadas en el período</td>' + parCasilla(127) + parCasilla(null) + '</tr>' +
+                filaDetalle('Ventas no Gravadas (Sin Considerar exportaciones)', 105, null) +
+                filaDetalle('Ventas no Gravadas (Sin efecto en ratio)', 109, null) +
+                filaDetalle('Otras ventas (inciso ii), numeral 6.2 - art. 6 del Reglamento', 112, null) +
+                '<tr><td colspan="5">Total</td>' + parCasilla(131) + '</tr></table>' +
+
+                encabezadoBloque('IGV COMPRAS', 'IGV CUENTA PROPIA') +
+                '<table>' + COLS_DETALLE +
+                filaDetalle('Compras netas destinada a ventas gravadas exclusivamente', 107, 108, grupoVertical('Nacionales', 4)) +
+                filaDetalle('Compras Netas destinadas a Vtas Gravadas Ley N° 31556 y modificatorias', 156, 157, '') +
+                filaDetalle('Compras netas destinada a ventas gravadas y no gravadas', 110, 111, '') +
+                filaDetalle('Compras netas destinada a ventas no gravadas exclusivamente', 113, null, '') +
+                filaDetalle('Compras netas destinada a ventas gravadas exclusivamente', 114, 115, grupoVertical('Importadas', 3)) +
+                filaDetalle('Compras netas destinada a ventas gravadas y no gravadas', 116, 117, '') +
+                filaDetalle('Compras netas destinada a ventas no gravadas exclusivamente', 119, null, '') +
+                filaDetalle('Compras internas no gravadas', 120, null) +
+                filaDetalle('Compras importadas no gravadas', 122, null) +
+                '<tr><td colspan="5">TOTAL</td>' + parCasilla(178) + '</tr>' +
+                '<tr><td colspan="5">CRÉDITO FISCAL ESPECIAL</td>' + parCasilla(172) + '</tr>' +
+                '<tr><td colspan="3">COEFICIENTE</td>' + (conCoef ? parCasilla(173) : '<td class="num">173</td><td class="val"></td>') + parCasilla(null) + '</tr></table>' +
+
+                encabezadoBloque('IVAP', 'IVAP') +
+                '<table>' + COLS_DETALLE +
+                filaDetalle('Ventas Gravadas', 340, 341) +
+                filaDetalle('Otros Créditos IVAP', null, 182) + '</table>' +
+
+                encabezadoBloque('RENTA', 'RENTA') +
+                '<table>' + COLS_DETALLE +
+                filaDetalle('Ingresos Netos', 301, 312) +
+                filaDetalle('Coeficiente', 380, null) +
+                filaDetalle('Porcentaje', 315, null) +
+                filaDetalle('Coeficiente Calculado (aplicado para el Cálculo de la Cas312)', 894, null) +
+                filaDetalle('Pagos a Cuenta en Exceso del Presente Ejercicio', null, 336) + '</table>' +
+                AVISO_FICTICIO;
+
+            // [concepto, IGV, IVAP, RENTA]; los rangos vacíos se funden como en el formato de SUNAT
+            const DEUDA = [
+                ['Impuesto Resultante o Saldo a Favor', 140, 353, 302],
+                ['Saldo a Favor del Período anterior', 145, 351, 303],
+                ['Tributo a Pagar o Saldo a Favor', 184, 352, 304],
+                ['Percepciones declaradas en el período', 171, null, null],
+                ['Saldo de percepciones de periodos anteriores', 168, null, null],
+                ['Saldo de percepciones no aplicadas', 164, null, null],
+                ['Retenciones declaradas en el período', 179, null, null],
+                ['Saldo de retenciones de periodos anteriores', 176, null, null],
+                ['Saldo de Retenciones no aplicadas', 165, null, null],
+                ['Retenciones de tercera declaradas en período', null, null, 326],
+                ['Retenciones de tercera declaradas en periodos anteriores', null, null, 327],
+                ['Compensación Saldo a Favor del Exportador', null, 347, 305],
+                ['Impuesto Temporal a los Activos Netos', null, null, 328],
+                ['Sub Total', 681, 683, 682],
+                ['Pagos previos', 185, 342, 317],
+                ['Interés moratorio', 187, 343, 319],
+                ['Total deuda tributaria', 188, 344, 324],
+                ['Importe a pagar', 189, null, 307]
+            ];
+            const pag2 = cabeceraDeclaracionPago(2) +
+                '<div class="bloque" style="margin-top:40px"><div class="seccion">DETERMINACIÓN DE LA DEUDA</div>' +
+                '<table style="width:61%"><tr><td class="c" colspan="3">DETERMINACIÓN DE LA DEUDA</td></tr>' +
+                '<tr><td class="c" style="width:33.3%">IGV</td><td class="c" style="width:33.3%">IVAP</td><td class="c">RENTA</td></tr></table></div>' +
+                '<table><colgroup><col><col style="width:5%"><col style="width:15.3%"><col style="width:5%"><col style="width:15.3%"><col style="width:5%"><col style="width:15.3%"></colgroup>' +
+                DEUDA.map(f => {
+                    let celdas = '', vacias = 0;
+                    const cerrar = () => { if (vacias) { celdas += '<td colspan="' + (vacias * 2) + '"></td>'; vacias = 0; } };
+                    f.slice(1).forEach(n => { if (n === null) vacias++; else { cerrar(); celdas += parCasilla(n); } });
+                    cerrar();
+                    return '<tr><td>' + f[0] + '</td>' + celdas + '</tr>';
+                }).join('') + '</table>' + AVISO_FICTICIO;
+
+            abrirHojaReporte('Declaración Pago 0621', 'DeclaracionPago_0621_' + presentacion621.orden + '.pdf', [pag1, pag2]);
+        }
+
+        // "Ver constancia": Constancia Formulario - 0621
+        function verConstancia621() {
+            const p = presentacion621;
+            if (!p) { abrirHojaReporte('', '', []); return; }
+
+            const pagado = p.pagado > 0;
+            const tribs = [['1011', 'IGV - OPER. INT. - CTA. PROPIA', val('c188'), pagado ? val('c189') : 0]];
+            if (document.querySelector('input[name="renta-full"]:checked')) {
+                const r = tributoRenta();
+                tribs.push([r[0], r[1], val('c324'), pagado ? val('c307') : 0]);
+            }
+            const totDeuda = tribs.reduce((s, t) => s + t[2], 0);
+            const totPago = tribs.reduce((s, t) => s + t[3], 0);
+            const pendientes = tribs.filter(t => t[2] - t[3] > 0);
+
+            let mensaje;
+            if (pendientes.length) {
+                mensaje = 'Usted no ha realizado el pago de la deuda, recuerde que deberá cancelar el saldo deudor de la declaración presentada consignando los siguientes datos:' +
+                    '<br><br><table class="ctab" style="width:100%"><tr class="th"><td style="width:33%">Periodo</td><td style="width:33%">Tributos</td><td>Deuda</td></tr>' +
+                    pendientes.map(t => '<tr><td>' + p.periodo + '</td><td>' + t[0] + ' ' + escHTML(t[1]) + '</td><td class="r">' + solesConstancia(t[2] - t[3]) + '</td></tr>').join('') +
+                    '</table>' +
+                    (npsEmitido621 ? '<br>Número de Pago SUNAT (NPS) generado: <b>' + npsEmitido621 + '</b>' : '');
+            } else if (totPago > 0) {
+                mensaje = 'Usted ha realizado el pago de la deuda por ' + solesConstancia(totPago) + ' mediante ' + escHTML(medioPago621 || '-') + '.' +
+                    (operacionPago621 && /Tarjeta|Yape/.test(medioPago621) ? '<br>Número de operación: ' + operacionPago621 : '') +
+                    '<br>Se generará una boleta de pago por cada tributo pagado.';
+            } else {
+                mensaje = 'La declaración presentada no genera deuda por pagar en el período.';
+            }
+
+            const hoja = '<div class="ctit"><span>Constancia Formulario - 0621</span><small>Fecha: &nbsp;&nbsp;&nbsp; ' + p.fecha + ' ' + p.hora + '</small></div>' +
+                '<fieldset><legend>Identificación de la Transacción:</legend>' +
+                'Número de Formulario : &nbsp;0621<br>Número de Orden : &nbsp;' + p.orden + '<br>Fecha de presentación : ' + p.fecha + '</fieldset>' +
+                '<fieldset style="min-height:200px"><legend>Datos de la Declaración:</legend>' +
+                'RUC : &nbsp;' + escHTML(p.ruc) + '<br>Nombre o Razón Social : &nbsp;' + escHTML(p.nombre) + '<br>Período : ' + p.periodo +
+                '<br>Semana : &nbsp;&nbsp;0<br>Tipo de Declaración : &nbsp;' + escHTML(textoTipoDeclaracion()) + '</fieldset>' +
+                '<fieldset><legend>Detalle de Tributos:</legend>' +
+                '<table class="ctab"><tr class="th"><td>Tributos</td><td style="width:22%">Total Deuda</td><td style="width:22%">Monto Pago</td></tr>' +
+                tribs.map(t => '<tr><td>' + t[0] + ' &nbsp;&nbsp;&nbsp;&nbsp; ' + escHTML(t[1]) + '</td><td class="r">' + solesConstancia(t[2]) + '</td><td class="r">' + solesConstancia(t[3]) + '</td></tr>').join('') +
+                '<tr><td>Total a Pagar</td><td class="r">' + solesConstancia(totDeuda) + '</td><td class="r">' + solesConstancia(totPago) + '</td></tr></table></fieldset>' +
+                '<div class="caja">' + mensaje + '</div>' + AVISO_FICTICIO;
+
+            abrirHojaReporte('Constancia Formulario - 0621', 'Constancia_0621_' + p.orden + '.pdf', [hoja]);
         }
 
         // --- Recálculo automático al escribir ---
