@@ -1125,6 +1125,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Último periodo presentado propio de la empresa ('YYYY-MM', columna
+    // empresas_simulador.sire_presentado_hasta). Si es null se usa monthData.
+    let sirePresentadoHastaRvie = null;
+    (async () => {
+        try {
+            const ruc = window.SimStore && SimStore.rucActivo && SimStore.rucActivo();
+            if (!ruc || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+            const { data } = await authSupabaseClient.from('empresas_simulador')
+                .select('sire_presentado_hasta').eq('ruc', String(ruc)).maybeSingle();
+            if (data && data.sire_presentado_hasta) sirePresentadoHastaRvie = data.sire_presentado_hasta;
+        } catch (e) { /* sin dato: se usan las etiquetas por defecto */ }
+    })();
+
     // Si el periodo fue generado en la simulación (guardado en 'sire_presentado'),
     // la etiqueta del mes pasa de "No Presentado" a "Presentado"
     function etiquetaMesPresentado(yearKey, month) {
@@ -1138,6 +1151,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const abrev = month.split('-')[0];
             const periodo = yearKey + '-' + mesMap[abrev];
             if (presentados[periodo]) return abrev + '-Presentado';
+            if (sirePresentadoHastaRvie) {
+                return abrev + (periodo <= sirePresentadoHastaRvie ? '-Presentado' : '-No Presentado');
+            }
         } catch (e) { /* estado corrupto: se ignora */ }
         return month;
     }

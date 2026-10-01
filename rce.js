@@ -1878,10 +1878,24 @@ document.addEventListener('DOMContentLoaded', function () {
         Object.entries(MES_ABREV_A_NUM).map(([abrev, num]) => [num, abrev])
     );
 
+    // Último periodo presentado propio de la empresa ('YYYY-MM', columna
+    // empresas_simulador.sire_presentado_hasta). Si es null se usa monthData.
+    let sirePresentadoHastaRce = null;
+    (async () => {
+        try {
+            const ruc = window.SimStore && SimStore.rucActivo && SimStore.rucActivo();
+            if (!ruc || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+            const { data } = await authSupabaseClient.from('empresas_simulador')
+                .select('sire_presentado_hasta').eq('ruc', String(ruc)).maybeSingle();
+            if (data && data.sire_presentado_hasta) sirePresentadoHastaRce = data.sire_presentado_hasta;
+        } catch (e) { /* sin dato: se usan las etiquetas por defecto */ }
+    })();
+
     // Fuente única de verdad del estado Presentado/No Presentado de un periodo.
     // 1) Si el usuario lo cambió con "Cambiar Estado", manda el valor guardado
     //    (booleano explícito en 'sire_presentado').
-    // 2) Si no, se usa el valor por defecto del dato estático (monthData).
+    // 2) Si la empresa tiene sire_presentado_hasta, manda esa fecha.
+    // 3) Si no, se usa el valor por defecto del dato estático (monthData).
     // periodo: 'YYYY-MM'
     function esPeriodoPresentadoRce(periodo) {
         try {
@@ -1890,6 +1904,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return !!presentados[periodo];
             }
         } catch (e) { /* estado corrupto: se ignora */ }
+        if (sirePresentadoHastaRce) return String(periodo) <= sirePresentadoHastaRce;
         const [yy, mm] = String(periodo).split('-');
         const abrev = MES_NUM_A_ABREV[mm];
         const label = (monthData[yy] || []).find(m => m.split('-')[0].trim() === abrev);
