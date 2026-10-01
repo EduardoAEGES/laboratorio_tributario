@@ -25,6 +25,8 @@ window.SimStore = (function () {
     // AVANCE INDEPENDIENTE: todo se guarda por la pareja (usuario, RUC de la
     // empresa activa) en la tabla public.avance_usuario. Los roles en modo
     // demostracion (INVITADO y PRUEBA) no persisten nada.
+    // El acceso PUBLICO (taxlab360) guarda en el localStorage de la computadora,
+    // sin enviar nada a Supabase.
     const SIM_PREFIX = 'sire_';
     const MODULO = 'sire';
 
@@ -84,15 +86,20 @@ window.SimStore = (function () {
         return out;
     }
 
+    /** Acceso público: el avance queda en esta computadora (no va a Supabase). */
+    function guardaLocal() {
+        return String(usuarioActual().rol || '').toUpperCase() === 'PUBLICO';
+    }
+
     function persistente(key) {
-        return esClaveSim(key) && guardaAvance() && !!uid();
+        return esClaveSim(key) && !!uid() && (guardaAvance() || guardaLocal());
     }
 
     // ---- Sincronización con Supabase: una fila por (usuario, RUC, modulo) ----
     let _syncTimer = null;
 
     function syncToServer() {
-        if (!persistente('sire_')) return;
+        if (!persistente('sire_') || !guardaAvance()) return;
         if (typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
         clearTimeout(_syncTimer);
         _syncTimer = setTimeout(async function () {
@@ -116,7 +123,7 @@ window.SimStore = (function () {
     // Carga el avance del usuario para la empresa activa hacia localStorage.
     // Se llama al iniciar sesión y al elegir empresa en la Clave SOL.
     async function hydrate() {
-        if (!uid() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+        if (!uid() || !guardaAvance() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
         const ruc = rucActivo();
         if (!ruc) return;
         try {
@@ -138,23 +145,42 @@ window.SimStore = (function () {
         }
     }
 
-    // Borra el avance del usuario actual (local y en el servidor si su rol lo permite)
+    // Deja la simulación de la empresa activa como al inicio: propuestas
+    // aceptadas, reemplazos, periodos presentados, constancias, contenido
+    // editado y facturas emitidas. Devuelve { servidor: 'ok' | 'sin_permiso' |
+    // 'no_aplica' } para avisar si el avance guardado en Supabase se mantuvo.
     async function clearAll(rucOpcional) {
         const ruc = rucOpcional || rucActivo() || 'anon';
-        ['sire_aceptado', 'sire_presentado', 'sire_resumen',
-         'sire_export_tickets', 'sire_rce_export_tickets'].forEach(function (k) {
-            sessionStorage.removeItem(k);
+        Object.keys(sessionStorage).forEach(function (k) {
+            if (esClaveSim(k) || k.indexOf('rce_nav_generacion') === 0 || k === 'rce_gen_periodo') {
+                sessionStorage.removeItem(k);
+            }
         });
         clavesSimLocal(ruc).forEach(function (item) {
             try { localStorage.removeItem(item.full); } catch (e) {}
         });
-        if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient && uid()) {
+        // Facturas emitidas en SEE - SOL por esta empresa (correlativo y reporte)
+        [sessionStorage, localStorage].forEach(function (st) {
             try {
-                await authSupabaseClient.rpc('fn_reiniciar_avance', {
-                    p_actor: uid(), p_objetivo: uid(), p_ruc: ruc,
-                    p_motivo: 'Reinicio desde el simulador'
-                });
-            } catch (e) { /* el rol no puede reiniciar: queda solo el borrado local */ }
+                Object.keys(st)
+                    .filter(function (k) { return k.indexOf('taxlab_correlativo_' + ruc + '_') === 0; })
+                    .forEach(function (k) { st.removeItem(k); });
+                const lista = JSON.parse(st.getItem('taxlab_facturas') || '[]');
+                const resto = lista.filter(function (f) { return String(f.emisor_ruc) !== String(ruc); });
+                if (resto.length !== lista.length) st.setItem('taxlab_facturas', JSON.stringify(resto));
+            } catch (e) { /* almacenamiento no disponible */ }
+        });
+        if (!guardaAvance() || !uid() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) {
+            return { servidor: 'no_aplica' };
+        }
+        try {
+            const r = await authSupabaseClient.rpc('fn_reiniciar_avance', {
+                p_actor: uid(), p_objetivo: uid(), p_ruc: ruc,
+                p_motivo: 'Reinicio desde el simulador'
+            });
+            return { servidor: r && r.error ? 'sin_permiso' : 'ok' };
+        } catch (e) {
+            return { servidor: 'sin_permiso' };
         }
     }
 
@@ -944,6 +970,14 @@ document.addEventListener('DOMContentLoaded', () => {
         '#emp-fab-menu{position:fixed;bottom:84px;right:20px;z-index:100000;display:flex;flex-direction:column;gap:8px;font-family:Roboto,Arial,sans-serif;}',
         '#emp-fab-menu .emp-fab-menu-item{background:#fff;color:#004B91;border:1px solid #cfe0f2;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.20);display:flex;align-items:center;gap:10px;white-space:nowrap;transition:transform .15s ease,background .15s ease,color .15s ease;}',
         '#emp-fab-menu .emp-fab-menu-item:hover{background:#004B91;color:#fff;transform:translateY(-1px);}',
+        // Preferencias del alumno: botón a la izquierda y/o reducido (solo el gatito)
+        'html.emp-fab-izq #emp-fab,html.emp-fab-izq #emp-fab-menu{right:auto;left:20px;}',
+        'html.emp-fab-mini #emp-fab .emp-fab-text{display:none;}',
+        'html.emp-fab-mini #emp-fab{padding:5px;}',
+        'html.emp-fab-mini #emp-fab .emp-fab-cat{width:40px;height:40px;}',
+        'html.emp-fab-mini #emp-fab-menu{bottom:66px;}',
+        '#emp-fab-menu .emp-fab-menu-sep{height:1px;background:#cfe0f2;margin:2px 4px;}',
+        '#emp-fab-menu .emp-fab-menu-item.sec{font-weight:500;font-size:12px;padding:8px 14px;color:#334155;}',
         '@media(max-width:640px){#emp-fab .emp-fab-text{display:none;}#emp-fab{padding:6px;} #emp-modal table{font-size:11.5px;}}'
     ].join('');
 
@@ -1026,6 +1060,23 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { /* queda el respaldo */ }
     }
 
+    // Posición y tamaño del botón: preferencia del navegador (no es avance del alumno)
+    var PREF_FAB = 'taxlab_fab_pref';
+    function leerPrefFab() {
+        try { return JSON.parse(localStorage.getItem(PREF_FAB) || '{}') || {}; } catch (e) { return {}; }
+    }
+    function aplicarPrefFab(p) {
+        var h = document.documentElement;
+        h.classList.toggle('emp-fab-izq', !!p.izq);
+        h.classList.toggle('emp-fab-mini', !!p.mini);
+    }
+    function cambiarPrefFab(clave) {
+        var p = leerPrefFab();
+        p[clave] = !p[clave];
+        try { localStorage.setItem(PREF_FAB, JSON.stringify(p)); } catch (e) { /* se aplica solo en esta página */ }
+        aplicarPrefFab(p);
+    }
+
     function cerrarMenuFab() {
         var m = document.getElementById('emp-fab-menu');
         if (m) m.remove();
@@ -1042,11 +1093,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('emp-fab-menu')) { cerrarMenuFab(); return; }
         inyectarCss();
         var m = document.createElement('div');
+        var pref = leerPrefFab();
         m.id = 'emp-fab-menu';
         m.innerHTML =
             '<button type="button" class="emp-fab-menu-item" data-act="empresas"><i class="fas fa-building"></i> Ver empresas</button>' +
-            '<button type="button" class="emp-fab-menu-item" data-act="encuesta"><i class="fas fa-clipboard-list"></i> Responder encuesta</button>';
+            '<button type="button" class="emp-fab-menu-item" data-act="encuesta"><i class="fas fa-clipboard-list"></i> Responder encuesta</button>' +
+            '<div class="emp-fab-menu-sep"></div>' +
+            '<button type="button" class="emp-fab-menu-item sec" data-act="lado"><i class="fas ' + (pref.izq ? 'fa-arrow-right' : 'fa-arrow-left') + '"></i> ' +
+                (pref.izq ? 'Mover a la derecha' : 'Mover a la izquierda') + '</button>' +
+            '<button type="button" class="emp-fab-menu-item sec" data-act="mini"><i class="fas ' + (pref.mini ? 'fa-expand-alt' : 'fa-compress-alt') + '"></i> ' +
+                (pref.mini ? 'Mostrar completo' : 'Hacer más pequeño') + '</button>';
         document.body.appendChild(m);
+        m.querySelector('[data-act="lado"]').addEventListener('click', function (ev) { ev.stopPropagation(); cerrarMenuFab(); cambiarPrefFab('izq'); });
+        m.querySelector('[data-act="mini"]').addEventListener('click', function (ev) { ev.stopPropagation(); cerrarMenuFab(); cambiarPrefFab('mini'); });
         m.querySelector('[data-act="empresas"]').addEventListener('click', function (ev) { ev.stopPropagation(); cerrarMenuFab(); abrirModal(); });
         m.querySelector('[data-act="encuesta"]').addEventListener('click', function (ev) { ev.stopPropagation(); cerrarMenuFab(); abrirEncuestaVentana(); });
         setTimeout(function () { document.addEventListener('click', cerrarMenuFab, { once: true }); }, 0);
@@ -1055,6 +1114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function crearBoton() {
         if (document.getElementById('emp-fab')) return;
         inyectarCss();
+        aplicarPrefFab(leerPrefFab());
         var fab = document.createElement('div');
         fab.id = 'emp-fab';
         fab.title = 'Empresas del laboratorio y encuesta';

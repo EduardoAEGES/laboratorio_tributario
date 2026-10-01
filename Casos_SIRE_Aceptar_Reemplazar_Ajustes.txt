@@ -1,0 +1,121 @@
+CASOS BREVES - SIRE (RVIE / RCE)
+ACEPTAR PROPUESTA  |  REEMPLAZAR PROPUESTA  |  AJUSTES POSTERIORES
+Clave SOL de todas las empresas: SIST / NORTON   |   IGV 18%
+
+Regla para decidir:
+  - Si tu registro contable coincide con la propuesta  -> ACEPTAR.
+  - Si hay diferencias en un periodo NO presentado      -> REEMPLAZAR.
+  - Si el error es de un periodo YA presentado           -> AJUSTE POSTERIOR.
+
+====================================================================
+CASO 1 - ACEPTAR PROPUESTA (RVIE)
+====================================================================
+Empresa ......... EMPRESA DEMO S.A.C. - RUC 20123456789
+Periodo ......... Mayo 2026 (No Presentado)
+Registro ........ RVIE (Ventas)
+
+El contador concilio sus ventas de mayo y obtuvo:
+  20 comprobantes (10 facturas y 10 boletas)
+  Base imponible gravada .... S/ 46,412.11
+  IGV ....................... S/  8,354.17
+  Exportacion ............... S/  4,409.07
+  Total ..................... S/ 59,175.35
+
+Que hacer:
+  Compara estos totales con el Resumen de la propuesta.
+  Si coinciden, ACEPTA la propuesta del RVIE de mayo 2026.
+
+====================================================================
+CASO 2 - ACEPTAR PROPUESTA (RCE)
+====================================================================
+Empresa ......... COMERCIAL FERRETERA SUR S.A.C. - RUC 20601458722
+Periodo ......... Junio 2026 (No Presentado)
+Registro ........ RCE (Compras)
+
+Registro contable de compras de junio:
+  24 facturas
+    Base imponible (DG) ..... S/ 72,967.82
+    IGV ..................... S/ 13,134.24
+  1 recibo por honorarios ... S/  3,880.67 (no gravado)
+  Total ..................... S/ 89,982.73
+
+Que hacer:
+  Verifica que la propuesta tenga los mismos 25 comprobantes y
+  los mismos importes. Si todo cuadra, ACEPTA la propuesta del RCE.
+
+====================================================================
+CASO 3 - REEMPLAZAR PROPUESTA (RVIE y RCE)
+====================================================================
+Empresa ......... LOS GORRIONES S.A. - RUC 20334020184
+Periodo ......... Febrero 2026 (No Presentado)
+
+Al comparar con lo registrado en el CONCAR se encontro:
+
+  a) RVIE: falta la factura de venta
+       E001-0103 - 17/02/2026 - QUIMICA COMERCIAL S.A. (RUC 20502400372)
+       Base S/ 6,180.00 + IGV S/ 1,112.40 = Total S/ 7,292.40
+
+  b) RCE: la factura F001-1975 de AUTOMOTORES ATLANTA S.A.C.
+       (RUC 20473363683), US$ 4,500.00 + IGV US$ 810.00,
+       viene con TC 3.735. El TC correcto del 18/02/2026 es 3.720:
+       Base S/ 16,740.00 + IGV S/ 3,013.20 = Total S/ 19,753.20
+
+Que hacer:
+  REEMPLAZA ambas propuestas con el registro correcto.
+  Totales esperados despues del reemplazo:
+    RVIE  Base S/ 61,490.00   IGV S/ 11,068.20
+    RCE   Base S/ 87,438.00   IGV S/ 15,738.84
+
+====================================================================
+CASO 4 - REEMPLAZAR PROPUESTA (RCE)
+====================================================================
+Empresa ......... RESTAURANTES SABOR ANDINO E.I.R.L. - RUC 20548912343
+Periodo ......... Junio 2026 (No Presentado)
+Registro ........ RCE (Compras)
+
+La propuesta incluye la factura F002-2489 de SODIMAC PERU S.A.
+(05/06/2026, Base S/ 1,996.15 + IGV S/ 359.31 = S/ 2,355.46).
+El titular la uso para remodelar su vivienda: es un gasto personal,
+no de la empresa, y no da derecho a credito fiscal.
+
+Que hacer:
+  REEMPLAZA la propuesta del RCE sin esa factura.
+  Totales esperados de facturas despues del reemplazo:
+    24 facturas   Base S/ 22,484.15   IGV S/ 4,047.16
+  Respecto del RVIE: solo aceptar la propuesta.
+
+====================================================================
+CASO 5 - AJUSTE POSTERIOR (RVIE) - DAR DE BAJA
+====================================================================
+Empresa ......... BOTICA SALUD TOTAL S.A.C. - RUC 20512347895
+Periodo ......... Abril 2026 (ya Presentado)
+Registro ........ RVIE (Ventas)
+
+En mayo se detecta que la factura F001-95 (14/04/2026) a
+DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L. (RUC 20606927283)
+por Base S/ 7,836.05 + IGV S/ 1,410.49 = S/ 9,246.54 fue dada de
+baja (el cliente nunca recibio la mercaderia), pero quedo incluida
+en el registro de abril.
+
+Que hacer:
+  Registra un AJUSTE POSTERIOR sobre abril 2026: anula la F001-95
+  (importes en 0.00, estado anulado) referenciando su CAR SUNAT.
+  El IGV de ventas de abril disminuye en S/ 1,410.49.
+
+====================================================================
+CASO 6 - AJUSTE POSTERIOR (RCE) - AGREGAR COMPROBANTE
+====================================================================
+Empresa ......... MINIMARKET DON PEPE E.I.R.L. - RUC 20609876540
+Periodo ......... Marzo 2026 (ya Presentado)
+Registro ........ RCE (Compras)
+
+El 10/05/2026 llega tarde a contabilidad una factura de marzo que
+no estaba en el registro:
+  F002-2695 - 30/03/2026
+  INVERSIONES COMERCIALES MACTOR S.A.C. (RUC 20541316311)
+  Mercaderia: Base S/ 2,450.00 + IGV S/ 441.00 = Total S/ 2,891.00
+  Forma de pago: contado
+
+Que hacer:
+  Registra un AJUSTE POSTERIOR sobre marzo 2026 para AGREGAR la
+  factura. El IGV de compras de marzo aumenta en S/ 441.00.

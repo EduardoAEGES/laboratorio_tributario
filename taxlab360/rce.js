@@ -1258,6 +1258,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Últimos comprobantes mostrados en la Propuesta del RCE (fuente del archivo exportado)
     let comprobantesActualesRce = [];
+    // Para la Constancia de Recepción: rceAceptarTicket (global) lee lo aceptado
+    window.obtenerFilasRceActuales = () => comprobantesActualesRce;
 
     // Referencia a processData (se asigna al consultar un período) para reutilizarla
     // desde el flujo "Reemplazar Propuesta"
@@ -2820,6 +2822,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try { estadoAceptado = JSON.parse(SimStore.getItem('sire_aceptado') || '{}'); } catch (e) {}
             estadoAceptado.rce_ap = periodoTextoRce();
             SimStore.setItem('sire_aceptado', JSON.stringify(estadoAceptado));
+            if (window.SireConstancias) SireConstancias.marcarOrigen('rce');
 
             sessionStorage.setItem('rce_nav_generacion', '1');
             window.location.href = 'rvie.html';
@@ -3098,6 +3101,30 @@ document.addEventListener('DOMContentLoaded', function () {
             const mainContent = document.getElementById('main-content-display');
             if (mainContent) mainContent.style.display = 'block';
 
+            // Como en SUNAT: primero solo el menú de Consultas y Descargas
+            ocultarPanelesIgRce();
+        });
+    }
+
+    // =============================================
+    // INFO GESTIÓN RCE: menú de Consultas y Descargas
+    // =============================================
+    function ocultarPanelesIgRce() {
+        ['ig-estado-ticket-panel-rce', 'ig-constancias-panel-rce', 'ig-otros-panel-rce'].forEach(function (id) {
+            const p = document.getElementById(id);
+            if (p) p.style.display = 'none';
+        });
+        document.querySelectorAll('#ig-menu-rce .ig-menu-item').forEach(i => i.classList.remove('ig-item-active'));
+    }
+
+    const igRceItemTicket = document.getElementById('ig-rce-item-estado-ticket');
+    if (igRceItemTicket) {
+        igRceItemTicket.addEventListener('click', function () {
+            ocultarPanelesIgRce();
+            igRceItemTicket.classList.add('ig-item-active');
+            const panel = document.getElementById('ig-estado-ticket-panel-rce');
+            if (panel) panel.style.display = 'block';
+
             // Períodos por defecto del filtro: mes actual
             const now = new Date();
             const per = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0');
@@ -3109,6 +3136,30 @@ document.addEventListener('DOMContentLoaded', function () {
             poblarTablaTicketsRce();
         });
     }
+
+    const igRceItemConstancias = document.getElementById('ig-rce-item-constancias');
+    if (igRceItemConstancias) {
+        igRceItemConstancias.addEventListener('click', function () {
+            ocultarPanelesIgRce();
+            igRceItemConstancias.classList.add('ig-item-active');
+            if (window.SireConstancias) {
+                SireConstancias.renderPanel(document.getElementById('ig-constancias-panel-rce'), 'RCE', {
+                    onRegresar: function () { igRceItemConstancias.classList.remove('ig-item-active'); }
+                });
+            }
+        });
+    }
+
+    document.querySelectorAll('.ig-rce-item-otro').forEach(function (el) {
+        el.addEventListener('click', function () {
+            ocultarPanelesIgRce();
+            el.classList.add('ig-item-active');
+            const otros = document.getElementById('ig-otros-panel-rce');
+            const titulo = document.getElementById('ig-otros-titulo-rce');
+            if (titulo) titulo.textContent = el.querySelector('strong').textContent;
+            if (otros) otros.style.display = 'block';
+        });
+    });
 
     if (mainTabGeneracionRce) {
         mainTabGeneracionRce.addEventListener('click', function () {
@@ -3252,6 +3303,12 @@ function rceAceptarTicket() {
     } catch (e) { /* estado corrupto: se reinicia */ }
     estadoAceptado.rce = periodoTexto;
     SimStore.setItem('sire_aceptado', JSON.stringify(estadoAceptado));
+
+    // Totales de lo aceptado para la Constancia de Recepción del RCE
+    if (window.SireConstancias) {
+        SireConstancias.guardarSnapshot('rce', periodoTexto,
+            window.obtenerFilasRceActuales ? window.obtenerFilasRceActuales() : []);
+    }
 
     // Marca de navegación: rvie.html mostrará la vista Generación de Registros
     sessionStorage.setItem('rce_nav_generacion', '1');

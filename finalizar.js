@@ -83,6 +83,9 @@
 
         let usuario = {};
         try { usuario = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        // Empresa elegida en la Clave SOL (el login de la persona no trae RUC)
+        let empresa = {};
+        try { empresa = JSON.parse(sessionStorage.getItem('sunat_empresa') || '{}') || {}; } catch (e) {}
 
         const cfg = datosDelModulo(modulo);
         const ahora = new Date();
@@ -105,14 +108,17 @@
         // Datos del usuario
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text('Datos del usuario', 15, y);
+        doc.text('Datos de la empresa y del usuario', 15, y);
         doc.setLineWidth(0.4);
         doc.line(15, y + 1.5, 195, y + 1.5);
         y += 9;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10.5);
-        doc.text('RUC: ' + (usuario.ruc || '—'), 15, y); y += 6.5;
-        doc.text('Razón social: ' + (usuario.denominacion || 'EMPRESA DEMO S.A.C.'), 15, y); y += 6.5;
+        doc.text('RUC: ' + (empresa.ruc || usuario.ruc || '—'), 15, y); y += 6.5;
+        doc.text('Razón social: ' + (empresa.razon_social || '—'), 15, y); y += 6.5;
+        let estudiante = '';
+        try { estudiante = (sessionStorage.getItem('taxlab_estudiante') || '').trim(); } catch (e) {}
+        doc.text('Realizado por: ' + (estudiante || 'USER'), 15, y); y += 6.5;
         doc.text('Usuario: ' + (usuario.usuario || '—'), 15, y); y += 6.5;
         doc.text('Perfil: ' + (usuario.rol || '—'), 15, y); y += 6.5;
         doc.text('Módulo: ' + modulo, 15, y); y += 6.5;

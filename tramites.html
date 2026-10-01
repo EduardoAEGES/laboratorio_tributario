@@ -70,6 +70,14 @@
                 <li class="active"><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Empresas <i class="fas fa-chevron-right arrow-right"></i></a></li>
                 <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Operador de<br>Comercio Exterior</a></li>
             </ul>
+            <button type="button" id="btn-reiniciar-todo" onclick="reiniciarSimulacionEmpresa(); return false;"
+                title="Deja la empresa como al inicio: sin propuestas aceptadas, reemplazos, constancias ni facturas emitidas"
+                style="margin:22px 0 0 0; width:100%; padding:10px 14px; background:#C00000; color:#fff; border:none; border-radius:6px; font-family:'Roboto',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <i class="fas fa-rotate-left"></i> Reiniciar todo
+            </button>
+            <p style="font-size:11.5px; color:#666; margin:8px 2px 0; line-height:1.4;">
+                Vuelve la empresa actual a su estado inicial (antes de aceptar propuestas o reemplazos).
+            </p>
         </aside>
 
         <main class="tramites-main">
@@ -6417,18 +6425,47 @@
         // Compatibilidad con llamadas previas
         function pintarEmisorDireccion() { pintarEmisor(); }
 
-        // Correlativo persistente e incremental por (emisor + serie). Se guarda en
-        // sessionStorage, así al emitir otra factura continúa el número y se pierde
-        // al cerrar el navegador.
+        // Almacén de las facturas emitidas: en esta computadora (localStorage)
+        // para que no se pierdan al cerrar el navegador; si no está disponible,
+        // se usa la sesión.
+        function almacenFacturas() {
+            try { localStorage.setItem('taxlab_prueba', '1'); localStorage.removeItem('taxlab_prueba'); return localStorage; }
+            catch (e) { return sessionStorage; }
+        }
+
+        // Correlativo persistente e incremental por (emisor + serie): al emitir
+        // otra factura continúa el número. "Reiniciar todo" lo vuelve a cero.
         function siguienteCorrelativo() {
             const serie = (window.currentEmisorData && window.currentEmisorData.serie_factura) || 'F001';
             const emisorRuc = (window.currentEmisorData && window.currentEmisorData.ruc) || 'anon';
             const key = 'taxlab_correlativo_' + emisorRuc + '_' + serie;
-            let n = parseInt(sessionStorage.getItem(key) || '0', 10);
+            const st = almacenFacturas();
+            let n = parseInt(st.getItem(key) || sessionStorage.getItem(key) || '0', 10);
             if (!n || n < 0) n = 0;
             n += 1;
-            try { sessionStorage.setItem(key, String(n)); } catch (e) {}
+            try { st.setItem(key, String(n)); } catch (e) {}
             return { serie: serie, numero: String(n).padStart(8, '0') };
+        }
+
+        // "Reiniciar todo": deja la empresa activa como al inicio
+        async function reiniciarSimulacionEmpresa() {
+            let emp = null;
+            try { emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null'); } catch (e) {}
+            const nombre = emp ? (emp.razon_social + ' (RUC ' + emp.ruc + ')') : 'la empresa actual';
+            if (!confirm('Se reiniciará ' + nombre + ' a su estado inicial:\n\n' +
+                         '• Propuestas aceptadas y reemplazos del RVIE / RCE\n' +
+                         '• Periodos presentados en la simulación y constancias de recepción\n' +
+                         '• Ajustes posteriores y facturas emitidas\n\n' +
+                         'Esta acción no se puede deshacer. ¿Deseas continuar?')) return;
+            let res = { servidor: 'no_aplica' };
+            try { if (window.SimStore && SimStore.clearAll) res = (await SimStore.clearAll()) || res; } catch (e) {}
+            if (res.servidor === 'sin_permiso') {
+                alert('Se reinició la información de esta computadora, pero tu perfil no puede borrar el avance guardado en el laboratorio: ' +
+                      'volverá a aparecer la próxima vez que ingreses con la Clave SOL. Pide a tu docente que reinicie tu avance desde el Gestor.');
+            } else {
+                alert('Listo: ' + nombre + ' quedó como al inicio. Ya puedes volver a aceptar o reemplazar las propuestas.');
+            }
+            window.location.reload();
         }
 
         // Guarda cada factura emitida en la sesión (para el reporte final).
@@ -6444,9 +6481,10 @@
                     emisor: (window.currentEmisorData && window.currentEmisorData.razon_social) || '',
                     emisor_ruc: (window.currentEmisorData && window.currentEmisorData.ruc) || ''
                 };
-                const arr = JSON.parse(sessionStorage.getItem('taxlab_facturas') || '[]');
+                const st = almacenFacturas();
+                const arr = JSON.parse(st.getItem('taxlab_facturas') || sessionStorage.getItem('taxlab_facturas') || '[]');
                 arr.push(f);
-                sessionStorage.setItem('taxlab_facturas', JSON.stringify(arr));
+                st.setItem('taxlab_facturas', JSON.stringify(arr));
             } catch (e) {}
         }
 
@@ -7645,7 +7683,7 @@
                 var doc = new jsPDF();
                 var estudiante = 'USER', facturas = [];
                 try { estudiante = sessionStorage.getItem('taxlab_estudiante') || 'USER'; } catch (e) {}
-                try { facturas = JSON.parse(sessionStorage.getItem('taxlab_facturas') || '[]'); } catch (e) {}
+                try { facturas = JSON.parse(almacenFacturas().getItem('taxlab_facturas') || sessionStorage.getItem('taxlab_facturas') || '[]'); } catch (e) {}
                 var emisor = window.currentEmisorData || {};
                 var ahora = new Date();
                 var azul = [30, 57, 91];

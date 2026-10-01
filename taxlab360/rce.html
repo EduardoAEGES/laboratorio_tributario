@@ -13,6 +13,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="auth.js"></script>
     <script src="sesion.js"></script>
@@ -821,7 +822,47 @@
                                 <button class="info-gestion-tab">Reporte de Cumplimiento</button>
                             </div>
 
-                            <div id="ig-estado-ticket-panel-rce" class="ig-panel" style="display:block;">
+                            <!-- Menú de Consultas y Descargas (como en SUNAT) -->
+                            <div class="ig-subview" style="padding-bottom:0;">
+                                <div class="content-header-blue" style="margin-bottom:0;">
+                                    <h2>Consultas y Descargas - RCE</h2>
+                                </div>
+                                <div class="ig-menu-list" id="ig-menu-rce">
+                                    <div class="ig-menu-item" id="ig-rce-item-constancias">
+                                        <span class="ig-arrow">&#9658;</span>
+                                        <strong>Constancias de Recepción</strong>
+                                    </div>
+                                    <div class="ig-menu-item" id="ig-rce-item-estado-ticket">
+                                        <span class="ig-arrow">&#9658;</span>
+                                        <strong>Estado de envío de Ticket</strong>
+                                    </div>
+                                    <div class="ig-menu-item ig-rce-item-otro">
+                                        <span class="ig-arrow">&#9658;</span>
+                                        <strong>Descarga de Registros</strong>
+                                    </div>
+                                    <div class="ig-menu-item ig-rce-item-otro">
+                                        <span class="ig-arrow">&#9658;</span>
+                                        <strong>Consulta de Reportes de Inconsistencias</strong>
+                                    </div>
+                                    <div class="ig-menu-item ig-rce-item-otro">
+                                        <span class="ig-arrow">&#9658;</span>
+                                        <strong>Descarga de CAR</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Constancias de Recepción (lo pinta sire_constancias.js) -->
+                            <div id="ig-constancias-panel-rce" class="ig-panel" style="display:none;"></div>
+
+                            <!-- Placeholder para otros items -->
+                            <div id="ig-otros-panel-rce" class="ig-panel" style="display:none;">
+                                <div class="content-header-blue" style="margin-bottom:16px;">
+                                    <h2 id="ig-otros-titulo-rce">Consultas y Descargas</h2>
+                                </div>
+                                <p style="padding:20px; color:#666;">Sección en construcción.</p>
+                            </div>
+
+                            <div id="ig-estado-ticket-panel-rce" class="ig-panel" style="display:none;">
                                 <div class="content-header-blue" style="margin-bottom:16px;">
                                     <h2>Estado de envío de Ticket - RCE</h2>
                                 </div>
@@ -1217,6 +1258,7 @@
         </div>
     </div>
 
+    <script src="sire_constancias.js"></script>
     <script src="rce.js"></script>
     <script src="survey.js"></script>
 

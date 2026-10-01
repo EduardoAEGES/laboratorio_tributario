@@ -16,28 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     });
 
-    // Botón "Reiniciar simulación": borra el estado temporal de la simulación
-    // (aceptaciones, periodos presentados y resumen del reporte)
+    // Botón "Reiniciar simulación": deja la empresa activa como al inicio
+    // (propuestas aceptadas, reemplazos, presentados, constancias y facturas).
     const btnReiniciar = document.getElementById('btn-reiniciar-simulacion');
     if (btnReiniciar) {
         btnReiniciar.addEventListener('click', async () => {
-            // RUC del usuario actual para limpiar también el estado persistido (MASTER)
-            let ruc = 'anon';
-            try {
-                const a = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-                if (a.ruc) ruc = a.ruc;
-            } catch (e) {}
-
-            ['sire_aceptado', 'sire_presentado', 'sire_resumen',
-             'rce_nav_generacion', 'rce_gen_periodo', 'sire_export_tickets', 'sire_rce_export_tickets'].forEach((k) => {
-                sessionStorage.removeItem(k);
-            });
-            // Borrar TODO el estado y contenido persistido del MASTER en localStorage
-            // (sim_<ruc>_sire_*: incluye tickets, aceptado, presentado y contenido editado)
-            const prefijoSim = 'sim_' + ruc + '_sire_';
-            Object.keys(localStorage)
-                .filter((k) => k.indexOf(prefijoSim) === 0)
-                .forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} });
+            let res = { servidor: 'no_aplica' };
+            try { if (window.SimStore && SimStore.clearAll) res = (await SimStore.clearAll()) || res; } catch (e) {}
 
             // Reponer la encuesta de satisfacción: se borran las marcas de la
             // sesión y también las antiguas permanentes de localStorage
@@ -48,18 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     .forEach((k) => { try { st.removeItem(k); } catch (e) {} });
             });
 
-            // Borrar también el estado guardado en Supabase (usuarios MASTER)
-            if (ruc !== 'anon' && typeof window.supabase !== 'undefined') {
-                try {
-                    const sb = window.supabase.createClient(
-                        'https://klmjmlhwuzhymrplemgw.supabase.co',
-                        'sb_publishable_DSS-WHn-WawxfYe0RWUHRg_odMjrb_b'
-                    );
-                    await sb.from('sire_estado').delete().eq('ruc', ruc);
-                } catch (e) { console.warn('No se pudo borrar el estado en Supabase:', e); }
+            if (res.servidor === 'sin_permiso') {
+                alert('Se reinició la información de esta computadora, pero tu perfil no puede borrar el avance guardado en el laboratorio. ' +
+                      'Pide a tu docente que reinicie tu avance desde el Gestor.');
+            } else {
+                alert('Simulación reiniciada: la empresa quedó como al inicio.');
             }
-
-            alert('Simulación reiniciada: se borró la información de los registros.');
         });
     }
 });

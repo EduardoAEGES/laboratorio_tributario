@@ -86,7 +86,10 @@ document.addEventListener('DOMContentLoaded', function () {
         btnAceptarTicket.addEventListener('click', () => {
             hideModal(modalTicket);
             // Registrar la aceptación del RVIE (persiste hasta pulsar "Salir")
-            guardarAceptacionRVIE(obtenerPeriodoSeleccionadoRVIE());
+            const periodoAceptado = obtenerPeriodoSeleccionadoRVIE();
+            guardarAceptacionRVIE(periodoAceptado);
+            // Totales de lo aceptado para la Constancia de Recepción
+            if (window.SireConstancias) SireConstancias.guardarSnapshot('rvie', periodoAceptado, comprobantesActuales);
             mostrarVistaGeneracionRegistros();
             showModal(modalAviso12h);
         });
@@ -431,10 +434,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 SimStore.setItem('sire_ap_generados', JSON.stringify(apGenerados));
             }
 
+            // Constancias de Recepción (RVIE / RCE) de esta generación
+            const correlativo = window.SireConstancias ? SireConstancias.registrarGeneracion(estado) : null;
+
             // Guardar el resumen de la generación para el reporte PDF final
             const correoInput = document.getElementById('gen-correos');
             const resumen = {
                 ticket: '2026020000005',
+                correlativo: correlativo,
                 generadoEn: new Date().toLocaleString('es-PE'),
                 rce: estado.rce || null,
                 rvie: estado.rvie || null,
@@ -456,9 +463,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // Datos del usuario (sesión) y resumen de la generación
-        let usuario = {};
-        try { usuario = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
+        // Empresa (Clave SOL), persona (login) y resumen de la generación
+        const emp = window.SireConstancias ? SireConstancias.empresa() : { ruc: '', razon: '' };
+        const per = window.SireConstancias ? SireConstancias.persona() : { nombre: '', usuario: '', rol: '' };
         let resumen = {};
         try { resumen = JSON.parse(SimStore.getItem('sire_resumen') || '{}'); } catch (e) {}
 
@@ -479,19 +486,29 @@ document.addEventListener('DOMContentLoaded', function () {
         doc.setTextColor(40, 40, 40);
         let y = 38;
 
-        // Datos del usuario
+        // Empresa con la que se trabajó
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text('Datos del usuario', 15, y);
+        doc.text('Datos de la empresa', 15, y);
         doc.setLineWidth(0.4);
         doc.line(15, y + 1.5, 195, y + 1.5);
         y += 9;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10.5);
-        doc.text('RUC: ' + (usuario.ruc || '—'), 15, y); y += 6.5;
-        doc.text('Razón social: ' + (usuario.denominacion || 'EMPRESA DEMO S.A.C.'), 15, y); y += 6.5;
-        doc.text('Usuario: ' + (usuario.usuario || '—'), 15, y); y += 6.5;
-        doc.text('Perfil: ' + (usuario.rol || '—'), 15, y); y += 6.5;
+        doc.text('RUC: ' + (emp.ruc || '—'), 15, y); y += 6.5;
+        doc.text('Razón social: ' + (emp.razon || '—'), 15, y); y += 12;
+
+        // Persona que realizó la simulación
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Realizado por', 15, y);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.text('Nombre: ' + (per.nombre || '—'), 15, y); y += 6.5;
+        doc.text('Usuario: ' + (per.usuario || '—'), 15, y); y += 6.5;
+        doc.text('Perfil: ' + (per.rol || '—'), 15, y); y += 6.5;
         doc.text('Fecha y hora del reporte: ' + fechaHora, 15, y); y += 12;
 
         // Resumen de la simulación
@@ -508,6 +525,18 @@ document.addEventListener('DOMContentLoaded', function () {
         doc.text('Registro de Ventas e Ingresos (RVIE): ' + (resumen.rvie ? 'Generado – periodo ' + resumen.rvie : 'No generado'), 15, y); y += 6.5;
         if (resumen.correo) {
             doc.text('Correo adicional para envío: ' + resumen.correo, 15, y); y += 6.5;
+        }
+        // Totales de las constancias de recepción de esta generación
+        if (resumen.correlativo && window.SireConstancias) {
+            const f2 = v => (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            SireConstancias.listar().filter(c => c.correlativo === resumen.correlativo).forEach(function (c) {
+                const t = c.totales || {};
+                const bi = c.registro === 'RCE' ? t.biDg : t.bi;
+                const igv = c.registro === 'RCE' ? t.igvDg : t.igv;
+                doc.text('Constancia ' + c.registro + ' ' + c.correlativo + ': ' + (c.cantidad != null ? c.cantidad : '—') +
+                         ' registros | BI S/ ' + f2(bi) + ' | IGV S/ ' + f2(igv) + ' | Total S/ ' + f2(t.total), 15, y);
+                y += 6.5;
+            });
         }
         y += 5.5;
 
@@ -547,7 +576,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     }
 
-    // Botón "Terminar simulación": descarga el reporte PDF y va a sol.html.
+    // Botón "Terminar simulación": descarga el reporte PDF y ofrece a dónde ir
+    // (quedarse en RVIE/RCE, Mis Trámites o el menú inicial).
     // El estado temporal (periodos presentados, resumen) se CONSERVA;
     // solo se borra al llegar a index o con "Reiniciar simulación" en SOL.
     document.addEventListener('click', function (e) {
@@ -556,10 +586,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         generarReporteSimulacionPDF();
 
-        // Pequeña espera para que inicie la descarga antes de navegar
-        setTimeout(function () {
-            window.location.href = 'sol.html';
-        }, 800);
+        if (window.SireConstancias) SireConstancias.mostrarCierre();
+        else setTimeout(function () { window.location.href = 'sol.html'; }, 800);
     });
 
     // =============================================
@@ -2797,6 +2825,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const estado = obtenerEstadoAceptacion();
             estado.rvie_ap = periodoApRvie();
+            if (window.SireConstancias) SireConstancias.marcarOrigen('rvie');
             SimStore.setItem('sire_aceptado', JSON.stringify(estado));
 
             mostrarVistaGeneracionRegistros();
@@ -3078,6 +3107,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const otrosPanel = document.getElementById('ig-otros-panel');
             if (panel) panel.style.display = 'none';
             if (otrosPanel) otrosPanel.style.display = 'none';
+            const constPanel = document.getElementById('ig-constancias-panel');
+            if (constPanel) constPanel.style.display = 'none';
             // Resetear items activos
             document.querySelectorAll('.ig-menu-item').forEach(i => i.classList.remove('ig-item-active'));
         });
@@ -3109,6 +3140,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Ocultar otros paneles
         const otrosPanel = document.getElementById('ig-otros-panel');
         if (otrosPanel) otrosPanel.style.display = 'none';
+        const constPanel = document.getElementById('ig-constancias-panel');
+        if (constPanel) constPanel.style.display = 'none';
 
         // Mostrar panel de estado de ticket
         const panel = document.getElementById('ig-estado-ticket-panel');
@@ -3217,7 +3250,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (pdfBtn) {
             e.preventDefault();
             const ticketNum = pdfBtn.getAttribute('data-ticket');
-            descargarConstanciaRecepcionPDF(ticketNum);
+            // Si ya hay constancia generada, se usa (empresa y totales reales)
+            const ultima = window.SireConstancias ? SireConstancias.listar('RVIE')[0] : null;
+            if (ultima) SireConstancias.descargarPDF(ultima);
+            else descargarConstanciaRecepcionPDF(ticketNum);
             return;
         }
 
@@ -3243,11 +3279,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let estadoResumen = {};
         try { estadoResumen = JSON.parse(SimStore.getItem('sire_resumen') || '{}'); } catch (e) {}
 
-        let ruc = '20606966823';
-        try {
-            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-            if (auth.ruc) ruc = auth.ruc;
-        } catch (e) {}
+        let ruc = (window.SireConstancias && SireConstancias.empresa().ruc) || '20606966823';
 
         const period = estadoAceptado.rvie || (estadoResumen ? estadoResumen.rvie : null) || '2026-05';
         const parts = period.split('-');
@@ -3540,8 +3572,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Click en "Constancias de Recepción" → consulta y descarga de constancias
+    function ocultarPanelConstancias() {
+        const cp = document.getElementById('ig-constancias-panel');
+        if (cp) cp.style.display = 'none';
+    }
+    const igItemConstancias = document.getElementById('ig-item-constancias');
+    if (igItemConstancias) {
+        igItemConstancias.addEventListener('click', function () {
+            document.querySelectorAll('.ig-menu-item').forEach(i => i.classList.remove('ig-item-active'));
+            igItemConstancias.classList.add('ig-item-active');
+            ['ig-estado-ticket-panel', 'ig-otros-panel'].forEach(function (id) {
+                const p = document.getElementById(id);
+                if (p) p.style.display = 'none';
+            });
+            if (window.SireConstancias) {
+                SireConstancias.renderPanel(document.getElementById('ig-constancias-panel'), 'RVIE', {
+                    onRegresar: function () { igItemConstancias.classList.remove('ig-item-active'); }
+                });
+            }
+        });
+    }
+
     // Click en otros items del menú → mostrar panel genérico
-    ['ig-item-constancias', 'ig-item-descarga', 'ig-item-inconsistencias', 'ig-item-car', 'ig-item-exportadores'].forEach(function (id) {
+    ['ig-item-descarga', 'ig-item-inconsistencias', 'ig-item-car', 'ig-item-exportadores'].forEach(function (id) {
         const el = document.getElementById(id);
         if (!el) return;
         el.addEventListener('click', function () {
@@ -3550,6 +3604,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const panel = document.getElementById('ig-estado-ticket-panel');
             if (panel) panel.style.display = 'none';
+            ocultarPanelConstancias();
 
             const otrosPanel = document.getElementById('ig-otros-panel');
             const otrosTitulo = document.getElementById('ig-otros-titulo');
