@@ -1008,8 +1008,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
+    // Sonido del gatito: suena al abrir la lista de empresas y se apaga al cerrarla
+    var miau = null;
+    function sonarMiau() {
+        try {
+            if (!miau) miau = new Audio('miau-triste.mp3');
+            miau.currentTime = 0;
+            var p = miau.play();
+            if (p && p.catch) p.catch(function () { /* el navegador bloqueó el audio */ });
+        } catch (e) { /* sin audio disponible */ }
+    }
+    function callarMiau() {
+        if (!miau) return;
+        try { miau.pause(); miau.currentTime = 0; } catch (e) {}
+    }
+    function cerrarModal(ov) {
+        ov.style.display = 'none';
+        callarMiau();
+    }
+
     function abrirModal() {
         inyectarCss();
+        sonarMiau();
         var ov = document.getElementById('emp-modal-ov');
         if (ov) { ov.style.display = 'flex'; return; }
 
@@ -1038,10 +1058,10 @@ document.addEventListener('DOMContentLoaded', () => {
             '</div>';
         document.body.appendChild(ov);
 
-        ov.querySelector('.emp-x').onclick = function () { ov.style.display = 'none'; };
-        ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.style.display = 'none'; });
+        ov.querySelector('.emp-x').onclick = function () { cerrarModal(ov); };
+        ov.addEventListener('click', function (ev) { if (ev.target === ov) cerrarModal(ov); });
         document.addEventListener('keydown', function (ev) {
-            if (ev.key === 'Escape' && ov.style.display !== 'none') ov.style.display = 'none';
+            if (ev.key === 'Escape' && ov.style.display !== 'none') cerrarModal(ov);
         });
 
         // Refrescar desde Supabase (si esta disponible) para no depender del respaldo
