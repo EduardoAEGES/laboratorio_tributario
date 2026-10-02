@@ -434,8 +434,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 SimStore.setItem('sire_ap_generados', JSON.stringify(apGenerados));
             }
 
-            // Constancias de Recepción (RVIE / RCE) de esta generación
+            // Constancias de Recepción (RVIE / RCE, propuesta y ajustes) de esta generación
             const correlativo = window.SireConstancias ? SireConstancias.registrarGeneracion(estado) : null;
+            if (correlativo) registrarTicketsGeneracion(estado, correlativo);
 
             // Guardar el resumen de la generación para el reporte PDF final
             const correoInput = document.getElementById('gen-correos');
@@ -454,6 +455,36 @@ document.addEventListener('DOMContentLoaded', function () {
             SimStore.removeItem('sire_aceptado');
             mostrarVistaGeneracionVacia();
             window.scrollTo(0, 0);
+        });
+    }
+
+    // Deja en "Estado de envío de Ticket" (RVIE y RCE) un ticket de Generación de
+    // Registros por cada registro generado, enlazado a su Constancia de Recepción.
+    function registrarTicketsGeneracion(estado, correlativo) {
+        const ahora = new Date();
+        const p2 = n => String(n).padStart(2, '0');
+        const fecha = p2(ahora.getDate()) + '/' + p2(ahora.getMonth() + 1) + '/' + ahora.getFullYear() + ' ' +
+                      p2(ahora.getHours()) + ':' + p2(ahora.getMinutes()) + ':' + p2(ahora.getSeconds());
+        const ruc = (window.SireConstancias && SireConstancias.empresa().ruc) || '';
+        const defs = [
+            { reg: 'rvie',    clave: 'sire_export_tickets',     tipo: 'Generación de Registros', libro: '0014040003' },
+            { reg: 'rvie_ap', clave: 'sire_export_tickets',     tipo: 'Generación de Registros - Ajustes Posteriores', libro: '0014040003' },
+            { reg: 'rce',     clave: 'sire_rce_export_tickets', tipo: 'Generación de Registros', libro: '0008040003' },
+            { reg: 'rce_ap',  clave: 'sire_rce_export_tickets', tipo: 'Generación de Registros - Ajustes Posteriores', libro: '0008040003' }
+        ];
+        defs.forEach(function (d) {
+            if (!estado[d.reg]) return;
+            let tickets = [];
+            try { tickets = JSON.parse(SimStore.getItem(d.clave) || '[]'); } catch (e) {}
+            tickets.unshift({
+                numero: correlativo,
+                fecha: fecha,
+                archivo: 'LE' + ruc + String(estado[d.reg]).replace('-', '') + d.libro + 'EXP2.zip',
+                tipo: d.tipo,
+                estado: 'Terminado',
+                constancia: correlativo + '-' + d.reg
+            });
+            SimStore.setItem(d.clave, JSON.stringify(tickets));
         });
     }
 
@@ -523,6 +554,8 @@ document.addEventListener('DOMContentLoaded', function () {
         doc.text('Fecha y hora de la generación: ' + (resumen.generadoEn || '—'), 15, y); y += 6.5;
         doc.text('Registro de Compras (RCE): ' + (resumen.rce ? 'Generado – periodo ' + resumen.rce : 'No generado'), 15, y); y += 6.5;
         doc.text('Registro de Ventas e Ingresos (RVIE): ' + (resumen.rvie ? 'Generado – periodo ' + resumen.rvie : 'No generado'), 15, y); y += 6.5;
+        if (resumen.rce_ap) { doc.text('Ajustes posteriores del RCE: Generado – periodo ' + resumen.rce_ap, 15, y); y += 6.5; }
+        if (resumen.rvie_ap) { doc.text('Ajustes posteriores del RVIE: Generado – periodo ' + resumen.rvie_ap, 15, y); y += 6.5; }
         if (resumen.correo) {
             doc.text('Correo adicional para envío: ' + resumen.correo, 15, y); y += 6.5;
         }
@@ -533,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const t = c.totales || {};
                 const bi = c.registro === 'RCE' ? t.biDg : t.bi;
                 const igv = c.registro === 'RCE' ? t.igvDg : t.igv;
-                doc.text('Constancia ' + c.registro + ' ' + c.correlativo + ': ' + (c.cantidad != null ? c.cantidad : '—') +
+                doc.text('Constancia ' + c.registro + (c.anotacion === 'Ajustes Posteriores' ? ' (ajustes)' : '') + ' ' + c.correlativo + ': ' + (c.cantidad != null ? c.cantidad : '—') +
                          ' registros | BI S/ ' + f2(bi) + ' | IGV S/ ' + f2(igv) + ' | Total S/ ' + f2(t.total), 15, y);
                 y += 6.5;
             });
@@ -561,6 +594,8 @@ document.addEventListener('DOMContentLoaded', function () {
                       'Archivo XML de la Constancia de Recepción (RCE)',
                       'Propuesta de Casillas del Formulario Virtual 621');
         }
+        if (resumen.rvie_ap) docs.push('Constancia de Recepción de Ajustes Posteriores (RVIE) PDF');
+        if (resumen.rce_ap) docs.push('Constancia de Recepción de Ajustes Posteriores (RCE) PDF');
         docs.forEach(function (d) {
             doc.text('•  ' + d, 18, y);
             y += 6;
@@ -2212,10 +2247,9 @@ document.addEventListener('DOMContentLoaded', function () {
      *  - inconsistencias: detalle de cada fila que no cumple (estructura o campo obligatorio)
      */
     function validarArchivoPlanoRvie(texto) {
-        let authData = {};
-        try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
-        const rucSesion = authData.ruc || '20606966823';
-        const razonSesion = authData.denominacion || 'EMPRESA DEMO S.A.C.';
+        const emp = window.SireConstancias ? SireConstancias.empresa() : { ruc: '', razon: '' };
+        const rucSesion = emp.ruc || '20123456789';
+        const razonSesion = emp.razon || 'EMPRESA DEMO S.A.C.';
 
         const lineas = texto.replace(/^﻿/, '').split(/\r?\n/);
         const filas = [];
@@ -2511,17 +2545,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function cargarAjustesRvie() {
-        const per = periodoApRvie().replace('-', '');
+        // Sin periodo elegido: se muestran los últimos ajustes cargados
+        let per = periodoApRvie().replace('-', '');
+        if (!currentPeriodoRvie) per = SimStore.getItem('sire_rvie_ap_ultimo') || per;
         try {
             const raw = SimStore.getItem(apContentKeyRvie(per));
             if (raw) { const a = JSON.parse(raw); if (Array.isArray(a)) ajustesPosterioresRvie = a; }
         } catch (e) {}
     }
 
+    // Los ajustes cargados se guardan para todos los perfiles: así siguen en la
+    // zona de Ajustes Posteriores al volver al RVIE.
     function guardarAjustesRvie() {
-        if (!esMasterRvie()) return;
         const per = periodoApRvie().replace('-', '');
-        try { SimStore.setItem(apContentKeyRvie(per), JSON.stringify(ajustesPosterioresRvie)); } catch (e) {}
+        try {
+            SimStore.setItem(apContentKeyRvie(per), JSON.stringify(ajustesPosterioresRvie));
+            SimStore.setItem('sire_rvie_ap_ultimo', per);
+        } catch (e) {}
     }
 
     const fmtNum2ApRvie = v => (parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0).toFixed(2);
@@ -2539,10 +2579,9 @@ document.addEventListener('DOMContentLoaded', function () {
      * Periodo), tal como el txt que descarga el SIRE.
      */
     function parsearAjustesPosterioresRvie(texto) {
-        let authData = {};
-        try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
-        const rucSesion = authData.ruc || '20606966823';
-        const razonSesion = authData.denominacion || 'EMPRESA DEMO S.A.C.';
+        const emp = window.SireConstancias ? SireConstancias.empresa() : { ruc: '', razon: '' };
+        const rucSesion = emp.ruc || '20123456789';
+        const razonSesion = emp.razon || 'EMPRESA DEMO S.A.C.';
 
         const lineas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim() !== '');
         const filas = [];
@@ -2620,11 +2659,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Cabecera "Datos Generales" (RUC, razón social y periodo del contribuyente)
     function renderDatosGeneralesApRvie() {
-        let razon = 'EMPRESA DEMO S.A.C.';
-        try {
-            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-            if (auth.denominacion) razon = auth.denominacion;
-        } catch (e) {}
+        const razon = (window.SireConstancias && SireConstancias.empresa().razon) || 'EMPRESA DEMO S.A.C.';
         const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
         setTxt('ap-rvie-ruc', rucFromSession());
         setTxt('ap-rvie-razon', razon);
@@ -2802,7 +2837,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             ajustesPosterioresRvie = filas;
             const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
-            if (esMasterRvie() && perImp.length === 6) currentPeriodoRvie = perImp;
+            // Los ajustes pertenecen al periodo del archivo
+            if (perImp.length === 6) currentPeriodoRvie = perImp;
             guardarAjustesRvie();
             renderDatosGeneralesApRvie();
             renderAjustesRvie();
@@ -2863,6 +2899,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (apEnviarRvie) apEnviarRvie.addEventListener('click', function () {
         if (!ajustesPosterioresRvie.length) { alert('No hay ajustes posteriores para enviar. Cargue un archivo primero.'); return; }
         apEnvioPendienteRvie = true;
+        // Totales de los ajustes enviados para su Constancia de Recepción
+        if (window.SireConstancias) SireConstancias.guardarSnapshot('rvie_ap', periodoApRvie(), ajustesPosterioresRvie, { sire: true });
         mostrarTicketApRvie(registrarTicketApRvie('-', 'Envío ajustes posteriores'));
     });
 
@@ -2884,13 +2922,9 @@ document.addEventListener('DOMContentLoaded', function () {
         URL.revokeObjectURL(a.href);
     });
 
+    // RUC de la empresa elegida en la Clave SOL
     function rucFromSession() {
-        let ruc = '20606966823';
-        try {
-            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-            if (auth.ruc) ruc = auth.ruc;
-        } catch (e) {}
-        return ruc;
+        return (window.SireConstancias && SireConstancias.empresa().ruc) || '20123456789';
     }
 
     // Intenta deducir el periodo (YYYYMM) de la primera línea con datos del archivo,
@@ -3250,8 +3284,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (pdfBtn) {
             e.preventDefault();
             const ticketNum = pdfBtn.getAttribute('data-ticket');
-            // Si ya hay constancia generada, se usa (empresa y totales reales)
-            const ultima = window.SireConstancias ? SireConstancias.listar('RVIE')[0] : null;
+            // La constancia de ese ticket (o la última generada): empresa y totales reales
+            const idConst = pdfBtn.getAttribute('data-constancia');
+            const ultima = window.SireConstancias
+                ? ((idConst && SireConstancias.buscar(idConst)) || SireConstancias.listar('RVIE')[0])
+                : null;
             if (ultima) SireConstancias.descargarPDF(ultima);
             else descargarConstanciaRecepcionPDF(ticketNum);
             return;
@@ -3305,7 +3342,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // If registers are generated, ensure "Generación de Registros" ticket exists
         if (estadoResumen && estadoResumen.rvie) {
-            if (!tickets.some(t => t.numero === '2026020000005')) {
+            if (!tickets.some(t => t.numero === '2026020000005' || /^Generación de Registros/.test(t.tipo || ''))) {
                 // Generación de Registros should be at the top
                 tickets.unshift({
                     numero: '2026020000005',
@@ -3336,8 +3373,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (t.conInconsistencias) {
                 detalleCell = `<span style="color:#c0392b; font-weight:600;">Con inconsistencias (${(t.inconsistencias || []).length})</span>`;
                 downloadCell = `<a href="#" class="ig-inc-download-link" data-ticket="${t.numero}" style="color:#c0392b; text-decoration:underline; font-weight:600;" title="Descargar reporte de inconsistencias"><i class="far fa-file-alt"></i> REPORTE_PARAMETRICOS.txt</a>`;
-            } else if (t.tipo === 'Generación de Registros') {
-                downloadCell = `<a href="#" class="ig-pdf-download-btn" data-ticket="${t.numero}" style="color:#005691; text-decoration:none; font-size:18px; cursor:pointer;" title="Descargar Constancia PDF"><i class="far fa-file-alt"></i></a>`;
+            } else if (/^Generación de Registros/.test(t.tipo || '')) {
+                downloadCell = `<a href="#" class="ig-pdf-download-btn" data-ticket="${t.numero}" data-constancia="${t.constancia || ''}" style="color:#005691; text-decoration:none; font-size:18px; cursor:pointer;" title="Descargar Constancia de Recepción (PDF)"><i class="far fa-file-alt"></i></a>`;
             } else if (t.tipo === 'Aceptar propuesta') {
                 downloadCell = '';
             } else {

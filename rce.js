@@ -2358,10 +2358,9 @@ document.addEventListener('DOMContentLoaded', function () {
      * en objetos con las columnas del esquema SIRE que entiende processData.
      */
     function parsearArchivoPlanoRce(texto) {
-        let authData = {};
-        try { authData = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}'); } catch (e) {}
-        const rucSesion = authData.ruc || '20606966823';
-        const razonSesion = authData.denominacion || 'EMPRESA DEMO S.A.C.';
+        const emp = window.SireConstancias ? SireConstancias.empresa() : { ruc: '', razon: '' };
+        const rucSesion = emp.ruc || '20123456789';
+        const razonSesion = emp.razon || 'EMPRESA DEMO S.A.C.';
 
         const lineas = texto.replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim() !== '');
         const filas = [];
@@ -2553,16 +2552,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // Carga los ajustes guardados del periodo actual (MASTER); si no hay guardado,
     // conserva lo que ya esté en memoria (para el perfil no persistente).
     function cargarAjustesRce() {
-        if (!currentPeriodoRce) return;
+        // Sin periodo elegido: se muestran los últimos ajustes cargados
+        const per = currentPeriodoRce || SimStore.getItem('sire_rce_ap_ultimo');
+        if (!per) return;
         try {
-            const raw = SimStore.getItem(apContentKeyRce(currentPeriodoRce));
+            const raw = SimStore.getItem(apContentKeyRce(per));
             if (raw) { const a = JSON.parse(raw); if (Array.isArray(a)) ajustesPosterioresRce = a; }
         } catch (e) {}
     }
 
+    // Los ajustes cargados se guardan para todos los perfiles: así siguen en la
+    // zona de Ajustes Posteriores al volver al RCE.
     function guardarAjustesRce() {
-        if (!esMasterRce() || !currentPeriodoRce) return;
-        try { SimStore.setItem(apContentKeyRce(currentPeriodoRce), JSON.stringify(ajustesPosterioresRce)); } catch (e) {}
+        if (!currentPeriodoRce) return;
+        try {
+            SimStore.setItem(apContentKeyRce(currentPeriodoRce), JSON.stringify(ajustesPosterioresRce));
+            SimStore.setItem('sire_rce_ap_ultimo', currentPeriodoRce);
+        } catch (e) {}
     }
 
     const fmtNum2Ap = v => (parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0).toFixed(2);
@@ -2630,13 +2636,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Datos Generales: RUC, razón social y periodo del contribuyente
     function renderDatosGeneralesApRce() {
-        let ruc = '20606966823';
-        let razon = 'EMPRESA DEMO S.A.C.';
-        try {
-            const auth = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
-            if (auth.ruc) ruc = auth.ruc;
-            if (auth.denominacion) razon = auth.denominacion;
-        } catch (e) {}
+        const emp = window.SireConstancias ? SireConstancias.empresa() : { ruc: '', razon: '' };
+        const ruc = emp.ruc || '20123456789';
+        const razon = emp.razon || 'EMPRESA DEMO S.A.C.';
         const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
         setTxt('ap-rce-ruc', ruc);
         setTxt('ap-rce-razon', razon);
@@ -2769,11 +2771,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             ajustesPosterioresRce = filas;
-            if (esMasterRce()) {
-                const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
-                if (perImp.length === 6) currentPeriodoRce = perImp;
-                guardarAjustesRce();
-            }
+            // Los ajustes pertenecen al periodo del archivo
+            const perImp = (filas[0] && filas[0]['Periodo']) ? String(filas[0]['Periodo']).replace(/\D/g, '').slice(0, 6) : '';
+            if (perImp.length === 6) currentPeriodoRce = perImp;
+            guardarAjustesRce();
             renderDatosGeneralesApRce();
             renderAjustesRce();
 
@@ -2859,6 +2860,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (apEnviar) apEnviar.addEventListener('click', function () {
         if (!ajustesPosterioresRce.length) { alert('No hay ajustes posteriores para enviar. Cargue un archivo primero.'); return; }
         apEnvioPendienteRce = true;
+        // Totales de los ajustes enviados para su Constancia de Recepción
+        if (window.SireConstancias) SireConstancias.guardarSnapshot('rce_ap', periodoTextoRce(), ajustesPosterioresRce, { sire: true });
         mostrarTicketAp(registrarTicketAp('-', 'Envío ajustes posteriores'));
     });
 
@@ -3013,9 +3016,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tickets.forEach(function (t) {
             const tr = document.createElement('tr');
-            const downloadCell = t.zip
+            let downloadCell = t.zip
                 ? `<a href="#" class="ig-rce-download-link" data-numero="${t.numero}" style="color:#005691; text-decoration:underline; font-weight:600;">${t.zip}</a>`
                 : '';
+            if (t.constancia) {
+                downloadCell = `<a href="#" class="ig-rce-constancia-btn" data-constancia="${t.constancia}" style="color:#005691; text-decoration:none; font-size:18px;" title="Descargar Constancia de Recepción (PDF)"><i class="far fa-file-alt"></i></a>`;
+            }
             tr.innerHTML = `
                 <td style="font-weight:700; color:#1E395B;">${t.numero}</td>
                 <td>${t.fecha}</td>
@@ -3057,8 +3063,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Descarga del zip desde la tabla de tickets
+    // Descarga del zip (o de la constancia) desde la tabla de tickets
     document.addEventListener('click', function (e) {
+        const cons = e.target.closest('.ig-rce-constancia-btn');
+        if (cons) {
+            e.preventDefault();
+            const c = window.SireConstancias ? SireConstancias.buscar(cons.getAttribute('data-constancia')) : null;
+            if (c) SireConstancias.descargarPDF(c);
+            else alert('No se encontró la constancia de este ticket. Vuelve a generar el registro.');
+            return;
+        }
         const link = e.target.closest('.ig-rce-download-link');
         if (link) {
             e.preventDefault();

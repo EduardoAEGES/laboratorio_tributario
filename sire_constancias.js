@@ -92,22 +92,54 @@
         return t;
     }
 
-    /** Guarda lo aceptado de un registro ('rvie' | 'rce') para su futura constancia. */
-    function guardarSnapshot(registro, periodo, filas) {
+    // Filas con los nombres de columna del SIRE (archivo de ajustes posteriores o
+    // tablas de la base) -> campos internos que usan totalesRvie / totalesRce
+    const numSire = v => parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0;
+    function filaVentaSire(d) {
+        return {
+            valor_facturado_export: numSire(d['Valor Facturado Exportación']), bi_gravada: numSire(d['BI Gravada']),
+            dscto_bi: numSire(d['Dscto BI']), igv_ipm: numSire(d['IGV / IPM']), dscto_igv_ipm: numSire(d['Dscto IGV / IPM']),
+            mto_exonerado: numSire(d['Mto Exonerado']), mto_inafecto: numSire(d['Mto Inafecto']), isc: numSire(d['ISC']),
+            bi_grav_ivap: numSire(d['BI Grav IVAP']), ivap: numSire(d['IVAP']), icbper: numSire(d['ICBPER']),
+            otros_tributos: numSire(d['Otros Tributos']), total_cp: numSire(d['Total CP'])
+        };
+    }
+    function filaCompraSire(d) {
+        return {
+            bi_gravada: numSire(d['BI Gravado DG']), igv_ipm: numSire(d['IGV / IPM DG']),
+            bi_gravada_dgng: numSire(d['BI Gravado DGNG']), igv_ipm_dgng: numSire(d['IGV / IPM DGNG']),
+            bi_gravada_dng: numSire(d['BI Gravado DNG']), igv_ipm_dng: numSire(d['IGV / IPM DNG']),
+            adquisiciones_no_gravadas: numSire(d['Valor Adq. NG']), isc: numSire(d['ISC']), icbper: numSire(d['ICBPER']),
+            otros_tributos_cargos: numSire(d['Otros Trib/ Cargos']), total_cp: numSire(d['Total CP'])
+        };
+    }
+
+    /**
+     * Guarda lo enviado de un registro para su futura constancia.
+     * registro: 'rvie' | 'rce' (propuesta aceptada) o 'rvie_ap' | 'rce_ap' (ajustes posteriores).
+     * opts.sire: las filas vienen con nombres de columna del SIRE.
+     */
+    function guardarSnapshot(registro, periodo, filas, opts) {
         const reg = String(registro).toLowerCase();
+        const esRce = reg.indexOf('rce') === 0;
+        let f = filas || [];
+        if (opts && opts.sire) f = f.map(esRce ? filaCompraSire : filaVentaSire);
         const snap = leerJSON(CLAVE_SNAP, {});
         snap[reg] = {
             periodo: periodo,
-            cantidad: (filas || []).length,
-            totales: reg === 'rce' ? totalesRce(filas) : totalesRvie(filas)
+            cantidad: f.length,
+            totales: esRce ? totalesRce(f) : totalesRvie(f)
         };
         guardarJSON(CLAVE_SNAP, snap);
-        marcarOrigen(reg);
+        marcarOrigen(esRce ? 'rce' : 'rvie');
     }
 
-    /** Crea las constancias de la generación. estado = { rvie: 'YYYY-MM', rce: 'YYYY-MM' } */
+    /**
+     * Crea las constancias de la generación.
+     * estado = { rvie, rce, rvie_ap, rce_ap } con el periodo 'YYYY-MM' de cada uno.
+     */
     function registrarGeneracion(estado) {
-        if (!estado || (!estado.rvie && !estado.rce)) return null;
+        if (!estado || (!estado.rvie && !estado.rce && !estado.rvie_ap && !estado.rce_ap)) return null;
         const ahora = new Date();
         const p2 = n => String(n).padStart(2, '0');
         let corr = parseInt(leerJSON(CLAVE_CORR, 8), 10) || 8;
@@ -120,26 +152,33 @@
         const emp = empresa();
         const snap = leerJSON(CLAVE_SNAP, {});
         const lista = leerJSON(CLAVE_LISTA, []);
-        ['rce', 'rvie'].forEach(reg => {
+        ['rce_ap', 'rvie_ap', 'rce', 'rvie'].forEach(reg => {
             if (!estado[reg]) return;
+            const esAp = /_ap$/.test(reg);
             const s = (snap[reg] && snap[reg].periodo === estado[reg]) ? snap[reg] : null;
             lista.unshift({
-                registro: reg.toUpperCase(),
+                id: correlativo + '-' + reg,
+                registro: reg.indexOf('rce') === 0 ? 'RCE' : 'RVIE',
                 periodo: estado[reg],
                 correlativo: correlativo,
                 fecha: fecha,
                 hora: hora,
                 ruc: emp.ruc,
                 razon: emp.razon,
-                anotacion: 'Propuesta Aceptada',
-                cantidad: s ? s.cantidad : null,       // null: se completa desde la base al ver la constancia
-                totales: s ? s.totales : null
+                anotacion: esAp ? 'Ajustes Posteriores' : 'Propuesta Aceptada',
+                // Propuesta sin totales guardados: se completan desde la base al ver la constancia
+                cantidad: s ? s.cantidad : (esAp ? 0 : null),
+                totales: s ? s.totales : (esAp ? {} : null)
             });
             delete snap[reg];
         });
         guardarJSON(CLAVE_LISTA, lista);
         guardarJSON(CLAVE_SNAP, snap);
         return correlativo;
+    }
+
+    function buscar(id) {
+        return leerJSON(CLAVE_LISTA, []).filter(c => c.id === id)[0] || null;
     }
 
     function listar(registro) {
@@ -158,23 +197,11 @@
         try {
             if (c.registro === 'RCE') {
                 const { data } = await cli.from('registro_compras').select('*').eq('RUC', parseInt(c.ruc, 10)).eq('Periodo', per);
-                const filas = (data || []).map(d => ({
-                    bi_gravada: d['BI Gravado DG'], igv_ipm: d['IGV / IPM DG'],
-                    bi_gravada_dgng: d['BI Gravado DGNG'], igv_ipm_dgng: d['IGV / IPM DGNG'],
-                    bi_gravada_dng: d['BI Gravado DNG'], igv_ipm_dng: d['IGV / IPM DNG'],
-                    adquisiciones_no_gravadas: d['Valor Adq. NG'], isc: d['ISC'], icbper: d['ICBPER'],
-                    otros_tributos_cargos: d['Otros Trib/ Cargos'], total_cp: d['Total CP']
-                }));
+                const filas = (data || []).map(filaCompraSire);
                 return Object.assign({}, c, { cantidad: filas.length, totales: totalesRce(filas) });
             }
             const { data } = await cli.from('registro_ventas').select('*').eq('Ruc', parseInt(c.ruc, 10)).eq('Periodo', per);
-            const filas = (data || []).map(d => ({
-                valor_facturado_export: d['Valor Facturado Exportación'], bi_gravada: d['BI Gravada'],
-                dscto_bi: d['Dscto BI'], igv_ipm: d['IGV / IPM'], dscto_igv_ipm: d['Dscto IGV / IPM'],
-                mto_exonerado: d['Mto Exonerado'], mto_inafecto: d['Mto Inafecto'], isc: d['ISC'],
-                bi_grav_ivap: d['BI Grav IVAP'], ivap: d['IVAP'], icbper: d['ICBPER'],
-                otros_tributos: d['Otros Tributos'], total_cp: d['Total CP']
-            }));
+            const filas = (data || []).map(filaVentaSire);
             return Object.assign({}, c, { cantidad: filas.length, totales: totalesRvie(filas) });
         } catch (e) {
             return Object.assign({}, c, { cantidad: c.cantidad || 0, totales: c.totales || {} });
@@ -192,6 +219,7 @@
         const c = await completarDesdeBase(constancia);
         const t = c.totales || {};
         const esRce = c.registro === 'RCE';
+        const esAp = c.anotacion === 'Ajustes Posteriores';
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
 
@@ -199,8 +227,8 @@
         doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(12, 86, 145);
         doc.text('SUNAT', 18, 18);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(0, 0, 0);
-        doc.text(esRce ? 'Constancia de Recepción del Registro de Compras Electrónico'
-                       : 'Constancia de Recepción del Registro de Ventas e Ingresos', 55, 24);
+        const libroTxt = esRce ? 'del Registro de Compras Electrónico' : 'del Registro de Ventas e Ingresos';
+        doc.text('Constancia de Recepción ' + (esAp ? 'de Ajustes Posteriores ' : '') + libroTxt, 45, 24);
 
         let y = 34;
         function seccion(titulo) {
@@ -218,7 +246,9 @@
         const per = String(c.periodo || '');
         const anio = per.slice(0, 4), mes = per.slice(5, 7);
         seccion('Transacción');
-        campo('Nombre:', esRce ? 'Generación del Registro de Compras Electrónico(RCE)' : 'Generación del RVIE');
+        campo('Nombre:', esAp
+            ? (esRce ? 'Generación del Reporte de Ajustes Posteriores del RCE' : 'Generación del Reporte de Ajustes Posteriores del RVIE')
+            : (esRce ? 'Generación del Registro de Compras Electrónico(RCE)' : 'Generación del RVIE'));
         campo('Nro. de Operación:', String(c.correlativo).slice(0, 4) + '-' + String(c.correlativo).slice(4));
         campo('Fecha y hora:', c.fecha + ' ' + c.hora);
         y += 3;
@@ -517,6 +547,7 @@
         guardarSnapshot: guardarSnapshot,
         registrarGeneracion: registrarGeneracion,
         listar: listar,
+        buscar: buscar,
         descargarPDF: descargarPDF,
         renderPanel: renderPanel,
         mostrarCierre: mostrarCierre
