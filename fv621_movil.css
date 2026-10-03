@@ -1,0 +1,195 @@
+/* =============================================================================
+   FV 621 (declaraciones.html) · Versión móvil
+   Se activa con body.modo-movil (botón "Versión móvil" de la barra azul).
+   Fuera de ese modo la página se ve igual que antes.
+   ============================================================================= */
+
+/* Botones de la barra azul (junto a la fecha) */
+.fecha-621 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn-movil-621 {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font: 500 12px 'Roboto', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-movil-621:hover { background: rgba(255, 255, 255, .15); }
+.btn-menu-621 { display: none; }
+.fondo-menu-621 { display: none; }
+
+/* ---------------------------------------------------------------------------
+   MODO MÓVIL
+   --------------------------------------------------------------------------- */
+body.modo-movil { overflow-x: hidden; }
+
+/* Cabecera blanca: logo y bandeja; el resto de enlaces aún no funciona */
+body.modo-movil .decl-header-top { padding: 6px 10px; gap: 8px; }
+body.modo-movil .decl-logo-area img { height: 32px; }
+body.modo-movil .decl-logo-area .lab-text { font-size: 11px; }
+body.modo-movil .decl-header-actions { gap: 6px; flex-shrink: 1; min-width: 0; }
+body.modo-movil .decl-header-actions > a:not(.btn-bandeja) { display: none; }
+body.modo-movil .btn-bandeja { padding: 8px 10px; font-size: 12px; }
+
+/* Barra azul compacta */
+body.modo-movil .decl-user-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 8px;
+    text-align: center;
+}
+body.modo-movil .fecha-621 { flex: 1 1 100%; justify-content: center; gap: 6px; }
+body.modo-movil .fecha-621 #current-datetime { flex: 1 1 100%; }
+body.modo-movil .user-info-right { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
+body.modo-movil .user-info-right .domicilio { display: none; }
+body.modo-movil .user-info-right > * { margin-left: 0 !important; }
+body.modo-movil .btn-salir { padding: 5px 14px; }
+body.modo-movil .btn-menu-621 {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffd54f;
+    border-color: #ffd54f;
+    color: #1e395b;
+}
+body.modo-movil .btn-movil-621:not(.btn-menu-621) { background: #fff; color: #0b4a8b; border-color: #fff; }
+
+/* Menú lateral: panel que se abre con el botón "Menú" */
+body.modo-movil .decl-layout { display: block; }
+body.modo-movil .decl-sidebar {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 82%;
+    max-width: 320px;
+    height: 100vh;
+    max-height: none;
+    z-index: 2500;
+    overflow-y: auto;
+    background: #fff;
+    transform: translateX(-105%);
+    transition: transform .25s;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, .25);
+}
+body.modo-movil.menu-621-abierto .decl-sidebar { transform: none; }
+body.modo-movil .decl-sidebar .collapse-arrow { display: none; }
+body.modo-movil.menu-621-abierto .fondo-menu-621 {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .4);
+    z-index: 2400;
+}
+
+/* Panel principal */
+body.modo-movil .decl-main { padding: 10px 8px 70px; }
+body.modo-movil .decl-top-row { gap: 10px; }
+
+/* Pasos: los cuatro a la vista */
+body.modo-movil .stepper { width: 100%; }
+body.modo-movil .stepper .step {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 4px 8px 14px;
+    font-size: 11px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.2;
+}
+body.modo-movil .stepper .step:first-child { padding-left: 6px; }
+body.modo-movil .decl-top-icons { width: 100%; flex-wrap: wrap; gap: 8px; }
+
+/* Barra del paso y botones */
+body.modo-movil .paso-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+body.modo-movil .paso-bar-actions { display: flex; gap: 6px; }
+body.modo-movil .paso-bar-actions .btn-paso { flex: 1 1 0; min-width: 0; padding: 8px 4px; }
+
+/* Pestañas del formulario */
+body.modo-movil .form-tabs,
+body.modo-movil .form-tabs-left { width: 100%; }
+body.modo-movil .form-tabs-left { display: flex; }
+body.modo-movil .form-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 4px;
+    font-size: 12px;
+    text-align: center;
+}
+body.modo-movil .form-body { padding: 10px 6px; }
+
+/* Información general */
+body.modo-movil .fieldset-row { flex-direction: column; gap: 10px; }
+body.modo-movil .sunat-fieldset { width: 100%; min-width: 0; margin: 0; }
+body.modo-movil .field-inline { flex-wrap: wrap; }
+body.modo-movil .field-inline select,
+body.modo-movil .field-inline input { max-width: 100%; }
+body.modo-movil .afectacion-cols { flex-direction: column; gap: 10px; }
+body.modo-movil .afectacion-col { width: 100%; min-width: 0; }
+
+/* Casillas: etiqueta arriba y casilla abajo, a todo el ancho */
+body.modo-movil .seccion-621 { padding: 16px 8px 8px; }
+body.modo-movil .c-row { gap: 6px; }
+body.modo-movil .c-label { flex: 1 1 100%; min-width: 0; font-size: 13px; }
+body.modo-movil .c-pair { flex: 1 1 100%; min-width: 0; }
+body.modo-movil .c-pair input { flex: 1 1 auto; width: auto; min-width: 0; }
+body.modo-movil .c-total-row { flex-wrap: wrap; justify-content: space-between; }
+
+/* Detalle de la declaración (Ventas / Compras): base e impuesto lado a lado */
+body.modo-movil .sub-tabs-l2 {
+    margin: 4px -6px 0;
+    padding: 0 6px;
+    gap: 14px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+body.modo-movil .det-row { gap: 6px 8px; padding: 12px 2px; }
+body.modo-movil .det-label { flex: 1 1 100%; min-width: 0; font-size: 13px; flex-wrap: wrap; }
+body.modo-movil .det-pair { flex: 1 1 0; min-width: 0; gap: 4px; }
+body.modo-movil .det-code { min-width: 36px; padding: 8px 4px; }
+body.modo-movil .det-pair input { flex: 1 1 auto; width: auto; min-width: 0; padding: 8px 6px; font-size: 13px; }
+body.modo-movil .det-total { flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+
+/* Determinación de la deuda: IGV y Renta lado a lado, la etiqueta encima */
+body.modo-movil .deuda-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 6px 8px !important;
+}
+body.modo-movil .deuda-grid > div:first-child { display: none; }
+body.modo-movil .deuda-grid .dg-label {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    font-weight: 500;
+}
+body.modo-movil .deuda-grid .c-pair { min-width: 0; }
+body.modo-movil .deuda-grid .c-code { min-width: 36px; padding: 8px 4px; }
+body.modo-movil .deuda-grid .c-pair input { padding: 8px 4px; }
+body.modo-movil .deuda-section-header { font-size: 13px; }
+/* Botón TXT (percepciones/retenciones): dentro de la fila, no fuera de la pantalla */
+body.modo-movil .btn-gen-txt { position: static; transform: none; margin-right: 4px; padding: 7px 6px; }
+
+/* Tablas anchas: se deslizan de lado dentro de su caja */
+body.modo-movil .decl-main table { display: block; max-width: 100%; overflow-x: auto; }
+
+/* Presente/Pague y constancia */
+body.modo-movil #view-pasarela-621 [style*="min-height: 600px"] { padding: 10px !important; min-height: 0 !important; }
+body.modo-movil #view-pasarela-621 [style*="display: flex; gap: 25px"] { flex-direction: column; align-items: stretch !important; gap: 14px !important; }
+body.modo-movil #view-pasarela-621 [style*="width: 320px"] { width: 100% !important; }
+body.modo-movil #view-pasarela-621 [style*="grid-template-columns: repeat(5"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
+body.modo-movil #view-pasarela-621 .bank-option-minimal { min-width: 0; padding: 6px; }
+body.modo-movil #view-pasarela-621 .bank-option-minimal img { max-width: 100%; height: auto !important; max-height: 30px; }
+body.modo-movil #view-pasarela-621 .bank-option-minimal[style*="padding: 10px 40px"] { padding: 10px 14px !important; width: 100% !important; }
+body.modo-movil #view-pasarela-621 .pasarela-acc-body > div { padding: 10px !important; }
+
+/* Ventanas de ayuda de casillas */
+body.modo-movil .modal-overlay > div,
+body.modo-movil .modal-overlay > section {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    max-height: 88vh;
+    overflow-y: auto;
+}
