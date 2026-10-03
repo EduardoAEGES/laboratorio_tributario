@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUNAT - Declaración Jurada Anual de Renta</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="survey.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -607,7 +608,7 @@
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-top">
-                <button class="btn-home" onclick="showWelcome()"><i class="fas fa-home"></i> <span>Ir al Inicio</span></button>
+                <button class="btn-home" onclick="window.location.href='sol.html'" title="Volver al portal SOL"><i class="fas fa-home"></i> <span>Ir al Inicio</span></button>
                 <button class="btn-collapse" onclick="toggleSidebar()"><i id="collapse-icon" class="fas fa-chevron-left"></i></button>
             </div>
 
@@ -1548,7 +1549,7 @@
                         </div>
 
                         <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 25px 0 5px;">
-                            <button type="button" class="btn-const-710" onclick="switchSection('form_selection');"><i class="fas fa-chevron-left"></i> Ir al inicio</button>
+                            <button type="button" class="btn-const-710" onclick="window.location.href='sol.html';"><i class="fas fa-home"></i> Ir al inicio</button>
                             <button type="button" class="btn-const-710" onclick="volverDeclaracion710();"><i class="fas fa-file-alt"></i> Volver a la declaración</button>
                             <button type="button" class="btn-const-710" onclick="switchSection('consulta_pagos');"><i class="fas fa-list"></i> Consulta de declaraciones</button>
                             <button type="button" class="btn-const-710 rojo" id="btn-finalizar-simulacion"><i class="fas fa-flag-checkered"></i> Finalizar simulación</button>
@@ -1961,9 +1962,7 @@
                 document.getElementById('eeff-pasivo').style.display = 'none';
                 document.getElementById('eeff-resultados').style.display = 'none';
 
-                setVal('ir-100', getVal('er-487'));
-                setVal('ir-101', getVal('er-489'));
-                calculateIR();
+                recalcularDeterminativa710();
 
                 updateSubTabStyles(1);
                 updateMainTabStyles(1);
@@ -1983,7 +1982,7 @@
                 document.getElementById('eeff-pasivo').style.display = 'none';
                 document.getElementById('eeff-resultados').style.display = 'none';
 
-                calculateCreditos();
+                recalcularDeterminativa710();
                 updateSubTabStyles(2);
                 updateMainTabStyles(1);
 
@@ -2002,7 +2001,7 @@
                 document.getElementById('eeff-pasivo').style.display = 'none';
                 document.getElementById('eeff-resultados').style.display = 'none';
 
-                calculateDeuda();
+                recalcularDeterminativa710();
                 updateSubTabStyles(3);
                 updateMainTabStyles(1);
 
@@ -3063,6 +3062,18 @@
             setVal('ir-610', (coeficiente * 100).toFixed(2) + ' %');
 
             calculateCreditos();
+        }
+
+        // Recalcula toda la sección determinativa en orden, sin importar la pestaña
+        // por la que se entre: Estados Financieros -> casillas 100/101 -> impuesto
+        // (110/113) -> créditos (504/506) -> determinación de la deuda (139/146).
+        // Antes cada pestaña solo calculaba su parte y, si se saltaba directo a la
+        // deuda, el impuesto aún no estaba calculado y salía 0.
+        function recalcularDeterminativa710() {
+            setVal('ir-100', getVal('er-487'));
+            setVal('ir-101', getVal('er-489'));
+            calculateIR();
+            calculateCreditos();   // incluye calculateDeuda()
         }
 
         function calculateCreditos() {

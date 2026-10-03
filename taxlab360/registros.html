@@ -89,10 +89,8 @@
         table { border-collapse: collapse; font-size: 11px; }
         thead th {
             background: #2c3e50; color: #fff; padding: 5px 6px; text-align: center; vertical-align: middle;
-            border: 1px solid #46607a; position: sticky; z-index: 2; font-weight: 600; line-height: 1.25;
+            border: 1px solid #46607a; position: sticky; z-index: 2; font-weight: 600; line-height: 1.2; font-size: 10px;
         }
-        thead tr.f1 th { top: 0; }
-        thead tr.f2 th { top: var(--alto-f1, 26px); }
         th.grupo { background: #1f2f40; }
         .th-in { display: flex; align-items: flex-start; justify-content: center; gap: 4px; }
         .th-help {
@@ -177,8 +175,8 @@
         </div>
 
         <div class="tabs">
-            <div class="tab activa" data-reg="ventas"><i class="fas fa-cash-register"></i> Registro de Ventas e Ingresos (Formato 14.1)</div>
-            <div class="tab" data-reg="compras"><i class="fas fa-shopping-cart"></i> Registro de Compras Electrónico (RCE)</div>
+            <div class="tab activa" data-reg="ventas"><i class="fas fa-cash-register"></i> Formato 14.1 · Registro de Ventas e Ingresos</div>
+            <div class="tab" data-reg="compras"><i class="fas fa-shopping-cart"></i> Formato 8.1 · Registro de Compras</div>
         </div>
 
         <div class="datos">
@@ -212,6 +210,7 @@
             <button class="btn gris" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
             <button class="btn ambar" onclick="mostrarGuia()"><i class="fas fa-book-open"></i> Guía de llenado</button>
             <button class="btn gris" onclick="limpiarRegistro()"><i class="fas fa-eraser"></i> Limpiar registro</button>
+            <button class="btn" id="btn-extra" onclick="alternarExtra()" style="background:#00695c;"></button>
             <span class="leyenda" style="margin-left:auto;">
                 <span style="background:var(--req); border:1px solid var(--req-borde);">Obligatorio *</span>
                 <span style="background:#fff; border:1px solid #ccc;">Opcional / según el caso</span>
@@ -242,7 +241,7 @@
 
     <script>
         // =====================================================================
-        // Catálogos (Anexo 3 de la R.S. 286-2009/SUNAT y Anexo 1 del SIRE)
+        // Catálogos (Anexo 3 de la R.S. 286-2009/SUNAT)
         // =====================================================================
         const T_DOC = [
             ["0", "Doc. trib. no dom. sin RUC"], ["1", "DNI - Documento Nacional de Identidad"],
@@ -253,126 +252,128 @@
             ["00", "Otros"], ["01", "Factura"], ["02", "Recibo por honorarios"], ["03", "Boleta de venta"],
             ["04", "Liquidación de compra"], ["07", "Nota de crédito"], ["08", "Nota de débito"],
             ["10", "Recibo por arrendamiento"], ["12", "Ticket de máquina registradora"],
-            ["14", "Recibo de servicios públicos"], ["50", "DAM - Importación definitiva"],
+            ["14", "Recibo de servicios públicos"], ["50", "DUA - Importación definitiva"],
             ["91", "Comprobante de no domiciliado"]
-        ];
-        const T_MONEDA = [["PEN", "Sol"], ["USD", "Dólar americano"], ["EUR", "Euro"]];
-        const T_CLASIF = [
-            ["1", "Mercadería, materia prima, suministros, envases y embalajes"],
-            ["2", "Activo fijo"],
-            ["3", "Otros activos no considerados en 1 y 2"],
-            ["4", "Gastos de educación, recreación, salud, representación, capacitación, viaje, mantenimiento de vehículos y premios"],
-            ["5", "Otros gastos no incluidos en 4"]
         ];
         const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
         // =====================================================================
-        // Estructura de cada registro (igual a los formatos en Excel)
+        // Estructura de los formatos oficiales (igual al Excel):
+        //   p: niveles del encabezado (grupo > subgrupo > columna)
         //   tipo: auto | fecha | num | texto | cod   ·   req: obligatorio
+        //   extra: columna adicional (oculta hasta pulsar "Mostrar columnas adicionales")
         // =====================================================================
+        const REF = 'REFERENCIA DEL COMPROBANTE DE PAGO O DOCUMENTO ORIGINAL QUE SE MODIFICA';
         const COLS = {
             ventas: [
-                { k: 'cuo', g: '', l: 'Número correlativo del registro o CUO', w: 90, tipo: 'auto',
+                { k: 'cuo', p: ['NÚMERO CORRELATIVO DEL REGISTRO O CÓDIGO ÚNICO DE LA OPERACIÓN'], w: 125, tipo: 'auto',
                   ayuda: 'Número correlativo que identifica la operación en el registro. Se numera solo (0001, 0002…).' },
-                { k: 'femi', g: '', l: 'Fecha de emisión del comprobante', w: 125, tipo: 'fecha', req: true,
+                { k: 'femi', p: ['FECHA DE EMISIÓN DEL COMPROBANTE DE PAGO O DOCUMENTO'], w: 125, tipo: 'fecha', req: true,
                   ayuda: 'Fecha que figura en el comprobante de pago.', ej: '05/02/2026',
                   regla: 'Debe pertenecer al periodo que declaras o ser anterior (si se anota con retraso).' },
-                { k: 'fvto', g: '', l: 'Fecha de vencimiento y/o pago', w: 125, tipo: 'fecha',
+                { k: 'fvto', p: ['FECHA DE VENCIMIENTO Y/O PAGO'], w: 125, tipo: 'fecha',
                   ayuda: 'Solo si la venta es al crédito: fecha de vencimiento o de pago. Si es al contado, déjalo vacío.' },
-                { k: 'tcp', g: 'Comprobante de pago o documento', l: 'Tipo', w: 150, tipo: 'cod', cat: T_CP, req: true,
+                { k: 'tcp', p: ['COMPROBANTE DE PAGO O DOCUMENTO', 'TIPO (TABLA 10)'], w: 150, tipo: 'cod', cat: T_CP, req: true,
                   ayuda: 'Código del tipo de comprobante (Tabla 10).', ej: '01 = Factura · 03 = Boleta · 07 = Nota de crédito' },
-                { k: 'serie', g: 'Comprobante de pago o documento', l: 'Serie o N° máq. registradora', w: 95, tipo: 'texto', req: true, mayus: true,
+                { k: 'serie', p: ['COMPROBANTE DE PAGO O DOCUMENTO', 'N° SERIE O N° SERIE DE LA MÁQUINA REGISTRADORA'], w: 110, tipo: 'texto', req: true, mayus: true,
                   ayuda: 'Serie del comprobante. En comprobantes electrónicos son 4 caracteres.', ej: 'E001 · F001 · EB01' },
-                { k: 'num', g: 'Comprobante de pago o documento', l: 'Número', w: 90, tipo: 'texto', req: true,
+                { k: 'num', p: ['COMPROBANTE DE PAGO O DOCUMENTO', 'NÚMERO'], w: 90, tipo: 'texto', req: true,
                   ayuda: 'Número correlativo del comprobante, sin la serie.', ej: '101' },
-                { k: 'tdoc', g: 'Información del cliente', l: 'Tipo doc. identidad', w: 130, tipo: 'cod', cat: T_DOC, req: true,
+                { k: 'tdoc', p: ['INFORMACIÓN DEL CLIENTE', 'DOCUMENTO DE IDENTIDAD', 'TIPO (TABLA 2)'], w: 130, tipo: 'cod', cat: T_DOC, req: true,
                   ayuda: 'Tipo de documento del cliente (Tabla 2).', ej: '6 = RUC (facturas) · 1 = DNI (boletas)' },
-                { k: 'ndoc', g: 'Información del cliente', l: 'Número', w: 105, tipo: 'texto', req: true,
-                  ayuda: 'Número del documento del cliente.', ej: 'RUC 20603383258 · DNI 45678912',
-                  regla: 'RUC = 11 dígitos · DNI = 8 dígitos.' },
-                { k: 'cli', g: 'Información del cliente', l: 'Apellidos y nombres, denominación o razón social', w: 240, tipo: 'texto', req: true, mayus: true,
+                { k: 'ndoc', p: ['INFORMACIÓN DEL CLIENTE', 'DOCUMENTO DE IDENTIDAD', 'NÚMERO'], w: 105, tipo: 'texto', req: true,
+                  ayuda: 'Número del documento del cliente.', ej: 'RUC 20603383258 · DNI 45678912', regla: 'RUC = 11 dígitos · DNI = 8 dígitos.' },
+                { k: 'cli', p: ['INFORMACIÓN DEL CLIENTE', 'APELLIDOS Y NOMBRES, DENOMINACIÓN O RAZÓN SOCIAL'], w: 240, tipo: 'texto', req: true, mayus: true,
                   ayuda: 'Nombre del cliente tal como figura en el comprobante. No uses comas.', ej: 'PIRQA CONSTRUCTORES S.A.C.' },
-                { k: 'exp', g: '', l: 'Valor facturado de la exportación', w: 100, tipo: 'num',
+                { k: 'exp', p: ['VALOR FACTURADO DE LA EXPORTACIÓN'], w: 100, tipo: 'num',
                   ayuda: 'Solo para exportaciones (no llevan IGV). Si no exportas, déjalo vacío.' },
-                { k: 'bi', g: '', l: 'Base imponible de la operación gravada', w: 110, tipo: 'num',
+                { k: 'bi', p: ['BASE IMPONIBLE DE LA OPERACIÓN GRAVADA'], w: 110, tipo: 'num',
                   ayuda: 'Valor de venta sin IGV de las operaciones gravadas.', ej: 'Factura por S/ 25,016 → base 21,200.00',
                   regla: 'En boletas el precio ya incluye IGV: base = total ÷ 1.18. En notas de crédito escríbelo en negativo.' },
-                { k: 'exo', g: 'Importe total de la operación', l: 'Exonerada', w: 95, tipo: 'num',
+                { k: 'exo', p: ['IMPORTE TOTAL DE LA OPERACIÓN EXONERADA O INAFECTA', 'EXONERADA'], w: 95, tipo: 'num',
                   ayuda: 'Ventas exoneradas del IGV (Apéndice I de la Ley del IGV).' },
-                { k: 'ina', g: 'Importe total de la operación', l: 'Inafecta', w: 95, tipo: 'num',
+                { k: 'ina', p: ['IMPORTE TOTAL DE LA OPERACIÓN EXONERADA O INAFECTA', 'INAFECTA'], w: 95, tipo: 'num',
                   ayuda: 'Ventas inafectas (no gravadas con IGV).' },
-                { k: 'isc', g: '', l: 'ISC', w: 80, tipo: 'num', ayuda: 'Impuesto Selectivo al Consumo, solo si corresponde.' },
-                { k: 'igv', g: '', l: 'IGV y/o IPM', w: 95, tipo: 'num', calc: 'igv',
+                { k: 'isc', p: ['ISC'], w: 75, tipo: 'num', ayuda: 'Impuesto Selectivo al Consumo, solo si corresponde.' },
+                { k: 'igv', p: ['IGV Y/O IPM'], w: 95, tipo: 'num', calc: 'igv', base: 'bi',
                   ayuda: 'Se propone solo: 18% de la base imponible. Puedes corregirlo (por ejemplo, 10% en restaurantes MYPE).', ej: 'Base 21,200.00 → IGV 3,816.00' },
-                { k: 'otros', g: '', l: 'Otros tributos y cargos', w: 90, tipo: 'num', ayuda: 'Otros tributos o cargos que no forman parte de la base (ICBPER, recargo al consumo, etc.).' },
-                { k: 'total', g: '', l: 'Importe total', w: 105, tipo: 'auto', suma: ['exp', 'bi', 'exo', 'ina', 'isc', 'igv', 'otros'],
+                { k: 'otros', p: ['OTROS TRIBUTOS Y CARGOS QUE NO FORMAN PARTE DE LA BASE IMPONIBLE'], w: 110, tipo: 'num',
+                  ayuda: 'Otros tributos o cargos que no forman parte de la base (ICBPER, recargo al consumo, etc.).' },
+                { k: 'total', p: ['IMPORTE TOTAL DEL COMPROBANTE DE PAGO'], w: 110, tipo: 'auto', suma: ['exp', 'bi', 'exo', 'ina', 'isc', 'igv', 'otros'],
                   ayuda: 'Se suma solo: exportación + base + exonerada + inafecta + ISC + IGV + otros.' },
-                { k: 'tc', g: '', l: 'Tipo de cambio', w: 75, tipo: 'num', dec: 3,
+                { k: 'tc', p: ['TIPO DE CAMBIO'], w: 80, tipo: 'num', dec: 3, extra: true,
                   ayuda: 'Solo si el comprobante está en moneda extranjera: tipo de cambio venta de la fecha de emisión (3 decimales). Los importes van en soles.', ej: '3.720' },
-                { k: 'rfec', g: 'Referencia del comprobante o documento original que se modifica', l: 'Fecha', w: 120, tipo: 'fecha',
+                { k: 'rfec', p: [REF, 'FECHA'], w: 125, tipo: 'fecha', extra: true,
                   ayuda: 'Solo para notas de crédito (07) o débito (08): fecha del comprobante que se modifica.' },
-                { k: 'rtcp', g: 'Referencia del comprobante o documento original que se modifica', l: 'Tipo', w: 120, tipo: 'cod', cat: T_CP,
+                { k: 'rtcp', p: [REF, 'TIPO (TABLA 10)'], w: 130, tipo: 'cod', cat: T_CP, extra: true,
                   ayuda: 'Solo para notas de crédito o débito: tipo del comprobante que se modifica.' },
-                { k: 'rser', g: 'Referencia del comprobante o documento original que se modifica', l: 'Serie', w: 75, tipo: 'texto', mayus: true,
+                { k: 'rser', p: [REF, 'SERIE'], w: 75, tipo: 'texto', mayus: true, extra: true,
                   ayuda: 'Solo para notas de crédito o débito: serie del comprobante que se modifica.' },
-                { k: 'rnum', g: 'Referencia del comprobante o documento original que se modifica', l: 'Número', w: 85, tipo: 'texto',
-                  ayuda: 'Solo para notas de crédito o débito: número del comprobante que se modifica.' },
-                { k: 'porc', g: 'Referencia del comprobante o documento original que se modifica', l: 'Porc. IGV', w: 70, tipo: 'num', dec: 0,
-                  ayuda: 'Tasa del IGV aplicada (18 o 10). Opcional.' }
+                { k: 'rnum', p: [REF, 'N° DEL COMPROBANTE DE PAGO O DOCUMENTO'], w: 110, tipo: 'texto', extra: true,
+                  ayuda: 'Solo para notas de crédito o débito: número del comprobante que se modifica.' }
             ],
             compras: [
-                { k: 'n', g: '', l: 'N.', w: 40, tipo: 'auto', ayuda: 'Número de fila.' },
-                { k: 'ruc', g: '', l: 'RUC', w: 100, tipo: 'auto', txt: true, ayuda: 'RUC de tu empresa. Se toma de los datos generales.' },
-                { k: 'razon', g: '', l: 'ID - Razón social', w: 170, tipo: 'auto', txt: true, ayuda: 'Razón social de tu empresa. Se toma de los datos generales.' },
-                { k: 'per', g: '', l: 'Periodo', w: 70, tipo: 'auto', txt: true, ayuda: 'Periodo declarado (AAAAMM). Se toma de los datos generales.' },
-                { k: 'car', g: '', l: 'CAR SUNAT', w: 210, tipo: 'auto', txt: true,
-                  ayuda: 'Código de Anotación en el Registro. Se arma solo: RUC del proveedor + tipo + serie + número (10 dígitos).', ej: '2056267131601F0010000001180' },
-                { k: 'femi', g: '', l: 'Fecha de emisión', w: 125, tipo: 'fecha', req: true, ayuda: 'Fecha que figura en el comprobante de compra.', ej: '02/02/2026',
+                { k: 'cuo', p: ['NÚMERO CORRELATIVO DEL REGISTRO O CÓDIGO ÚNICO DE LA OPERACIÓN'], w: 125, tipo: 'auto',
+                  ayuda: 'Número correlativo que identifica la operación en el registro. Se numera solo (0001, 0002…).' },
+                { k: 'femi', p: ['FECHA DE EMISIÓN DEL COMPROBANTE DE PAGO O DOCUMENTO'], w: 125, tipo: 'fecha', req: true,
+                  ayuda: 'Fecha que figura en el comprobante de compra.', ej: '02/02/2026',
                   regla: 'Debe pertenecer al periodo o ser anterior (hasta 12 meses) para usar el crédito fiscal.' },
-                { k: 'fvto', g: '', l: 'Fecha Vcto / Pago', w: 125, tipo: 'fecha', ayuda: 'Solo si la compra es al crédito: fecha de vencimiento o de pago.' },
-                { k: 'tcp', g: '', l: 'Tipo CP / Doc.', w: 150, tipo: 'cod', cat: T_CP, req: true, ayuda: 'Código del tipo de comprobante (Tabla 10).', ej: '01 = Factura · 02 = Recibo por honorarios' },
-                { k: 'serie', g: '', l: 'Serie del CDP', w: 85, tipo: 'texto', req: true, mayus: true, ayuda: 'Serie del comprobante del proveedor.', ej: 'F001' },
-                { k: 'anio', g: '', l: 'Año DUA o DSI', w: 70, tipo: 'texto', ayuda: 'Solo para importaciones (tipo 50): año de la DAM.' },
-                { k: 'num', g: '', l: 'Nro CP o Doc. Nro inicial (rango)', w: 100, tipo: 'texto', req: true, ayuda: 'Número del comprobante del proveedor.', ej: '1180' },
-                { k: 'nfin', g: '', l: 'Nro final (rango)', w: 80, tipo: 'texto', ayuda: 'Solo si anotas un rango de tickets o boletas consolidadas.' },
-                { k: 'tdoc', g: '', l: 'Tipo Doc Identidad', w: 130, tipo: 'cod', cat: T_DOC, req: true, ayuda: 'Tipo de documento del proveedor.', ej: '6 = RUC' },
-                { k: 'ndoc', g: '', l: 'Nro Doc Identidad', w: 105, tipo: 'texto', req: true, ayuda: 'Número de documento del proveedor.', ej: '20562671316', regla: 'RUC = 11 dígitos · DNI = 8 dígitos.' },
-                { k: 'prov', g: '', l: 'Apellidos nombres / Razón social', w: 230, tipo: 'texto', req: true, mayus: true, ayuda: 'Nombre del proveedor tal como figura en el comprobante. No uses comas.', ej: 'ADVANCE TECHNOLOGY GROUP S.A.C.' },
-                { k: 'bidg', g: 'Adquisiciones destinadas a ventas gravadas', l: 'Base imponible', w: 105, tipo: 'num',
-                  ayuda: 'Base imponible de compras destinadas SOLO a ventas gravadas (lo más común). Da derecho a crédito fiscal.', ej: 'Factura S/ 26,196 → base 22,200.00' },
-                { k: 'igvdg', g: 'Adquisiciones destinadas a ventas gravadas', l: 'IGV 18% y 10%', w: 95, tipo: 'num', calc: 'igv', base: 'bidg',
+                { k: 'fvto', p: ['FECHA DE VENCIMIENTO O FECHA DE PAGO (1)'], w: 125, tipo: 'fecha',
+                  ayuda: 'Solo si la compra es al crédito: fecha de vencimiento o de pago. Obligatoria en recibos de servicios públicos (tipo 14).' },
+                { k: 'tcp', p: ['COMPROBANTE DE PAGO O DOCUMENTO', 'TIPO (TABLA 10)'], w: 150, tipo: 'cod', cat: T_CP, req: true,
+                  ayuda: 'Código del tipo de comprobante (Tabla 10).', ej: '01 = Factura · 02 = Recibo por honorarios · 14 = Recibo de luz o agua' },
+                { k: 'serie', p: ['COMPROBANTE DE PAGO O DOCUMENTO', 'SERIE O CÓDIGO DE LA DEPENDENCIA ADUANERA (TABLA 11)'], w: 120, tipo: 'texto', req: true, mayus: true,
+                  ayuda: 'Serie del comprobante del proveedor. En importaciones, el código de la aduana (Tabla 11).', ej: 'F001 · E001' },
+                { k: 'anio', p: ['COMPROBANTE DE PAGO O DOCUMENTO', 'AÑO DE EMISIÓN DE LA DUA O DSI'], w: 85, tipo: 'texto',
+                  ayuda: 'Solo para importaciones: año de emisión de la DUA o DSI. En compras locales déjalo vacío.' },
+                { k: 'num', p: ['N° DEL COMPROBANTE DE PAGO, DOCUMENTO, N° DE ORDEN DEL FORMULARIO FÍSICO O VIRTUAL, N° DE DUA, DSI O LIQUIDACIÓN DE COBRANZA U OTROS DOCUMENTOS EMITIDOS POR SUNAT PARA ACREDITAR EL CRÉDITO FISCAL EN LA IMPORTACIÓN'], w: 300, tipo: 'texto', req: true,
+                  ayuda: 'Número del comprobante del proveedor (sin la serie).', ej: '1180' },
+                { k: 'tdoc', p: ['INFORMACIÓN DEL PROVEEDOR', 'DOCUMENTO DE IDENTIDAD', 'TIPO (TABLA 2)'], w: 130, tipo: 'cod', cat: T_DOC, req: true,
+                  ayuda: 'Tipo de documento del proveedor (Tabla 2).', ej: '6 = RUC' },
+                { k: 'ndoc', p: ['INFORMACIÓN DEL PROVEEDOR', 'DOCUMENTO DE IDENTIDAD', 'NÚMERO'], w: 105, tipo: 'texto', req: true,
+                  ayuda: 'Número de documento del proveedor.', ej: '20562671316', regla: 'RUC = 11 dígitos · DNI = 8 dígitos.' },
+                { k: 'prov', p: ['INFORMACIÓN DEL PROVEEDOR', 'APELLIDOS Y NOMBRES, DENOMINACIÓN O RAZÓN SOCIAL'], w: 230, tipo: 'texto', req: true, mayus: true,
+                  ayuda: 'Nombre del proveedor tal como figura en el comprobante. No uses comas.', ej: 'ADVANCE TECHNOLOGY GROUP S.A.C.' },
+                { k: 'bidg', p: ['ADQUISICIONES GRAVADAS DESTINADAS A OPERACIONES GRAVADAS Y/O DE EXPORTACIÓN', 'BASE IMPONIBLE'], w: 110, tipo: 'num',
+                  ayuda: 'Base imponible de compras destinadas SOLO a ventas gravadas o exportación (lo más común). Su IGV es crédito fiscal.', ej: 'Factura S/ 26,196 → base 22,200.00' },
+                { k: 'igvdg', p: ['ADQUISICIONES GRAVADAS DESTINADAS A OPERACIONES GRAVADAS Y/O DE EXPORTACIÓN', 'IGV'], w: 95, tipo: 'num', calc: 'igv', base: 'bidg',
                   ayuda: 'Se propone solo: 18% de la base. Puedes corregirlo.' },
-                { k: 'bidgng', g: 'Destinadas a ventas gravadas y no gravadas', l: 'Base imponible', w: 105, tipo: 'num',
-                  ayuda: 'Compras que se usan a la vez para ventas gravadas y no gravadas (se prorratea el crédito fiscal).' },
-                { k: 'igvdgng', g: 'Destinadas a ventas gravadas y no gravadas', l: 'IGV 18% y 10%', w: 95, tipo: 'num', calc: 'igv', base: 'bidgng',
+                { k: 'bidgng', p: ['ADQUISICIONES GRAVADAS DESTINADAS A OPERACIONES GRAVADAS Y/O DE EXPORTACIÓN Y A OPERACIONES NO GRAVADAS', 'BASE IMPONIBLE'], w: 110, tipo: 'num',
+                  ayuda: 'Compras que se usan a la vez para ventas gravadas y no gravadas (el crédito fiscal se prorratea).' },
+                { k: 'igvdgng', p: ['ADQUISICIONES GRAVADAS DESTINADAS A OPERACIONES GRAVADAS Y/O DE EXPORTACIÓN Y A OPERACIONES NO GRAVADAS', 'IGV'], w: 95, tipo: 'num', calc: 'igv', base: 'bidgng',
                   ayuda: 'Se propone solo: 18% de la base. Puedes corregirlo.' },
-                { k: 'bidng', g: 'Destinadas a ventas no gravadas', l: 'Base imponible', w: 105, tipo: 'num',
+                { k: 'bidng', p: ['ADQUISICIONES GRAVADAS DESTINADAS A OPERACIONES NO GRAVADAS', 'BASE IMPONIBLE'], w: 110, tipo: 'num',
                   ayuda: 'Compras destinadas solo a ventas no gravadas: su IGV NO da crédito fiscal.' },
-                { k: 'igvdng', g: 'Destinadas a ventas no gravadas', l: 'IGV 18% y 10%', w: 95, tipo: 'num', calc: 'igv', base: 'bidng',
+                { k: 'igvdng', p: ['ADQUISICIONES GRAVADAS DESTINADAS A OPERACIONES NO GRAVADAS', 'IGV'], w: 95, tipo: 'num', calc: 'igv', base: 'bidng',
                   ayuda: 'Se propone solo: 18% de la base. Puedes corregirlo.' },
-                { k: 'ng', g: '', l: 'Compras no gravadas', w: 95, tipo: 'num', ayuda: 'Compras exoneradas o inafectas, y recibos por honorarios (tipo 02).' },
-                { k: 'isc', g: '', l: 'I.S.C.', w: 75, tipo: 'num', ayuda: 'Impuesto Selectivo al Consumo, solo si corresponde.' },
-                { k: 'icbper', g: '', l: 'ICBPER - bolsas', w: 75, tipo: 'num', ayuda: 'Impuesto al consumo de bolsas de plástico.' },
-                { k: 'otros', g: '', l: 'Otros conceptos / tributos', w: 90, tipo: 'num', ayuda: 'Otros tributos o cargos que no forman parte de la base.' },
-                { k: 'total', g: '', l: 'Importe total', w: 105, tipo: 'auto', suma: ['bidg', 'igvdg', 'bidgng', 'igvdgng', 'bidng', 'igvdng', 'ng', 'isc', 'icbper', 'otros'],
+                { k: 'ng', p: ['VALOR DE LAS ADQUISICIONES NO GRAVADAS'], w: 105, tipo: 'num',
+                  ayuda: 'Compras exoneradas o inafectas, y recibos por honorarios (tipo 02).' },
+                { k: 'isc', p: ['ISC'], w: 75, tipo: 'num', ayuda: 'Impuesto Selectivo al Consumo, solo si corresponde.' },
+                { k: 'otros', p: ['OTROS TRIBUTOS Y CARGOS'], w: 95, tipo: 'num', ayuda: 'Otros tributos o cargos que no forman parte de la base (por ejemplo, ICBPER).' },
+                { k: 'total', p: ['IMPORTE TOTAL'], w: 110, tipo: 'auto', suma: ['bidg', 'igvdg', 'bidgng', 'igvdgng', 'bidng', 'igvdng', 'ng', 'isc', 'otros'],
                   ayuda: 'Se suma solo con todas las columnas de importes.' },
-                { k: 'mon', g: '', l: 'Código moneda', w: 90, tipo: 'cod', cat: T_MONEDA, defecto: 'PEN', ayuda: 'Moneda del comprobante.', ej: 'PEN · USD' },
-                { k: 'tc', g: '', l: 'Tipo de cambio', w: 75, tipo: 'num', dec: 3,
-                  ayuda: 'Obligatorio si la moneda no es PEN: tipo de cambio venta de la fecha de emisión. Los importes van en soles.', ej: '3.720' },
-                { k: 'rfec', g: 'Documento que se modifica', l: 'Fecha de emisión', w: 120, tipo: 'fecha', ayuda: 'Solo para notas de crédito o débito: fecha del comprobante que se modifica.' },
-                { k: 'rtcp', g: 'Documento que se modifica', l: 'Tipo', w: 110, tipo: 'cod', cat: T_CP, ayuda: 'Solo para notas de crédito o débito: tipo del comprobante modificado.' },
-                { k: 'rser', g: 'Documento que se modifica', l: 'Serie', w: 70, tipo: 'texto', mayus: true, ayuda: 'Solo para notas de crédito o débito: serie del comprobante modificado.' },
-                { k: 'rdua', g: 'Documento que se modifica', l: 'Código DUA', w: 75, tipo: 'texto', ayuda: 'Solo si el documento modificado es una DAM.' },
-                { k: 'rnum', g: 'Documento que se modifica', l: 'Número', w: 80, tipo: 'texto', ayuda: 'Solo para notas de crédito o débito: número del comprobante modificado.' },
-                { k: 'clasif', g: '', l: 'Clasificación de bienes y servicios', w: 170, tipo: 'cod', cat: T_CLASIF,
-                  ayuda: 'Indica qué compraste (Tabla 30). Ayuda a SUNAT a cruzar la información.', ej: '1 = Mercadería · 2 = Activo fijo · 5 = Otros gastos' },
-                { k: 'contrato', g: 'Contratos de colaboración', l: 'Identificación del contrato', w: 110, tipo: 'texto', ayuda: 'Solo si la compra es de un contrato de colaboración empresarial.' },
-                { k: 'porcpart', g: 'Contratos de colaboración', l: '% participación', w: 85, tipo: 'num', ayuda: 'Porcentaje de participación en el contrato.' },
-                { k: 'ley31053', g: '', l: 'Impuesto materia de beneficio Ley 31053', w: 105, tipo: 'num', ayuda: 'Solo para libros y productos editoriales exonerados (Ley 31053).' },
-                { k: 'carmod', g: '', l: 'CAR CP a modificar o indicador', w: 120, tipo: 'texto', ayuda: 'Solo en ajustes posteriores: CAR del comprobante a modificar, o 1 (excluir) / 2 (incluir).' },
-                { k: 'libre1', g: 'Campos de libre utilización', l: 'Campo 1', w: 90, tipo: 'texto', ayuda: 'Libre: puedes anotar el asiento contable, centro de costo, etc.' },
-                { k: 'libre2', g: 'Campos de libre utilización', l: 'Campo 2', w: 90, tipo: 'texto', ayuda: 'Libre: puedes anotar el asiento contable, centro de costo, etc.' }
+                { k: 'nodom', p: ['N° DE COMPROBANTE DE PAGO EMITIDO POR SUJETO NO DOMICILIADO (2)'], w: 130, tipo: 'texto', extra: true,
+                  ayuda: 'Solo si el servicio lo prestó un no domiciliado: número de su comprobante.' },
+                { k: 'detnum', p: ['CONSTANCIA DE DEPÓSITO DE DETRACCIÓN (3)', 'NÚMERO'], w: 110, tipo: 'texto', extra: true,
+                  ayuda: 'Solo si la compra está sujeta a detracción: número de la constancia de depósito en el Banco de la Nación.' },
+                { k: 'detfec', p: ['CONSTANCIA DE DEPÓSITO DE DETRACCIÓN (3)', 'FECHA DE EMISIÓN'], w: 125, tipo: 'fecha', extra: true,
+                  ayuda: 'Fecha de emisión de la constancia de depósito de la detracción.' },
+                { k: 'tc', p: ['TIPO DE CAMBIO'], w: 80, tipo: 'num', dec: 3, extra: true,
+                  ayuda: 'Solo si el comprobante está en moneda extranjera: tipo de cambio venta de la fecha de emisión. Los importes van en soles.', ej: '3.720' },
+                { k: 'rfec', p: [REF, 'FECHA'], w: 125, tipo: 'fecha', extra: true,
+                  ayuda: 'Solo para notas de crédito o débito: fecha del comprobante que se modifica.' },
+                { k: 'rtcp', p: [REF, 'TIPO (TABLA 10)'], w: 130, tipo: 'cod', cat: T_CP, extra: true,
+                  ayuda: 'Solo para notas de crédito o débito: tipo del comprobante modificado.' },
+                { k: 'rser', p: [REF, 'SERIE'], w: 75, tipo: 'texto', mayus: true, extra: true,
+                  ayuda: 'Solo para notas de crédito o débito: serie del comprobante modificado.' },
+                { k: 'rnum', p: [REF, 'N° DEL COMPROBANTE DE PAGO O DOCUMENTO'], w: 110, tipo: 'texto', extra: true,
+                  ayuda: 'Solo para notas de crédito o débito: número del comprobante modificado.' }
             ]
+        };
+        Object.values(COLS).forEach(cs => cs.forEach(c => { c.l = c.p[c.p.length - 1]; }));
+        const FORMATO = {
+            ventas: { codigo: 'FORMATO 14.1', nombre: 'REGISTRO DE VENTAS E INGRESOS' },
+            compras: { codigo: 'FORMATO 8.1', nombre: 'REGISTRO DE COMPRAS' }
         };
 
         // =====================================================================
@@ -380,6 +381,7 @@
         // =====================================================================
         const CLAVE = 'sire_registros_manual';
         let reg = 'ventas';
+        let verExtra = false;
         let datos = { mes: '', anio: '', ruc: '', razon: '', ventas: [], compras: [] };
 
         const $ = id => document.getElementById(id);
@@ -387,6 +389,8 @@
         const r2 = v => Math.round(v * 100) / 100;
         const fmt = (v, d) => (v === '' || v == null) ? '' : num(v).toLocaleString('en-US', { minimumFractionDigits: d == null ? 2 : d, maximumFractionDigits: d == null ? 2 : d });
         const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+        const visibles = () => COLS[reg].filter(c => verExtra || !c.extra);
+        const sumable = c => (c.tipo === 'num' && c.dec == null) || (c.tipo === 'auto' && c.suma);
 
         function guardar() {
             try {
@@ -399,20 +403,24 @@
                 const v = window.SimStore ? SimStore.getItem(CLAVE) : localStorage.getItem(CLAVE);
                 if (v) datos = Object.assign(datos, JSON.parse(v));
             } catch (e) {}
+            try { verExtra = localStorage.getItem('taxlab_registros_extra') === '1'; } catch (e) {}
             let emp = null;
             try { emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null'); } catch (e) {}
             if (emp && !datos.ruc) { datos.ruc = emp.ruc || ''; datos.razon = emp.razon_social || ''; }
             const hoy = new Date();
             if (!datos.mes) { const m = hoy.getMonth() === 0 ? 12 : hoy.getMonth(); datos.mes = String(m); datos.anio = String(hoy.getMonth() === 0 ? hoy.getFullYear() - 1 : hoy.getFullYear()); }
-            if (!datos.ventas.length) datos.ventas.push(filaVacia('ventas'));
-            if (!datos.compras.length) datos.compras.push(filaVacia('compras'));
+            ['ventas', 'compras'].forEach(r => {
+                if (!Array.isArray(datos[r]) || !datos[r].length) datos[r] = [filaVacia(r)];
+                datos[r].forEach(f => { if (!f._igvManual) f._igvManual = {}; });
+            });
         }
         function filaVacia(r) {
             const f = {};
-            COLS[r].forEach(c => { f[c.k] = c.defecto || ''; });
+            COLS[r].forEach(c => { f[c.k] = ''; });
             f._igvManual = {};
             return f;
         }
+        const filaVaciaEs = f => COLS[reg].every(c => c.tipo === 'auto' || !f[c.k]);
 
         // =====================================================================
         // Datos generales
@@ -426,8 +434,8 @@
             $('dg-mes').value = datos.mes; $('dg-anio').value = datos.anio;
             $('dg-ruc').value = datos.ruc; $('dg-razon').value = datos.razon;
             $('dg-mes').onchange = $('dg-anio').onchange = () => { datos.mes = $('dg-mes').value; datos.anio = $('dg-anio').value; refrescar(); };
-            $('dg-ruc').oninput = () => { $('dg-ruc').value = $('dg-ruc').value.replace(/\D/g, ''); datos.ruc = $('dg-ruc').value; refrescar(); };
-            $('dg-razon').oninput = () => { datos.razon = $('dg-razon').value.replace(/,/g, ''); refrescar(); };
+            $('dg-ruc').oninput = () => { $('dg-ruc').value = $('dg-ruc').value.replace(/\D/g, ''); datos.ruc = $('dg-ruc').value; guardar(); };
+            $('dg-razon').oninput = () => { datos.razon = $('dg-razon').value.replace(/,/g, ''); guardar(); };
         }
         const periodoAAAAMM = () => datos.anio + String(datos.mes).padStart(2, '0');
 
@@ -435,24 +443,14 @@
         // Cálculos automáticos de una fila
         // =====================================================================
         function calcularFila(f, i) {
-            const cols = COLS[reg];
-            // IGV sugerido (18%) mientras el alumno no lo cambie
-            cols.filter(c => c.calc === 'igv').forEach(c => {
-                const kb = c.base || 'bi';
-                if (!f._igvManual[c.k]) f[c.k] = f[kb] === '' ? '' : String(r2(num(f[kb]) * 0.18));
+            COLS[reg].filter(c => c.calc === 'igv').forEach(c => {
+                if (!f._igvManual[c.k]) f[c.k] = f[c.base] === '' || f[c.base] == null ? '' : String(r2(num(f[c.base]) * 0.18));
             });
-            cols.filter(c => c.suma).forEach(c => {
+            COLS[reg].filter(c => c.suma).forEach(c => {
                 const algo = c.suma.some(k => f[k] !== '' && f[k] != null);
                 f[c.k] = algo ? String(r2(c.suma.reduce((s, k) => s + num(f[k]), 0))) : '';
             });
-            if (reg === 'ventas') f.cuo = String(i + 1).padStart(4, '0');
-            if (reg === 'compras') {
-                f.n = String(i + 1);
-                f.ruc = datos.ruc; f.razon = datos.razon; f.per = periodoAAAAMM();
-                f.car = (f.ndoc && f.tcp && f.serie && f.num)
-                    ? String(f.ndoc) + String(f.tcp).padStart(2, '0') + String(f.serie).toUpperCase() + String(f.num).replace(/\D/g, '').padStart(10, '0')
-                    : '';
-            }
+            f.cuo = String(i + 1).padStart(4, '0');
         }
 
         // =====================================================================
@@ -460,66 +458,83 @@
         // =====================================================================
         function validarFila(f) {
             const out = {};
-            const vacia = COLS[reg].every(c => c.tipo === 'auto' || !f[c.k] || f[c.k] === c.defecto);
-            if (vacia) return out;
+            if (filaVaciaEs(f)) return out;
             COLS[reg].forEach(c => {
                 if (c.req && (f[c.k] === '' || f[c.k] == null)) out[c.k] = { tipo: 'err', msg: 'Campo obligatorio: ' + c.l + '.' };
             });
             const d = String(f.ndoc || '');
             if (d && f.tdoc === '6' && !/^(10|15|17|20)\d{9}$/.test(d)) out.ndoc = { tipo: 'err', msg: 'El RUC debe tener 11 dígitos y empezar con 10, 15, 17 o 20.' };
             if (d && f.tdoc === '1' && !/^\d{8}$/.test(d)) out.ndoc = { tipo: 'err', msg: 'El DNI debe tener 8 dígitos.' };
-            if (/,/.test(f.cli || f.prov || '')) out[reg === 'ventas' ? 'cli' : 'prov'] = { tipo: 'err', msg: 'No uses comas en el nombre: el registro se separa por comas al importarlo.' };
+            const kNom = reg === 'ventas' ? 'cli' : 'prov';
+            if (/,/.test(f[kNom] || '')) out[kNom] = { tipo: 'err', msg: 'No uses comas en el nombre: el registro se separa por comas al importarlo.' };
             if (f.femi) {
                 const [a, m] = f.femi.split('-');
                 if (a + m > periodoAAAAMM()) out.femi = { tipo: 'err', msg: 'La fecha de emisión es posterior al periodo que declaras (' + MESES[datos.mes - 1] + ' ' + datos.anio + ').' };
             }
             if (f.fvto && f.femi && f.fvto < f.femi) out.fvto = { tipo: 'err', msg: 'La fecha de vencimiento no puede ser anterior a la de emisión.' };
-            const pares = reg === 'ventas' ? [['bi', 'igv']] : [['bidg', 'igvdg'], ['bidgng', 'igvdgng'], ['bidng', 'igvdng']];
-            pares.forEach(([kb, ki]) => {
-                const b = num(f[kb]), g = num(f[ki]);
+            if (reg === 'compras' && f.tcp === '14' && !f.fvto) out.fvto = { tipo: 'err', msg: 'En recibos de servicios públicos (14) la fecha de vencimiento es obligatoria.' };
+            COLS[reg].filter(c => c.calc === 'igv').forEach(c => {
+                const b = num(f[c.base]), g = num(f[c.k]);
                 if (b !== 0 && Math.abs(g - b * 0.18) > 1 && Math.abs(g - b * 0.10) > 1)
-                    out[ki] = { tipo: 'warn', msg: 'El IGV no es el 18% (ni el 10%) de la base imponible. Revísalo.' };
-                if (b === 0 && g !== 0) out[ki] = { tipo: 'warn', msg: 'Hay IGV pero no hay base imponible.' };
+                    out[c.k] = { tipo: 'warn', msg: 'El IGV no es el 18% (ni el 10%) de la base imponible. Revísalo.' };
+                if (b === 0 && g !== 0) out[c.k] = { tipo: 'warn', msg: 'Hay IGV pero no hay base imponible.' };
             });
             if (f.tcp === '07' || f.tcp === '08') {
-                ['rfec', 'rtcp', 'rser', 'rnum'].forEach(k => { if (!f[k]) out[k] = { tipo: 'err', msg: 'En notas de crédito o débito debes indicar el comprobante que se modifica.' }; });
-                const base = reg === 'ventas' ? num(f.bi) : num(f.bidg);
-                if (f.tcp === '07' && base > 0) out[reg === 'ventas' ? 'bi' : 'bidg'] = { tipo: 'warn', msg: 'En una nota de crédito la base imponible va en negativo.' };
+                ['rfec', 'rtcp', 'rser', 'rnum'].forEach(k => { if (!f[k]) out[k] = { tipo: 'err', msg: 'En notas de crédito o débito debes indicar el comprobante que se modifica (columnas adicionales).' }; });
+                const kb = reg === 'ventas' ? 'bi' : 'bidg';
+                if (f.tcp === '07' && num(f[kb]) > 0) out[kb] = { tipo: 'warn', msg: 'En una nota de crédito la base imponible va en negativo.' };
             }
-            if (reg === 'compras' && f.mon && f.mon !== 'PEN' && !f.tc) out.tc = { tipo: 'err', msg: 'Si la moneda no es PEN, indica el tipo de cambio.' };
+            if (reg === 'compras' && f.tdoc && f.tdoc !== '6' && num(f.igvdg) !== 0 && f.tcp === '01')
+                out.tdoc = { tipo: 'warn', msg: 'Una factura con crédito fiscal debe ser emitida por un proveedor con RUC (tipo 6).' };
             return out;
         }
 
         // =====================================================================
-        // Pintado de la tabla
+        // Encabezado de varios niveles (igual al formato)
         // =====================================================================
         function pintarCabecera() {
-            const cols = COLS[reg];
-            let f1 = '<tr class="f1"><th class="sel" rowspan="2"><input type="checkbox" id="chk-todos" title="Seleccionar todas"></th>';
-            let f2 = '<tr class="f2">';
-            for (let i = 0; i < cols.length;) {
-                const c = cols[i];
-                if (!c.g) { f1 += `<th rowspan="2" style="min-width:${c.w}px">${thContenido(c, i)}</th>`; i++; continue; }
-                let span = 0;
-                while (i + span < cols.length && cols[i + span].g === c.g) span++;
-                f1 += `<th class="grupo" colspan="${span}">${c.g}</th>`;
-                for (let j = 0; j < span; j++) f2 += `<th style="min-width:${cols[i + j].w}px">${thContenido(cols[i + j], i + j)}</th>`;
-                i += span;
+            const cols = visibles();
+            const prof = Math.max(...cols.map(c => c.p.length));
+            const filas = [];
+            for (let nivel = 0; nivel < prof; nivel++) {
+                let html = nivel === 0 ? `<th class="sel" rowspan="${prof}"><input type="checkbox" id="chk-todos" title="Seleccionar todas"></th>` : '';
+                for (let i = 0; i < cols.length;) {
+                    const c = cols[i];
+                    if (c.p.length <= nivel) { i++; continue; }                     // ya cubierta por un rowspan
+                    if (c.p.length === nivel + 1) {                                  // hoja
+                        html += `<th rowspan="${prof - nivel}" style="min-width:${c.w}px">${thContenido(c)}</th>`;
+                        i++; continue;
+                    }
+                    let span = 0;                                                    // grupo
+                    while (i + span < cols.length && cols[i + span].p.length > nivel + 1 &&
+                           cols[i + span].p.slice(0, nivel + 1).join('|') === c.p.slice(0, nivel + 1).join('|')) span++;
+                    if (span === 0) span = 1;
+                    html += `<th class="grupo" colspan="${span}">${c.p[nivel]}</th>`;
+                    i += span;
+                }
+                filas.push('<tr>' + html + '</tr>');
             }
-            $('thead').innerHTML = f1 + '</tr>' + f2 + '</tr>';
-            const alto = $('thead').querySelector('tr.f1 th.grupo');
-            document.documentElement.style.setProperty('--alto-f1', (alto ? alto.offsetHeight : 26) + 'px');
+            $('thead').innerHTML = filas.join('');
+            // Encabezado fijo al desplazar: cada fila se pega bajo la anterior
+            let top = 0;
+            $('thead').querySelectorAll('tr').forEach(tr => {
+                tr.querySelectorAll('th').forEach(th => { th.style.top = top + 'px'; });
+                top += tr.offsetHeight;
+            });
             $('chk-todos').onchange = e => document.querySelectorAll('.chk-fila').forEach(c => c.checked = e.target.checked);
         }
-        function thContenido(c, i) {
-            return `<div class="th-in"><span><span class="num-col">${i + 1}</span>${c.l}${c.req ? ' <span class="marca-req">*</span>' : ''}${c.tipo === 'auto' ? ' &#128274;' : ''}</span>` +
+        function thContenido(c) {
+            const n = COLS[reg].indexOf(c) + 1;
+            return `<div class="th-in"><span><span class="num-col">${n}</span>${c.l}${c.req ? ' <span class="marca-req">*</span>' : ''}${c.tipo === 'auto' ? ' &#128274;' : ''}</span>` +
                    `<span class="th-help" onclick="mostrarAyuda('${c.k}')" title="¿Qué escribo aquí?">?</span></div>`;
         }
 
+        // =====================================================================
+        // Cuerpo y totales
+        // =====================================================================
         function pintarCuerpo() {
-            const cols = COLS[reg];
-            const filas = datos[reg];
-            $('tbody').innerHTML = filas.map((f, i) => {
+            const cols = visibles();
+            $('tbody').innerHTML = datos[reg].map((f, i) => {
                 calcularFila(f, i);
                 return '<tr data-i="' + i + '"><td class="sel"><input type="checkbox" class="chk-fila" data-i="' + i + '" style="width:auto;"></td>' +
                     cols.map(c => celda(c, f, i)).join('') + '</tr>';
@@ -532,10 +547,7 @@
             const v = f[c.k] == null ? '' : f[c.k];
             const cls = c.req ? 'req' : '';
             const d = `data-k="${c.k}" data-i="${i}"`;
-            if (c.tipo === 'auto') {
-                const txt = c.txt || c.k === 'cuo' || c.k === 'n' ? esc(v) : fmt(v);
-                return `<td class="auto${c.txt ? ' txt' : ''}" ${d}>${txt}</td>`;
-            }
+            if (c.tipo === 'auto') return `<td class="auto${c.k === 'cuo' ? ' txt' : ''}" ${d}>${c.k === 'cuo' ? esc(v) : fmt(v)}</td>`;
             if (c.tipo === 'fecha') return `<td class="${cls}" ${d}><input type="date" value="${esc(v)}" ${d}></td>`;
             if (c.tipo === 'cod') {
                 const ops = '<option value=""></option>' + c.cat.map(([cod, desc]) =>
@@ -547,31 +559,24 @@
         }
 
         function pintarTotales() {
-            const cols = COLS[reg];
-            const filas = datos[reg];
             let html = '<tr><td></td>';
             let etiqueta = false;
-            cols.forEach(c => {
-                const sumable = (c.tipo === 'num' && c.dec == null && c.k !== 'porcpart') || (c.tipo === 'auto' && c.suma);
-                if (!sumable) {
-                    html += etiqueta ? '<td></td>' : '<td class="lbl">TOTALES</td>';
-                    etiqueta = true;
-                    return;
-                }
-                html += `<td data-tot="${c.k}">${fmt(filas.reduce((s, f) => s + num(f[c.k]), 0))}</td>`;
+            visibles().forEach(c => {
+                if (!sumable(c)) { html += etiqueta ? '<td></td>' : '<td class="lbl">TOTALES</td>'; etiqueta = true; return; }
+                html += `<td>${fmt(datos[reg].reduce((s, f) => s + num(f[c.k]), 0))}</td>`;
             });
             $('tfoot').innerHTML = html + '</tr>';
         }
 
-        // Refresca una fila (celdas calculadas) sin repintar los inputs
         function refrescarFila(i) {
             const f = datos[reg][i];
             calcularFila(f, i);
             const tr = $('tbody').querySelector(`tr[data-i="${i}"]`);
-            COLS[reg].forEach(c => {
+            if (!tr) return;
+            visibles().forEach(c => {
                 if (c.tipo === 'auto') {
                     const td = tr.querySelector(`td[data-k="${c.k}"]`);
-                    td.textContent = (c.txt || c.k === 'cuo' || c.k === 'n') ? (f[c.k] || '') : fmt(f[c.k]);
+                    td.textContent = c.k === 'cuo' ? (f[c.k] || '') : fmt(f[c.k]);
                 }
                 if (c.calc === 'igv' && !f._igvManual[c.k]) {
                     const inp = tr.querySelector(`input[data-k="${c.k}"]`);
@@ -587,21 +592,23 @@
         }
 
         function validarTodo() {
-            let errores = 0, avisos = 0, llenas = 0;
+            let errores = 0, avisos = 0, llenas = 0, ocultos = 0;
             const cuenta = {};
             datos[reg].forEach((f, i) => {
                 const res = validarFila(f);
+                if (!filaVaciaEs(f)) { llenas++; cuenta[f.tcp || '—'] = (cuenta[f.tcp || '—'] || 0) + 1; }
+                Object.keys(res).forEach(k => {
+                    if (res[k].tipo === 'err') errores++; else avisos++;
+                    const c = COLS[reg].find(x => x.k === k);
+                    if (c && c.extra && !verExtra) ocultos++;
+                });
                 const tr = $('tbody').querySelector(`tr[data-i="${i}"]`);
                 if (!tr) return;
-                const vacia = COLS[reg].every(c => c.tipo === 'auto' || !f[c.k] || f[c.k] === c.defecto);
-                if (!vacia) { llenas++; cuenta[f.tcp || '—'] = (cuenta[f.tcp || '—'] || 0) + 1; }
                 tr.querySelectorAll('td[data-k]').forEach(td => {
                     const r = res[td.dataset.k];
                     td.classList.toggle('err', !!r && r.tipo === 'err');
                     td.classList.toggle('warn', !!r && r.tipo === 'warn');
                     td.title = r ? r.msg : '';
-                    if (r && r.tipo === 'err') errores++;
-                    if (r && r.tipo === 'warn') avisos++;
                 });
             });
             const tipos = Object.keys(cuenta).sort().map(k => {
@@ -611,14 +618,32 @@
             $('chips').innerHTML = `<span class="chip">Comprobantes: <b>${llenas}</b></span>` + tipos +
                 (errores || avisos
                     ? `<span class="chip chip-error" onclick="irAlPrimerError()" title="Clic para ir al primer error">✗ ${errores} error(es) · ${avisos} aviso(s) — pasa el mouse sobre la celda roja o amarilla</span>`
-                    : '<span class="chip chip-ok">✓ Sin errores</span>');
+                    : '<span class="chip chip-ok">✓ Sin errores</span>') +
+                (ocultos ? `<span class="chip chip-error" onclick="alternarExtra(true)">${ocultos} en columnas adicionales: clic para mostrarlas</span>` : '');
         }
         function irAlPrimerError() {
             const td = $('tbody').querySelector('td.err, td.warn');
-            if (!td) return;
+            if (!td) { alternarExtra(true); return; }
             td.scrollIntoView({ block: 'center', inline: 'center' });
             const inp = td.querySelector('input, select'); if (inp) inp.focus();
             alert(td.title);
+        }
+
+        // Columnas adicionales (tipo de cambio, referencia, detracción...)
+        function alternarExtra(forzar) {
+            verExtra = forzar === true ? true : !verExtra;
+            try { localStorage.setItem('taxlab_registros_extra', verExtra ? '1' : '0'); } catch (e) {}
+            actualizarBotonExtra();
+            pintarCabecera();
+            pintarCuerpo();
+        }
+        function actualizarBotonExtra() {
+            const extras = COLS[reg].filter(c => c.extra);
+            const b = $('btn-extra');
+            b.innerHTML = verExtra
+                ? '<i class="fas fa-compress-alt"></i> Ocultar columnas adicionales'
+                : `<i class="fas fa-expand-alt"></i> Mostrar columnas adicionales (${extras.length})`;
+            b.title = 'Columnas después del importe total: ' + [...new Set(extras.map(c => c.p[0]))].join(' · ').toLowerCase();
         }
 
         // =====================================================================
@@ -632,7 +657,7 @@
             if (c.tipo === 'num') v = v.replace(/[^\d.\-]/g, '');
             if (c.tipo === 'texto') v = v.replace(/,/g, '');
             if (c.mayus) v = v.toUpperCase();
-            if (c.k === 'ndoc') v = v.replace(/\s/g, '');
+            if (k === 'ndoc') v = v.replace(/\s/g, '');
             f[k] = v;
             if (c.calc === 'igv') f._igvManual[k] = v !== '';
             refrescarFila(i); pintarTotales(); validarTodo(); guardar();
@@ -642,7 +667,6 @@
             const i = +el.dataset.i; datos[reg][i][el.dataset.k] = el.value;
             refrescarFila(i); validarTodo(); guardar();
         });
-        // Al salir de un importe se muestra con miles y decimales
         $('tbody').addEventListener('focusout', e => {
             const el = e.target; if (!el.classList || !el.classList.contains('num')) return;
             const c = COLS[reg].find(x => x.k === el.dataset.k);
@@ -660,7 +684,7 @@
         function copiarFilas() {
             const sel = seleccionadas();
             if (!sel.length) { alert('Marca con el check la(s) fila(s) que quieres copiar.'); return; }
-            sel.forEach(i => { const f = JSON.parse(JSON.stringify(datos[reg][i])); datos[reg].push(f); });
+            sel.forEach(i => datos[reg].push(JSON.parse(JSON.stringify(datos[reg][i]))));
             pintarCuerpo(); guardar();
         }
         function eliminarFilas() {
@@ -684,7 +708,8 @@
         function mostrarAyuda(k) {
             const c = COLS[reg].find(x => x.k === k);
             $('help-titulo').textContent = c.l + (c.req ? ' (obligatorio)' : '');
-            let html = `<div>${c.ayuda}</div>`;
+            let html = c.p.length > 1 ? `<div style="color:#607d8b; font-size:12px; margin-bottom:6px;">${c.p.slice(0, -1).join(' › ')}</div>` : '';
+            html += `<div>${c.ayuda}</div>`;
             if (c.ej) html += `<div class="ejemplo"><b>Ejemplo:</b> ${c.ej}</div>`;
             if (c.regla) html += `<div class="regla"><b>Ojo:</b> ${c.regla}</div>`;
             if (c.cat) html += '<table><tr><th>Código</th><th>Descripción</th></tr>' +
@@ -696,7 +721,7 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarAyuda(); });
 
         function mostrarGuia() {
-            $('help-titulo').textContent = reg === 'ventas' ? 'Cómo llenar el Registro de Ventas' : 'Cómo llenar el Registro de Compras';
+            $('help-titulo').textContent = reg === 'ventas' ? 'Cómo llenar el Registro de Ventas (Formato 14.1)' : 'Cómo llenar el Registro de Compras (Formato 8.1)';
             $('help-cuerpo').innerHTML = reg === 'ventas' ? `
                 <ol>
                     <li>Completa el <b>periodo</b>, el <b>RUC</b> y la <b>razón social</b> de tu empresa.</li>
@@ -704,68 +729,72 @@
                     <li>Elige el <b>tipo de comprobante</b> y el <b>tipo de documento</b> del cliente de la lista.</li>
                     <li>Escribe la <b>base imponible</b>: el IGV (18%) y el importe total se calculan solos.</li>
                     <li>Las <b>boletas</b> muestran el precio con IGV: base = total ÷ 1.18.</li>
-                    <li>En <b>notas de crédito</b> los importes van en negativo y debes llenar la referencia del comprobante que se modifica.</li>
+                    <li>En <b>notas de crédito</b> los importes van en negativo y debes llenar la referencia del comprobante que se modifica (en <b>Mostrar columnas adicionales</b>).</li>
                     <li>Si una celda se pone <span style="color:#c62828;font-weight:700;">roja</span> (error) o <span style="color:#f9a825;font-weight:700;">amarilla</span> (aviso), pasa el mouse sobre ella para ver qué corregir.</li>
                     <li>Al terminar, usa <b>Exportar a Excel</b> o <b>Imprimir</b>.</li>
                 </ol>` : `
                 <ol>
-                    <li>Completa el <b>periodo</b>, el <b>RUC</b> y la <b>razón social</b> de tu empresa: se copian solos en cada fila.</li>
+                    <li>Completa el <b>periodo</b>, el <b>RUC</b> y la <b>razón social</b> de tu empresa.</li>
                     <li>Anota <b>una fila por comprobante recibido</b> de tus proveedores.</li>
-                    <li>Elige el <b>tipo de comprobante</b> y escribe serie, número y el RUC del proveedor: el <b>CAR SUNAT</b> se arma solo.</li>
-                    <li>Si la compra es para tus ventas gravadas (lo más común), usa las columnas <b>15 y 16</b>: escribe la base y el IGV se propone al 18%.</li>
-                    <li>Los <b>recibos por honorarios</b> (02) van en <b>compras no gravadas</b>.</li>
-                    <li>Si el comprobante está en <b>dólares</b>, elige USD, escribe el <b>tipo de cambio</b> y anota los importes <b>en soles</b>.</li>
-                    <li>Indica la <b>clasificación de bienes y servicios</b> (mercadería, activo fijo, gastos…).</li>
+                    <li>Si la compra es para tus ventas gravadas (lo más común), usa las columnas <b>11 y 12</b>: escribe la base y el IGV se propone al 18%.</li>
+                    <li>Los <b>recibos por honorarios</b> (02) y las compras exoneradas o inafectas van en <b>valor de las adquisiciones no gravadas</b> (columna 17).</li>
+                    <li>Si el comprobante está en <b>dólares</b>, anota los importes <b>en soles</b> y el <b>tipo de cambio</b> en las columnas adicionales.</li>
+                    <li>Las compras con <b>detracción</b> llevan el número y la fecha de la constancia de depósito (columnas adicionales).</li>
                     <li>Las celdas <span style="color:#c62828;font-weight:700;">rojas</span> o <span style="color:#f9a825;font-weight:700;">amarillas</span> indican qué revisar (pasa el mouse sobre ellas).</li>
                 </ol>`;
             $('help-card').style.display = 'block';
         }
 
         // =====================================================================
-        // Exportar a Excel (mismo orden de columnas que los formatos)
+        // Exportar a Excel con el formato oficial completo (todas las columnas)
         // =====================================================================
         function aFecha(v) { if (!v) return ''; const [a, m, d] = v.split('-'); return d + '/' + m + '/' + a; }
         function exportarExcel() {
             if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel. Revisa tu conexión a internet y vuelve a intentarlo.'); return; }
             const cols = COLS[reg];
-            const filas = datos[reg].filter(f => !cols.every(c => c.tipo === 'auto' || !f[c.k] || f[c.k] === c.defecto));
-            const titulo = reg === 'ventas' ? 'FORMATO 14.1: REGISTRO DE VENTAS E INGRESOS' : 'REGISTRO DE COMPRAS ELECTRÓNICO';
+            const filas = datos[reg].filter(f => !filaVaciaEs(f));
+            const prof = Math.max(...cols.map(c => c.p.length));
             const aoa = [
-                [titulo], [],
+                [FORMATO[reg].codigo, FORMATO[reg].nombre], [],
                 ['PERIODO:', MESES[datos.mes - 1] + ' ' + datos.anio],
                 ['RUC:', datos.ruc],
-                ['APELLIDOS Y NOMBRES, DENOMINACIÓN O RAZÓN SOCIAL:', datos.razon],
-                ['EXPRESADO EN:', 'SOLES'], []
+                ['APELLIDOS Y NOMBRES, DENOMINACIÓN O RAZÓN SOCIAL:', datos.razon], []
             ];
-            const filaGrupo = aoa.length;
-            aoa.push(cols.map(c => c.g || c.l));
-            aoa.push(cols.map(c => c.g ? c.l : ''));
+            const r0 = aoa.length;
             const merges = [];
-            for (let i = 0; i < cols.length;) {
-                const c = cols[i];
-                if (!c.g) { merges.push({ s: { r: filaGrupo, c: i }, e: { r: filaGrupo + 1, c: i } }); i++; continue; }
-                let span = 0; while (i + span < cols.length && cols[i + span].g === c.g) span++;
-                if (span > 1) merges.push({ s: { r: filaGrupo, c: i }, e: { r: filaGrupo, c: i + span - 1 } });
-                i += span;
+            for (let nivel = 0; nivel < prof; nivel++) aoa.push(cols.map(() => ''));
+            for (let nivel = 0; nivel < prof; nivel++) {
+                for (let i = 0; i < cols.length;) {
+                    const c = cols[i];
+                    if (c.p.length <= nivel) { i++; continue; }
+                    if (c.p.length === nivel + 1) {
+                        aoa[r0 + nivel][i] = c.l;
+                        if (prof - nivel > 1) merges.push({ s: { r: r0 + nivel, c: i }, e: { r: r0 + prof - 1, c: i } });
+                        i++; continue;
+                    }
+                    let span = 0;
+                    while (i + span < cols.length && cols[i + span].p.length > nivel + 1 &&
+                           cols[i + span].p.slice(0, nivel + 1).join('|') === c.p.slice(0, nivel + 1).join('|')) span++;
+                    if (span === 0) span = 1;
+                    aoa[r0 + nivel][i] = c.p[nivel];
+                    if (span > 1) merges.push({ s: { r: r0 + nivel, c: i }, e: { r: r0 + nivel, c: i + span - 1 } });
+                    i += span;
+                }
             }
-            filas.forEach(f => aoa.push(cols.map(c => {
-                const v = f[c.k];
+            filas.forEach((f, idx) => aoa.push(cols.map(c => {
+                const v = c.k === 'cuo' ? String(idx + 1).padStart(4, '0') : f[c.k];
                 if (v === '' || v == null) return '';
                 if (c.tipo === 'fecha') return aFecha(v);
                 if (c.tipo === 'num' || (c.tipo === 'auto' && c.suma)) return num(v);
                 return String(v);
             })));
-            aoa.push(cols.map((c, i) => {
-                const sumable = (c.tipo === 'num' && c.dec == null && c.k !== 'porcpart') || (c.tipo === 'auto' && c.suma);
-                if (i === 0) return 'TOTALES';
-                return sumable ? r2(filas.reduce((s, f) => s + num(f[c.k]), 0)) : '';
-            }));
+            aoa.push(cols.map((c, i) => i === 0 ? 'TOTALES' : (sumable(c) ? r2(filas.reduce((s, f) => s + num(f[c.k]), 0)) : '')));
             const ws = XLSX.utils.aoa_to_sheet(aoa);
             ws['!merges'] = merges;
-            ws['!cols'] = cols.map(c => ({ wch: Math.max(8, Math.round(c.w / 7)) }));
+            ws['!cols'] = cols.map(c => ({ wch: Math.max(9, Math.round(c.w / 7)) }));
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, reg === 'ventas' ? 'Registro de Ventas' : 'RCE');
-            const nombre = (reg === 'ventas' ? 'Registro_Ventas_' : 'Registro_Compras_') + (datos.ruc || 'RUC') + '_' + periodoAAAAMM() + '.xlsx';
+            XLSX.utils.book_append_sheet(wb, ws, reg === 'ventas' ? '14.1' : '8.1');
+            const nombre = (reg === 'ventas' ? 'Registro_Ventas_14.1_' : 'Registro_Compras_8.1_') + (datos.ruc || 'RUC') + '_' + periodoAAAAMM() + '.xlsx';
             XLSX.writeFile(wb, nombre);
         }
 
@@ -775,8 +804,9 @@
         function cambiarRegistro(r) {
             reg = r;
             document.querySelectorAll('.tab').forEach(t => t.classList.toggle('activa', t.dataset.reg === r));
-            $('titulo-formato').textContent = r === 'ventas' ? 'Formato 14.1 - Registro de Ventas e Ingresos' : 'Registro de Compras Electrónico (estructura del RCE - SIRE)';
+            $('titulo-formato').textContent = FORMATO[r].codigo + ' - ' + FORMATO[r].nombre;
             cerrarAyuda();
+            actualizarBotonExtra();
             pintarCabecera();
             pintarCuerpo();
         }
