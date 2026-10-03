@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registros de Compras y Ventas</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <script src="sesion.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --azul: #1E395B;
+            --azul2: #004B91;
+            --req: #fff6d9;
+            --req-borde: #e0c96a;
+            --auto: #e3e6e8;
+            --error: #fdecea;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f9;
+            color: #263238;
+            font-size: 12px;
+        }
+
+        .pagina { padding: 18px 22px 30px; }
+
+        /* ===== Encabezado ===== */
+        .encabezado { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+        .encabezado img { height: 38px; }
+        .marca { font-size: 12px; font-weight: 700; color: var(--azul); border-left: 2px solid #006699; padding-left: 10px; }
+        .encabezado h1 { margin: 0; font-size: 18px; color: #222; }
+        .encabezado .volver { margin-left: auto; color: var(--azul2); text-decoration: none; font-weight: 600; font-size: 13px; }
+
+        /* ===== Pestañas ===== */
+        .tabs { display: flex; gap: 6px; border-bottom: 2px solid var(--azul2); margin-bottom: 12px; flex-wrap: wrap; }
+        .tab {
+            padding: 9px 18px; border: 1px solid #c5d2e0; border-bottom: none; border-radius: 8px 8px 0 0;
+            background: #e8eef5; cursor: pointer; font-weight: 600; color: #455a64; font-size: 13px;
+        }
+        .tab.activa { background: var(--azul2); color: #fff; border-color: var(--azul2); }
+
+        /* ===== Datos generales ===== */
+        .datos {
+            background: #fff; border-left: 4px solid var(--azul2); box-shadow: 0 1px 4px rgba(0,0,0,.08);
+            padding: 12px 14px; display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px;
+        }
+        .datos .formato { width: 100%; font-weight: 700; color: var(--azul); font-size: 13px; margin-bottom: 2px; }
+        .campo-dg { display: flex; flex-direction: column; gap: 3px; }
+        .campo-dg label { font-weight: 600; font-size: 11px; color: #546e7a; }
+        .campo-dg input, .campo-dg select {
+            padding: 6px 8px; border: 1px solid #b0bec5; border-radius: 4px; font-size: 13px; font-family: inherit;
+        }
+
+        /* ===== Barra de acciones ===== */
+        .acciones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+        .btn {
+            padding: 7px 13px; border: none; border-radius: 4px; color: #fff; background: #1a73e8; cursor: pointer;
+            font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn:hover { filter: brightness(.93); }
+        .btn.rojo { background: #d93025; }
+        .btn.verde { background: #2e7d32; }
+        .btn.gris { background: #607d8b; }
+        .btn.morado { background: #6a1b9a; }
+        .btn.ambar { background: #b45309; }
+
+        .leyenda span { display: inline-block; padding: 3px 10px; margin-right: 6px; border-radius: 3px; font-size: 11px; }
+        .chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 6px 0 8px; }
+        .chip { background: #fff; border: 1px solid #cfd8dc; border-radius: 14px; padding: 3px 12px; font-size: 11px; }
+        .chip-ok { background: #e8f5e9; border-color: #66bb6a; color: #1b5e20; }
+        .chip-error { background: #fdecea; border-color: #e53935; color: #b71c1c; cursor: pointer; }
+
+        /* ===== Tabla ===== */
+        .tabla-wrap {
+            max-height: calc(100vh - 330px); min-height: 280px; overflow: auto;
+            border: 1px solid #c5ccd3; background: #fff;
+        }
+        table { border-collapse: collapse; font-size: 11px; }
+        thead th {
+            background: #2c3e50; color: #fff; padding: 5px 6px; text-align: center; vertical-align: middle;
+            border: 1px solid #46607a; position: sticky; z-index: 2; font-weight: 600; line-height: 1.25;
+        }
+        thead tr.f1 th { top: 0; }
+        thead tr.f2 th { top: var(--alto-f1, 26px); }
+        th.grupo { background: #1f2f40; }
+        .th-in { display: flex; align-items: flex-start; justify-content: center; gap: 4px; }
+        .th-help {
+            display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; flex-shrink: 0;
+            border-radius: 50%; background: rgba(255,255,255,.22); border: 1px solid rgba(255,255,255,.6);
+            font-size: 10px; font-weight: 700; cursor: pointer; user-select: none;
+        }
+        .th-help:hover { background: #fff; color: #2c3e50; }
+        .num-col { color: #ffd54f; font-size: 10px; display: block; font-weight: 400; }
+        .marca-req { color: #ffd54f; }
+
+        tbody td { border: 1px solid #dde2e6; padding: 0; height: 26px; }
+        tbody tr:nth-child(even) td { background-image: linear-gradient(rgba(0,0,0,.025), rgba(0,0,0,.025)); }
+        td.req { background-color: var(--req); }
+        td.auto { background-color: var(--auto); color: #546e7a; text-align: right; padding: 0 6px; }
+        td.auto.txt { text-align: left; }
+        td.sel { text-align: center; background: #fafafa; }
+        td.err { outline: 2px solid #e53935; outline-offset: -2px; background-color: var(--error) !important; }
+        td.warn { outline: 2px solid #f9a825; outline-offset: -2px; }
+        td input, td select {
+            width: 100%; height: 26px; border: none; background: transparent; font-size: 11px; font-family: inherit;
+            padding: 0 5px;
+        }
+        td input:focus, td select:focus { outline: 2px solid #1a73e8; background: #fff; }
+        td input.num { text-align: right; }
+        tfoot td {
+            background: #eceff1; font-weight: 700; padding: 5px 6px; text-align: right; border: 1px solid #cfd8dc;
+            position: sticky; bottom: 0; z-index: 1;
+        }
+        tfoot td.lbl { text-align: left; }
+
+        /* ===== Tarjeta de ayuda ===== */
+        .help-card {
+            position: fixed; top: 90px; left: 50%; transform: translateX(-50%); z-index: 10001;
+            width: 94%; max-width: 560px; background: #fff; border: 1px solid #90a4ae; border-radius: 8px;
+            box-shadow: 0 12px 44px rgba(0,0,0,.32); display: none;
+        }
+        .help-card header {
+            background: #2c3e50; color: #fff; padding: 10px 14px; display: flex; justify-content: space-between;
+            align-items: center; border-radius: 8px 8px 0 0; font-weight: 600; font-size: 14px;
+        }
+        .help-card header span { cursor: pointer; font-size: 22px; line-height: 1; }
+        .help-card .cuerpo { padding: 14px 16px; font-size: 13px; line-height: 1.6; max-height: 60vh; overflow-y: auto; }
+        .help-card .ejemplo { background: #f1f8e9; border-left: 3px solid #7cb342; padding: 6px 10px; margin-top: 8px; }
+        .help-card .regla { background: #fff8e1; border-left: 3px solid #f9a825; padding: 6px 10px; margin-top: 8px; }
+        .help-card table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 12px; }
+        .help-card th { background: #2c3e50; color: #fff; padding: 4px 8px; text-align: left; position: static; }
+        .help-card td { border: 1px solid #ddd; padding: 3px 8px; }
+        .help-card td.cod { font-weight: 700; color: #1a73e8; white-space: nowrap; }
+        .help-card ol { padding-left: 20px; margin: 6px 0; }
+
+        footer.pie {
+            background: #222; color: #ccc; padding: 8px 20px; font-size: 11px; display: flex;
+            justify-content: space-between; flex-wrap: wrap; gap: 6px;
+        }
+        footer.pie strong { color: #fff; }
+
+        @media print {
+            @page { size: A4 landscape; margin: 8mm; }
+            body { background: #fff; }
+            .acciones, .tabs, .leyenda, .chips, .encabezado .volver, footer.pie, #emp-fab, td.sel, th.sel, .th-help { display: none !important; }
+            .tabla-wrap { max-height: none; overflow: visible; border: none; }
+            thead th { position: static; }
+            tfoot td { position: static; }
+            td input, td select { font-size: 9px; }
+        }
+        @media (max-width: 640px) {
+            .pagina { padding: 12px 10px 24px; }
+            .encabezado h1 { font-size: 15px; }
+            .tabla-wrap { max-height: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pagina">
+        <div class="encabezado">
+            <img src="LOGO_SUNAT.png" alt="Logo">
+            <span class="marca">LABORATORIO CONTABLE</span>
+            <h1>Registros de Compras y Ventas — llenado guiado</h1>
+            <a class="volver" href="sol.html"><i class="fas fa-arrow-left"></i> Volver al portal SOL</a>
+        </div>
+
+        <div class="tabs">
+            <div class="tab activa" data-reg="ventas"><i class="fas fa-cash-register"></i> Registro de Ventas e Ingresos (Formato 14.1)</div>
+            <div class="tab" data-reg="compras"><i class="fas fa-shopping-cart"></i> Registro de Compras Electrónico (RCE)</div>
+        </div>
+
+        <div class="datos">
+            <div class="formato" id="titulo-formato">Formato 14.1 - Registro de Ventas e Ingresos</div>
+            <div class="campo-dg">
+                <label>Periodo</label>
+                <div style="display:flex; gap:6px;">
+                    <select id="dg-mes"></select>
+                    <select id="dg-anio"></select>
+                </div>
+            </div>
+            <div class="campo-dg">
+                <label>RUC</label>
+                <input id="dg-ruc" maxlength="11" inputmode="numeric" placeholder="Ej: 20123456789" style="width:140px;">
+            </div>
+            <div class="campo-dg" style="flex:1; min-width:220px;">
+                <label>Apellidos y nombres, denominación o razón social</label>
+                <input id="dg-razon" placeholder="Ej: EMPRESA DEMO S.A.C.">
+            </div>
+            <div class="campo-dg">
+                <label>Expresado en</label>
+                <input value="SOLES" disabled style="width:90px; background:#eceff1;">
+            </div>
+        </div>
+
+        <div class="acciones">
+            <button class="btn" onclick="agregarFila()"><i class="fas fa-plus"></i> Agregar fila</button>
+            <button class="btn morado" onclick="copiarFilas()"><i class="fas fa-copy"></i> Copiar fila(s)</button>
+            <button class="btn rojo" onclick="eliminarFilas()"><i class="fas fa-trash"></i> Eliminar fila(s)</button>
+            <button class="btn verde" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+            <button class="btn gris" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+            <button class="btn ambar" onclick="mostrarGuia()"><i class="fas fa-book-open"></i> Guía de llenado</button>
+            <button class="btn gris" onclick="limpiarRegistro()"><i class="fas fa-eraser"></i> Limpiar registro</button>
+            <span class="leyenda" style="margin-left:auto;">
+                <span style="background:var(--req); border:1px solid var(--req-borde);">Obligatorio *</span>
+                <span style="background:#fff; border:1px solid #ccc;">Opcional / según el caso</span>
+                <span style="background:var(--auto); color:#607d8b; border:1px solid #bbb;">&#128274; Se calcula solo</span>
+            </span>
+        </div>
+
+        <div class="chips" id="chips"></div>
+
+        <div class="tabla-wrap">
+            <table id="tabla">
+                <thead id="thead"></thead>
+                <tbody id="tbody"></tbody>
+                <tfoot id="tfoot"></tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="help-card" id="help-card">
+        <header><span id="help-titulo" style="cursor:default; font-size:14px;"></span><span onclick="cerrarAyuda()" title="Cerrar">&times;</span></header>
+        <div class="cuerpo" id="help-cuerpo"></div>
+    </div>
+
+    <footer class="pie">
+        <span>Simulador de prueba | Elaborado por <strong>el Equipo Académico de Contabilidad CERTUS</strong></span>
+        <span>Lo que escribas se guarda automáticamente en este navegador.</span>
+    </footer>
+
+    <script>
+        // =====================================================================
+        // Catálogos (Anexo 3 de la R.S. 286-2009/SUNAT y Anexo 1 del SIRE)
+        // =====================================================================
+        const T_DOC = [
+            ["0", "Doc. trib. no dom. sin RUC"], ["1", "DNI - Documento Nacional de Identidad"],
+            ["4", "Carnet de extranjería"], ["6", "RUC - Registro Único de Contribuyentes"],
+            ["7", "Pasaporte"], ["A", "Cédula diplomática de identidad"], ["-", "Varios (ventas menores sin documento)"]
+        ];
+        const T_CP = [
+            ["00", "Otros"], ["01", "Factura"], ["02", "Recibo por honorarios"], ["03", "Boleta de venta"],
+            ["04", "Liquidación de compra"], ["07", "Nota de crédito"], ["08", "Nota de débito"],
+            ["10", "Recibo por arrendamiento"], ["12", "Ticket de máquina registradora"],
+            ["14", "Recibo de servicios públicos"], ["50", "DAM - Importación definitiva"],
+            ["91", "Comprobante de no domiciliado"]
+        ];
+        const T_MONEDA = [["PEN", "Sol"], ["USD", "Dólar americano"], ["EUR", "Euro"]];
+        const T_CLASIF = [
+            ["1", "Mercadería, materia prima, suministros, envases y embalajes"],
+            ["2", "Activo fijo"],
+            ["3", "Otros activos no considerados en 1 y 2"],
+            ["4", "Gastos de educación, recreación, salud, representación, capacitación, viaje, mantenimiento de vehículos y premios"],
+            ["5", "Otros gastos no incluidos en 4"]
+        ];
+        const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+        // =====================================================================
+        // Estructura de cada registro (igual a los formatos en Excel)
+        //   tipo: auto | fecha | num | texto | cod   ·   req: obligatorio
+        // =====================================================================
+        const COLS = {
+            ventas: [
+                { k: 'cuo', g: '', l: 'Número correlativo del registro o CUO', w: 90, tipo: 'auto',
+                  ayuda: 'Número correlativo que identifica la operación en el registro. Se numera solo (0001, 0002…).' },
+                { k: 'femi', g: '', l: 'Fecha de emisión del comprobante', w: 125, tipo: 'fecha', req: true,
+                  ayuda: 'Fecha que figura en el comprobante de pago.', ej: '05/02/2026',
+                  regla: 'Debe pertenecer al periodo que declaras o ser anterior (si se anota con retraso).' },
+                { k: 'fvto', g: '', l: 'Fecha de vencimiento y/o pago', w: 125, tipo: 'fecha',
+                  ayuda: 'Solo si la venta es al crédito: fecha de vencimiento o de pago. Si es al contado, déjalo vacío.' },
+                { k: 'tcp', g: 'Comprobante de pago o documento', l: 'Tipo', w: 150, tipo: 'cod', cat: T_CP, req: true,
+                  ayuda: 'Código del tipo de comprobante (Tabla 10).', ej: '01 = Factura · 03 = Boleta · 07 = Nota de crédito' },
+                { k: 'serie', g: 'Comprobante de pago o documento', l: 'Serie o N° máq. registradora', w: 95, tipo: 'texto', req: true, mayus: true,
+                  ayuda: 'Serie del comprobante. En comprobantes electrónicos son 4 caracteres.', ej: 'E001 · F001 · EB01' },
+                { k: 'num', g: 'Comprobante de pago o documento', l: 'Número', w: 90, tipo: 'texto', req: true,
+                  ayuda: 'Número correlativo del comprobante, sin la serie.', ej: '101' },
+                { k: 'tdoc', g: 'Información del cliente', l: 'Tipo doc. identidad', w: 130, tipo: 'cod', cat: T_DOC, req: true,
+                  ayuda: 'Tipo de documento del cliente (Tabla 2).', ej: '6 = RUC (facturas) · 1 = DNI (boletas)' },
+                { k: 'ndoc', g: 'Información del cliente', l: 'Número', w: 105, tipo: 'texto', req: true,
+                  ayuda: 'Número del documento del cliente.', ej: 'RUC 20603383258 · DNI 45678912',
+                  regla: 'RUC = 11 dígitos · DNI = 8 dígitos.' },
+                { k: 'cli', g: 'Información del cliente', l: 'Apellidos y nombres, denominación o razón social', w: 240, tipo: 'texto', req: true, mayus: true,
+                  ayuda: 'Nombre del cliente tal como figura en el comprobante. No uses comas.', ej: 'PIRQA CONSTRUCTORES S.A.C.' },
+                { k: 'exp', g: '', l: 'Valor facturado de la exportación', w: 100, tipo: 'num',
+                  ayuda: 'Solo para exportaciones (no llevan IGV). Si no exportas, déjalo vacío.' },
+                { k: 'bi', g: '', l: 'Base imponible de la operación gravada', w: 110, tipo: 'num',
+                  ayuda: 'Valor de venta sin IGV de las operaciones gravadas.', ej: 'Factura por S/ 25,016 → base 21,200.00',
+                  regla: 'En boletas el precio ya incluye IGV: base = total ÷ 1.18. En notas de crédito escríbelo en negativo.' },
+                { k: 'exo', g: 'Importe total de la operación', l: 'Exonerada', w: 95, tipo: 'num',
+                  ayuda: 'Ventas exoneradas del IGV (Apéndice I de la Ley del IGV).' },
+                { k: 'ina', g: 'Importe total de la operación', l: 'Inafecta', w: 95, tipo: 'num',
+                  ayuda: 'Ventas inafectas (no gravadas con IGV).' },
+                { k: 'isc', g: '', l: 'ISC', w: 80, tipo: 'num', ayuda: 'Impuesto Selectivo al Consumo, solo si corresponde.' },
+                { k: 'igv', g: '', l: 'IGV y/o IPM', w: 95, tipo: 'num', calc: 'igv',
+                  ayuda: 'Se propone solo: 18% de la base imponible. Puedes corregirlo (por ejemplo, 10% en restaurantes MYPE).', ej: 'Base 21,200.00 → IGV 3,816.00' },
+                { k: 'otros', g: '', l: 'Otros tributos y cargos', w: 90, tipo: 'num', ayuda: 'Otros tributos o cargos que no forman parte de la base (ICBPER, recargo al consumo, etc.).' },
+                { k: 'total', g: '', l: 'Importe total', w: 105, tipo: 'auto', suma: ['exp', 'bi', 'exo', 'ina', 'isc', 'igv', 'otros'],
+                  ayuda: 'Se suma solo: exportación + base + exonerada + inafecta + ISC + IGV + otros.' },
+                { k: 'tc', g: '', l: 'Tipo de cambio', w: 75, tipo: 'num', dec: 3,
+                  ayuda: 'Solo si el comprobante está en moneda extranjera: tipo de cambio venta de la fecha de emisión (3 decimales). Los importes van en soles.', ej: '3.720' },
+                { k: 'rfec', g: 'Referencia del comprobante o documento original que se modifica', l: 'Fecha', w: 120, tipo: 'fecha',
+                  ayuda: 'Solo para notas de crédito (07) o débito (08): fecha del comprobante que se modifica.' },
+                { k: 'rtcp', g: 'Referencia del comprobante o documento original que se modifica', l: 'Tipo', w: 120, tipo: 'cod', cat: T_CP,
+                  ayuda: 'Solo para notas de crédito o débito: tipo del comprobante que se modifica.' },
+                { k: 'rser', g: 'Referencia del comprobante o documento original que se modifica', l: 'Serie', w: 75, tipo: 'texto', mayus: true,
+                  ayuda: 'Solo para notas de crédito o débito: serie del comprobante que se modifica.' },
+                { k: 'rnum', g: 'Referencia del comprobante o documento original que se modifica', l: 'Número', w: 85, tipo: 'texto',
+                  ayuda: 'Solo para notas de crédito o débito: número del comprobante que se modifica.' },
+                { k: 'porc', g: 'Referencia del comprobante o documento original que se modifica', l: 'Porc. IGV', w: 70, tipo: 'num', dec: 0,
+                  ayuda: 'Tasa del IGV aplicada (18 o 10). Opcional.' }
+            ],
+            compras: [
+                { k: 'n', g: '', l: 'N.', w: 40, tipo: 'auto', ayuda: 'Número de fila.' },
+                { k: 'ruc', g: '', l: 'RUC', w: 100, tipo: 'auto', txt: true, ayuda: 'RUC de tu empresa. Se toma de los datos generales.' },
+                { k: 'razon', g: '', l: 'ID - Razón social', w: 170, tipo: 'auto', txt: true, ayuda: 'Razón social de tu empresa. Se toma de los datos generales.' },
+                { k: 'per', g: '', l: 'Periodo', w: 70, tipo: 'auto', txt: true, ayuda: 'Periodo declarado (AAAAMM). Se toma de los datos generales.' },
+                { k: 'car', g: '', l: 'CAR SUNAT', w: 210, tipo: 'auto', txt: true,
+                  ayuda: 'Código de Anotación en el Registro. Se arma solo: RUC del proveedor + tipo + serie + número (10 dígitos).', ej: '2056267131601F0010000001180' },
+                { k: 'femi', g: '', l: 'Fecha de emisión', w: 125, tipo: 'fecha', req: true, ayuda: 'Fecha que figura en el comprobante de compra.', ej: '02/02/2026',
+                  regla: 'Debe pertenecer al periodo o ser anterior (hasta 12 meses) para usar el crédito fiscal.' },
+                { k: 'fvto', g: '', l: 'Fecha Vcto / Pago', w: 125, tipo: 'fecha', ayuda: 'Solo si la compra es al crédito: fecha de vencimiento o de pago.' },
+                { k: 'tcp', g: '', l: 'Tipo CP / Doc.', w: 150, tipo: 'cod', cat: T_CP, req: true, ayuda: 'Código del tipo de comprobante (Tabla 10).', ej: '01 = Factura · 02 = Recibo por honorarios' },
+                { k: 'serie', g: '', l: 'Serie del CDP', w: 85, tipo: 'texto', req: true, mayus: true, ayuda: 'Serie del comprobante del proveedor.', ej: 'F001' },
+                { k: 'anio', g: '', l: 'Año DUA o DSI', w: 70, tipo: 'texto', ayuda: 'Solo para importaciones (tipo 50): año de la DAM.' },
+                { k: 'num', g: '', l: 'Nro CP o Doc. Nro inicial (rango)', w: 100, tipo: 'texto', req: true, ayuda: 'Número del comprobante del proveedor.', ej: '1180' },
+                { k: 'nfin', g: '', l: 'Nro final (rango)', w: 80, tipo: 'texto', ayuda: 'Solo si anotas un rango de tickets o boletas consolidadas.' },
+                { k: 'tdoc', g: '', l: 'Tipo Doc Identidad', w: 130, tipo: 'cod', cat: T_DOC, req: true, ayuda: 'Tipo de documento del proveedor.', ej: '6 = RUC' },
+                { k: 'ndoc', g: '', l: 'Nro Doc Identidad', w: 105, tipo: 'texto', req: true, ayuda: 'Número de documento del proveedor.', ej: '20562671316', regla: 'RUC = 11 dígitos · DNI = 8 dígitos.' },
+                { k: 'prov', g: '', l: 'Apellidos nombres / Razón social', w: 230, tipo: 'texto', req: true, mayus: true, ayuda: 'Nombre del proveedor tal como figura en el comprobante. No uses comas.', ej: 'ADVANCE TECHNOLOGY GROUP S.A.C.' },
+                { k: 'bidg', g: 'Adquisiciones destinadas a ventas gravadas', l: 'Base imponible', w: 105, tipo: 'num',
+                  ayuda: 'Base imponible de compras destinadas SOLO a ventas gravadas (lo más común). Da derecho a crédito fiscal.', ej: 'Factura S/ 26,196 → base 22,200.00' },
+                { k: 'igvdg', g: 'Adquisiciones destinadas a ventas gravadas', l: 'IGV 18% y 10%', w: 95, tipo: 'num', calc: 'igv', base: 'bidg',
+                  ayuda: 'Se propone solo: 18% de la base. Puedes corregirlo.' },
+                { k: 'bidgng', g: 'Destinadas a ventas gravadas y no gravadas', l: 'Base imponible', w: 105, tipo: 'num',
+                  ayuda: 'Compras que se usan a la vez para ventas gravadas y no gravadas (se prorratea el crédito fiscal).' },
+                { k: 'igvdgng', g: 'Destinadas a ventas gravadas y no gravadas', l: 'IGV 18% y 10%', w: 95, tipo: 'num', calc: 'igv', base: 'bidgng',
+                  ayuda: 'Se propone solo: 18% de la base. Puedes corregirlo.' },
+                { k: 'bidng', g: 'Destinadas a ventas no gravadas', l: 'Base imponible', w: 105, tipo: 'num',
+                  ayuda: 'Compras destinadas solo a ventas no gravadas: su IGV NO da crédito fiscal.' },
+                { k: 'igvdng', g: 'Destinadas a ventas no gravadas', l: 'IGV 18% y 10%', w: 95, tipo: 'num', calc: 'igv', base: 'bidng',
+                  ayuda: 'Se propone solo: 18% de la base. Puedes corregirlo.' },
+                { k: 'ng', g: '', l: 'Compras no gravadas', w: 95, tipo: 'num', ayuda: 'Compras exoneradas o inafectas, y recibos por honorarios (tipo 02).' },
+                { k: 'isc', g: '', l: 'I.S.C.', w: 75, tipo: 'num', ayuda: 'Impuesto Selectivo al Consumo, solo si corresponde.' },
+                { k: 'icbper', g: '', l: 'ICBPER - bolsas', w: 75, tipo: 'num', ayuda: 'Impuesto al consumo de bolsas de plástico.' },
+                { k: 'otros', g: '', l: 'Otros conceptos / tributos', w: 90, tipo: 'num', ayuda: 'Otros tributos o cargos que no forman parte de la base.' },
+                { k: 'total', g: '', l: 'Importe total', w: 105, tipo: 'auto', suma: ['bidg', 'igvdg', 'bidgng', 'igvdgng', 'bidng', 'igvdng', 'ng', 'isc', 'icbper', 'otros'],
+                  ayuda: 'Se suma solo con todas las columnas de importes.' },
+                { k: 'mon', g: '', l: 'Código moneda', w: 90, tipo: 'cod', cat: T_MONEDA, defecto: 'PEN', ayuda: 'Moneda del comprobante.', ej: 'PEN · USD' },
+                { k: 'tc', g: '', l: 'Tipo de cambio', w: 75, tipo: 'num', dec: 3,
+                  ayuda: 'Obligatorio si la moneda no es PEN: tipo de cambio venta de la fecha de emisión. Los importes van en soles.', ej: '3.720' },
+                { k: 'rfec', g: 'Documento que se modifica', l: 'Fecha de emisión', w: 120, tipo: 'fecha', ayuda: 'Solo para notas de crédito o débito: fecha del comprobante que se modifica.' },
+                { k: 'rtcp', g: 'Documento que se modifica', l: 'Tipo', w: 110, tipo: 'cod', cat: T_CP, ayuda: 'Solo para notas de crédito o débito: tipo del comprobante modificado.' },
+                { k: 'rser', g: 'Documento que se modifica', l: 'Serie', w: 70, tipo: 'texto', mayus: true, ayuda: 'Solo para notas de crédito o débito: serie del comprobante modificado.' },
+                { k: 'rdua', g: 'Documento que se modifica', l: 'Código DUA', w: 75, tipo: 'texto', ayuda: 'Solo si el documento modificado es una DAM.' },
+                { k: 'rnum', g: 'Documento que se modifica', l: 'Número', w: 80, tipo: 'texto', ayuda: 'Solo para notas de crédito o débito: número del comprobante modificado.' },
+                { k: 'clasif', g: '', l: 'Clasificación de bienes y servicios', w: 170, tipo: 'cod', cat: T_CLASIF,
+                  ayuda: 'Indica qué compraste (Tabla 30). Ayuda a SUNAT a cruzar la información.', ej: '1 = Mercadería · 2 = Activo fijo · 5 = Otros gastos' },
+                { k: 'contrato', g: 'Contratos de colaboración', l: 'Identificación del contrato', w: 110, tipo: 'texto', ayuda: 'Solo si la compra es de un contrato de colaboración empresarial.' },
+                { k: 'porcpart', g: 'Contratos de colaboración', l: '% participación', w: 85, tipo: 'num', ayuda: 'Porcentaje de participación en el contrato.' },
+                { k: 'ley31053', g: '', l: 'Impuesto materia de beneficio Ley 31053', w: 105, tipo: 'num', ayuda: 'Solo para libros y productos editoriales exonerados (Ley 31053).' },
+                { k: 'carmod', g: '', l: 'CAR CP a modificar o indicador', w: 120, tipo: 'texto', ayuda: 'Solo en ajustes posteriores: CAR del comprobante a modificar, o 1 (excluir) / 2 (incluir).' },
+                { k: 'libre1', g: 'Campos de libre utilización', l: 'Campo 1', w: 90, tipo: 'texto', ayuda: 'Libre: puedes anotar el asiento contable, centro de costo, etc.' },
+                { k: 'libre2', g: 'Campos de libre utilización', l: 'Campo 2', w: 90, tipo: 'texto', ayuda: 'Libre: puedes anotar el asiento contable, centro de costo, etc.' }
+            ]
+        };
+
+        // =====================================================================
+        // Estado (se guarda por estudiante y empresa con SimStore)
+        // =====================================================================
+        const CLAVE = 'sire_registros_manual';
+        let reg = 'ventas';
+        let datos = { mes: '', anio: '', ruc: '', razon: '', ventas: [], compras: [] };
+
+        const $ = id => document.getElementById(id);
+        const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+        const r2 = v => Math.round(v * 100) / 100;
+        const fmt = (v, d) => (v === '' || v == null) ? '' : num(v).toLocaleString('en-US', { minimumFractionDigits: d == null ? 2 : d, maximumFractionDigits: d == null ? 2 : d });
+        const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+        function guardar() {
+            try {
+                const v = JSON.stringify(datos);
+                if (window.SimStore) SimStore.setItem(CLAVE, v); else localStorage.setItem(CLAVE, v);
+            } catch (e) { /* sin almacenamiento */ }
+        }
+        function cargar() {
+            try {
+                const v = window.SimStore ? SimStore.getItem(CLAVE) : localStorage.getItem(CLAVE);
+                if (v) datos = Object.assign(datos, JSON.parse(v));
+            } catch (e) {}
+            let emp = null;
+            try { emp = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null'); } catch (e) {}
+            if (emp && !datos.ruc) { datos.ruc = emp.ruc || ''; datos.razon = emp.razon_social || ''; }
+            const hoy = new Date();
+            if (!datos.mes) { const m = hoy.getMonth() === 0 ? 12 : hoy.getMonth(); datos.mes = String(m); datos.anio = String(hoy.getMonth() === 0 ? hoy.getFullYear() - 1 : hoy.getFullYear()); }
+            if (!datos.ventas.length) datos.ventas.push(filaVacia('ventas'));
+            if (!datos.compras.length) datos.compras.push(filaVacia('compras'));
+        }
+        function filaVacia(r) {
+            const f = {};
+            COLS[r].forEach(c => { f[c.k] = c.defecto || ''; });
+            f._igvManual = {};
+            return f;
+        }
+
+        // =====================================================================
+        // Datos generales
+        // =====================================================================
+        function iniciarDatosGenerales() {
+            $('dg-mes').innerHTML = MESES.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+            const y = new Date().getFullYear();
+            let anios = '';
+            for (let a = y + 1; a >= 2019; a--) anios += `<option>${a}</option>`;
+            $('dg-anio').innerHTML = anios;
+            $('dg-mes').value = datos.mes; $('dg-anio').value = datos.anio;
+            $('dg-ruc').value = datos.ruc; $('dg-razon').value = datos.razon;
+            $('dg-mes').onchange = $('dg-anio').onchange = () => { datos.mes = $('dg-mes').value; datos.anio = $('dg-anio').value; refrescar(); };
+            $('dg-ruc').oninput = () => { $('dg-ruc').value = $('dg-ruc').value.replace(/\D/g, ''); datos.ruc = $('dg-ruc').value; refrescar(); };
+            $('dg-razon').oninput = () => { datos.razon = $('dg-razon').value.replace(/,/g, ''); refrescar(); };
+        }
+        const periodoAAAAMM = () => datos.anio + String(datos.mes).padStart(2, '0');
+
+        // =====================================================================
+        // Cálculos automáticos de una fila
+        // =====================================================================
+        function calcularFila(f, i) {
+            const cols = COLS[reg];
+            // IGV sugerido (18%) mientras el alumno no lo cambie
+            cols.filter(c => c.calc === 'igv').forEach(c => {
+                const kb = c.base || 'bi';
+                if (!f._igvManual[c.k]) f[c.k] = f[kb] === '' ? '' : String(r2(num(f[kb]) * 0.18));
+            });
+            cols.filter(c => c.suma).forEach(c => {
+                const algo = c.suma.some(k => f[k] !== '' && f[k] != null);
+                f[c.k] = algo ? String(r2(c.suma.reduce((s, k) => s + num(f[k]), 0))) : '';
+            });
+            if (reg === 'ventas') f.cuo = String(i + 1).padStart(4, '0');
+            if (reg === 'compras') {
+                f.n = String(i + 1);
+                f.ruc = datos.ruc; f.razon = datos.razon; f.per = periodoAAAAMM();
+                f.car = (f.ndoc && f.tcp && f.serie && f.num)
+                    ? String(f.ndoc) + String(f.tcp).padStart(2, '0') + String(f.serie).toUpperCase() + String(f.num).replace(/\D/g, '').padStart(10, '0')
+                    : '';
+            }
+        }
+
+        // =====================================================================
+        // Validación: devuelve { k: {tipo:'err'|'warn', msg} }
+        // =====================================================================
+        function validarFila(f) {
+            const out = {};
+            const vacia = COLS[reg].every(c => c.tipo === 'auto' || !f[c.k] || f[c.k] === c.defecto);
+            if (vacia) return out;
+            COLS[reg].forEach(c => {
+                if (c.req && (f[c.k] === '' || f[c.k] == null)) out[c.k] = { tipo: 'err', msg: 'Campo obligatorio: ' + c.l + '.' };
+            });
+            const d = String(f.ndoc || '');
+            if (d && f.tdoc === '6' && !/^(10|15|17|20)\d{9}$/.test(d)) out.ndoc = { tipo: 'err', msg: 'El RUC debe tener 11 dígitos y empezar con 10, 15, 17 o 20.' };
+            if (d && f.tdoc === '1' && !/^\d{8}$/.test(d)) out.ndoc = { tipo: 'err', msg: 'El DNI debe tener 8 dígitos.' };
+            if (/,/.test(f.cli || f.prov || '')) out[reg === 'ventas' ? 'cli' : 'prov'] = { tipo: 'err', msg: 'No uses comas en el nombre: el registro se separa por comas al importarlo.' };
+            if (f.femi) {
+                const [a, m] = f.femi.split('-');
+                if (a + m > periodoAAAAMM()) out.femi = { tipo: 'err', msg: 'La fecha de emisión es posterior al periodo que declaras (' + MESES[datos.mes - 1] + ' ' + datos.anio + ').' };
+            }
+            if (f.fvto && f.femi && f.fvto < f.femi) out.fvto = { tipo: 'err', msg: 'La fecha de vencimiento no puede ser anterior a la de emisión.' };
+            const pares = reg === 'ventas' ? [['bi', 'igv']] : [['bidg', 'igvdg'], ['bidgng', 'igvdgng'], ['bidng', 'igvdng']];
+            pares.forEach(([kb, ki]) => {
+                const b = num(f[kb]), g = num(f[ki]);
+                if (b !== 0 && Math.abs(g - b * 0.18) > 1 && Math.abs(g - b * 0.10) > 1)
+                    out[ki] = { tipo: 'warn', msg: 'El IGV no es el 18% (ni el 10%) de la base imponible. Revísalo.' };
+                if (b === 0 && g !== 0) out[ki] = { tipo: 'warn', msg: 'Hay IGV pero no hay base imponible.' };
+            });
+            if (f.tcp === '07' || f.tcp === '08') {
+                ['rfec', 'rtcp', 'rser', 'rnum'].forEach(k => { if (!f[k]) out[k] = { tipo: 'err', msg: 'En notas de crédito o débito debes indicar el comprobante que se modifica.' }; });
+                const base = reg === 'ventas' ? num(f.bi) : num(f.bidg);
+                if (f.tcp === '07' && base > 0) out[reg === 'ventas' ? 'bi' : 'bidg'] = { tipo: 'warn', msg: 'En una nota de crédito la base imponible va en negativo.' };
+            }
+            if (reg === 'compras' && f.mon && f.mon !== 'PEN' && !f.tc) out.tc = { tipo: 'err', msg: 'Si la moneda no es PEN, indica el tipo de cambio.' };
+            return out;
+        }
+
+        // =====================================================================
+        // Pintado de la tabla
+        // =====================================================================
+        function pintarCabecera() {
+            const cols = COLS[reg];
+            let f1 = '<tr class="f1"><th class="sel" rowspan="2"><input type="checkbox" id="chk-todos" title="Seleccionar todas"></th>';
+            let f2 = '<tr class="f2">';
+            for (let i = 0; i < cols.length;) {
+                const c = cols[i];
+                if (!c.g) { f1 += `<th rowspan="2" style="min-width:${c.w}px">${thContenido(c, i)}</th>`; i++; continue; }
+                let span = 0;
+                while (i + span < cols.length && cols[i + span].g === c.g) span++;
+                f1 += `<th class="grupo" colspan="${span}">${c.g}</th>`;
+                for (let j = 0; j < span; j++) f2 += `<th style="min-width:${cols[i + j].w}px">${thContenido(cols[i + j], i + j)}</th>`;
+                i += span;
+            }
+            $('thead').innerHTML = f1 + '</tr>' + f2 + '</tr>';
+            const alto = $('thead').querySelector('tr.f1 th.grupo');
+            document.documentElement.style.setProperty('--alto-f1', (alto ? alto.offsetHeight : 26) + 'px');
+            $('chk-todos').onchange = e => document.querySelectorAll('.chk-fila').forEach(c => c.checked = e.target.checked);
+        }
+        function thContenido(c, i) {
+            return `<div class="th-in"><span><span class="num-col">${i + 1}</span>${c.l}${c.req ? ' <span class="marca-req">*</span>' : ''}${c.tipo === 'auto' ? ' &#128274;' : ''}</span>` +
+                   `<span class="th-help" onclick="mostrarAyuda('${c.k}')" title="¿Qué escribo aquí?">?</span></div>`;
+        }
+
+        function pintarCuerpo() {
+            const cols = COLS[reg];
+            const filas = datos[reg];
+            $('tbody').innerHTML = filas.map((f, i) => {
+                calcularFila(f, i);
+                return '<tr data-i="' + i + '"><td class="sel"><input type="checkbox" class="chk-fila" data-i="' + i + '" style="width:auto;"></td>' +
+                    cols.map(c => celda(c, f, i)).join('') + '</tr>';
+            }).join('');
+            pintarTotales();
+            validarTodo();
+        }
+
+        function celda(c, f, i) {
+            const v = f[c.k] == null ? '' : f[c.k];
+            const cls = c.req ? 'req' : '';
+            const d = `data-k="${c.k}" data-i="${i}"`;
+            if (c.tipo === 'auto') {
+                const txt = c.txt || c.k === 'cuo' || c.k === 'n' ? esc(v) : fmt(v);
+                return `<td class="auto${c.txt ? ' txt' : ''}" ${d}>${txt}</td>`;
+            }
+            if (c.tipo === 'fecha') return `<td class="${cls}" ${d}><input type="date" value="${esc(v)}" ${d}></td>`;
+            if (c.tipo === 'cod') {
+                const ops = '<option value=""></option>' + c.cat.map(([cod, desc]) =>
+                    `<option value="${cod}"${cod === v ? ' selected' : ''}>${cod} - ${esc(desc)}</option>`).join('');
+                return `<td class="${cls}" ${d}><select ${d}>${ops}</select></td>`;
+            }
+            if (c.tipo === 'num') return `<td class="${cls}" ${d}><input class="num" inputmode="decimal" value="${v === '' ? '' : fmt(v, c.dec)}" ${d}></td>`;
+            return `<td class="${cls}" ${d}><input value="${esc(v)}" ${d}${c.mayus ? ' style="text-transform:uppercase"' : ''}></td>`;
+        }
+
+        function pintarTotales() {
+            const cols = COLS[reg];
+            const filas = datos[reg];
+            let html = '<tr><td></td>';
+            let etiqueta = false;
+            cols.forEach(c => {
+                const sumable = (c.tipo === 'num' && c.dec == null && c.k !== 'porcpart') || (c.tipo === 'auto' && c.suma);
+                if (!sumable) {
+                    html += etiqueta ? '<td></td>' : '<td class="lbl">TOTALES</td>';
+                    etiqueta = true;
+                    return;
+                }
+                html += `<td data-tot="${c.k}">${fmt(filas.reduce((s, f) => s + num(f[c.k]), 0))}</td>`;
+            });
+            $('tfoot').innerHTML = html + '</tr>';
+        }
+
+        // Refresca una fila (celdas calculadas) sin repintar los inputs
+        function refrescarFila(i) {
+            const f = datos[reg][i];
+            calcularFila(f, i);
+            const tr = $('tbody').querySelector(`tr[data-i="${i}"]`);
+            COLS[reg].forEach(c => {
+                if (c.tipo === 'auto') {
+                    const td = tr.querySelector(`td[data-k="${c.k}"]`);
+                    td.textContent = (c.txt || c.k === 'cuo' || c.k === 'n') ? (f[c.k] || '') : fmt(f[c.k]);
+                }
+                if (c.calc === 'igv' && !f._igvManual[c.k]) {
+                    const inp = tr.querySelector(`input[data-k="${c.k}"]`);
+                    if (inp && document.activeElement !== inp) inp.value = f[c.k] === '' ? '' : fmt(f[c.k]);
+                }
+            });
+        }
+        function refrescar() {
+            datos[reg].forEach((f, i) => refrescarFila(i));
+            pintarTotales();
+            validarTodo();
+            guardar();
+        }
+
+        function validarTodo() {
+            let errores = 0, avisos = 0, llenas = 0;
+            const cuenta = {};
+            datos[reg].forEach((f, i) => {
+                const res = validarFila(f);
+                const tr = $('tbody').querySelector(`tr[data-i="${i}"]`);
+                if (!tr) return;
+                const vacia = COLS[reg].every(c => c.tipo === 'auto' || !f[c.k] || f[c.k] === c.defecto);
+                if (!vacia) { llenas++; cuenta[f.tcp || '—'] = (cuenta[f.tcp || '—'] || 0) + 1; }
+                tr.querySelectorAll('td[data-k]').forEach(td => {
+                    const r = res[td.dataset.k];
+                    td.classList.toggle('err', !!r && r.tipo === 'err');
+                    td.classList.toggle('warn', !!r && r.tipo === 'warn');
+                    td.title = r ? r.msg : '';
+                    if (r && r.tipo === 'err') errores++;
+                    if (r && r.tipo === 'warn') avisos++;
+                });
+            });
+            const tipos = Object.keys(cuenta).sort().map(k => {
+                const n = (T_CP.find(t => t[0] === k) || [k, k])[1];
+                return `<span class="chip">${n}: <b>${cuenta[k]}</b></span>`;
+            }).join('');
+            $('chips').innerHTML = `<span class="chip">Comprobantes: <b>${llenas}</b></span>` + tipos +
+                (errores || avisos
+                    ? `<span class="chip chip-error" onclick="irAlPrimerError()" title="Clic para ir al primer error">✗ ${errores} error(es) · ${avisos} aviso(s) — pasa el mouse sobre la celda roja o amarilla</span>`
+                    : '<span class="chip chip-ok">✓ Sin errores</span>');
+        }
+        function irAlPrimerError() {
+            const td = $('tbody').querySelector('td.err, td.warn');
+            if (!td) return;
+            td.scrollIntoView({ block: 'center', inline: 'center' });
+            const inp = td.querySelector('input, select'); if (inp) inp.focus();
+            alert(td.title);
+        }
+
+        // =====================================================================
+        // Edición
+        // =====================================================================
+        $('tbody').addEventListener('input', e => {
+            const el = e.target; const k = el.dataset.k; if (!k) return;
+            const i = +el.dataset.i; const f = datos[reg][i];
+            const c = COLS[reg].find(x => x.k === k);
+            let v = el.value;
+            if (c.tipo === 'num') v = v.replace(/[^\d.\-]/g, '');
+            if (c.tipo === 'texto') v = v.replace(/,/g, '');
+            if (c.mayus) v = v.toUpperCase();
+            if (c.k === 'ndoc') v = v.replace(/\s/g, '');
+            f[k] = v;
+            if (c.calc === 'igv') f._igvManual[k] = v !== '';
+            refrescarFila(i); pintarTotales(); validarTodo(); guardar();
+        });
+        $('tbody').addEventListener('change', e => {
+            const el = e.target; if (el.tagName !== 'SELECT' && el.type !== 'date') return;
+            const i = +el.dataset.i; datos[reg][i][el.dataset.k] = el.value;
+            refrescarFila(i); validarTodo(); guardar();
+        });
+        // Al salir de un importe se muestra con miles y decimales
+        $('tbody').addEventListener('focusout', e => {
+            const el = e.target; if (!el.classList || !el.classList.contains('num')) return;
+            const c = COLS[reg].find(x => x.k === el.dataset.k);
+            const v = datos[reg][+el.dataset.i][el.dataset.k];
+            el.value = v === '' ? '' : fmt(v, c.dec);
+        });
+        $('tbody').addEventListener('focusin', e => {
+            const el = e.target; if (!el.classList || !el.classList.contains('num')) return;
+            const v = datos[reg][+el.dataset.i][el.dataset.k];
+            el.value = v == null ? '' : v;
+        });
+
+        function agregarFila() { datos[reg].push(filaVacia(reg)); pintarCuerpo(); guardar(); $('tbody').lastElementChild.scrollIntoView({ block: 'nearest' }); }
+        function seleccionadas() { return [...document.querySelectorAll('.chk-fila:checked')].map(c => +c.dataset.i); }
+        function copiarFilas() {
+            const sel = seleccionadas();
+            if (!sel.length) { alert('Marca con el check la(s) fila(s) que quieres copiar.'); return; }
+            sel.forEach(i => { const f = JSON.parse(JSON.stringify(datos[reg][i])); datos[reg].push(f); });
+            pintarCuerpo(); guardar();
+        }
+        function eliminarFilas() {
+            const sel = seleccionadas();
+            if (!sel.length) { alert('Marca con el check la(s) fila(s) que quieres eliminar.'); return; }
+            if (!confirm('¿Eliminar ' + sel.length + ' fila(s)?')) return;
+            datos[reg] = datos[reg].filter((_, i) => !sel.includes(i));
+            if (!datos[reg].length) datos[reg].push(filaVacia(reg));
+            pintarCuerpo(); guardar();
+        }
+        function limpiarRegistro() {
+            const nombre = reg === 'ventas' ? 'el Registro de Ventas' : 'el Registro de Compras';
+            if (!confirm('Se borrarán todas las filas de ' + nombre + '. ¿Continuar?')) return;
+            datos[reg] = [filaVacia(reg)];
+            pintarCuerpo(); guardar();
+        }
+
+        // =====================================================================
+        // Ayuda
+        // =====================================================================
+        function mostrarAyuda(k) {
+            const c = COLS[reg].find(x => x.k === k);
+            $('help-titulo').textContent = c.l + (c.req ? ' (obligatorio)' : '');
+            let html = `<div>${c.ayuda}</div>`;
+            if (c.ej) html += `<div class="ejemplo"><b>Ejemplo:</b> ${c.ej}</div>`;
+            if (c.regla) html += `<div class="regla"><b>Ojo:</b> ${c.regla}</div>`;
+            if (c.cat) html += '<table><tr><th>Código</th><th>Descripción</th></tr>' +
+                c.cat.map(([cod, desc]) => `<tr><td class="cod">${cod}</td><td>${desc}</td></tr>`).join('') + '</table>';
+            $('help-cuerpo').innerHTML = html;
+            $('help-card').style.display = 'block';
+        }
+        function cerrarAyuda() { $('help-card').style.display = 'none'; }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarAyuda(); });
+
+        function mostrarGuia() {
+            $('help-titulo').textContent = reg === 'ventas' ? 'Cómo llenar el Registro de Ventas' : 'Cómo llenar el Registro de Compras';
+            $('help-cuerpo').innerHTML = reg === 'ventas' ? `
+                <ol>
+                    <li>Completa el <b>periodo</b>, el <b>RUC</b> y la <b>razón social</b> de tu empresa.</li>
+                    <li>Anota <b>una fila por comprobante emitido</b> (facturas, boletas, notas), en orden de fecha.</li>
+                    <li>Elige el <b>tipo de comprobante</b> y el <b>tipo de documento</b> del cliente de la lista.</li>
+                    <li>Escribe la <b>base imponible</b>: el IGV (18%) y el importe total se calculan solos.</li>
+                    <li>Las <b>boletas</b> muestran el precio con IGV: base = total ÷ 1.18.</li>
+                    <li>En <b>notas de crédito</b> los importes van en negativo y debes llenar la referencia del comprobante que se modifica.</li>
+                    <li>Si una celda se pone <span style="color:#c62828;font-weight:700;">roja</span> (error) o <span style="color:#f9a825;font-weight:700;">amarilla</span> (aviso), pasa el mouse sobre ella para ver qué corregir.</li>
+                    <li>Al terminar, usa <b>Exportar a Excel</b> o <b>Imprimir</b>.</li>
+                </ol>` : `
+                <ol>
+                    <li>Completa el <b>periodo</b>, el <b>RUC</b> y la <b>razón social</b> de tu empresa: se copian solos en cada fila.</li>
+                    <li>Anota <b>una fila por comprobante recibido</b> de tus proveedores.</li>
+                    <li>Elige el <b>tipo de comprobante</b> y escribe serie, número y el RUC del proveedor: el <b>CAR SUNAT</b> se arma solo.</li>
+                    <li>Si la compra es para tus ventas gravadas (lo más común), usa las columnas <b>15 y 16</b>: escribe la base y el IGV se propone al 18%.</li>
+                    <li>Los <b>recibos por honorarios</b> (02) van en <b>compras no gravadas</b>.</li>
+                    <li>Si el comprobante está en <b>dólares</b>, elige USD, escribe el <b>tipo de cambio</b> y anota los importes <b>en soles</b>.</li>
+                    <li>Indica la <b>clasificación de bienes y servicios</b> (mercadería, activo fijo, gastos…).</li>
+                    <li>Las celdas <span style="color:#c62828;font-weight:700;">rojas</span> o <span style="color:#f9a825;font-weight:700;">amarillas</span> indican qué revisar (pasa el mouse sobre ellas).</li>
+                </ol>`;
+            $('help-card').style.display = 'block';
+        }
+
+        // =====================================================================
+        // Exportar a Excel (mismo orden de columnas que los formatos)
+        // =====================================================================
+        function aFecha(v) { if (!v) return ''; const [a, m, d] = v.split('-'); return d + '/' + m + '/' + a; }
+        function exportarExcel() {
+            if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel. Revisa tu conexión a internet y vuelve a intentarlo.'); return; }
+            const cols = COLS[reg];
+            const filas = datos[reg].filter(f => !cols.every(c => c.tipo === 'auto' || !f[c.k] || f[c.k] === c.defecto));
+            const titulo = reg === 'ventas' ? 'FORMATO 14.1: REGISTRO DE VENTAS E INGRESOS' : 'REGISTRO DE COMPRAS ELECTRÓNICO';
+            const aoa = [
+                [titulo], [],
+                ['PERIODO:', MESES[datos.mes - 1] + ' ' + datos.anio],
+                ['RUC:', datos.ruc],
+                ['APELLIDOS Y NOMBRES, DENOMINACIÓN O RAZÓN SOCIAL:', datos.razon],
+                ['EXPRESADO EN:', 'SOLES'], []
+            ];
+            const filaGrupo = aoa.length;
+            aoa.push(cols.map(c => c.g || c.l));
+            aoa.push(cols.map(c => c.g ? c.l : ''));
+            const merges = [];
+            for (let i = 0; i < cols.length;) {
+                const c = cols[i];
+                if (!c.g) { merges.push({ s: { r: filaGrupo, c: i }, e: { r: filaGrupo + 1, c: i } }); i++; continue; }
+                let span = 0; while (i + span < cols.length && cols[i + span].g === c.g) span++;
+                if (span > 1) merges.push({ s: { r: filaGrupo, c: i }, e: { r: filaGrupo, c: i + span - 1 } });
+                i += span;
+            }
+            filas.forEach(f => aoa.push(cols.map(c => {
+                const v = f[c.k];
+                if (v === '' || v == null) return '';
+                if (c.tipo === 'fecha') return aFecha(v);
+                if (c.tipo === 'num' || (c.tipo === 'auto' && c.suma)) return num(v);
+                return String(v);
+            })));
+            aoa.push(cols.map((c, i) => {
+                const sumable = (c.tipo === 'num' && c.dec == null && c.k !== 'porcpart') || (c.tipo === 'auto' && c.suma);
+                if (i === 0) return 'TOTALES';
+                return sumable ? r2(filas.reduce((s, f) => s + num(f[c.k]), 0)) : '';
+            }));
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            ws['!merges'] = merges;
+            ws['!cols'] = cols.map(c => ({ wch: Math.max(8, Math.round(c.w / 7)) }));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, reg === 'ventas' ? 'Registro de Ventas' : 'RCE');
+            const nombre = (reg === 'ventas' ? 'Registro_Ventas_' : 'Registro_Compras_') + (datos.ruc || 'RUC') + '_' + periodoAAAAMM() + '.xlsx';
+            XLSX.writeFile(wb, nombre);
+        }
+
+        // =====================================================================
+        // Pestañas e inicio
+        // =====================================================================
+        function cambiarRegistro(r) {
+            reg = r;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('activa', t.dataset.reg === r));
+            $('titulo-formato').textContent = r === 'ventas' ? 'Formato 14.1 - Registro de Ventas e Ingresos' : 'Registro de Compras Electrónico (estructura del RCE - SIRE)';
+            cerrarAyuda();
+            pintarCabecera();
+            pintarCuerpo();
+        }
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => cambiarRegistro(t.dataset.reg)));
+
+        cargar();
+        iniciarDatosGenerales();
+        cambiarRegistro('ventas');
+    </script>
+</body>
+
+</html>

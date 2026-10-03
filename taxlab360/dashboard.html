@@ -1549,6 +1549,7 @@
 
                         <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 25px 0 5px;">
                             <button type="button" class="btn-const-710" onclick="switchSection('form_selection');"><i class="fas fa-chevron-left"></i> Ir al inicio</button>
+                            <button type="button" class="btn-const-710" onclick="volverDeclaracion710();"><i class="fas fa-file-alt"></i> Volver a la declaración</button>
                             <button type="button" class="btn-const-710" onclick="switchSection('consulta_pagos');"><i class="fas fa-list"></i> Consulta de declaraciones</button>
                             <button type="button" class="btn-const-710 rojo" id="btn-finalizar-simulacion"><i class="fas fa-flag-checkered"></i> Finalizar simulación</button>
                         </div>
@@ -1608,6 +1609,12 @@
                             </table>
                         </div>
                     </div>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 25px 0 5px;">
+                    <button type="button" class="btn-const-710" onclick="volverDeclaracion710();"><i class="fas fa-file-alt"></i> Volver a la declaración</button>
+                    <button type="button" class="btn-const-710" onclick="volverConstancia710();"><i class="fas fa-receipt"></i> Volver a la constancia</button>
+                    <button type="button" class="btn-const-710 rojo btn-finalizar-simulacion"><i class="fas fa-flag-checkered"></i> Finalizar simulación</button>
                 </div>
             </div>
         </main>
@@ -4535,6 +4542,22 @@
             document.getElementById('cpanel-resumen').style.display = esNps ? 'none' : 'block';
             document.getElementById('ctab-nps').classList.toggle('active', esNps);
             document.getElementById('ctab-resumen').classList.toggle('active', !esNps);
+        }
+
+        // Vuelve a la declaración presentada (sección de deuda tributaria), con los
+        // importes tal como quedaron; desde ahí se puede revisar con "Anterior".
+        function volverDeclaracion710() {
+            switchSection('determinativa_deuda');
+            window.scrollTo(0, 0);
+        }
+
+        // Vuelve a la constancia del último pago (desde ahí se genera el reporte)
+        function volverConstancia710() {
+            if (!window.__constancia710) {
+                showSunatConfirm('Todavía no has presentado la declaración en esta simulación. Completa el formulario y usa "Presente/Pague" para obtener la constancia.', null, 'warning');
+                return;
+            }
+            switchSection('constancia_710');
         }
 
         function verConstancia710() {
