@@ -5,19 +5,24 @@
    queda igual.
    ============================================================================= */
 
-/* Botones de la barra azul */
+/* Botones de la barra azul (junto a la fecha) */
+.info-left-710 { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .btn-movil-710 {
-    background: #fff;
-    color: #0b4a8b;
-    border: none;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .7);
     border-radius: 4px;
-    padding: 4px 12px;
-    margin-left: 15px;
-    font: 500 13px 'Roboto', sans-serif;
+    padding: 3px 10px;
+    font: 500 12px 'Roboto', sans-serif;
     cursor: pointer;
     white-space: nowrap;
 }
-.btn-movil-710:hover { opacity: .9; }
+.btn-movil-710:hover { background: rgba(255, 255, 255, .15); }
+
+/* Escritorio: la cabecera nunca empuja la página hacia un lado. Si algo no
+   entra se recorta, en vez de dejar que el navegador desplace todo el
+   formulario al enfocar una casilla. */
+body:not(.modo-movil) #main-app-container { overflow: clip; }
 .btn-menu-710 { display: none; }
 
 /* Aviso de avance guardado */
@@ -82,7 +87,8 @@ body.modo-movil .blue-info-bar {
     height: auto;
     padding: 6px;
 }
-body.modo-movil .info-left { flex: 1 1 100%; text-align: center; font-size: 13px; }
+body.modo-movil .info-left { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; gap: 6px; text-align: center; font-size: 13px; }
+body.modo-movil .info-left #current-datetime { flex: 1 1 100%; }
 body.modo-movil .info-center,
 body.modo-movil .info-right .status-badge { display: none; }
 body.modo-movil .info-right { flex: 1 1 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
@@ -94,8 +100,10 @@ body.modo-movil .btn-menu-710 {
     align-items: center;
     gap: 6px;
     background: #ffd54f;
+    border-color: #ffd54f;
     color: #1e395b;
 }
+body.modo-movil .btn-movil-710:not(.btn-menu-710) { background: #fff; color: #0b4a8b; border-color: #fff; }
 
 /* Menú lateral: pasa a ser un panel que se abre con el botón "Menú" */
 body.modo-movil .sidebar {
@@ -247,3 +255,17 @@ body.modo-movil .modal-content {
     max-height: 88vh;
     overflow-y: auto;
 }
+
+/* Presente/Pague y constancia */
+body.modo-movil #view-pasarela .form-header-grey,
+body.modo-movil #view-constancia-710 .form-header-grey,
+body.modo-movil #view-consulta-pagos .form-header-grey { display: block; }
+body.modo-movil #view-pasarela [style*="padding: 20px; min-height: 600px"] { padding: 10px !important; min-height: 0 !important; }
+body.modo-movil #view-pasarela [style*="display: flex; gap: 25px"] { flex-direction: column; align-items: stretch !important; gap: 14px !important; }
+body.modo-movil #view-pasarela [style*="width: 320px"] { width: 100% !important; }
+body.modo-movil #view-pasarela [style*="grid-template-columns: repeat(5"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
+body.modo-movil #view-pasarela .bank-option-minimal { min-width: 0; padding: 6px; }
+body.modo-movil #view-pasarela .bank-option-minimal img { max-width: 100%; height: auto !important; max-height: 30px; }
+body.modo-movil #view-pasarela .bank-option-minimal[style*="padding: 10px 40px"] { padding: 10px 14px !important; width: 100% !important; }
+body.modo-movil #view-pasarela .pasarela-acc-body { padding: 8px; }
+body.modo-movil #view-pasarela .pasarela-acc-body > div { padding: 10px !important; }

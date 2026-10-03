@@ -76,8 +76,11 @@
     }
 
     function montarBotones() {
-        const barra = document.querySelector('.blue-info-bar .info-right');
+        // Van junto a la fecha (a la izquierda de la barra azul), donde sobra
+        // espacio, para no apretar Domicilio / Perfil / Menú principal / Salir.
+        const barra = document.querySelector('.blue-info-bar .info-left');
         if (!barra || document.getElementById('btn-movil-710')) return;
+        barra.classList.add('info-left-710');
 
         const menu = document.createElement('button');
         menu.type = 'button';
@@ -93,8 +96,8 @@
         modo.className = 'btn-movil-710';
         modo.addEventListener('click', () => aplicarModoMovil(!esMovil(), true));
 
-        barra.insertBefore(modo, barra.firstChild);
-        barra.insertBefore(menu, barra.firstChild);
+        barra.appendChild(menu);
+        barra.appendChild(modo);
 
         const fondo = document.createElement('div');
         fondo.className = 'fondo-menu-710';
