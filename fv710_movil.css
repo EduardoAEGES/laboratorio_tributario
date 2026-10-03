@@ -1,0 +1,249 @@
+/* =============================================================================
+   FV 710 · Versión móvil
+   Se activa con la clase body.modo-movil (botón "Versión móvil" de la barra
+   azul). Todo lo de aquí solo aplica en ese modo; la versión de escritorio
+   queda igual.
+   ============================================================================= */
+
+/* Botones de la barra azul */
+.btn-movil-710 {
+    background: #fff;
+    color: #0b4a8b;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin-left: 15px;
+    font: 500 13px 'Roboto', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-movil-710:hover { opacity: .9; }
+.btn-menu-710 { display: none; }
+
+/* Aviso de avance guardado */
+.aviso-avance-710 {
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px solid #b3d4f5;
+    border-left: 4px solid #0b6fd0;
+    background: #eef6ff;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #1d3b5c;
+    line-height: 1.5;
+}
+.aviso-avance-710 .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.aviso-avance-710 button {
+    border: none;
+    border-radius: 4px;
+    padding: 8px 14px;
+    font: 500 13px 'Roboto', sans-serif;
+    cursor: pointer;
+}
+.aviso-avance-710 .continuar { background: #0b6fd0; color: #fff; }
+.aviso-avance-710 .descartar { background: #e3e7ec; color: #333; }
+.guardado-710 {
+    position: fixed;
+    left: 50%;
+    bottom: 46px;
+    transform: translateX(-50%);
+    background: rgba(30, 57, 91, .92);
+    color: #fff;
+    font: 13px 'Roboto', sans-serif;
+    padding: 6px 14px;
+    border-radius: 16px;
+    z-index: 3000;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+}
+.guardado-710.ver { opacity: 1; }
+
+/* ---------------------------------------------------------------------------
+   MODO MÓVIL
+   --------------------------------------------------------------------------- */
+
+/* La página hace scroll normal (sin cajas con scroll dentro de otras) */
+body.modo-movil #main-app-container { height: auto; min-height: 100vh; overflow: visible; }
+body.modo-movil .dashboard-layout { display: block; overflow: visible; }
+body.modo-movil .content-panel { padding: 12px 10px 70px; overflow: visible; }
+
+/* Cabecera compacta */
+body.modo-movil .blue-info-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    height: auto;
+    padding: 6px;
+}
+body.modo-movil .info-left { flex: 1 1 100%; text-align: center; font-size: 13px; }
+body.modo-movil .info-center,
+body.modo-movil .info-right .status-badge { display: none; }
+body.modo-movil .info-right { flex: 1 1 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+body.modo-movil .info-right > * { margin-left: 0 !important; }
+body.modo-movil .btn-exit,
+body.modo-movil .btn-movil-710 { padding: 5px 10px; font-size: 12px; }
+body.modo-movil .btn-menu-710 {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffd54f;
+    color: #1e395b;
+}
+
+/* Menú lateral: pasa a ser un panel que se abre con el botón "Menú" */
+body.modo-movil .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 82%;
+    max-width: 320px;
+    max-height: none;
+    height: 100%;
+    z-index: 2500;
+    overflow-y: auto;
+    transform: translateX(-105%);
+    transition: transform .25s;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, .25);
+}
+body.modo-movil.menu-710-abierto .sidebar { transform: none; }
+body.modo-movil .sidebar .btn-collapse { display: none; }
+body.modo-movil .sidebar.collapsed { width: 82%; }
+body.modo-movil .sidebar.collapsed .sidebar-nav,
+body.modo-movil .sidebar.collapsed .btn-home span,
+body.modo-movil .sidebar.collapsed .section-title { display: revert; }
+.fondo-menu-710 { display: none; }
+body.modo-movil.menu-710-abierto .fondo-menu-710 {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .4);
+    z-index: 2400;
+}
+
+/* Pasos y cajas del formulario */
+body.modo-movil .form-stepper { flex-direction: row; }
+body.modo-movil .form-stepper .step {
+    clip-path: none;
+    width: auto;
+    flex: 1;
+    padding: 8px 4px;
+    font-size: 12px;
+    text-align: center;
+}
+body.modo-movil .form-header-grey { font-size: 14px; padding: 10px 12px; }
+body.modo-movil .form-body-white,
+body.modo-movil .eeff-body { padding: 12px 6px; }
+body.modo-movil .form-field-row { flex-wrap: wrap; gap: 6px; }
+body.modo-movil .form-field-row label { width: 100%; }
+body.modo-movil .form-select-custom { width: 100%; max-width: 100%; }
+
+/* Pestañas: todas a la vista, repartidas en el ancho de la pantalla */
+body.modo-movil .main-tabs,
+body.modo-movil .sub-tabs-bar,
+body.modo-movil .eeff-sub-tabs {
+    flex-wrap: wrap;
+    white-space: normal;
+    padding-left: 0;
+    padding-right: 0;
+    overflow: visible;
+}
+body.modo-movil .main-tabs .tab-item,
+body.modo-movil .eeff-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 6px;
+    font-size: 13px;
+    text-align: center;
+}
+body.modo-movil .sub-tab-item {
+    flex: 1 1 50%;
+    padding: 8px 6px;
+    text-align: center;
+    border: 1px solid #e3e3e3;
+}
+body.modo-movil .sub-tab-item.active { border-color: #0066b3; background: #eef6ff; margin-bottom: 0; }
+body.modo-movil .infcomp-sub-tabs { padding: 5px 6px 0; gap: 10px; }
+
+/* Casillas de los Estados Financieros: una columna, etiqueta arriba y casilla abajo */
+body.modo-movil .eeff-grid {
+    grid-template-columns: 1fr !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+}
+body.modo-movil .eeff-row {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 9px 2px;
+}
+body.modo-movil .eeff-row label {
+    white-space: normal;
+    flex: 1 1 100%;
+    padding-right: 0;
+    font-size: 13px;
+}
+body.modo-movil .eeff-input-group {
+    width: 100%;
+    max-width: 100%;
+}
+body.modo-movil .eeff-header-row { flex-wrap: wrap; gap: 8px; }
+
+/* Casillas alineadas (sección informativa, impuesto, créditos, deuda) */
+body.modo-movil .casilla-row,
+body.modo-movil .casilla-row-aligned,
+body.modo-movil .rectificatoria-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+}
+body.modo-movil .casilla-row label,
+body.modo-movil .casilla-row-aligned label,
+body.modo-movil .rectificatoria-section .label { width: 100% !important; white-space: normal; }
+body.modo-movil .casilla-input-group,
+body.modo-movil .radio-stack,
+body.modo-movil .field-right-content { width: 100% !important; margin-left: 0 !important; flex-wrap: wrap; }
+body.modo-movil .form-input-sm,
+body.modo-movil .form-select-sm { max-width: 100%; }
+body.modo-movil .casilla-input-group .form-input-sm,
+body.modo-movil .casilla-input-group .form-select-sm { flex: 1 1 140px; width: auto !important; margin-left: 0 !important; }
+
+/* Ningún bloque del formulario puede ser más ancho que la pantalla */
+body.modo-movil #main-content input[type="text"],
+body.modo-movil #main-content input[type="number"],
+body.modo-movil #main-content input[type="email"],
+body.modo-movil #main-content select { max-width: 100%; }
+body.modo-movil #main-content [style*="width: 250px"],
+body.modo-movil #main-content [style*="width: 300px"],
+body.modo-movil #main-content [style*="width: 350px"],
+body.modo-movil #main-content [style*="width: 400px"] { max-width: 100%; }
+body.modo-movil #main-content [style*="grid-template-columns: 200px"] { grid-template-columns: 1fr !important; gap: 6px !important; }
+body.modo-movil .info-box-bordered { padding: 12px 10px; }
+body.modo-movil .modal-detail-row { flex-wrap: wrap; gap: 6px; }
+
+/* Tablas anchas: se deslizan de lado dentro de su caja */
+body.modo-movil #main-content table { display: block; max-width: 100%; overflow-x: auto; }
+
+/* Botones de navegación (Anterior / Siguiente / Presente) */
+body.modo-movil .form-footer-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+body.modo-movil .form-footer-actions button { flex: 1 1 140px; }
+
+/* Ventanas de detalle (asistentes de casillas) */
+body.modo-movil .modal-custom,
+body.modo-movil .modal-content {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    max-height: 88vh;
+    overflow-y: auto;
+}
