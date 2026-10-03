@@ -19,7 +19,7 @@
     function detectarModulo() {
         const p = window.location.pathname.toLowerCase();
         if (p.includes('declaraciones')) return 'FV 621';
-        if (p.includes('renta')) return 'FV 710';
+        if (p.includes('renta') || p.includes('dashboard')) return 'FV 710';
         if (p.includes('comprobantes') || p.includes('tramites')) return 'CDP - SEE SOL';
         if (p.includes('ajustes')) return 'Ajustes Posteriores';
         return 'Laboratorio Tributario';
@@ -44,9 +44,24 @@
             };
         }
         if (modulo === 'FV 710') {
+            const u = window.ultimoPago710;
+            const f = n => 'S/ ' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+            const filas = [['Formulario', 'Formulario Virtual 710 – Renta Anual Empresas']];
+            if (u) {
+                filas.push(['Ejercicio declarado', String(u.record.ejercicio)]);
+                filas.push(['Régimen', u.regimen === 'MYPE' ? 'Régimen MYPE Tributario' : 'Régimen General']);
+                filas.push(['UIT del ejercicio', f(u.uit)]);
+                filas.push(['Renta neta imponible (casilla 110)', f(u.rentaNeta)]);
+                filas.push(['Impuesto resultante (casilla 113)', f(u.impuesto)]);
+                filas.push(['Importe pagado (casilla 180)', f(u.record.monto)]);
+                filas.push(['Medio de pago', u.record.medio]);
+                filas.push(['Número de orden', u.record.orden]);
+            } else {
+                filas.push(['Estado', 'Sin declaración presentada en esta simulación']);
+            }
             return {
                 titulo: 'Reporte de Simulación – Renta Anual FV 710',
-                filas: [['Formulario', 'Formulario Virtual 710 – Renta Anual']],
+                filas: filas,
                 documentos: ['Constancia de Presentación de la Declaración Anual (FV 710)']
             };
         }

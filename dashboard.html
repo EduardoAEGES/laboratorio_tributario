@@ -213,6 +213,339 @@
             border-bottom: 3px solid #0066B3;
         }
     </style>
+    <!-- Pasarela de pagos y constancia (mismo flujo que el FV 621) -->
+    <style>
+        /* Opción única de tarjetas, con el aviso de horarios al pasar el mouse */
+        .tarjeta-unica {
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tarjeta-strip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        /* Las marcas van pegadas entre sí, como la tira única de SUNAT */
+        .tarjeta-logos {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            border: 1px solid #CCC;
+        }
+
+        .tarjeta-logos img {
+            height: 34px;
+            width: 62px;
+            object-fit: contain;
+            background: #FFF;
+            padding: 2px 4px;
+        }
+
+        .tarjeta-horario {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-20%);
+            margin-top: 6px;
+            background: #FFF;
+            border: 1px solid #DDD;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .18);
+            padding: 14px 30px;
+            text-align: center;
+            font-size: 13px;
+            color: #444;
+            z-index: 50;
+            white-space: nowrap;
+        }
+
+        .tarjeta-horario strong { display: block; margin-bottom: 8px; font-size: 14px; }
+        .tarjeta-unica:hover .tarjeta-horario { display: block; }
+
+        /* ===== Pasarela de tarjeta / Yape ===== */
+        .pt-aviso {
+            background: #FDF6DC;
+            border: 1px solid #F0E6C0;
+            padding: 14px;
+            text-align: center;
+            font-size: 14px;
+            color: #6B5B2A;
+        }
+
+        .pt-datos {
+            margin: 30px auto;
+            max-width: 520px;
+            font-size: 15px;
+        }
+
+        .pt-datos > div {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            padding: 6px 0;
+        }
+
+        .pt-datos span { font-weight: 700; color: #333; }
+
+        .pt-selecc {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            border-top: 1px solid #E0E0E0;
+            padding-top: 25px;
+            margin-bottom: 22px;
+        }
+
+        .btn-paga-aqui {
+            background: #2E4A8C;
+            color: #FFF;
+            border: none;
+            padding: 16px 45px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            cursor: pointer;
+        }
+
+        .btn-paga-aqui:hover { background: #24396E; }
+
+        .btn-pt-cancelar {
+            background: #FFF;
+            border: 1px solid #DDD;
+            padding: 12px 60px;
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .pt-nota {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #E0E0E0;
+            padding-top: 14px;
+        }
+
+        /* Tarjeta blanca de la pasarela (medio de pago / tarjeta / Yape) */
+        .pago-card {
+            background: #FFF;
+            width: 100%;
+            max-width: 390px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 14px 32px 30px 32px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .3);
+        }
+
+        .pago-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12.5px;
+            color: #888;
+        }
+
+        .pago-card-top .fa-times-circle { cursor: pointer; font-size: 17px; color: #BBB; }
+        .pago-idioma { letter-spacing: .5px; }
+
+        .pago-logo { display: block; margin: 14px auto 22px auto; height: 46px; }
+
+        .pago-titulo {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 18px;
+        }
+
+        .pago-opcion {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            cursor: pointer;
+        }
+
+        .pago-opcion > div { display: flex; flex-direction: column; gap: 6px; }
+        .pago-op-nombre { font-size: 14px; color: #333; }
+        .pago-op-desc { font-size: 12.5px; color: #777; }
+        .pago-op-logos { display: flex; gap: 8px; align-items: center; }
+        .pago-op-logos img { height: 22px; object-fit: contain; }
+
+
+        .pago-recuerda { text-align: center; font-size: 14px; color: #444; line-height: 1.5; margin-bottom: 16px; }
+
+        .pago-sim-aviso {
+            background: #FFF4F4;
+            border: 1px solid #F0C6C6;
+            color: #A33;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px 10px;
+            margin-bottom: 16px;
+        }
+
+        .pago-campo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #DDD;
+            padding: 11px 12px;
+            margin-bottom: 12px;
+            flex: 1;
+        }
+
+        .pago-campo i { color: #999; }
+        .pago-campo .help-circle { width: 18px; height: 18px; font-size: 9px; }
+
+        .pago-campo input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .pago-campo-fila { display: flex; gap: 12px; }
+
+        .pago-label { font-size: 14px; color: #444; margin-bottom: 8px; }
+
+        .pago-input {
+            width: 100%;
+            border: 1px solid #DDD;
+            padding: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+
+        .pago-hint { font-size: 12.5px; color: #999; margin: -8px 0 20px 0; }
+
+        .btn-pago-rojo {
+            width: 100%;
+            background: #E30613;
+            color: #FFF;
+            border: none;
+            border-radius: 4px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        .btn-pago-rojo:hover { background: #C10510; }
+
+        .btn-pago-yape {
+            width: 100%;
+            background: #742284;
+            color: #FFF;
+            border: none;
+            border-radius: 4px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-pago-yape:hover { background: #5D1A6B; }
+
+        .pago-marcas {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .pago-marcas img { height: 20px; object-fit: contain; }
+
+        /* ===== Constancia NPS (Paso 4) ===== */
+        .const-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 18px 15px 0 15px;
+        }
+
+        .const-tab {
+            padding: 10px 22px;
+            font-size: 14px;
+            color: #1B6CB0;
+            background: #FFF;
+            border: 1px solid #DDD;
+            border-bottom: none;
+            cursor: pointer;
+        }
+
+        .const-tab.active {
+            background: #1B6CB0;
+            color: #FFF;
+            border-color: #1B6CB0;
+            font-weight: 500;
+        }
+
+        .const-titulo {
+            background: #E9E9E9;
+            border: 1px solid #DDD;
+            padding: 12px 18px;
+            font-size: 17px;
+            color: #555;
+            margin: 0 15px;
+        }
+
+        .const-nps-num,
+        .const-parrafo { margin: 18px 20px; font-size: 14px; }
+
+        .const-tabla {
+            width: calc(100% - 30px);
+            margin: 18px 15px;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .const-tabla th,
+        .const-tabla td {
+            border: 1px solid #DDD;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .const-tabla th { font-weight: 700; color: #333; }
+        .const-tabla .ta-c { text-align: center; }
+        .const-tabla .ta-r { text-align: right; }
+        .const-tabla a { color: #1B6CB0; text-decoration: underline; }
+
+        .const-aviso {
+            background: #FDF6DC;
+            border: 1px solid #F0E6C0;
+            margin: 18px 15px;
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .const-datos-gen {
+            margin: 18px 20px;
+            font-size: 14px;
+            line-height: 1.9;
+        }
+
+        .const-datos-gen p { margin: 0; }
+
+        /* Ventanas de la pasarela: clase propia para no chocar con .modal-overlay del 710 */
+        .pg-ov { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 16px; }
+        .pg-ov.open { display: flex; }
+        .pg-box { background: #fff; border-radius: 6px; width: 100%; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.25); font-family: 'Roboto', sans-serif; }
+        .pg-box header { color: #fff; padding: 12px 16px; font-size: 15px; }
+        .const-tabs { margin-top: 10px; }
+        .btn-const-710 { padding: 10px 28px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Roboto', sans-serif; border: 1px solid #0066b3; background: #fff; color: #0066b3; }
+        .btn-const-710.rojo { background: #C00000; border-color: #C00000; color: #fff; }
+        @media print { .pg-ov { display: none !important; } }
+    </style>
 </head>
 <body>
     <!-- Modals -->
@@ -354,7 +687,7 @@
                         
                         <div class="form-field-row">
                             <label>Ejercicio</label>
-                            <select id="select-ejercicio" class="form-select-custom" onchange="if(this.value) { currentEjercicio = this.value; switchSection('informativa'); }">
+                            <select id="select-ejercicio" class="form-select-custom" onchange="if(this.value) { aplicarEjercicio(this.value); }">
                                 <option value="">Seleccionar</option>
                                 <option value="2025">2025</option>
                                 <option value="2024">2024</option>
@@ -552,20 +885,20 @@
                                                     <label>Nro de documento:</label>
                                                     <div class="casilla-input-group">
                                                         <span class="casilla-num">207</span>
-                                                        <input type="text" class="form-input-sm" style="width: 250px;" value="46069339">
+                                                        <input type="text" id="cont-dni" class="form-input-sm" style="width: 250px;" placeholder="INGRESAR">
                                                     </div>
                                                 </div>
                                                 <div class="casilla-row-aligned">
                                                     <label>Apellidos y Nombres:</label>
-                                                    <input type="text" class="form-input-sm" style="width: 300px; margin-left: 55px;" value="MAMANI ROQUE EDUARDO LUIS">
+                                                    <input type="text" id="cont-nombre" class="form-input-sm" style="width: 300px; margin-left: 55px;" placeholder="INGRESAR">
                                                 </div>
                                                 <div class="casilla-row-aligned">
                                                     <label>C.P.C.:</label>
-                                                    <input type="text" class="form-input-sm" style="width: 250px; margin-left: 55px;" placeholder="INGRESAR">
+                                                    <input type="text" id="cont-cpc" class="form-input-sm" style="width: 250px; margin-left: 55px;" placeholder="INGRESAR">
                                                 </div>
                                                 <div class="casilla-row-aligned">
                                                     <label>Correo Electrónico 1:</label>
-                                                    <input type="text" class="form-input-sm" style="width: 250px; margin-left: 55px;" value="EDU.MAMANIROQUE@GMAIL.COM">
+                                                    <input type="text" id="cont-correo" class="form-input-sm" style="width: 250px; margin-left: 55px;" placeholder="INGRESAR">
                                                 </div>
                                                 <div class="casilla-row-aligned">
                                                     <label>Correo Electrónico 2:</label>
@@ -582,7 +915,7 @@
                                                     <label>Celular:</label>
                                                     <div class="casilla-input-group">
                                                         <span class="casilla-num">251</span>
-                                                        <input type="text" class="form-input-sm" style="width: 200px;" placeholder="INGRESAR">
+                                                        <input type="text" id="cont-celular" class="form-input-sm" style="width: 200px;" placeholder="INGRESAR">
                                                     </div>
                                                 </div>
                                             </div>
@@ -606,12 +939,12 @@
                                                     <label>Nro de documento:</label>
                                                     <div class="casilla-input-group">
                                                         <span class="casilla-num">226</span>
-                                                        <input type="text" class="form-input-sm" style="width: 250px;" value="44452865">
+                                                        <input type="text" id="rep-dni" class="form-input-sm" style="width: 250px;" placeholder="INGRESAR">
                                                     </div>
                                                 </div>
                                                 <div class="casilla-row-aligned">
                                                     <label>Apellidos y Nombres:</label>
-                                                    <input type="text" class="form-input-sm" style="width: 300px; margin-left: 55px;" value="CRUZ ROQUE RODY JOSE MIGUEL">
+                                                    <input type="text" id="rep-nombre" class="form-input-sm" style="width: 300px; margin-left: 55px;" placeholder="INGRESAR">
                                                 </div>
                                                 <div class="casilla-row-aligned" style="margin-top: 20px; justify-content: center;">
                                                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
@@ -658,7 +991,7 @@
 
                                 <div class="eeff-body" id="eeff-body-area">
                                     <div class="eeff-header-row" id="header-situacion">
-                                        <p>I. Estado de Situación Financiera (Balance General) - Valor Histórico al 31 de Dic. 2025</p>
+                                        <p>I. Estado de Situación Financiera (Balance General) - Valor Histórico al 31 de Dic. <span class="ej-anio">2025</span></p>
                                         <button class="btn-import-blue" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-import"></i> Importar</button>
                                     </div>
 
@@ -776,7 +1109,7 @@
                                     <!-- AREA ESTADO DE RESULTADOS (HIDDEN) -->
                                     <div id="eeff-resultados" style="display: none;">
                                         <div class="eeff-header-row">
-                                            <p>II. Estado de Resultados del 01/01 al 31/12 del 2025</p>
+                                            <p>II. Estado de Resultados del 01/01 al 31/12 del <span class="ej-anio">2025</span></p>
                                             <button class="btn-import-blue" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-import"></i> Importar</button>
                                         </div>
                                         <div class="eeff-grid">
@@ -1006,7 +1339,7 @@
 
                 <div class="form-container-box">
                     <div class="form-header-grey" id="pasarela-header">
-                        Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Presente/Pague
+                        Formulario Virtual N° 710 Renta Anual - EMPRESAS&nbsp;<span class="ej-anio">2025</span>&nbsp;- Presente/Pague
                     </div>
                     <div class="form-body-white no-padding" style="background-color: #f0f2f5;">
                         <div style="padding: 20px; min-height: 600px; font-family: 'Roboto', sans-serif;">
@@ -1027,17 +1360,17 @@
                                         <div id="pasarela-acc-body-1" class="pasarela-acc-body">
                                             <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none;">
                                                 <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; align-items: center; justify-items: center;">
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="1.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="2.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="3.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="4.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="5.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="1.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="2.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="3.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="4.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="5.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
                                                     
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="6.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="7.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="8.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="9.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="10.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="6.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="7.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="8.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="9.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
+                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method" value="banco"><img src="10.png" style="height: 30px; object-fit: contain; margin-top: 5px;"></label>
                                                 </div>
                                                 <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
                                                     Previamente debe haber celebrado un convenio de afiliación con su banco. Para tal efecto contáctese con su banco o sectorista
@@ -1055,7 +1388,7 @@
                                         <div id="pasarela-acc-body-2" class="pasarela-acc-body">
                                             <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none; text-align: center;">
                                                 <label class="bank-option-minimal" style="width: auto; padding: 10px 40px; flex-direction: row; gap: 15px;">
-                                                    <input type="radio" name="pay-method">
+                                                    <input type="radio" name="pay-method" value="detraccion">
                                                     <img src="BancoNacion.png" style="height: 45px; object-fit: contain;">
                                                 </label>
                                                 <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
@@ -1073,11 +1406,22 @@
                                         </div>
                                         <div id="pasarela-acc-body-3" class="pasarela-acc-body">
                                             <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none; text-align: center;">
-                                                <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="TARJETA1.png" style="height: 40px; object-fit: contain;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="TARJETA2.png" style="height: 40px; object-fit: contain;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="TARJETA3.png" style="height: 40px; object-fit: contain;"></label>
-                                                    <label class="bank-option-minimal"><input type="radio" name="pay-method"><img src="TARJETA4.png" style="height: 40px; object-fit: contain;"></label>
+                                                <!-- Una sola opción con todas las marcas, como en SUNAT -->
+                                                <div class="tarjeta-unica">
+                                                    <label class="tarjeta-strip">
+                                                        <input type="radio" name="pay-method" value="tarjeta">
+                                                        <span class="tarjeta-logos">
+                                                            <img src="TARJETA1.png" alt="Visa">
+                                                            <img src="TARJETA2.png" alt="MasterCard">
+                                                            <img src="TARJETA3.png" alt="American Express">
+                                                            <img src="TARJETA4.png" alt="Diners Club">
+                                                            <img src="TARJETA5.jpg" alt="Yape">
+                                                        </span>
+                                                    </label>
+                                                    <div class="tarjeta-horario">
+                                                        <strong>Horarios de Atención</strong>
+                                                        <span>Las 24 horas, los 7 días de la semana.</span>
+                                                    </div>
                                                 </div>
                                                 <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
                                                     Selecciones su tarjeta de Crédito o Débito
@@ -1095,7 +1439,7 @@
                                         <div id="pasarela-acc-body-4" class="pasarela-acc-body">
                                             <div style="padding: 20px; background: white; border: 1px solid #ddd; border-top: none; text-align: center;">
                                                 <label class="bank-option-minimal" style="width: auto; padding: 10px 40px;">
-                                                    <input type="radio" name="pay-method">
+                                                    <input type="radio" name="pay-method" value="nps">
                                                     <span style="font-weight: bold; color: #004a8e; font-size: 30px; font-style: italic; border-bottom: 2px solid #c00; border-top: 2px solid #c00; padding: 0 10px;">nps</span>
                                                 </label>
                                                 <div style="background: #e0e0e0; padding: 8px; font-size: 11px; color: #444; margin-top: 15px; border-radius: 2px;">
@@ -1131,7 +1475,87 @@
                 </div>
             </div>
 
-            <!-- CONSULTA DE PAGOS (LISTADO) -->
+            
+            <!-- CONSTANCIA (Paso 4): mismo formato que el FV 621 -->
+            <div id="view-constancia-710" style="display: none;">
+                <div class="form-stepper">
+                    <div class="step">Complete</div>
+                    <div class="step">Presente/Pague</div>
+                    <div class="step active">Constancia</div>
+                </div>
+                <div class="form-container-box">
+                    <div class="form-header-grey">Formulario Virtual N° 710 Renta Anual - EMPRESAS&nbsp;<span class="ej-anio">2025</span>&nbsp;- Constancia</div>
+                    <div class="form-body-white">
+                        <div class="const-tabs">
+                            <div class="const-tab active" id="ctab-nps" onclick="cambiarTabConstancia710('nps');">Constancia NPS</div>
+                            <div class="const-tab" id="ctab-resumen" onclick="cambiarTabConstancia710('resumen');">Resumen de Transacciones</div>
+                        </div>
+
+                        <div id="cpanel-nps">
+                            <div class="const-titulo">Constancia NPS</div>
+                            <p class="const-nps-num"><strong>Número de Pago SUNAT:</strong> <span id="const-nps-numero"></span></p>
+                            <p class="const-parrafo">Usted puede realizar el pago hasta el <strong id="const-nps-vence"></strong>. Se muestra el importe a pagar, actualizado durante los 3 primeros días:</p>
+                            <table class="const-tabla">
+                                <thead><tr><th></th><th class="ta-c">DIA 1</th><th class="ta-c">DIA 2</th><th class="ta-c">DIA 3</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Fecha de Pago</td><td class="ta-c" id="const-f1"></td><td class="ta-c" id="const-f2"></td><td class="ta-c" id="const-f3"></td></tr>
+                                    <tr><td>Monto Proyectado</td><td class="ta-c" id="const-m1"></td><td class="ta-c" id="const-m2"></td><td class="ta-c" id="const-m3"></td></tr>
+                                </tbody>
+                            </table>
+                            <div class="const-aviso">
+                                Pague en cualquier oficina de los bancos Scotiabank, Interbank, Banco de Crédito BCP, BBVA, Nación y BanBif. También está disponible el pago en los Agentes BCP del Banco de Crédito, Agentes MultiRed del Banco de la Nación y Agentes Interbank.<br>
+                                <strong>IMPORTANTE:</strong> El presente documento no es una constancia de pago.
+                            </div>
+                            <table class="const-tabla">
+                                <thead>
+                                    <tr><th rowspan="2">Periodo</th><th rowspan="2">Tributo</th><th rowspan="2">Tributo Asociado</th><th rowspan="2">Nro. Documento</th><th colspan="3" class="ta-c">Pago</th></tr>
+                                    <tr><th class="ta-c" id="const-h1"></th><th class="ta-c" id="const-h2"></th><th class="ta-c" id="const-h3"></th></tr>
+                                </thead>
+                                <tbody id="const-detalle"></tbody>
+                            </table>
+                            <div class="const-aviso">
+                                El NPS tendrá vigencia durante 15 días calendario o hasta que se emita la Orden de Pago.<br>
+                                La vigencia del NPS no amplía el plazo de pago de la deuda ni posterga la emisión de las órdenes de pago.
+                            </div>
+                        </div>
+
+                        <div id="cpanel-resumen" style="display: none;">
+                            <div class="const-titulo">Resumen de Transacciones</div>
+                            <div class="const-datos-gen">
+                                <p><strong>Datos Generales:</strong></p>
+                                <p>RUC: <span id="const-ruc"></span></p>
+                                <p>Nombre: <span id="const-nombre"></span></p>
+                                <p>Fecha de presentación: <span id="const-fecha-pres"></span></p>
+                                <p>Medio de pago: <span id="const-medio"></span></p>
+                            </div>
+                            <table class="const-tabla">
+                                <thead><tr><th>Form</th><th>Descripción</th><th>N° Orden</th><th>Periodo</th><th>Tributo</th><th>Nro. Documento</th><th class="ta-r">Monto de pago</th><th></th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>0710</td>
+                                        <td>Renta Anual - Empresas</td>
+                                        <td id="const-orden"></td>
+                                        <td id="const-periodo"></td>
+                                        <td id="const-tributo">3081</td>
+                                        <td>-</td>
+                                        <td class="ta-r" id="const-monto"></td>
+                                        <td class="ta-c"><a href="javascript:void(0);" onclick="verConstancia710();">Ver constancia</a></td>
+                                    </tr>
+                                    <tr><td colspan="5"></td><td>Cantidad de formularios</td><td class="ta-r">1</td><td></td></tr>
+                                    <tr><td colspan="5"></td><td>Monto pagado</td><td class="ta-r" id="const-monto-pagado"></td><td></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 25px 0 5px;">
+                            <button type="button" class="btn-const-710" onclick="switchSection('form_selection');"><i class="fas fa-chevron-left"></i> Ir al inicio</button>
+                            <button type="button" class="btn-const-710" onclick="switchSection('consulta_pagos');"><i class="fas fa-list"></i> Consulta de declaraciones</button>
+                            <button type="button" class="btn-const-710 rojo" id="btn-finalizar-simulacion"><i class="fas fa-flag-checkered"></i> Finalizar simulación</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+<!-- CONSULTA DE PAGOS (LISTADO) -->
             <div id="view-consulta-pagos" style="display: none; padding: 20px; background-color: #f0f2f5; min-height: 800px; font-family: 'Roboto', sans-serif;">
                 <div style="background-color: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 4px; margin-bottom: 20px; color: #7a0000; font-size: 14px;">
                     Sr. Contribuyente, esta consulta mostrará información desde el ejercicio 2019.<br>
@@ -1370,6 +1794,12 @@
                         switchSection('informativa');
                         showModal(modalInfo);
                     });
+                    // Cancelar: el selector vuelve a "Seleccionar" para poder elegir otra vez (incluso el mismo año)
+                    const btnNoEj = document.getElementById('btn-modal-no');
+                    if (btnNoEj) {
+                        const cancelar = btnNoEj.onclick;
+                        btnNoEj.onclick = function () { if (cancelar) cancelar.apply(this, arguments); selectEjercicio.value = ''; };
+                    }
                 }
             });
         }
@@ -1445,6 +1875,7 @@
                 'determinativa-deuda-area',
                 'eeff-body-area',
                 'view-pasarela',
+                'view-constancia-710',
                 'view-consulta-pagos'
             ];
             views.forEach(id => {
@@ -1474,6 +1905,9 @@
             
             if (section === 'form_selection') {
                 document.getElementById('view-renta-710').style.display = 'block';
+                // Al volver a la selección, el ejercicio se elige de nuevo
+                const selEj = document.getElementById('select-ejercicio');
+                if (selEj) selEj.value = '';
             } else if (section === 'informativa' || section === 'informativa_complementaria') {
                 document.getElementById('view-informativa').style.display = 'block';
                 const infFullArea = document.getElementById('informativa-full-area');
@@ -1492,8 +1926,8 @@
                 }
 
                 updateMainTabStyles(0);
-                const headerText = document.querySelector('.form-header-grey');
-                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Informativa ';
+                const headerText = document.querySelector('#view-informativa .form-header-grey');
+                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS ' + currentEjercicio + ' - Sección Informativa ';
             } else if (section === 'determinativa' || section === 'determinativa_eeff') {
                 document.getElementById('view-informativa').style.display = 'block';
                 document.getElementById('informativa-full-area').style.display = 'none';
@@ -1507,8 +1941,8 @@
                 updateSubTabStyles(0);
                 updateMainTabStyles(1);
 
-                const headerText = document.querySelector('.form-header-grey');
-                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Determinativa ';
+                const headerText = document.querySelector('#view-informativa .form-header-grey');
+                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS ' + currentEjercicio + ' - Sección Determinativa ';
             } else if (section === 'determinativa_impuesto') {
                 document.getElementById('view-informativa').style.display = 'block';
                 document.getElementById('informativa-full-area').style.display = 'none';
@@ -1527,8 +1961,8 @@
                 updateSubTabStyles(1);
                 updateMainTabStyles(1);
 
-                const headerText = document.querySelector('.form-header-grey');
-                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Determinativa ';
+                const headerText = document.querySelector('#view-informativa .form-header-grey');
+                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS ' + currentEjercicio + ' - Sección Determinativa ';
             } else if (section === 'determinativa_creditos') {
                 document.getElementById('view-informativa').style.display = 'block';
                 document.getElementById('informativa-full-area').style.display = 'none';
@@ -1546,8 +1980,8 @@
                 updateSubTabStyles(2);
                 updateMainTabStyles(1);
 
-                const headerText = document.querySelector('.form-header-grey');
-                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Determinativa ';
+                const headerText = document.querySelector('#view-informativa .form-header-grey');
+                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS ' + currentEjercicio + ' - Sección Determinativa ';
             } else if (section === 'determinativa_deuda') {
                 document.getElementById('view-informativa').style.display = 'block';
                 document.getElementById('informativa-full-area').style.display = 'none';
@@ -1565,12 +1999,15 @@
                 updateSubTabStyles(3);
                 updateMainTabStyles(1);
 
-                const headerText = document.querySelector('.form-header-grey');
-                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS 2025 - Sección Determinativa ';
+                const headerText = document.querySelector('#view-informativa .form-header-grey');
+                if(headerText) headerText.firstChild.textContent = 'Formulario Virtual N° 710 Renta Anual - EMPRESAS ' + currentEjercicio + ' - Sección Determinativa ';
             } else if (section === 'pasarela') {
                 document.getElementById('view-pasarela').style.display = 'block';
                 const headerText = document.querySelector('.form-header-grey');
                 if(headerText) headerText.firstChild.textContent = 'Pasarela de Pagos - Formulario Virtual N° 710 ';
+            } else if (section === 'constancia_710') {
+                document.getElementById('view-constancia-710').style.display = 'block';
+                window.scrollTo(0, 0);
             } else if (section === 'consulta_pagos') {
                 document.getElementById('view-consulta-pagos').style.display = 'block';
                 renderConsultaTable();
@@ -2030,7 +2467,7 @@
                         <tr>
                             <th style="width: 60px;"></th>
                             <th>Ejercicio</th>
-                            <th>Saldo de Pérdidas al 31/12/2025</th>
+                            <th>Saldo de Pérdidas al 31/12/<span class="ej-anio">2025</span></th>
                             <th>Compensación de Pérdidas</th>
                         </tr>
                     </thead>
@@ -2116,7 +2553,7 @@
                 <p style="color: #333; font-weight: bold; margin-bottom: 20px; font-size: 14px;">Saldo a favor no aplicado del ejercicio anterior</p>
                 
                 <div class="eeff-row" style="margin-bottom: 10px; display: flex; align-items: center; width: 100%;">
-                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">Saldo a favor del ejercicio 2024</label>
+                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">Saldo a favor del ejercicio <span class="ej-anterior">2024</span></label>
                     <div style="display: flex; align-items: center; width: 220px; flex-shrink: 0; margin-right: 10px;">
                         <span style="background: #f5f5f5; padding: 6px 0; border: 1px solid #ccc; border-right: none; width: 55px; text-align: center; color: #666; font-size: 12px;">202</span>
                         <div class="currency-input" style="flex: 1; border: 1px solid #ccc; padding: 4px 10px; background: white; display: flex; align-items: center; height: 32px;">
@@ -2127,7 +2564,7 @@
                 </div>
 
                 <div class="eeff-row" style="margin-bottom: 10px; display: flex; align-items: center; width: 100%;">
-                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">(-) Saldo a Favor del ejercicio 2024 aplicado<br>en el ejercicio 2025</label>
+                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">(-) Saldo a Favor del ejercicio <span class="ej-anterior">2024</span> aplicado<br>en el ejercicio <span class="ej-anio">2025</span></label>
                     <div style="display: flex; align-items: center; width: 220px; flex-shrink: 0; margin-right: 10px;">
                         <span style="background: #f5f5f5; padding: 6px 0; border: 1px solid #ccc; border-right: none; width: 55px; text-align: center; color: #666; font-size: 12px;">203</span>
                         <div class="currency-input" style="flex: 1; border: 1px solid #ccc; padding: 4px 10px; background: white; display: flex; align-items: center; height: 32px;">
@@ -2138,7 +2575,7 @@
                 </div>
 
                 <div class="eeff-row" style="margin-bottom: 10px; display: flex; align-items: center; width: 100%;">
-                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">(-) Saldo a Favor del ejercicio 2024 aplicado<br>en el ejercicio 2026</label>
+                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">(-) Saldo a Favor del ejercicio <span class="ej-anterior">2024</span> aplicado<br>en el ejercicio <span class="ej-siguiente">2026</span></label>
                     <div style="display: flex; align-items: center; width: 220px; flex-shrink: 0; margin-right: 10px;">
                         <span style="background: #f5f5f5; padding: 6px 0; border: 1px solid #ccc; border-right: none; width: 55px; text-align: center; color: #666; font-size: 12px;">204</span>
                         <div class="currency-input" style="flex: 1; border: 1px solid #ccc; padding: 4px 10px; background: white; display: flex; align-items: center; height: 32px;">
@@ -2149,7 +2586,7 @@
                 </div>
 
                 <div class="eeff-row" style="margin-bottom: 10px; display: flex; align-items: center; width: 100%;">
-                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">(-) Saldo a Favor del ejercicio 2024 aplicado a deudas<br>en el ejercicio 2025 y 2026</label>
+                    <label style="flex: 1; font-size: 13px; color: #333; padding-right: 15px; line-height: 1.2;">(-) Saldo a Favor del ejercicio <span class="ej-anterior">2024</span> aplicado a deudas<br>en el ejercicio <span class="ej-anio">2025</span> y <span class="ej-siguiente">2026</span></label>
                     <div style="display: flex; align-items: center; width: 220px; flex-shrink: 0; margin-right: 10px;">
                         <span style="background: #f5f5f5; padding: 6px 0; border: 1px solid #ccc; border-right: none; width: 55px; text-align: center; color: #666; font-size: 12px;">297</span>
                         <div class="currency-input highlight-green" onclick="openModal297()" style="flex: 1; border: 1px solid #c5e1a5; padding: 4px 10px; background: #e8f5e9 !important; display: flex; align-items: center; cursor: pointer; height: 32px;">
@@ -2469,7 +2906,7 @@
             document.getElementById('modal128').style.display = 'none';
         }
 
-        const m128Periods = [
+        let m128Periods = [
             "01-2025","02-2025","03-2025","04-2025","05-2025","06-2025","07-2025","08-2025","09-2025","10-2025","11-2025","12-2025",
             "01-2026","02-2026","03-2026","04-2026","05-2026","06-2026"
         ];
@@ -2575,11 +3012,17 @@
             const rni = Math.max(0, c106 - c108);
             setVal('ir-110', rni);
 
-            // Casilla 113 logic: tier-based tax (UIT 2025 = 5350)
-            const uit = 5350;
-            const limit = 15 * uit; // 80,250
+            // Casilla 113 según el régimen de la empresa (Clave SOL):
+            //   Régimen General  -> 29.5% de la renta neta imponible (casilla 110)
+            //   Régimen MYPE Tributario -> 10% hasta 15 UIT y 29.5% por el exceso
+            // La UIT es la del ejercicio declarado.
+            const uit = (typeof uitEjercicio === 'function') ? uitEjercicio() : 5350;
+            const limit = 15 * uit;
             let tax = 0;
-            if (rni <= limit) {
+            const esMype = (typeof regimenEmpresa710 === 'function') && regimenEmpresa710() === 'MYPE';
+            if (!esMype) {
+                tax = rni * 0.295;
+            } else if (rni <= limit) {
                 tax = rni * 0.10;
             } else {
                 tax = (limit * 0.10) + ((rni - limit) * 0.295);
@@ -3172,6 +3615,44 @@
             razonSocial: "EMPRESA DEMO S.A.C.",
             status: "HABIDO"
         };
+        // Empresa elegida en la Clave SOL (RUC + SIST + NORTON)
+        try {
+            const empSol = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
+            if (empSol && empSol.ruc) {
+                currentContribuyente.ruc = String(empSol.ruc);
+                currentContribuyente.razonSocial = empSol.razon_social || currentContribuyente.razonSocial;
+            }
+        } catch (e) { /* sin empresa elegida: queda la empresa demo */ }
+        document.addEventListener('DOMContentLoaded', function () {
+            const put = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            put('header-razon', currentContribuyente.razonSocial);
+            put('drop-razon', currentContribuyente.razonSocial);
+            put('drop-ruc', currentContribuyente.ruc);
+            cargarFirmantes710();
+        });
+
+        // Contador y representante legal de la empresa (tabla empresas_simulador).
+        // Si la empresa no los tiene registrados, los campos quedan para ingresar.
+        async function cargarFirmantes710() {
+            const put = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : String(v); };
+            const may = v => (v == null ? '' : String(v).toUpperCase());
+            let e = null;
+            try {
+                if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient) {
+                    const { data } = await authSupabaseClient.from('empresas_simulador')
+                        .select('*').eq('ruc', String(currentContribuyente.ruc)).maybeSingle();
+                    e = data;
+                }
+            } catch (err) { /* sin conexión: quedan los campos vacíos */ }
+            if (!e) return;
+            put('cont-dni', e.contador_dni);
+            put('cont-nombre', may(e.contador_nombre));
+            put('cont-cpc', e.contador_cpc);
+            put('cont-correo', may(e.contador_correo));
+            put('cont-celular', e.contador_celular);
+            put('rep-dni', e.dni_representante);
+            put('rep-nombre', may(e.representante_legal));
+        }
 
         function openProfileModal() {
             document.getElementById('prof-ruc').value = currentContribuyente.ruc;
@@ -3201,46 +3682,61 @@
         }
 
         let currentEjercicio = "2024";
-        let paymentRecords = [];
 
-        function processPayment() {
-            const importe = getVal('dd-180');
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('es-PE') + ' ' + now.toLocaleTimeString('es-PE');
-            
-            // Get selected bank or method
-            const selectedMethod = document.querySelector('input[name="pay-method"]:checked');
-            let methodLabel = "Pago Cero";
-            if (importe > 0) {
-                if (selectedMethod) {
-                    const accItem = selectedMethod.closest('.pasarela-acc-item');
-                    if (accItem) {
-                        const headerText = accItem.querySelector('.pasarela-acc-header span').innerText;
-                        methodLabel = headerText;
-                    } else {
-                        methodLabel = "Cargo en Cuenta / Tarjeta";
-                    }
-                } else {
-                    methodLabel = "NPS / Banco";
-                }
-            }
+        // UIT vigente de cada ejercicio (para los tramos de la casilla 113)
+        const UIT_POR_EJERCICIO = { 2019: 4200, 2020: 4300, 2021: 4400, 2022: 4600, 2023: 4950, 2024: 5150, 2025: 5350, 2026: 5500 };
 
-            const record = {
-                id: Date.now(),
-                form: "FV Formulario Virtual N° 710 Renta Anual - EMPRESAS",
-                ejercicio: currentEjercicio,
-                tipo: "Original",
-                fecha: dateStr,
-                medio: methodLabel,
-                monto: importe
-            };
-
-            paymentRecords.push(record);
-            
-            showSunatConfirm("Sr. Contribuyente, su declaración ha sido presentada y pagada satisfactoriamente.", () => {
-                switchSection('consulta_pagos');
-            }, 'success');
+        // Régimen de la empresa elegida en la Clave SOL: 'MYPE' o 'GENERAL'
+        function regimenEmpresa710() {
+            try {
+                const e = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null') || {};
+                const r = String(e.regimen_tributario || e.regimen || '');
+                return /mype/i.test(r) ? 'MYPE' : 'GENERAL';
+            } catch (err) { return 'GENERAL'; }
         }
+        function uitEjercicio() {
+            return UIT_POR_EJERCICIO[parseInt(currentEjercicio, 10)] || 5350;
+        }
+
+        // Ajusta todo el formulario al ejercicio elegido (2019 - 2025): títulos,
+        // fechas, saldo a favor del ejercicio anterior, meses de aplicación,
+        // periodos de pagos a cuenta y la UIT del cálculo del impuesto.
+        function aplicarEjercicio(valor) {
+            const y = parseInt(valor, 10);
+            if (!y) return;
+            currentEjercicio = String(y);
+            const pon = (sel, v) => document.querySelectorAll(sel).forEach(el => { el.textContent = v; });
+            pon('.ej-anio', y);
+            pon('.ej-anterior', y - 1);
+            pon('.ej-siguiente', y + 1);
+
+            document.querySelectorAll('.form-header-grey').forEach(h => {
+                const t = h.firstChild;
+                if (t && t.nodeType === 3) t.textContent = t.textContent.replace(/EMPRESAS \d{4}/, 'EMPRESAS ' + y);
+            });
+
+            const p2 = n => String(n).padStart(2, '0');
+            // Pérdidas de ejercicios anteriores (casilla 108): los 5 años previos
+            const astEj = document.getElementById('ast-ejercicio');
+            if (astEj) {
+                astEj.innerHTML = '<option value="">--Seleccionar--</option>' +
+                    [1, 2, 3, 4, 5].map(k => '<option value="' + (y - k) + '">' + (y - k) + '</option>').join('');
+            }
+            // Mes de aplicación del saldo a favor (casilla 297): todo el ejercicio y el primer semestre siguiente
+            const meses297 = [];
+            for (let m = 1; m <= 12; m++) meses297.push(p2(m) + '/' + y);
+            for (let m = 1; m <= 6; m++) meses297.push(p2(m) + '/' + (y + 1));
+            const sel297 = document.getElementById('ast297-mes-aplic');
+            if (sel297) sel297.innerHTML = '<option value="">--Seleccionar--</option>' + meses297.map(m => '<option>' + m + '</option>').join('');
+            // Pagos a cuenta (casilla 128)
+            m128Periods = meses297.map(m => m.replace('/', '-'));
+            // Consulta de declaraciones
+            const cons = document.getElementById('consulta-ejercicio');
+            if (cons) cons.innerHTML = '<option>' + y + '</option>';
+
+            if (typeof calculateIR === 'function') { try { calculateIR(); } catch (e) {} }
+        }
+        let paymentRecords = [];
 
         function renderConsultaTable() {
             const tbody = document.getElementById('consulta-list-tbody');
@@ -3299,6 +3795,11 @@
                 setSafeText('pdf-cas-' + c, val.toLocaleString('en-US', {minimumFractionDigits: 0}));
             });
 
+            // Nombre que el estudiante escribió al ingresar con la Clave SOL (o USER)
+            let estudiante710 = '';
+            try { estudiante710 = (sessionStorage.getItem('taxlab_estudiante') || '').trim(); } catch (e) {}
+            document.querySelectorAll('.pdf-estudiante').forEach(el => el.textContent = estudiante710 || 'USER');
+
             setSafeText('pdf-ruc-4', currentContribuyente.ruc);
             setSafeText('pdf-ruc-5', currentContribuyente.ruc);
             setSafeText('pdf-ruc-6', currentContribuyente.ruc);
@@ -3332,6 +3833,7 @@
             setSafeText('rec-monto', montoStr);
             setSafeText('rec-orden', r.orden);
             setSafeText('rec-periodo', periodo);
+            setSafeText('rec-ejercicio', r.ejercicio);
 
             const v146 = getVal('dd-146');
             const v180 = getVal('dd-180');
@@ -3365,6 +3867,7 @@
                         <div><strong>Número de RUC:</strong> <span id="pdf-ruc-4">20123456789</span></div>
                         <div><strong>Periodo Tributario:</strong> <span id="pdf-ejercicio-box-4">202413</span></div>
                         <div><strong>Número de Formulario:</strong> 0710</div>
+                        <div><strong>Realizado por:</strong> <span class="pdf-estudiante">USER</span></div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div><strong>Razón Social:</strong> <span id="pdf-razon-4">EMPRESA DEMO S.A.C.</span></div>
@@ -3531,6 +4034,7 @@
                         <div><strong>Número de RUC:</strong> <span id="pdf-ruc-5">20123456789</span></div>
                         <div><strong>Periodo Tributario:</strong> <span id="pdf-ejercicio-box-5">202413</span></div>
                         <div><strong>Número de Formulario:</strong> 0710</div>
+                        <div><strong>Realizado por:</strong> <span class="pdf-estudiante">USER</span></div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div><strong>Razón Social:</strong> <span id="pdf-razon-5">EMPRESA DEMO S.A.C.</span></div>
@@ -3595,6 +4099,7 @@
                         <div><strong>Número de RUC:</strong> <span id="pdf-ruc-6">20123456789</span></div>
                         <div><strong>Periodo Tributario:</strong> <span id="pdf-ejercicio-box-6">202413</span></div>
                         <div><strong>Número de Formulario:</strong> 0710</div>
+                        <div><strong>Realizado por:</strong> <span class="pdf-estudiante">USER</span></div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div><strong>Razón Social:</strong> <span id="pdf-razon-6">EMPRESA DEMO S.A.C.</span></div>
@@ -3681,6 +4186,7 @@
                         <div><strong>Número de RUC:</strong> <span id="pdf-ruc-7">20123456789</span></div>
                         <div><strong>Periodo Tributario:</strong> <span id="pdf-ejercicio-box-7">202413</span></div>
                         <div><strong>Número de Formulario:</strong> 0710</div>
+                        <div><strong>Realizado por:</strong> <span class="pdf-estudiante">USER</span></div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div><strong>Razón Social:</strong> <span id="pdf-razon-7">EMPRESA DEMO S.A.C.</span></div>
@@ -3735,7 +4241,7 @@
             </div>
             <div style="text-align: center; margin: 10px 0;">
                 <h3 style="margin: 0; font-size: 12px;">REPORTE DEFINITIVO</h3>
-                <h2 style="margin: 5px 0; font-size: 16px;">FORMULARIO 710 RENTA ANUAL 2024<br>TERCERA CATEGORÍA - ITF</h2>
+                <h2 style="margin: 5px 0; font-size: 16px;">FORMULARIO 710 RENTA ANUAL <span id="rec-ejercicio">2024</span><br>TERCERA CATEGORÍA - ITF</h2>
             </div>
 
             <div style="text-align: center; background: #f0f0f0; border: 1px solid #000; padding: 5px; font-weight: bold; margin-bottom: 20px;">
@@ -3815,5 +4321,227 @@
             </div>
         </div>
     </div>
+    <!-- ================= PASARELA DE TARJETA / YAPE (simulación didáctica) ================= -->
+    <div class="pg-ov" id="m-pago-tarjeta">
+        <div class="pg-box" style="max-width: 760px;">
+            <header style="background: #1A3A6B;"><span><i class="far fa-credit-card"></i> Pago con Tarjeta de Crédito y Débito</span></header>
+            <div style="padding: 25px 30px 30px 30px;">
+                <div class="pt-aviso">El tiempo máximo para realizar su operación es de 5 minutos.</div>
+                <div class="pt-datos">
+                    <div><span>Número de Operación</span><strong id="pt-operacion"></strong></div>
+                    <div><span>Importe a Pagar</span><strong id="pt-importe"></strong></div>
+                </div>
+                <p class="pt-selecc">Seleccione Medio de Pago</p>
+                <div style="text-align: center;"><button class="btn-paga-aqui" onclick="abrirElegirMedioPago710();">PAGA AQUÍ</button></div>
+                <div style="text-align: center; margin-top: 25px;"><button class="btn-pt-cancelar" onclick="cancelarPagoTarjeta710();"><i class="fas fa-ban"></i> Cancelar</button></div>
+                <p class="pt-nota">(*)Su tarjeta VISA debe estar afiliada a Verified by VISA</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="pg-ov" id="m-pago-medio">
+        <div class="pago-card">
+            <div class="pago-card-top"><span class="pago-idioma">ENG&nbsp;&nbsp;ESP</span><i class="fas fa-times-circle" onclick="cancelarPagoTarjeta710();"></i></div>
+            <img src="LOGO_SUNAT.png" alt="SUNAT" class="pago-logo">
+            <p class="pago-titulo">Elige un medio de pago</p>
+            <label class="pago-opcion">
+                <input type="radio" name="medio-pago-online" value="tarjeta" checked>
+                <div>
+                    <span class="pago-op-nombre">Tarjeta de crédito y débito</span>
+                    <span class="pago-op-desc">Realiza tu pago en cuotas o directo</span>
+                    <span class="pago-op-logos"><img src="TARJETA1.png" alt=""><img src="TARJETA2.png" alt=""><img src="TARJETA3.png" alt=""><img src="TARJETA4.png" alt=""></span>
+                </div>
+            </label>
+            <label class="pago-opcion">
+                <input type="radio" name="medio-pago-online" value="yape">
+                <div><span class="pago-op-nombre">Pago con Yape</span><span class="pago-op-logos"><img src="TARJETA5.jpg" alt="Yape"></span></div>
+            </label>
+            <button class="btn-pago-rojo" onclick="continuarMedioPago710();">Continuar</button>
+        </div>
+    </div>
+
+    <div class="pg-ov" id="m-pago-visa">
+        <div class="pago-card">
+            <div class="pago-card-top"><span class="pago-idioma">ENG&nbsp;&nbsp;ESP</span><i class="fas fa-times-circle" onclick="cancelarPagoTarjeta710();"></i></div>
+            <img src="LOGO_SUNAT.png" alt="SUNAT" class="pago-logo">
+            <p class="pago-recuerda"><strong>Recuerda</strong> activar las <strong>compras por internet</strong> con tu banco</p>
+            <div class="pago-sim-aviso">Simulación con fines didácticos: no ingrese datos reales de su tarjeta.</div>
+            <div class="pago-campo"><i class="far fa-credit-card"></i><input type="text" id="pv-numero" placeholder="Número de Tarjeta" inputmode="tel" maxlength="19" autocomplete="off"></div>
+            <div class="pago-campo-fila">
+                <div class="pago-campo"><i class="far fa-calendar-alt"></i><input type="text" id="pv-vence" placeholder="MM/AA" maxlength="5" autocomplete="off"></div>
+                <div class="pago-campo"><i class="far fa-credit-card"></i><input type="text" id="pv-cvv" placeholder="CVV" maxlength="4" autocomplete="off"></div>
+            </div>
+            <div class="pago-campo-fila">
+                <div class="pago-campo"><i class="far fa-user"></i><input type="text" id="pv-nombre" placeholder="Nombre" autocomplete="off"></div>
+                <div class="pago-campo"><i class="far fa-user"></i><input type="text" id="pv-apellido" placeholder="Apellido" autocomplete="off"></div>
+            </div>
+            <div class="pago-campo"><i class="far fa-envelope"></i><input type="text" id="pv-email" placeholder="Email" autocomplete="off"></div>
+            <button class="btn-pago-rojo" id="btn-pagar-visa" onclick="confirmarPagoOnline710('tarjeta');">Pagar</button>
+            <div class="pago-marcas"><img src="TARJETA1.png" alt=""><img src="TARJETA2.png" alt=""><img src="TARJETA3.png" alt=""><img src="TARJETA4.png" alt=""></div>
+        </div>
+    </div>
+
+    <div class="pg-ov" id="m-pago-yape">
+        <div class="pago-card">
+            <div class="pago-card-top"><span class="pago-idioma">ENG&nbsp;&nbsp;ESP</span><i class="fas fa-times-circle" onclick="cancelarPagoTarjeta710();"></i></div>
+            <img src="LOGO_SUNAT.png" alt="SUNAT" class="pago-logo">
+            <div class="pago-sim-aviso">Simulación con fines didácticos: no ingrese datos reales de su cuenta Yape.</div>
+            <p class="pago-label">Ingresa tu celular Yape</p>
+            <input type="text" id="py-celular" class="pago-input" inputmode="tel" maxlength="9" placeholder="9XXXXXXXX" autocomplete="off">
+            <p class="pago-label">Código de aprobación</p>
+            <input type="text" id="py-codigo" class="pago-input" inputmode="tel" maxlength="6" autocomplete="off">
+            <p class="pago-hint">Encuéntralo en el menú de Yape</p>
+            <button class="btn-pago-yape" id="btn-pagar-yape" onclick="confirmarPagoOnline710('yape');">Yapear</button>
+            <div class="pago-marcas"><img src="TARJETA5.jpg" alt="Yape"></div>
+        </div>
+    </div>
+
+    <script>
+        // La pasarela, la constancia y la consulta quedaban fuera del contenido
+        // principal (se dibujaban debajo del menú): se mueven a #main-content.
+        (function () {
+            const main = document.getElementById('main-content');
+            ['view-pasarela', 'view-constancia-710', 'view-consulta-pagos'].forEach(id => {
+                const v = document.getElementById(id);
+                if (main && v && v.parentElement !== main) main.appendChild(v);
+            });
+        })();
+
+        // ===== Pasarela de pagos del 710: mismo flujo que el FV 621 =====
+        // Simulación didáctica: nada de lo que se escriba en tarjeta o Yape se guarda ni se envía.
+        const MEDIOS_710 = {
+            banco: 'Cargo en Cuenta Bancaria',
+            detraccion: 'Cargo en Cuenta de Detracciones',
+            tarjeta: 'Tarjeta de Crédito o Débito',
+            yape: 'Pago con Yape',
+            nps: 'NPS - Número de Pago SUNAT',
+            cero: 'Pago Cero'
+        };
+        let totalPago710 = 0;
+        window.ultimoPago710 = null;   // lo usa finalizar.js para el reporte
+
+        const abrirPg710 = id => document.getElementById(id).classList.add('open');
+        const cerrarPg710 = id => document.getElementById(id).classList.remove('open');
+        const soles710 = n => 'S/ ' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+        const solesDec710 = n => 'S/ ' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fecha710 = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+
+        ['pv-numero', 'pv-cvv', 'py-celular', 'py-codigo'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
+        });
+
+        function processPayment() {
+            const importe = getVal('dd-180');
+            const medio = document.querySelector('input[name="pay-method"]:checked');
+            if (importe > 0 && !medio) {
+                showSunatConfirm('Sr. Contribuyente, seleccione un medio de pago para continuar.', null, 'warning');
+                return;
+            }
+            const tipo = importe > 0 ? (medio.value || 'banco') : 'cero';
+            if (tipo === 'tarjeta') { abrirPagoTarjeta710(importe); return; }
+            registrarPago710(importe, tipo);
+        }
+
+        function abrirPagoTarjeta710(total) {
+            totalPago710 = total;
+            document.getElementById('pt-operacion').textContent = String(Math.floor(Math.random() * 9e9) + 1e9);
+            document.getElementById('pt-importe').textContent = solesDec710(total);
+            document.getElementById('btn-pagar-visa').textContent = 'Pagar ' + solesDec710(total);
+            document.getElementById('btn-pagar-yape').textContent = 'Yapear ' + solesDec710(total);
+            abrirPg710('m-pago-tarjeta');
+        }
+        function abrirElegirMedioPago710() { cerrarPg710('m-pago-tarjeta'); abrirPg710('m-pago-medio'); }
+        function continuarMedioPago710() {
+            const m = document.querySelector('input[name="medio-pago-online"]:checked');
+            cerrarPg710('m-pago-medio');
+            abrirPg710(m && m.value === 'yape' ? 'm-pago-yape' : 'm-pago-visa');
+        }
+        function limpiarCamposPago710() {
+            ['pv-numero', 'pv-vence', 'pv-cvv', 'pv-nombre', 'pv-apellido', 'pv-email', 'py-celular', 'py-codigo']
+                .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        }
+        function cancelarPagoTarjeta710() {
+            ['m-pago-tarjeta', 'm-pago-medio', 'm-pago-visa', 'm-pago-yape'].forEach(cerrarPg710);
+            limpiarCamposPago710();
+        }
+        function confirmarPagoOnline710(tipo) {
+            cancelarPagoTarjeta710();
+            registrarPago710(totalPago710, tipo);
+        }
+
+        // Registra la declaración presentada y muestra la constancia (Paso 4)
+        function registrarPago710(importe, tipo) {
+            const now = new Date();
+            const record = {
+                id: Date.now(),
+                orden: '100' + Math.floor(Math.random() * 90000000 + 10000000),
+                form: 'FV Formulario Virtual N° 710 Renta Anual - EMPRESAS',
+                ejercicio: currentEjercicio,
+                tipo: 'Original',
+                fecha: now.toLocaleDateString('es-PE') + ' ' + now.toLocaleTimeString('es-PE'),
+                medio: MEDIOS_710[tipo] || tipo,
+                monto: importe
+            };
+            paymentRecords.push(record);
+            window.ultimoPago710 = {
+                record: record,
+                regimen: (typeof regimenEmpresa710 === 'function') ? regimenEmpresa710() : '',
+                uit: (typeof uitEjercicio === 'function') ? uitEjercicio() : '',
+                rentaNeta: getVal('ir-110'),
+                impuesto: getVal('ir-113'),
+                deuda: getVal('dd-146')
+            };
+            mostrarConstancia710(record, tipo === 'nps');
+        }
+
+        function mostrarConstancia710(record, esNps) {
+            const total = record.monto;
+            const periodo = record.ejercicio + '13';
+            const hoy = new Date();
+            if (esNps) {
+                const fechas = [0, 1, 2].map(d => { const f = new Date(hoy); f.setDate(f.getDate() + d); return fecha710(f); });
+                const vence = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                document.getElementById('const-nps-numero').textContent = '0004' + String(Math.floor(Math.random() * 1e9)).padStart(9, '0');
+                document.getElementById('const-nps-vence').textContent = fecha710(vence);
+                fechas.forEach((f, i) => {
+                    document.getElementById('const-f' + (i + 1)).textContent = f;
+                    document.getElementById('const-m' + (i + 1)).textContent = soles710(total);
+                    document.getElementById('const-h' + (i + 1)).textContent = f;
+                });
+                document.getElementById('const-detalle').innerHTML =
+                    '<tr><td>' + periodo + '</td><td>3081-REGULARIZACION RENTA TERCERA CATEGORIA</td><td>-</td><td></td>' +
+                    '<td class="ta-r">' + soles710(total) + '</td><td class="ta-r">' + soles710(total) + '</td><td class="ta-r">' + soles710(total) + '</td></tr>' +
+                    '<tr><td colspan="3"></td><td><strong>Total</strong></td><td class="ta-r">' + soles710(total) + '</td><td class="ta-r">' + soles710(total) + '</td><td class="ta-r">' + soles710(total) + '</td></tr>';
+            }
+            document.getElementById('const-ruc').textContent = currentContribuyente.ruc;
+            document.getElementById('const-nombre').textContent = currentContribuyente.razonSocial;
+            document.getElementById('const-fecha-pres').textContent = fecha710(hoy);
+            document.getElementById('const-medio').textContent = record.medio;
+            document.getElementById('const-orden').textContent = record.orden;
+            document.getElementById('const-periodo').textContent = periodo;
+            document.getElementById('const-monto').textContent = soles710(total);
+            document.getElementById('const-monto-pagado').textContent = soles710(esNps ? 0 : total);
+            window.__constancia710 = record.id;
+
+            document.getElementById('ctab-nps').style.display = esNps ? 'block' : 'none';
+            cambiarTabConstancia710(esNps ? 'nps' : 'resumen');
+            switchSection('constancia_710');
+        }
+
+        function cambiarTabConstancia710(tab) {
+            const esNps = tab === 'nps';
+            document.getElementById('cpanel-nps').style.display = esNps ? 'block' : 'none';
+            document.getElementById('cpanel-resumen').style.display = esNps ? 'none' : 'block';
+            document.getElementById('ctab-nps').classList.toggle('active', esNps);
+            document.getElementById('ctab-resumen').classList.toggle('active', !esNps);
+        }
+
+        function verConstancia710() {
+            if (window.__constancia710) downloadPDF(window.__constancia710);
+        }
+    </script>
+    <script src="survey.js"></script>
+    <script src="finalizar.js"></script>
 </body>
 </html>
