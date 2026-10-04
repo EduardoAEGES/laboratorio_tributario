@@ -622,16 +622,10 @@
     // ------------------------------------------------------------ enganche
     function montarBotones() {
         document.querySelectorAll('#determinativa-area .btn-import-blue').forEach(b => {
-            const enResultados = !!b.closest('#eeff-resultados');
-            b.removeAttribute('onclick');
-            b.onclick = null;
-            b.title = enResultados
+            // El clic lo maneja el onclick del HTML (FV710Importar.abrir); aquí solo el texto de ayuda
+            b.title = b.closest('#eeff-resultados')
                 ? 'Importar el Estado de Resultados desde la plantilla Excel de SUNAT'
                 : 'Importar el Activo o el Pasivo y Patrimonio desde la plantilla Excel de SUNAT';
-            b.addEventListener('click', e => {
-                e.preventDefault();
-                abrirImportar(enResultados ? ['EEGGPP'] : ['ACTIVO', 'PASIVO']);
-            });
         });
 
         Object.keys(CASILLAS_DETALLE).forEach(c => {

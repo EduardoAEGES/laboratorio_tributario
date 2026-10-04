@@ -994,7 +994,7 @@
                                 <div class="eeff-body" id="eeff-body-area">
                                     <div class="eeff-header-row" id="header-situacion">
                                         <p>I. Estado de Situación Financiera (Balance General) - Valor Histórico al 31 de Dic. <span class="ej-anio">2025</span></p>
-                                        <button class="btn-import-blue" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-import"></i> Importar</button>
+                                        <button type="button" class="btn-import-blue" onclick="window.FV710Importar ? FV710Importar.abrir(['ACTIVO','PASIVO']) : alert('No se encontró el importador (fv710_importar.js). Copie ese archivo y la carpeta plantillas_710 junto a dashboard.html y recargue la página.')"><i class="fas fa-file-import"></i> Importar</button>
                                     </div>
 
                                     <!-- AREA ACTIVO -->
@@ -1112,7 +1112,7 @@
                                     <div id="eeff-resultados" style="display: none;">
                                         <div class="eeff-header-row">
                                             <p>II. Estado de Resultados del 01/01 al 31/12 del <span class="ej-anio">2025</span></p>
-                                            <button class="btn-import-blue" onclick="alert('POR IMPLEMENTAR')"><i class="fas fa-file-import"></i> Importar</button>
+                                            <button type="button" class="btn-import-blue" onclick="window.FV710Importar ? FV710Importar.abrir(['EEGGPP']) : alert('No se encontró el importador (fv710_importar.js). Copie ese archivo y la carpeta plantillas_710 junto a dashboard.html y recargue la página.')"><i class="fas fa-file-import"></i> Importar</button>
                                         </div>
                                         <div class="eeff-grid">
                                             <div class="eeff-column">
