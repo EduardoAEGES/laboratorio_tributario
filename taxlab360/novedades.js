@@ -20,7 +20,7 @@
         },
         {
             fecha: '03/10/2026',
-            texto: 'El <strong>FV 710</strong> guarda solo lo que vas llenando. Al volver, pulsa <strong>Continuar donde me quedé</strong>.'
+            texto: 'El <strong>FV 621</strong> y el <strong>FV 710</strong> guardan solo lo que vas llenando. Al volver, pulsa <strong>Continuar donde me quedé</strong>.'
         },
         {
             fecha: '03/10/2026',
