@@ -214,17 +214,29 @@
     function sincronizarPestanas() {
         const activa = document.querySelector('.infcomp-tab-item.active');
         const tab = activa ? activa.id.replace('infcomp-tab-', '') : 'general';
-        const itan = $('inf-comp-itan-content'), niif = $('inf-comp-niif-content');
+        const propias = { itan: 'inf-comp-itan-content', niif: 'inf-comp-niif-content', socios: 'inf-comp-socios-content', alquileres: 'inf-comp-alquileres-content' };
+        Object.keys(propias).forEach(t => {
+            const el = $(propias[t]);
+            if (el) el.style.display = tab === t ? 'block' : 'none';
+        });
         const otros = $('inf-comp-others-content');
-        if (itan) itan.style.display = tab === 'itan' ? 'block' : 'none';
-        if (niif) niif.style.display = tab === 'niif' ? 'block' : 'none';
-        if (otros && (tab === 'itan' || tab === 'niif')) otros.style.display = 'none';
+        if (otros && propias[tab]) otros.style.display = 'none';
+        if (tab === 'socios' && window.FV710Socios) FV710Socios.pintar();
+        if (tab === 'alquileres' && window.FV710Alquileres) FV710Alquileres.pintar();
     }
 
+    // "No aplica las NIIF": la pregunta 2 sigue a la vista pero gris y bloqueada (como en SUNAT)
     function aplicarNIIF() {
         const r = document.querySelector('input[name="niif-norma"]:checked');
-        const p2 = $('niif-pregunta-2');
-        if (p2) p2.style.display = (r && r.value === 'noaplica') ? 'none' : 'block';
+        const bloquear = !!(r && r.value === 'noaplica');
+        ['niif-fecha', 'niif-anio'].forEach(id => {
+            const el = $(id);
+            if (!el) return;
+            el.disabled = bloquear;
+            el.style.background = bloquear ? '#b5b5b5' : '#fff';
+            el.style.cursor = bloquear ? 'not-allowed' : '';
+            if (bloquear && el.value) { el.value = ''; avisarCambio(el); }
+        });
     }
 
     function ir(destino) {
