@@ -601,7 +601,7 @@
             <div class="info-right">
                 <span class="status-badge">Domicilio: <strong id="header-status">HABIDO</strong></span>
                 <a href="index.html" class="btn-exit" style="background-color: #00AEEF;">MENÚ PRINCIPAL</a>
-                <a href="login.html" class="btn-exit">Salir</a>
+                <a href="login.html?redirect=dashboard.html" class="btn-exit" title="Salir y volver a ingresar con Clave SOL">Salir</a>
             </div>
         </div>
     </header>
@@ -3094,6 +3094,11 @@
             const c506 = c504 - c127 - c128 - c130 - c129;
             setVal('cr-506', c506);
 
+            // ITAN (casilla 131): se aplica contra el saldo de la 506; lo que no
+            // alcanza a aplicarse queda como Saldo del ITAN no aplicado (279)
+            const c131 = getVal('cr-131');
+            setVal('cr-279', c131 - itanAplicado710());
+
             // Determine if it's Saldo a Favor or Impuesto a Pagar in Determinación de la Deuda
             calculateDeuda();
         }
@@ -3403,8 +3408,17 @@
         }
 
         // --- DETERMINACIÓN DE LA DEUDA ---
-        function calculateDeuda() {
+        // Parte de los pagos del ITAN (casilla 131) que sí se aplica como crédito:
+        // como máximo el saldo a favor del fisco de la casilla 506
+        function itanAplicado710() {
             const c506 = getVal('cr-506');
+            const c131 = getVal('cr-131');
+            return c506 > 0 ? Math.min(c131, c506) : 0;
+        }
+
+        function calculateDeuda() {
+            // La 139 es el saldo de la 506 menos el ITAN aplicado
+            const c506 = getVal('cr-506') - itanAplicado710();
             const dd137 = document.getElementById('dd-137');
             
             if (c506 >= 0) {
@@ -4578,6 +4592,7 @@
     </script>
     <script src="fv710_movil.js"></script>
     <script src="fv710_importar.js"></script>
+    <script src="fv710_itan_niif.js"></script>
     <script src="survey.js"></script>
     <script src="finalizar.js"></script>
 </body>

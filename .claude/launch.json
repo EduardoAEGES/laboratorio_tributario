@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "5502"],
       "port": 5502
+    },
+    {
+      "name": "sunat-sim-alt",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5512"],
+      "port": 5512
     }
   ]
 }

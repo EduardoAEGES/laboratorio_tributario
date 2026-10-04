@@ -11,6 +11,18 @@
 
     const NOVEDADES = [
         {
+            fecha: '04/10/2026',
+            texto: 'En el <strong>FV 710</strong> ya puedes <strong>Importar</strong> los Estados Financieros con las plantillas Excel de SUNAT.'
+        },
+        {
+            fecha: '04/10/2026',
+            texto: 'Las casillas <strong>128</strong> (pagos a cuenta) y <strong>130</strong> (retenciones) del FV 710 también se importan desde Excel.'
+        },
+        {
+            fecha: '04/10/2026',
+            texto: 'Nuevas pestañas <strong>ITAN</strong> y <strong>NIIF</strong> en el FV 710. Si marcas <strong>Si</strong> en ITAN se habilita la casilla <strong>131</strong>.'
+        },
+        {
             fecha: '03/10/2026',
             texto: 'En el <strong>FV 621</strong> y el <strong>FV 710</strong>, luego de realizar la declaración ya aparecen los <strong>reportes de declaración</strong>.'
         },
