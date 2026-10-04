@@ -2654,7 +2654,7 @@
                 </div>
             </div>
             <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
-                <button class="btn-top-action" style="padding: 6px 15px; font-size: 13px; background-color: #0066B3; color: white; border: none; margin-right: auto;">Importar</button>
+                <button type="button" class="btn-top-action" onclick="window.FV710Importar ? FV710Importar.abrir(['C128']) : alert('No se encontró el importador (fv710_importar.js). Copie ese archivo y la carpeta plantillas_710 junto a dashboard.html y recargue la página.')" style="padding: 6px 15px; font-size: 13px; background-color: #0066B3; color: white; border: none; margin-right: auto;">Importar</button>
                 <button class="btn-modal-cancel" onclick="closeModal128()" style="padding: 6px 20px; font-size: 13px;">Cancelar</button>
                 <button class="btn-modal-save" onclick="saveModal128()" style="padding: 6px 25px; font-size: 13px;">Guardar</button>
             </div>
@@ -2686,7 +2686,7 @@
                 </div>
             </div>
             <div class="modal-footer" style="justify-content: space-between; padding: 15px 40px;">
-                <button class="btn-top-action" style="background-color: #0066B3; color: white; border: none;">Importar</button>
+                <button type="button" class="btn-top-action" onclick="window.FV710Importar ? FV710Importar.abrir(['C130']) : alert('No se encontró el importador (fv710_importar.js). Copie ese archivo y la carpeta plantillas_710 junto a dashboard.html y recargue la página.')" style="background-color: #0066B3; color: white; border: none;">Importar</button>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn-modal-cancel" onclick="closeModal130()">Cancelar</button>
                     <button class="btn-modal-save" onclick="saveModal130()">Guardar</button>

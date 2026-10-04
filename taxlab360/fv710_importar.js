@@ -9,6 +9,9 @@
 //    y 408 (cuentas por cobrar / por pagar por tercero): se importa un archivo
 //    0710AAAArucCCC.TXT (o .xls) con la estructura del instructivo de SUNAT
 //    y la casilla toma la suma del detalle.
+// 3) Botón "Importar" de las ventanas de las casillas 128 (pagos a cuenta) y
+//    130 (retenciones): plantillas 0710AAAAruc128.xls / 0710AAAAruc130.xls,
+//    un mes por fila (AAAAMM en la columna A, montos desde la celda B4).
 // Se valida lo mismo que valida SUNAT: nombre del archivo, ejercicio, RUC,
 // estructura, montos enteros y positivos y casillas excluyentes.
 // El detalle se guarda en un campo oculto del formulario, así viaja con el
@@ -52,6 +55,23 @@
             archivo: 'TABLA_EEGGPP_FV_2025.xls'
         }
     };
+
+    // Casillas 128 y 130: un mes por fila (enero del ejercicio a junio del siguiente)
+    const MENSUALES = {
+        C128: {
+            casilla: '128',
+            titulo: 'Pagos a cuenta del ejercicio (casilla 128)',
+            columnas: ['Utilización del saldo a favor', 'Compensación del SFMB', 'Compensación del ITAN', 'Otros créditos', 'Monto pagado'],
+            archivo: 'Casilla_128_2025.xls'
+        },
+        C130: {
+            casilla: '130',
+            titulo: 'Retenciones de Renta de Tercera Categoría (casilla 130)',
+            columnas: ['Monto de la retención'],
+            archivo: 'Casilla_130_2025.xls'
+        }
+    };
+    const tipoMensual = casilla => casilla === '128' ? 'C128' : casilla === '130' ? 'C130' : null;
 
     // Casillas con detalle por tercero
     const CASILLAS_DETALLE = {
@@ -163,7 +183,9 @@
     function analizarNombre(nombre, permitidos) {
         const m = /^0710(\d{4})(\d{11})(ACTIVO|PASIVO|EEGGPP|\d{3})\.(xls|xlsx|txt)$/i.exec(nombre.trim());
         const ruc = rucDeclarante(), y = ejercicio();
-        const ejemplos = permitidos.map(t => t === 'DETALLE' ? '0710' + y + ruc + '361.TXT' : '0710' + y + ruc + t + '.xls');
+        const ejemplos = permitidos.map(t => t === 'DETALLE' ? '0710' + y + ruc + '361.TXT'
+            : MENSUALES[t] ? '0710' + y + ruc + MENSUALES[t].casilla + '.xls'
+            : '0710' + y + ruc + t + '.xls');
         if (!m) {
             throw ['El nombre del archivo "' + nombre + '" no tiene la estructura que pide SUNAT.',
                    'Renombre el archivo así: ' + ejemplos.join('  ·  ') +
@@ -172,13 +194,16 @@
         const errores = [];
         const sufijo = m[3].toUpperCase();
         const ext = m[4].toLowerCase();
-        const tipo = /^\d{3}$/.test(sufijo) ? 'DETALLE' : sufijo;
+        const tipo = /^\d{3}$/.test(sufijo) ? (tipoMensual(sufijo) || 'DETALLE') : sufijo;
 
         if (m[1] !== y) errores.push('El archivo es del ejercicio ' + m[1] + ', pero está declarando el ejercicio ' + y + '. Corrija el año en el nombre del archivo o elija el ejercicio correcto.');
         if (m[2] !== ruc) errores.push('El RUC del nombre del archivo (' + m[2] + ') no es el del declarante (' + ruc + '). Use el RUC de la empresa con la que ingresó.');
         if (permitidos.indexOf(tipo) < 0) {
+            const aqui = permitidos.map(t => (PLANTILLAS[t] || MENSUALES[t] || { titulo: 'detalle de la casilla ' + (casillaActual || '') }).titulo).join(' o ');
             errores.push(tipo === 'DETALLE'
-                ? 'Este botón importa el ' + permitidos.map(t => PLANTILLAS[t] ? PLANTILLAS[t].titulo : t).join(' o el ') + '. El detalle de la casilla ' + sufijo + ' se importa desde el botón verde de esa casilla.'
+                ? 'Este botón importa: ' + aqui + '. El detalle de la casilla ' + sufijo + ' se importa desde el botón verde de esa casilla.'
+                : MENSUALES[tipo]
+                ? 'Este botón importa: ' + aqui + '. El archivo de la casilla ' + sufijo + ' se importa desde el botón "Importar" de la ventana de la casilla ' + sufijo + ' (pestaña Cred. Contra Imp. Renta).'
                 : 'El archivo ' + sufijo + ' no corresponde a esta sección. Impórtelo desde el botón "Importar" de la pestaña ' + PLANTILLAS[sufijo].titulo + '.');
         }
         if (tipo === 'DETALLE' && !CASILLAS_DETALLE[sufijo]) {
@@ -262,6 +287,90 @@
             titulo: p.titulo, pestana: p.pestana, avisos: avisos,
             mensaje: 'Se importó el ' + p.titulo + ' del archivo ' + file.name + ': ' + llenas +
                      ' casilla(s) con monto. Los totales los calcula el formulario.'
+        };
+    }
+
+    // ------------------------------------------------ casillas 128 y 130
+    function periodosEjercicio() {
+        try { if (Array.isArray(m128Periods) && m128Periods.length) return m128Periods.slice(); } catch (e) {}
+        const y = Number(ejercicio());
+        const p2 = n => String(n).padStart(2, '0');
+        return Array.from({ length: 18 }, (_, i) => p2(i % 12 + 1) + '-' + (i < 12 ? y : y + 1));
+    }
+
+    async function importarMensual(file, tipo) {
+        const p = MENSUALES[tipo];
+        const periodos = periodosEjercicio();               // 'MM-AAAA'
+        const filas = await filasExcel(file);
+        const valores = {}, errores = [];
+
+        // Desde la fila 4: periodo AAAAMM en la columna A y montos desde la columna B
+        for (let i = 3; i < filas.length; i++) {
+            const f = filas[i] || [];
+            const per = String(f[0]).trim().replace(/\.0+$/, '');
+            if (!/^\d{6}$/.test(per)) continue;                 // fila Total o vacía
+            const montos = [];
+            let conMonto = false;
+            p.columnas.forEach((nombre, c) => {
+                const r = leerMonto(f[c + 1]);
+                if (r.error) errores.push('Periodo ' + per + ', ' + nombre.toLowerCase() + ' (fila ' + (i + 1) + '): el monto ' + r.error + '.');
+                else { montos.push(r.valor); if (r.valor > 0) conMonto = true; }
+            });
+            const idx = periodos.indexOf(per.slice(4) + '-' + per.slice(0, 4));
+            if (idx < 0) {
+                if (conMonto) errores.push('El periodo ' + per + ' (fila ' + (i + 1) + ') no corresponde al ejercicio ' + ejercicio() + ': solo se aceptan de ' + periodos[0] + ' a ' + periodos[periodos.length - 1] + '.');
+                continue;
+            }
+            if (idx in valores) { errores.push('El periodo ' + per + ' está repetido (fila ' + (i + 1) + '). Deje una sola fila por mes.'); continue; }
+            if (montos.length === p.columnas.length) valores[idx] = montos;
+        }
+        if (!Object.keys(valores).length && !errores.length) {
+            throw ['El archivo no tiene la estructura de la plantilla de la casilla ' + p.casilla + ' de SUNAT.',
+                   'Descargue la plantilla oficial: los meses (AAAAMM) van en la columna A y los montos desde la celda B4. No agregue ni quite filas o columnas.'];
+        }
+        if (errores.length) throw errores;
+
+        let total = 0, meses = 0;
+        if (tipo === 'C128') {
+            if (!document.getElementById('m128-row-0-col1')) llamar('renderM128Rows');
+            periodos.forEach((_, idx) => {
+                const montos = valores[idx] || [0, 0, 0, 0, 0];
+                montos.forEach((v, c) => setCampo('m128-row-' + idx + '-col' + (c + 1), v));
+                try { calculateM128Row(idx); } catch (e) {}
+                const fila = montos.reduce((a, b) => a + b, 0);
+                if (fila > 0) meses++;
+                total += fila;
+            });
+            llamar('calculateM128GrandTotal');
+        } else {
+            if (!document.getElementById('m130-input-0')) llamar('renderM130Rows');
+            periodos.forEach((_, idx) => {
+                const v = (valores[idx] || [0])[0];
+                setCampo('m130-input-' + idx, v);
+                if (v > 0) meses++;
+                total += v;
+            });
+            llamar('calculateM130Total');
+        }
+        return {
+            pestana: null,
+            mensaje: 'Se cargaron ' + meses + ' mes(es) con monto, total S/ ' + fmt(total) +
+                     '. Cierre esta ventana, revise los montos y pulse "Guardar" para pasarlos a la casilla ' + p.casilla + '.'
+        };
+    }
+
+    // Las ventanas 128 y 130 se volvían a dibujar en 0 cada vez que se abrían:
+    // ahora conservan lo importado o digitado mientras no cambie el ejercicio.
+    function conservarFilas(nombreAbrir, idPrimera, idCuerpo) {
+        const original = window[nombreAbrir];
+        if (typeof original !== 'function') return;
+        window[nombreAbrir] = function () {
+            const cuerpo = document.getElementById(idCuerpo);
+            const primerPeriodo = periodosEjercicio()[0];
+            const vigente = document.getElementById(idPrimera) && cuerpo && cuerpo.textContent.indexOf(primerPeriodo) >= 0;
+            if (!vigente) return original.apply(this, arguments);
+            const modal = document.getElementById(nombreAbrir.replace('open', '').replace('M', 'm'));
+            if (modal) modal.style.display = 'flex';
         };
     }
 
@@ -526,7 +635,18 @@
         const plant = document.getElementById('imp710-plantillas');
         const file = document.getElementById('imp710-file');
 
-        if (casillaActual) {
+        const mensual = MENSUALES[permitidos[0]];
+        if (mensual) {
+            const per = periodosEjercicio();
+            titulo.textContent = 'Importar ' + mensual.titulo;
+            pasos.innerHTML =
+                '<li>Descargue la plantilla de SUNAT y llene un mes por fila (' + esc(per[0]) + ' a ' + esc(per[per.length - 1]) + '): ' +
+                esc(mensual.columnas.join(', ')) + '. Montos en positivo y sin decimales; no agregue ni quite filas o columnas (se lee desde la celda B4).</li>' +
+                '<li>Guárdela como <strong>Libro de Excel 97-2003 (.xls)</strong> con el nombre <span class="imp710-nombre">0710' + esc(y) + esc(ruc) + mensual.casilla + '.xls</span>.</li>' +
+                '<li>Pulse <strong>Importar</strong>, revise los montos en la ventana y pulse <strong>Guardar</strong>.</li>';
+            plant.innerHTML = '<a href="' + CARPETA_PLANTILLAS + mensual.archivo + '" download><i class="fas fa-file-excel"></i> Plantilla casilla ' + mensual.casilla + '</a>';
+            file.accept = '.xls,.xlsx';
+        } else if (casillaActual) {
             titulo.textContent = 'Importar detalle de la casilla ' + casillaActual;
             pasos.innerHTML =
                 '<li>Prepare un archivo de texto con una línea por tercero: <span class="imp710-nombre">tipo|número|indicador|paterno|materno|nombres|razón social|monto</span></li>' +
@@ -575,11 +695,11 @@
             if (info.tipo === 'DETALLE' && casillaActual && info.casilla !== casillaActual) {
                 throw ['Está importando el detalle de la casilla ' + casillaActual + ', pero el archivo es de la casilla ' + info.casilla + '. Renómbrelo como 0710' + ejercicio() + rucDeclarante() + casillaActual + '.TXT o ábralo desde la casilla ' + info.casilla + '.'];
             }
-            const r = info.tipo === 'DETALLE'
-                ? await importarDetalle(file, info.casilla, info.ext)
+            const r = info.tipo === 'DETALLE' ? await importarDetalle(file, info.casilla, info.ext)
+                : MENSUALES[info.tipo] ? await importarMensual(file, info.tipo)
                 : await importarPlantilla(file, info.tipo);
             avisarCambio();
-            if (typeof window.switchEEFF === 'function') window.switchEEFF(r.pestana);
+            if (r.pestana && typeof window.switchEEFF === 'function') window.switchEEFF(r.pestana);
             mensaje('ok', '<i class="fas fa-check-circle"></i> ' + esc(r.mensaje) +
                 ((r.avisos || []).length ? '<ul>' + r.avisos.map(a => '<li>' + esc(a) + '</li>').join('') + '</ul>' : ''));
             if (info.tipo === 'DETALLE') pintarDetalle(info.casilla);
@@ -658,6 +778,8 @@
     function iniciar() {
         insertarEstilos();
         montarBotones();
+        conservarFilas('openModal128', 'm128-row-0-col1', 'm128-tbody');
+        conservarFilas('openModal130', 'm130-input-0', 'm130-rows-container');
         engancharRestauracion();
         aplicarTodosLosDetalles();
     }
