@@ -8,14 +8,24 @@
  * ----------------------------------------------------------------------------
  * Esta carpeta es una copia independiente del simulador que NO pide usuario ni
  * contraseña. Al cargar, se siembra una sesión pública con acceso a todos los
- * módulos; su avance vive solo en sessionStorage y se pierde al cerrar el
- * navegador (nada se guarda en Supabase). La empresa se sigue eligiendo con la
+ * módulos con el perfil ESTUDIANTE; su avance se guarda en el localStorage de
+ * esta computadora (nada va a Supabase) y solo se borra con "Reiniciar
+ * simulación". La empresa se sigue eligiendo con la
  * Clave SOL (RUC + SIST + NORTON), validada localmente.
  * Debe ejecutarse ANTES que checkAuth() de este mismo archivo.
  * ==========================================================================*/
 (function sembrarSesionPublica() {
     try {
-        if (sessionStorage.getItem('sunat_auth')) return;
+        var previa = JSON.parse(sessionStorage.getItem('sunat_auth') || 'null');
+        if (previa) {
+            // Sesiones públicas abiertas antes del cambio: pasan al perfil ESTUDIANTE
+            if (previa.usuario_id === 'publico' && previa.rol !== 'ESTUDIANTE') {
+                previa.rol = 'ESTUDIANTE';
+                previa.denominacion = 'Estudiante';
+                sessionStorage.setItem('sunat_auth', JSON.stringify(previa));
+            }
+            return;
+        }
         var modulos = ['sol', 'fv621', 'fv710', 'tramites', 'rvie', 'rce',
                        'see_sol', 'tregistro', 'reemplazo', 'ajustes', 'plan_contable']
                       .map(function (c) { return { clave: c }; });
@@ -23,8 +33,8 @@
             id: 'publico',
             usuario_id: 'publico',
             usuario: 'invitado',
-            denominacion: 'Acceso Público',
-            rol: 'PUBLICO',
+            denominacion: 'Estudiante',
+            rol: 'ESTUDIANTE',   // perfil por defecto del acceso público
             modo_demo: false,
             puede_guardar: false,   // no va a Supabase: SimStore lo guarda en esta computadora (localStorage)
             modulos: modulos,
@@ -118,7 +128,9 @@ window.SimStore = (function () {
 
     /** Acceso público: el avance queda en esta computadora (no va a Supabase). */
     function guardaLocal() {
-        return String(usuarioActual().rol || '').toUpperCase() === 'PUBLICO';
+        // Sesión sembrada por sembrarSesionPublica (perfil ESTUDIANTE por defecto)
+        return usuarioActual().usuario_id === 'publico' ||
+               String(usuarioActual().rol || '').toUpperCase() === 'PUBLICO';
     }
 
     function persistente(key) {
