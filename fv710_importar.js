@@ -14,6 +14,9 @@
 //    un mes por fila (AAAAMM en la columna A, montos desde la celda B4).
 // Se valida lo mismo que valida SUNAT: nombre del archivo, ejercicio, RUC,
 // estructura, montos enteros y positivos y casillas excluyentes.
+// La ventana imita la de SUNAT (Seleccionar archivo · Cancelar · Aceptar) y el
+// resultado sale en la ventana "Mensaje". Las plantillas oficiales para los
+// alumnos están en plantillas_710/.
 // El detalle se guarda en un campo oculto del formulario, así viaja con el
 // guardado automático del avance (fv710_movil.js). Se carga después de él.
 // =============================================================================
@@ -21,7 +24,6 @@
     'use strict';
 
     const URL_SHEETJS = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    const CARPETA_PLANTILLAS = 'plantillas_710/';
 
     // ------------------------------------------------------------ plantillas
     // entradas: casillas que llena el contribuyente. totales: las calcula el
@@ -33,16 +35,14 @@
             entradas: rango(359, 389),
             totales: ['390'],
             excluyentes: [],
-            pestana: 'activo',
-            archivo: 'TABLA_ACTIVO_FV_2025.xls'
+            pestana: 'activo'
         },
         PASIVO: {
             titulo: 'Pasivo y Patrimonio',
             entradas: rango(401, 411).concat(rango(414, 424)),
             totales: ['412', '425', '426'],
             excluyentes: [['416', '417'], ['421', '422'], ['423', '424']],
-            pestana: 'pasivo',
-            archivo: 'TABLA_PASIVO_FV_2025.xls'
+            pestana: 'pasivo'
         },
         EEGGPP: {
             titulo: 'Estado de Resultados',
@@ -51,8 +51,7 @@
             // 473 = 650 + 651 y 477 = 432 + 433: se aceptan solos si el detalle viene vacío
             totales: ['463', '466', '467', '470', '471', '473', '477', '484', '485', '487', '489', '492', '493'],
             excluyentes: [['481', '483'], ['351', '490']],
-            pestana: 'resultados',
-            archivo: 'TABLA_EEGGPP_FV_2025.xls'
+            pestana: 'resultados'
         }
     };
 
@@ -61,14 +60,12 @@
         C128: {
             casilla: '128',
             titulo: 'Pagos a cuenta del ejercicio (casilla 128)',
-            columnas: ['Utilización del saldo a favor', 'Compensación del SFMB', 'Compensación del ITAN', 'Otros créditos', 'Monto pagado'],
-            archivo: 'Casilla_128_2025.xls'
+            columnas: ['Utilización del saldo a favor', 'Compensación del SFMB', 'Compensación del ITAN', 'Otros créditos', 'Monto pagado']
         },
         C130: {
             casilla: '130',
             titulo: 'Retenciones de Renta de Tercera Categoría (casilla 130)',
-            columnas: ['Monto de la retención'],
-            archivo: 'Casilla_130_2025.xls'
+            columnas: ['Monto de la retención']
         }
     };
     const tipoMensual = casilla => casilla === '128' ? 'C128' : casilla === '130' ? 'C130' : null;
@@ -282,12 +279,7 @@
         }
         llamar('recalcularDeterminativa710');
 
-        const llenas = p.entradas.filter(c => (valores[c] || 0) > 0).length;
-        return {
-            titulo: p.titulo, pestana: p.pestana, avisos: avisos,
-            mensaje: 'Se importó el ' + p.titulo + ' del archivo ' + file.name + ': ' + llenas +
-                     ' casilla(s) con monto. Los totales los calcula el formulario.'
-        };
+        return { pestana: p.pestana, avisos: avisos };
     }
 
     // ------------------------------------------------ casillas 128 y 130
@@ -354,8 +346,7 @@
         }
         return {
             pestana: null,
-            mensaje: 'Se cargaron ' + meses + ' mes(es) con monto, total S/ ' + fmt(total) +
-                     '. Cierre esta ventana, revise los montos y pulse "Guardar" para pasarlos a la casilla ' + p.casilla + '.'
+            avisos: [meses + ' mes(es) con monto, total S/ ' + fmt(total) + '. Revise los montos y pulse "Guardar" para pasarlos a la casilla ' + p.casilla + '.']
         };
     }
 
@@ -445,8 +436,7 @@
         llamar('recalcularDeterminativa710');
         return {
             pestana: Number(casilla) >= 400 ? 'pasivo' : 'activo',
-            mensaje: 'Se importaron ' + filas.length + ' registro(s) en la casilla ' + casilla +
-                     ' por un total de S/ ' + fmt(total) + '.'
+            avisos: [filas.length + ' registro(s) por un total de S/ ' + fmt(total) + ' en la casilla ' + casilla + '.']
         };
     }
 
@@ -519,20 +509,31 @@
         const css = document.createElement('style');
         css.id = 'imp710-estilos';
         css.textContent = `
-            #imp710-modal .modal-content, #imp710-detalle-modal .modal-content { width: 640px; max-width: calc(100vw - 32px); }
-            .imp710-pasos { font-size: 13px; color: #444; line-height: 1.55; margin: 0 0 14px; padding-left: 18px; }
-            .imp710-plantillas { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
-            .imp710-plantillas a { font-size: 12px; color: #0066B3; border: 1px solid #b3d4f0; border-radius: 4px; padding: 5px 10px; text-decoration: none; background: #f4f9fe; }
-            .imp710-plantillas a:hover { background: #e3f0fb; }
-            .imp710-fila { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
-            .imp710-fila label { font-weight: 600; white-space: nowrap; }
-            .imp710-fila input[type=file] { flex: 1; min-width: 200px; font-size: 13px; }
+            #imp710-detalle-modal .modal-content { width: 640px; max-width: calc(100vw - 32px); }
             .imp710-nombre { font-family: monospace; background: #f1f1f1; padding: 1px 5px; border-radius: 3px; }
-            .imp710-msg { margin-top: 14px; padding: 10px 12px; border-radius: 4px; font-size: 13px; line-height: 1.5; display: none; }
-            .imp710-msg ul { margin: 6px 0 0; padding-left: 18px; }
-            .imp710-msg.error { display: block; background: #fdecea; border: 1px solid #f5c2c0; color: #8a1f17; }
-            .imp710-msg.ok { display: block; background: #e8f5e9; border: 1px solid #c8e6c9; color: #1e5e24; }
-            .imp710-msg.cargando { display: block; background: #f4f9fe; border: 1px solid #b3d4f0; color: #0b4f86; }
+            /* Ventanas "Importar ..." y "Mensaje" con el aspecto del formulario de SUNAT */
+            .imp710-ov { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: flex-start; justify-content: center; padding: 8vh 16px 16px; z-index: 2600; box-sizing: border-box; }
+            .imp710-ov.ver { display: flex; }
+            #imp710-mensaje { z-index: 2700; padding-top: 12vh; }
+            .imp710-dlg { background: #fff; width: 625px; max-width: 100%; border-radius: 6px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,.3); font-family: Roboto, 'Helvetica Neue', Arial, sans-serif; }
+            .imp710-hd { background: #0066b3; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 0 0 18px; min-height: 60px; font-size: 17px; font-weight: 500; }
+            .imp710-hd button { background: transparent; border: none; color: #fff; font-size: 26px; font-weight: 700; width: 52px; height: 60px; cursor: pointer; line-height: 1; }
+            .imp710-hd button:hover { background: rgba(255,255,255,.12); }
+            .imp710-bd { padding: 18px; border-bottom: 1px solid #dee2e6; font-size: 16px; color: #212529; line-height: 1.5; }
+            .imp710-bd ul { margin: 8px 0 0; padding-left: 20px; font-size: 14px; }
+            .imp710-bd li { margin-bottom: 4px; }
+            .imp710-grupo { display: flex; align-items: stretch; border: 1px solid #ced4da; border-radius: 4px; min-height: 40px; cursor: pointer; margin: 0; overflow: hidden; }
+            .imp710-grupo:hover, .imp710-grupo:focus-within { border-color: #86b7fe; box-shadow: 0 0 0 3px rgba(13,110,253,.18); }
+            .imp710-sel { background: #e9ecef; color: #495057; padding: 8px 13px; border-right: 1px solid #ced4da; white-space: nowrap; display: flex; align-items: center; }
+            .imp710-archivo { padding: 8px 12px; color: #212529; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; }
+            .imp710-oculto { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+            .imp710-ft { display: flex; justify-content: flex-end; gap: 16px; padding: 18px; }
+            .imp710-ft button { font-size: 16px; padding: 8px 13px; border-radius: 4px; cursor: pointer; min-width: 84px; }
+            .imp710-cancelar { background: #fff; color: #6c757d; border: 1px solid #6c757d; }
+            .imp710-cancelar:hover { background: #f1f3f5; }
+            .imp710-aceptar { background: #0066b3; color: #fff; border: 1px solid #0066b3; }
+            .imp710-aceptar:hover { background: #00589b; }
+            .imp710-aceptar:disabled { opacity: .65; cursor: wait; }
             .imp710-btn-det { flex: 0 0 28px; min-width: 28px; padding: 0; border: 1px solid #81c784; background: #e8f5e9; color: #2e7d32; border-radius: 3px; width: 28px; height: 28px; margin-left: 4px; cursor: pointer; font-size: 12px; }
             .imp710-btn-det:hover { background: #c8e6c9; }
             .imp710-tabla-wrap { max-height: 45vh; overflow: auto; border: 1px solid #ddd; }
@@ -556,29 +557,41 @@
         insertarEstilos();
         const m = document.createElement('div');
         m.id = 'imp710-modal';
-        m.className = 'modal-overlay';
-        m.style.zIndex = '2600';
+        m.className = 'imp710-ov';
         m.innerHTML = `
-            <div class="modal-content" role="dialog" aria-labelledby="imp710-titulo">
-                <div class="modal-header"><h4 id="imp710-titulo">Importar</h4><span class="close-modal" data-cerrar>&times;</span></div>
-                <div class="modal-body">
-                    <ol class="imp710-pasos" id="imp710-pasos"></ol>
-                    <div class="imp710-plantillas" id="imp710-plantillas"></div>
-                    <div class="imp710-fila">
-                        <label for="imp710-file">Archivo a importar:</label>
-                        <input type="file" id="imp710-file">
-                    </div>
-                    <div class="imp710-msg" id="imp710-msg" aria-live="polite"></div>
+            <div class="imp710-dlg" role="dialog" aria-modal="true" aria-labelledby="imp710-titulo">
+                <div class="imp710-hd"><span id="imp710-titulo">Importar</span><button type="button" data-cerrar aria-label="Cerrar">&times;</button></div>
+                <div class="imp710-bd">
+                    <label class="imp710-grupo" for="imp710-file">
+                        <span class="imp710-sel">Seleccionar archivo</span>
+                        <span class="imp710-archivo" id="imp710-archivo">Seleccionar archivo</span>
+                    </label>
+                    <input type="file" id="imp710-file" class="imp710-oculto">
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-modal-cancel" data-cerrar>Cerrar</button>
-                    <button type="button" class="btn-modal-save" id="imp710-ok">Importar</button>
+                <div class="imp710-ft">
+                    <button type="button" class="imp710-cancelar" data-cerrar>Cancelar</button>
+                    <button type="button" class="imp710-aceptar" id="imp710-ok">Aceptar</button>
                 </div>
             </div>`;
         document.body.appendChild(m);
         m.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', cerrarModal));
-        m.addEventListener('click', e => { if (e.target === m) cerrarModal(); });
         document.getElementById('imp710-ok').addEventListener('click', ejecutarImportacion);
+        document.getElementById('imp710-file').addEventListener('change', e => {
+            const f = e.target.files[0];
+            document.getElementById('imp710-archivo').textContent = f ? f.name : 'Seleccionar archivo';
+        });
+
+        const msg = document.createElement('div');
+        msg.id = 'imp710-mensaje';
+        msg.className = 'imp710-ov';
+        msg.innerHTML = `
+            <div class="imp710-dlg" role="alertdialog" aria-modal="true" aria-labelledby="imp710-mensaje-tit">
+                <div class="imp710-hd"><span id="imp710-mensaje-tit">Mensaje</span></div>
+                <div class="imp710-bd" id="imp710-mensaje-texto"></div>
+                <div class="imp710-ft"><button type="button" class="imp710-aceptar" id="imp710-mensaje-ok">Aceptar</button></div>
+            </div>`;
+        document.body.appendChild(msg);
+        document.getElementById('imp710-mensaje-ok').addEventListener('click', () => msg.classList.remove('ver'));
 
         const d = document.createElement('div');
         d.id = 'imp710-detalle-modal';
@@ -629,67 +642,47 @@
         crearModal();
         permitidosActual = permitidos;
         casillaActual = casilla || null;
-        const y = ejercicio(), ruc = rucDeclarante();
-        const titulo = document.getElementById('imp710-titulo');
-        const pasos = document.getElementById('imp710-pasos');
-        const plant = document.getElementById('imp710-plantillas');
         const file = document.getElementById('imp710-file');
-
         const mensual = MENSUALES[permitidos[0]];
+        let titulo;
         if (mensual) {
-            const per = periodosEjercicio();
-            titulo.textContent = 'Importar ' + mensual.titulo;
-            pasos.innerHTML =
-                '<li>Descargue la plantilla de SUNAT y llene un mes por fila (' + esc(per[0]) + ' a ' + esc(per[per.length - 1]) + '): ' +
-                esc(mensual.columnas.join(', ')) + '. Montos en positivo y sin decimales; no agregue ni quite filas o columnas (se lee desde la celda B4).</li>' +
-                '<li>Guárdela como <strong>Libro de Excel 97-2003 (.xls)</strong> con el nombre <span class="imp710-nombre">0710' + esc(y) + esc(ruc) + mensual.casilla + '.xls</span>.</li>' +
-                '<li>Pulse <strong>Importar</strong>, revise los montos en la ventana y pulse <strong>Guardar</strong>.</li>';
-            plant.innerHTML = '<a href="' + CARPETA_PLANTILLAS + mensual.archivo + '" download><i class="fas fa-file-excel"></i> Plantilla casilla ' + mensual.casilla + '</a>';
+            titulo = 'Importar ' + mensual.titulo;
             file.accept = '.xls,.xlsx';
         } else if (casillaActual) {
-            titulo.textContent = 'Importar detalle de la casilla ' + casillaActual;
-            pasos.innerHTML =
-                '<li>Prepare un archivo de texto con una línea por tercero: <span class="imp710-nombre">tipo|número|indicador|paterno|materno|nombres|razón social|monto</span></li>' +
-                '<li>Ejemplos: <span class="imp710-nombre">06|20100070970|0||||SUPERMERCADOS SAC|15000</span> · <span class="imp710-nombre">01|09591153|1|PEREZ|ROJAS|JUAN||15900</span></li>' +
-                '<li>Montos enteros, sin comas ni puntos. Tipos de documento: 01 DNI, 04 C.E., 06 RUC, 07 Pasaporte, 00 Otros, 99 Consolidado, A, F.</li>' +
-                '<li>Nombre del archivo: <span class="imp710-nombre">0710' + esc(y) + esc(ruc) + esc(casillaActual) + '.TXT</span></li>';
-            plant.innerHTML = '<a href="' + CARPETA_PLANTILLAS + 'Importacion_Casillas_EEFF_SUNAT.pdf" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> Instructivo SUNAT (PDF)</a>';
+            titulo = 'Importar detalle de la casilla ' + casillaActual;
             file.accept = '.txt,.TXT,.xls,.xlsx';
         } else {
-            const tipos = permitidos.map(t => PLANTILLAS[t]);
-            titulo.textContent = 'Importar ' + tipos.map(t => t.titulo).join(' / ');
-            pasos.innerHTML =
-                '<li>Descargue la plantilla de SUNAT y llene <strong>solo la columna Monto</strong> (en positivo, sin decimales). No agregue ni quite filas o columnas: el formulario lee desde la celda C4.</li>' +
-                '<li>Guárdela como <strong>Libro de Excel 97-2003 (.xls)</strong> con el nombre ' +
-                permitidos.map(t => '<span class="imp710-nombre">0710' + esc(y) + esc(ruc) + t + '.xls</span>').join(' o ') + '.</li>' +
-                '<li>Elija el archivo y pulse <strong>Importar</strong>. Los totales los calcula el formulario.</li>';
-            plant.innerHTML = tipos.map(t =>
-                '<a href="' + CARPETA_PLANTILLAS + t.archivo + '" download><i class="fas fa-file-excel"></i> Plantilla ' + esc(t.titulo) + '</a>').join('') +
-                '<a href="' + CARPETA_PLANTILLAS + 'Instrucciones_2025.xls" download><i class="fas fa-info-circle"></i> Instrucciones SUNAT</a>';
+            // El botón del Estado de Situación Financiera se titula según la pestaña visible
+            const pasivo = document.getElementById('eeff-pasivo');
+            const enPasivo = permitidos.length > 1 && pasivo && pasivo.style.display !== 'none';
+            titulo = 'Importar ' + (enPasivo ? PLANTILLAS.PASIVO.titulo : PLANTILLAS[permitidos[0]].titulo);
             file.accept = '.xls,.xlsx';
         }
+        document.getElementById('imp710-titulo').textContent = titulo;
         file.value = '';
-        mensaje('', '');
-        document.getElementById('imp710-modal').style.display = 'flex';
+        document.getElementById('imp710-archivo').textContent = 'Seleccionar archivo';
+        document.getElementById('imp710-modal').classList.add('ver');
     }
 
     function cerrarModal() {
         const m = document.getElementById('imp710-modal');
-        if (m) m.style.display = 'none';
+        if (m) m.classList.remove('ver');
     }
 
-    function mensaje(clase, html) {
-        const el = document.getElementById('imp710-msg');
-        el.className = 'imp710-msg' + (clase ? ' ' + clase : '');
-        el.innerHTML = html;
+    // Ventana "Mensaje" (texto principal + lista opcional)
+    function mensaje(texto, lista) {
+        crearModal();
+        document.getElementById('imp710-mensaje-texto').innerHTML = esc(texto) +
+            (lista && lista.length ? '<ul>' + lista.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '');
+        document.getElementById('imp710-mensaje').classList.add('ver');
+        document.getElementById('imp710-mensaje-ok').focus();
     }
 
     async function ejecutarImportacion() {
         const file = document.getElementById('imp710-file').files[0];
-        if (!file) { mensaje('error', 'Primero elija el archivo con el botón "Seleccionar archivo".'); return; }
+        if (!file) { mensaje('Debe seleccionar un archivo. Pulse "Seleccionar archivo" y elija el archivo a importar.'); return; }
         const boton = document.getElementById('imp710-ok');
         boton.disabled = true;
-        mensaje('cargando', '<i class="fas fa-spinner fa-spin"></i> Validando el archivo…');
         try {
             const info = analizarNombre(file.name, permitidosActual);
             if (info.tipo === 'DETALLE' && casillaActual && info.casilla !== casillaActual) {
@@ -699,16 +692,15 @@
                 : MENSUALES[info.tipo] ? await importarMensual(file, info.tipo)
                 : await importarPlantilla(file, info.tipo);
             avisarCambio();
+            cerrarModal();
             if (r.pestana && typeof window.switchEEFF === 'function') window.switchEEFF(r.pestana);
-            mensaje('ok', '<i class="fas fa-check-circle"></i> ' + esc(r.mensaje) +
-                ((r.avisos || []).length ? '<ul>' + r.avisos.map(a => '<li>' + esc(a) + '</li>').join('') + '</ul>' : ''));
             if (info.tipo === 'DETALLE') pintarDetalle(info.casilla);
+            mensaje('Se cargó la información correctamente', r.avisos);
         } catch (e) {
             const lista = Array.isArray(e) ? e : ['Ocurrió un error inesperado al leer el archivo (' + (e && e.message || e) + '). Verifique que sea la plantilla correcta y vuelva a intentar.'];
             const visibles = lista.slice(0, 15);
-            mensaje('error', '<strong><i class="fas fa-exclamation-triangle"></i> No se importó el archivo. Corrija lo siguiente y vuelva a importar:</strong><ul>' +
-                visibles.map(x => '<li>' + esc(x) + '</li>').join('') +
-                (lista.length > visibles.length ? '<li>… y ' + (lista.length - visibles.length) + ' observación(es) más.</li>' : '') + '</ul>');
+            if (lista.length > visibles.length) visibles.push('… y ' + (lista.length - visibles.length) + ' observación(es) más.');
+            mensaje('No se cargó la información. Corrija lo siguiente y vuelva a importar:', visibles);
         } finally {
             boton.disabled = false;
         }
