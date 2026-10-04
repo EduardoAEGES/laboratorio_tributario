@@ -73,6 +73,7 @@ tocar código**. No hardcodear reglas de rol en el JS.
 | `gestor.html` / `gestor.js` | Gestor de usuarios: secciones, matrícula, reinicio y (MASTER) cambio de rol. |
 | `index.html` | Portada. Los botones se deshabilitan solos según el rol. |
 | `rvie.js`, `rce.js` (~150 KB c/u) | Los simuladores del SIRE. |
+| `fv710_importar.js` + `plantillas_710/` | Botón "Importar" del FV 710: plantillas SUNAT ACTIVO / PASIVO / EEGGPP (.xls) y detalle por tercero de las casillas 361-367 y 404-408 (`0710AAAArucCCC.TXT`). |
 | `sql_supabase/` | 00–20 carga de data · 30 multiusuario · 35 roles · 40 acceso · 45 gestor · 50 seguridad |
 | `LEEME_ROLES.md` | Documentación viva del modelo de acceso, con las pruebas ejecutadas. |
 | `carga_csv/` | Los mismos datos en CSV, por si hay que recargar desde cero. |
