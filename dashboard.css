@@ -898,6 +898,41 @@ body {
     }
 }
 
+.mobile-nav-buttons {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .mobile-nav-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 25px;
+        background: #f8f9fb;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #e0e4e9;
+    }
+    
+    .btn-mobile-nav {
+        background-color: #ffffff;
+        border: 1px solid #0066B3;
+        color: #0066B3;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-mobile-nav:hover {
+        background-color: #0066B3;
+        color: #ffffff;
+    }
+}
+
 /* ESTADOS FINANCIEROS (EEFF) STYLES */
 .eeff-body {
     padding: 20px 10px; 
