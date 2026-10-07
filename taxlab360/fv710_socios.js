@@ -179,6 +179,10 @@
     function pintar() {
         const cuerpo = $('socios-cuerpo');
         if (!cuerpo) return;
+        if (aplicarSociosDeLaBase && sociosBase && sociosBase.length &&
+            $('socios-710-lista').value === JSON.stringify(sociosDeEjemplo())) {
+            return aplicarSociosDeLaBase();
+        }
         const tiene = document.querySelector('input[name="socios-tiene"]:checked');
         $('socios-zona').style.display = (tiene && tiene.value === 'no') ? 'none' : 'block';
 
@@ -296,6 +300,45 @@
         pintar();
     }
 
+    // Socios reales de la empresa (tabla socios_empresa, p. ej. las empresas del
+    // AA4). Si la empresa los tiene, reemplazan a los de ejemplo, también en un
+    // avance recuperado que todavía tenga los de ejemplo. Lo que el alumno ya
+    // editó no se toca.
+    let sociosBase = null;          // null = aún no consultado; [] = la empresa no tiene
+    async function cargarSociosDeLaBase() {
+        if (sociosBase === null) {
+            sociosBase = [];
+            try {
+                if (typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+                const { data, error } = await authSupabaseClient.from('socios_empresa')
+                    .select('tipo_socio,tipo_doc,num_doc,nombre,fecha_nacimiento,pais,porcentaje,fecha_socio')
+                    .eq('ruc', rucEmpresa()).order('orden');
+                if (error || !data) return;
+                sociosBase = data.map(s => ({
+                    tipoSocio: s.tipo_socio,
+                    tipoDoc: s.tipo_doc,
+                    numDoc: s.num_doc,
+                    nombre: s.nombre,
+                    nacimiento: s.fecha_nacimiento || '',
+                    pais: s.pais || '',
+                    porcentaje: Number(s.porcentaje),
+                    fechaSocio: s.fecha_socio || ''
+                }));
+            } catch (e) { return; /* sin conexión: quedan los socios de ejemplo */ }
+        }
+        aplicarSociosDeLaBase();
+    }
+
+    function aplicarSociosDeLaBase() {
+        if (!sociosBase || !sociosBase.length) return false;
+        const actual = ($('socios-710-lista') || {}).value || '';
+        if (actual && actual !== JSON.stringify(sociosDeEjemplo())) return false;
+        $('socios-710-lista').value = JSON.stringify(sociosBase);
+        $('socios-710-lista').dispatchEvent(new Event('change', { bubbles: true }));
+        pintar();
+        return true;
+    }
+
     // ---------------------------------------------------------- montaje
     function irPestana(t) {
         if (typeof switchInfComp === 'function') switchInfComp(t);
@@ -309,6 +352,7 @@
 
         // Socios de ejemplo de la empresa (solo la primera vez; luego manda lo guardado)
         if (!$('socios-710-lista').value) $('socios-710-lista').value = JSON.stringify(sociosDeEjemplo());
+        cargarSociosDeLaBase();
 
         const zona = $('inf-comp-socios-content');
         zona.addEventListener('click', e => {
