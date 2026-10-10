@@ -207,6 +207,13 @@
             <button class="btn morado" onclick="copiarFilas()"><i class="fas fa-copy"></i> Copiar fila(s)</button>
             <button class="btn rojo" onclick="eliminarFilas()"><i class="fas fa-trash"></i> Eliminar fila(s)</button>
             <button class="btn verde" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+            <span style="position:relative;display:inline-block;">
+                <button class="btn" onclick="alternarMenuImagen(event)" style="background:#6a1b9a;" title="Descarga el registro como imagen, solo con las columnas que tienen datos"><i class="fas fa-image"></i> Exportar imagen <i class="fas fa-caret-down"></i></button>
+                <span id="menu-imagen" style="display:none;position:absolute;top:100%;left:0;z-index:50;background:#fff;border:1px solid #ccd;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.18);min-width:170px;margin-top:4px;overflow:hidden;">
+                    <a href="javascript:void(0)" onclick="exportarImagen('png')" style="display:block;padding:9px 14px;color:#1e395b;text-decoration:none;"><i class="fas fa-file-image"></i> Imagen PNG</a>
+                    <a href="javascript:void(0)" onclick="exportarImagen('jpg')" style="display:block;padding:9px 14px;color:#1e395b;text-decoration:none;border-top:1px solid #eee;"><i class="far fa-file-image"></i> Imagen JPG</a>
+                </span>
+            </span>
             <button class="btn gris" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
             <button class="btn ambar" onclick="mostrarGuia()"><i class="fas fa-book-open"></i> Guía de llenado</button>
             <button class="btn gris" onclick="limpiarRegistro()"><i class="fas fa-eraser"></i> Limpiar registro</button>
@@ -731,7 +738,7 @@
                     <li>Las <b>boletas</b> muestran el precio con IGV: base = total ÷ 1.18.</li>
                     <li>En <b>notas de crédito</b> los importes van en negativo y debes llenar la referencia del comprobante que se modifica (en <b>Mostrar columnas adicionales</b>).</li>
                     <li>Si una celda se pone <span style="color:#c62828;font-weight:700;">roja</span> (error) o <span style="color:#f9a825;font-weight:700;">amarilla</span> (aviso), pasa el mouse sobre ella para ver qué corregir.</li>
-                    <li>Al terminar, usa <b>Exportar a Excel</b> o <b>Imprimir</b>.</li>
+                    <li>Al terminar, usa <b>Exportar a Excel</b>, <b>Exportar imagen</b> (PNG o JPG, solo con las columnas que tienen datos) o <b>Imprimir</b>.</li>
                 </ol>` : `
                 <ol>
                     <li>Completa el <b>periodo</b>, el <b>RUC</b> y la <b>razón social</b> de tu empresa.</li>
@@ -796,6 +803,125 @@
             XLSX.utils.book_append_sheet(wb, ws, reg === 'ventas' ? '14.1' : '8.1');
             const nombre = (reg === 'ventas' ? 'Registro_Ventas_14.1_' : 'Registro_Compras_8.1_') + (datos.ruc || 'RUC') + '_' + periodoAAAAMM() + '.xlsx';
             XLSX.writeFile(wb, nombre);
+        }
+
+        // =====================================================================
+        // Exportar como imagen (PNG o JPG): mismo formato oficial, pero solo
+        // con las columnas que tienen datos, para que no salga tan ancha
+        // =====================================================================
+        function cargarHtml2canvas() {
+            return new Promise((ok, mal) => {
+                if (window.html2canvas) return ok();
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = () => ok();
+                s.onerror = () => mal(new Error('sin conexión'));
+                document.head.appendChild(s);
+            });
+        }
+
+        function alternarMenuImagen(ev) {
+            if (ev) ev.stopPropagation();
+            const m = $('menu-imagen');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        }
+        document.addEventListener('click', () => { const m = $('menu-imagen'); if (m) m.style.display = 'none'; });
+
+        async function exportarImagen(formato) {
+            $('menu-imagen').style.display = 'none';
+            const filas = datos[reg].filter(f => !filaVaciaEs(f));
+            if (!filas.length) { alert('El registro está vacío. Llena al menos un comprobante antes de exportarlo como imagen.'); return; }
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const valor = (c, f, idx) => {
+                const v = c.k === 'cuo' ? String(idx + 1).padStart(4, '0') : f[c.k];
+                if (v === '' || v == null) return '';
+                if (c.tipo === 'fecha') return aFecha(v);
+                if (c.tipo === 'num' && num(v) === 0) return '';
+                if (c.tipo === 'num' || (c.tipo === 'auto' && c.suma)) return fmt(v, c.dec);
+                return String(v);
+            };
+            // Solo las columnas con algún dato (el correlativo y el importe total siempre van)
+            const cols = COLS[reg].filter(c => c.k === 'cuo' || c.k === 'total' || filas.some((f, i) => valor(c, f, i) !== ''));
+            const prof = Math.max(...cols.map(c => c.p.length));
+
+            // Encabezado de varios niveles (grupos combinados como en el formato oficial)
+            let thead = '';
+            for (let nivel = 0; nivel < prof; nivel++) {
+                thead += '<tr>';
+                for (let i = 0; i < cols.length;) {
+                    const c = cols[i];
+                    if (c.p.length <= nivel) { i++; continue; }
+                    if (c.p.length === nivel + 1) {
+                        thead += '<th rowspan="' + (prof - nivel) + '">' + esc(c.p[nivel]) + '</th>';
+                        i++; continue;
+                    }
+                    let span = 0;
+                    while (i + span < cols.length && cols[i + span].p.length > nivel + 1 &&
+                           cols[i + span].p.slice(0, nivel + 1).join('|') === c.p.slice(0, nivel + 1).join('|')) span++;
+                    if (span === 0) span = 1;
+                    thead += '<th colspan="' + span + '">' + esc(c.p[nivel]) + '</th>';
+                    i += span;
+                }
+                thead += '</tr>';
+            }
+            const tbody = filas.map((f, idx) => '<tr>' + cols.map(c => {
+                const der = c.tipo === 'num' || (c.tipo === 'auto' && c.suma);
+                const cen = c.tipo === 'fecha' || c.tipo === 'cod' || c.k === 'cuo';
+                return '<td style="text-align:' + (der ? 'right' : cen ? 'center' : 'left') + ';">' + esc(valor(c, f, idx)) + '</td>';
+            }).join('') + '</tr>').join('');
+            let etiqueta = false;
+            const tfoot = '<tr>' + cols.map(c => {
+                if (!sumable(c)) { const td = etiqueta ? '<td></td>' : '<td style="text-align:left;">TOTALES</td>'; etiqueta = true; return td; }
+                return '<td style="text-align:right;">' + fmt(r2(filas.reduce((s, f) => s + num(f[c.k]), 0)), c.dec) + '</td>';
+            }).join('') + '</tr>';
+
+            // Anchos fijos por columna: así los títulos se parten en líneas y la imagen no sale gigante
+            const ancho = c => c.k === 'cuo' ? 70 : (c.tipo === 'texto' && /cli|prov/.test(c.k) ? 250 : Math.max(78, Math.min(c.w, 120)));
+            const colgroup = '<colgroup>' + cols.map(c => '<col style="width:' + ancho(c) + 'px;">').join('') + '</colgroup>';
+            const anchoTabla = cols.reduce((s, c) => s + ancho(c), 0);
+            const hoy = new Date();
+            const caja = document.createElement('div');
+            caja.style.cssText = 'position:fixed;left:-30000px;top:0;display:inline-block;min-width:760px;background:#fff;padding:28px 32px 22px;font-family:Roboto,Arial,sans-serif;color:#1f2933;';
+            caja.innerHTML =
+                '<style>' +
+                    '.ri-t{border-collapse:collapse;font-size:12.5px;table-layout:fixed;width:' + anchoTabla + 'px;}' +
+                    '.ri-t th{background:#1e395b;color:#fff;font-weight:700;font-size:10.5px;padding:7px 8px;border:1px solid #3b5a82;text-align:center;line-height:1.25;}' +
+                    '.ri-t td{border:1px solid #cfd8e3;padding:6px 8px;word-wrap:break-word;}' +
+                    '.ri-t tbody tr:nth-child(even) td{background:#f4f7fb;}' +
+                    '.ri-t tfoot td{background:#e3ecf7;font-weight:700;border-top:2px solid #1e395b;}' +
+                '</style>' +
+                '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;border-bottom:3px solid #1e395b;padding-bottom:10px;margin-bottom:14px;">' +
+                    '<div><div style="font-size:13px;color:#5b6b7f;font-weight:700;letter-spacing:.5px;">' + esc(FORMATO[reg].codigo) + '</div>' +
+                    '<div style="font-size:22px;font-weight:700;color:#1e395b;">' + esc(FORMATO[reg].nombre) + '</div></div>' +
+                    '<div style="font-size:12px;color:#5b6b7f;text-align:right;">TAXLAB 360 · Laboratorio Contable CERTUS</div>' +
+                '</div>' +
+                '<div style="display:flex;flex-wrap:wrap;gap:6px 34px;font-size:13.5px;margin-bottom:14px;">' +
+                    '<div><b>PERIODO:</b> ' + esc((MESES[datos.mes - 1] || '') + ' ' + (datos.anio || '')) + '</div>' +
+                    '<div><b>RUC:</b> ' + esc(datos.ruc || '-') + '</div>' +
+                    '<div><b>APELLIDOS Y NOMBRES, DENOMINACIÓN O RAZÓN SOCIAL:</b> ' + esc(datos.razon || '-') + '</div>' +
+                    '<div><b>EXPRESADO EN:</b> SOLES</div>' +
+                '</div>' +
+                '<table class="ri-t">' + colgroup + '<thead>' + thead + '</thead><tbody>' + tbody + '</tbody><tfoot>' + tfoot + '</tfoot></table>' +
+                '<div style="display:flex;justify-content:space-between;gap:30px;font-size:11px;color:#7b8794;margin-top:10px;">' +
+                    '<span>' + filas.length + ' comprobante(s) · se omitieron las columnas sin datos</span>' +
+                    '<span>Generado el ' + hoy.toLocaleDateString('es-PE') + ' ' + hoy.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) + '</span>' +
+                '</div>';
+            document.body.appendChild(caja);
+            try {
+                await cargarHtml2canvas();
+                const lienzo = await html2canvas(caja, { scale: 2, backgroundColor: '#ffffff' });
+                const tipo = formato === 'jpg' ? 'image/jpeg' : 'image/png';
+                const a = document.createElement('a');
+                a.href = lienzo.toDataURL(tipo, 0.95);
+                a.download = (reg === 'ventas' ? 'Registro_Ventas_14.1_' : 'Registro_Compras_8.1_') + (datos.ruc || 'RUC') + '_' + periodoAAAAMM() + '.' + formato;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (e) {
+                alert('No se pudo generar la imagen (revisa tu conexión a internet). Puedes usar Imprimir o Exportar a Excel.');
+            } finally {
+                caja.remove();
+            }
         }
 
         // =====================================================================
