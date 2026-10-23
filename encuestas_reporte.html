@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Encuestas - TAXLAB 360</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Roboto', Arial, sans-serif; background: #f2f5f9; color: #1E395B; }
+        .topbar { background: #004B91; color: #fff; padding: 14px 22px; display: flex; align-items: center; gap: 12px; }
+        .topbar h1 { font-size: 18px; margin: 0; font-weight: 700; }
+        .topbar .sp { margin-left: auto; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; text-decoration: none; border: none; }
+        .btn-descargar { background: #2e7d32; color: #fff; }
+        .btn-volver { background: #eef4fb; color: #004B91; border: 1px solid #cfe0f2; }
+        .wrap { max-width: 1100px; margin: 22px auto; padding: 0 16px; }
+        .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 22px; }
+        .kpi { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 10px rgba(0,75,145,.08); }
+        .kpi .n { font-size: 30px; font-weight: 700; color: #004B91; line-height: 1; }
+        .kpi .l { font-size: 12px; color: #607089; margin-top: 6px; }
+        .kpi .sub { font-size: 11px; color: #8a97a8; margin-top: 2px; }
+        .panel { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 10px rgba(0,75,145,.08); margin-bottom: 22px; }
+        .panel h2 { font-size: 15px; margin: 0 0 12px; color: #004B91; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef1f5; }
+        th { background: #f6f9fc; color: #607089; font-weight: 700; font-size: 12px; }
+        tr:hover td { background: #fafcfe; }
+        .bar { height: 8px; border-radius: 4px; background: #e3eaf2; overflow: hidden; }
+        .bar > span { display: block; height: 100%; background: #0072CE; }
+        .muted { color: #8a97a8; }
+        .aviso { max-width: 520px; margin: 60px auto; background: #fff; border-radius: 10px; padding: 28px; text-align: center; box-shadow: 0 2px 10px rgba(0,75,145,.08); }
+        .aviso i { font-size: 34px; color: #7A0C2E; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <i class="fas fa-chart-column"></i>
+        <h1>Reporte de Encuestas de Satisfacción</h1>
+        <span class="sp"></span>
+        <button class="btn btn-descargar" id="btn-csv" style="display:none;"><i class="fas fa-download"></i> Descargar CSV</button>
+        <a class="btn btn-volver" href="sol.html"><i class="fas fa-arrow-left"></i> Volver</a>
+    </div>
+
+    <div class="wrap" id="contenido">
+        <p class="muted" id="cargando"><i class="fas fa-spinner fa-spin"></i> Cargando respuestas...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    <script src="sesion.js"></script>
+    <script>
+    (function () {
+        var cont = document.getElementById('contenido');
+
+        // --- Solo MASTER ---
+        var esMaster = window.Sesion && String(window.Sesion.rol && window.Sesion.rol() || '').toUpperCase() === 'MASTER';
+        if (!esMaster) {
+            cont.innerHTML = '<div class="aviso"><i class="fas fa-lock"></i>' +
+                '<h2>Acceso solo para MASTER</h2>' +
+                '<p class="muted">Este reporte está disponible únicamente en modo MASTER. ' +
+                'Vuelve al portal e ingresa con el acceso MASTER (docente).</p>' +
+                '<a class="btn btn-volver" href="sol.html"><i class="fas fa-arrow-left"></i> Volver al portal</a></div>';
+            return;
+        }
+
+        var URL = 'https://klmjmlhwuzhymrplemgw.supabase.co';
+        var KEY = 'sb_publishable_DSS-WHn-WawxfYe0RWUHRg_odMjrb_b';
+        var cli = (window.authSupabaseClient) ||
+                  (window.supabase && window.supabase.createClient(URL, KEY)) || null;
+
+        var FILAS = [];
+
+        function esc(v) { return (v == null ? '' : String(v)).replace(/[&<>]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+        function prom(arr) { return arr.length ? (arr.reduce(function (a, b) { return a + b; }, 0) / arr.length) : 0; }
+        function fecha(s) { if (!s) return ''; var d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('es-PE') + ' ' + d.toLocaleTimeString('es-PE', {hour:'2-digit',minute:'2-digit'}); }
+
+        function render(filas) {
+            var total = filas.length;
+            if (!total) { cont.innerHTML = '<div class="aviso"><i class="fas fa-inbox"></i><h2>Sin respuestas todavía</h2></div>'; return; }
+
+            // Metricas globales
+            var facil = filas.filter(function (f) { return f.facilidad != null; }).map(function (f) { return +f.facilidad; });
+            var recs  = filas.filter(function (f) { return f.recomendar != null; }).map(function (f) { return +f.recomendar; });
+            var promo = recs.filter(function (r) { return r >= 9; }).length;
+            var detr  = recs.filter(function (r) { return r <= 6; }).length;
+            var nps   = recs.length ? Math.round((promo - detr) / recs.length * 100) : 0;
+            var ayudoPos = filas.filter(function (f) { return /^s[ií]/i.test(f.ayudo_comprension || ''); }).length;
+            var pctAyudo = Math.round(ayudoPos / total * 100);
+
+            // Por modulo
+            var mods = {};
+            filas.forEach(function (f) {
+                var k = f.modulo || '(sin módulo)';
+                (mods[k] = mods[k] || { n: 0, fac: [], rec: [] });
+                mods[k].n++;
+                if (f.facilidad != null) mods[k].fac.push(+f.facilidad);
+                if (f.recomendar != null) mods[k].rec.push(+f.recomendar);
+            });
+            var modsArr = Object.keys(mods).map(function (k) { return { modulo: k, n: mods[k].n, fac: prom(mods[k].fac), rec: prom(mods[k].rec) }; })
+                                 .sort(function (a, b) { return b.n - a.n; });
+            var maxN = modsArr.reduce(function (m, x) { return Math.max(m, x.n); }, 1);
+
+            // Distribucion ayudo
+            var ayudo = {};
+            filas.forEach(function (f) { var k = f.ayudo_comprension || '(sin respuesta)'; ayudo[k] = (ayudo[k] || 0) + 1; });
+            var ayudoArr = Object.keys(ayudo).map(function (k) { return { k: k, c: ayudo[k] }; }).sort(function (a, b) { return b.c - a.c; });
+
+            var coment = filas.filter(function (f) { return (f.comentarios || '').trim(); });
+
+            var html = '';
+
+            // KPIs
+            html += '<div class="kpis">';
+            html += '<div class="kpi"><div class="n">' + total + '</div><div class="l">Respuestas</div></div>';
+            html += '<div class="kpi"><div class="n">' + prom(facil).toFixed(1) + '<span style="font-size:15px;color:#8a97a8"> / 5</span></div><div class="l">Facilidad promedio</div></div>';
+            html += '<div class="kpi"><div class="n">' + pctAyudo + '%</div><div class="l">Les ayudó a comprender</div><div class="sub">' + ayudoPos + ' de ' + total + '</div></div>';
+            html += '<div class="kpi"><div class="n">' + nps + '</div><div class="l">NPS (recomendación)</div><div class="sub">' + promo + ' promotores · ' + detr + ' detractores</div></div>';
+            html += '</div>';
+
+            // Por modulo
+            html += '<div class="panel"><h2>Por módulo</h2><table><thead><tr>' +
+                    '<th>Módulo</th><th class="num">Respuestas</th><th style="width:28%">Volumen</th>' +
+                    '<th class="num">Facilidad</th><th class="num">Recomienda</th></tr></thead><tbody>';
+            modsArr.forEach(function (m) {
+                html += '<tr><td>' + esc(m.modulo) + '</td>' +
+                        '<td class="num">' + m.n + '</td>' +
+                        '<td><div class="bar"><span style="width:' + Math.round(m.n / maxN * 100) + '%"></span></div></td>' +
+                        '<td class="num">' + (m.fac ? m.fac.toFixed(1) : '-') + '</td>' +
+                        '<td class="num">' + (m.rec ? m.rec.toFixed(1) : '-') + '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+
+            // Ayudo a comprension
+            html += '<div class="panel"><h2>¿Ayudó a comprender?</h2><table><tbody>';
+            ayudoArr.forEach(function (a) {
+                html += '<tr><td style="width:40%">' + esc(a.k) + '</td>' +
+                        '<td><div class="bar"><span style="width:' + Math.round(a.c / total * 100) + '%"></span></div></td>' +
+                        '<td class="num" style="width:90px">' + a.c + ' (' + Math.round(a.c / total * 100) + '%)</td></tr>';
+            });
+            html += '</tbody></table></div>';
+
+            // Comentarios
+            html += '<div class="panel"><h2>Comentarios (' + coment.length + ')</h2>';
+            if (coment.length) {
+                html += '<table><thead><tr><th>Estudiante</th><th>Módulo</th><th>Comentario</th><th>Fecha</th></tr></thead><tbody>';
+                coment.forEach(function (f) {
+                    html += '<tr><td>' + esc(f.nombre || '-') + '</td><td>' + esc(f.modulo || '-') + '</td>' +
+                            '<td>' + esc(f.comentarios) + '</td><td class="muted">' + esc(fecha(f.created_at)) + '</td></tr>';
+                });
+                html += '</tbody></table>';
+            } else { html += '<p class="muted">Sin comentarios escritos.</p>'; }
+            html += '</div>';
+
+            cont.innerHTML = html;
+        }
+
+        function descargarCSV() {
+            var cols = ['nombre', 'modulo', 'facilidad', 'ayudo_comprension', 'recomendar', 'comentarios', 'created_at'];
+            var cab = { nombre:'Estudiante', modulo:'Modulo', facilidad:'Facilidad (1-5)', ayudo_comprension:'Ayudo a comprender', recomendar:'Recomienda (0-10)', comentarios:'Comentario', created_at:'Fecha' };
+            function campo(v) { v = (v == null ? '' : String(v)); return '"' + v.replace(/"/g, '""') + '"'; }
+            var lineas = [cols.map(function (c) { return campo(cab[c]); }).join(';')];
+            FILAS.forEach(function (f) { lineas.push(cols.map(function (c) { return campo(f[c]); }).join(';')); });
+            var csv = '﻿' + lineas.join('\r\n');  // BOM para que Excel lea las tildes
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            var a = document.createElement('a');
+            var hoy = new Date().toISOString().slice(0, 10);
+            a.href = URL_crear(blob);
+            a.download = 'encuestas_' + hoy + '.csv';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+        function URL_crear(b) { return (window.URL || window.webkitURL).createObjectURL(b); }
+
+        if (!cli) { cont.innerHTML = '<div class="aviso"><i class="fas fa-plug"></i><h2>Sin conexión</h2><p class="muted">No se pudo iniciar Supabase.</p></div>'; return; }
+
+        var actor = (window.Sesion && window.Sesion.uid && window.Sesion.uid()) || null;
+        cli.rpc('fn_reporte_encuestas', { p_actor: actor }).then(function (r) {
+            if (r.error) {
+                cont.innerHTML = '<div class="aviso"><i class="fas fa-triangle-exclamation"></i><h2>Error al cargar</h2><p class="muted">' + esc(r.error.message) + '</p></div>';
+                return;
+            }
+            FILAS = r.data || [];
+            render(FILAS);
+            var b = document.getElementById('btn-csv');
+            if (b && FILAS.length) { b.style.display = 'inline-flex'; b.addEventListener('click', descargarCSV); }
+        });
+    })();
+    </script>
+</body>
+</html>

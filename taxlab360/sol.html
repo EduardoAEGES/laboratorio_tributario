@@ -64,12 +64,21 @@
                     Entrar como MASTER
                 </button>
             </div>
+            <a id="master-reporte" href="encuestas_reporte.html"
+                style="display:none; margin-top:12px; padding:9px 14px; background:#004B91; color:#fff; border-radius:6px; font-family:'Roboto',sans-serif; font-size:13px; font-weight:700; text-decoration:none; align-items:center; gap:8px;">
+                <i class="fas fa-chart-column"></i> Reporte de encuestas
+            </a>
             <script>
             (function () {
                 var toggle = document.getElementById('master-toggle');
                 var panel  = document.getElementById('master-panel');
                 var pass   = document.getElementById('master-pass-field');
                 var btn    = document.getElementById('btn-master');
+                var rep    = document.getElementById('master-reporte');
+                // Si ya hay sesion MASTER, mostrar el enlace al reporte de encuestas
+                if (rep && window.Sesion && String(window.Sesion.rol && window.Sesion.rol() || '').toUpperCase() === 'MASTER') {
+                    rep.style.display = 'flex';
+                }
                 if (toggle && panel) {
                     toggle.addEventListener('click', function () {
                         var oculto = panel.style.display === 'none' || !panel.style.display;
