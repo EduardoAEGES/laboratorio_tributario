@@ -257,6 +257,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ===== ACCESO DIRECTO MASTER (docente / administrador) =====
+    const masterToggle = document.getElementById('master-toggle');
+    const masterPanel = document.getElementById('master-panel');
+    const masterPassField = document.getElementById('master-pass-field');
+    const masterTogglePass = document.getElementById('master-toggle-pass');
+    const btnMaster = document.getElementById('btn-master');
+
+    if (masterToggle && masterPanel) {
+        masterToggle.addEventListener('click', () => {
+            const oculto = masterPanel.style.display === 'none' || !masterPanel.style.display;
+            masterPanel.style.display = oculto ? 'block' : 'none';
+            if (oculto && masterPassField) masterPassField.focus();
+        });
+    }
+
+    // Mostrar / ocultar la clave MASTER
+    if (masterTogglePass && masterPassField) {
+        masterTogglePass.addEventListener('click', () => {
+            const oculto = masterPassField.type === 'password';
+            masterPassField.type = oculto ? 'text' : 'password';
+            const icono = masterTogglePass.querySelector('i');
+            if (icono) {
+                icono.classList.toggle('fa-eye', !oculto);
+                icono.classList.toggle('fa-eye-slash', oculto);
+            }
+        });
+    }
+
+    const entrarComoMaster = async () => {
+        if (!window.Sesion || !window.Sesion.entrarMaster) {
+            alert('No se pudo cargar el módulo de sesión. Recarga la página.');
+            return;
+        }
+        const clave = masterPassField ? masterPassField.value.trim() : '';
+        if (!clave) {
+            alert('Ingresa la clave MASTER.');
+            return;
+        }
+        btnMaster.disabled = true;
+        const txt = btnMaster.textContent;
+        btnMaster.textContent = 'Verificando...';
+        try {
+            const res = await window.Sesion.entrarMaster(clave);
+            if (res && res.ok) {
+                // MASTER entra a la portada; desde ahí elige empresa (Clave SOL)
+                window.location.href = 'index.html';
+            } else {
+                alert((res && res.mensaje) || 'No se pudo entrar como MASTER.');
+            }
+        } catch (e) {
+            console.error('Error en acceso MASTER:', e);
+            alert('No se pudo conectar con el servidor. Intenta nuevamente.');
+        } finally {
+            btnMaster.disabled = false;
+            btnMaster.textContent = txt;
+        }
+    };
+
+    if (btnMaster) btnMaster.addEventListener('click', entrarComoMaster);
+    if (masterPassField) {
+        masterPassField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); entrarComoMaster(); }
+        });
+    }
+
     // Iniciar sesión/Registro al presionar la tecla ENTER en los campos
     const inputs = [rucField, userField, nombresField, paternoField, maternoField,
                     emailField, telefonoField, passField];

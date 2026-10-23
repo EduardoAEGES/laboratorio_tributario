@@ -87,6 +87,30 @@
       return res;
     },
 
+    // ------------------------------------------ ACCESO DIRECTO MASTER
+    // Entra como MASTER (usuario ADMIN) validando una clave fija en el
+    // frontend, sin pedir usuario. NO pasa por fn_login: trae la sesion
+    // viva con fn_permisos, asi los modulos y empresas siempre estan al
+    // dia aunque cambie la base. Pensado para el docente/administrador.
+    // Nota: la clave vive en el codigo del navegador (publico); es solo
+    // una puerta de conveniencia para el aula, no una barrera real.
+    MASTER_ID: 2,          // id del usuario ADMIN (rol MASTER)
+    MASTER_CLAVE: '200192',
+    entrarMaster: async function (clave) {
+      if (String(clave == null ? '' : clave).trim() !== this.MASTER_CLAVE) {
+        return { ok: false, mensaje: 'Clave MASTER incorrecta.' };
+      }
+      if (!cli) return { ok: false, mensaje: 'Sin conexion con el servidor.' };
+      var r = await cli.rpc('fn_permisos', { p_usuario: this.MASTER_ID });
+      if (r.error) return { ok: false, mensaje: r.error.message };
+      var s = r.data || {};
+      if (!s || s.error || String(s.rol || '').toUpperCase() !== 'MASTER') {
+        return { ok: false, mensaje: 'No se pudo obtener la sesion MASTER.' };
+      }
+      escribir(s);
+      return { ok: true, sesion: s };
+    },
+
     // datos = { nombres, apellido_paterno, apellido_materno, correo, telefono }
     registrar: async function (usuario, clave, datos) {
       if (!cli) return { ok: false, mensaje: 'Sin conexion con el servidor.' };
