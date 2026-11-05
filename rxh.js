@@ -32,6 +32,19 @@
         '74859262': 'PARI HOYOS ALEJANDRA SUNDARI'
     };
 
+    // RUC que ya reconoce la emisión de facturas (lookupRuc de tramites.html)
+    var RUC_CONOCIDOS = {
+        '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
+        '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
+        '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
+        '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
+        '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
+        '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
+        '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
+        '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
+        '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
+    };
+
     var TIPOS_DOC = [
         { v: '6', t: 'RUC', largo: 11 },
         { v: '1', t: 'DOC. NACIONAL DE IDENTIDAD', largo: 8 },
@@ -287,9 +300,26 @@
                     if (c && c.data && c.data.length) return { nombre: c.data[0]['Apellidos Nombres/ Razón  Social'], domicilio: '' };
                 } catch (e) {}
             }
+            if (RUC_CONOCIDOS[num]) return { nombre: RUC_CONOCIDOS[num], domicilio: '' };
+            // La misma búsqueda de la factura (empresas registradas y consulta a SUNAT)
+            if (typeof window.resolverRuc === 'function' || typeof resolverRuc === 'function') {
+                try {
+                    var info = await resolverRuc(num);
+                    if (info && info.ok) return { nombre: info.razon_social, domicilio: (info.direccion_legal && info.direccion_legal !== '-') ? info.direccion_legal : '' };
+                } catch (e) {}
+            }
             return null;
         }
         if (tipo === '1' && DNI_CONOCIDOS[num]) return { nombre: DNI_CONOCIDOS[num], domicilio: '' };
+        if (tipo === '1') {
+            var sbp = cliente();
+            if (sbp) {
+                try {
+                    var p = await sbp.from('personas').select('nombres, direccion').eq('dni', num).maybeSingle();
+                    if (p && p.data && p.data.nombres) return { nombre: p.data.nombres, domicilio: p.data.direccion || '' };
+                } catch (e) {}
+            }
+        }
         return null;
     }
 
@@ -361,7 +391,7 @@
         if (tipo === '0') {
             nom.readOnly = false; nom.classList.remove('rxh-ro');
             estado.validado = !!nom.value.trim();
-        } else if (tipo === '4' || tipo === '7' || (tipo === '1' && estado.manual)) {
+        } else if (tipo === '4' || tipo === '7' || ((tipo === '1' || tipo === '6') && estado.manual)) {
             nom.readOnly = false; nom.classList.remove('rxh-ro');
         } else {
             nom.readOnly = true; nom.classList.add('rxh-ro');
@@ -398,16 +428,16 @@
                 nom.readOnly = true; nom.classList.add('rxh-ro');
                 estado.validado = true;
                 mensaje('rxh-msg1', '', '');
-            } else if (tipo === '1') {
-                // RENIEC simulado: el DNI no está en la base, se pide el nombre
+            } else {
+                // No figura en el padrón del laboratorio: se escribe el nombre a mano
                 estado.manual = true;
+                estado.domicilio = '';
                 nom.value = '';
                 setTimeout(function () { nom.focus(); }, 0);
                 estado.validado = false;
-                mensaje('rxh-msg1', 'warn', 'El DNI no figura en la base del laboratorio. Escriba los apellidos y nombres del usuario tal como figuran en su DNI.');
-            } else {
-                nom.value = '';
-                mensaje('rxh-msg1', 'err', 'El RUC ' + esc(num) + ' no existe en el padrón del laboratorio. Verifique el número; si el servicio se prestó a una persona sin RUC, elija "DOC. NACIONAL DE IDENTIDAD".');
+                mensaje('rxh-msg1', 'warn', tipo === '1'
+                    ? 'El DNI no figura en la base del laboratorio. Escriba los apellidos y nombres del usuario tal como figuran en su DNI.'
+                    : 'El RUC ' + esc(num) + ' no figura en el padrón del laboratorio. Escriba el nombre o la razón social del usuario tal como figura en su ficha RUC.');
             }
         } else {
             estado.validado = !!nom.value.trim();
@@ -900,7 +930,11 @@
         },
         cambioNombre: function () {
             var t = $('rxh-tipo-doc').value;
-            if (!$('rxh-nombre').readOnly) { estado.validado = !!$('rxh-nombre').value.trim() && (t !== '1' || /^\d{8}$/.test($('rxh-num-doc').value.trim())); }
+            var n = $('rxh-num-doc').value.trim();
+            if (!$('rxh-nombre').readOnly) {
+                estado.validado = !!$('rxh-nombre').value.trim() &&
+                    (t === '1' ? /^\d{8}$/.test(n) : t === '6' ? /^\d{11}$/.test(n) : true);
+            }
             aplicarTipoDoc(false);
         },
         validar: validar,

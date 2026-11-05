@@ -844,22 +844,31 @@
   function abrirTransportista() {
     ['gre-tr-ruc', 'gre-tr-razon', 'gre-tr-mtc', 'gre-tr-aut'].forEach(function (id) { $(id).value = ''; });
     $('gre-tr-ent').value = ''; $('gre-tr-frec').checked = false;
+    $('gre-tr-razon').readOnly = true; $('gre-tr-razon').style.background = '#f5f5f5';
     mostrarError('gre-tr-err', '');
     abrir('gre-modal-tr');
   }
   async function trBuscar() {
-    var ruc = $('gre-tr-ruc').value.trim();
-    $('gre-tr-razon').value = '';
+    var ruc = $('gre-tr-ruc').value.trim(), raz = $('gre-tr-razon');
+    raz.value = '';
+    raz.readOnly = true; raz.style.background = '#f5f5f5';
     if (!/^\d{11}$/.test(ruc)) return;
-    $('gre-tr-razon').value = 'Buscando...';
+    raz.value = 'Buscando...';
     var e = await buscarEmpresa(ruc);
-    $('gre-tr-razon').value = e ? e.razon_social : '';
-    mostrarError('gre-tr-err', e ? '' : 'El RUC ' + ruc + ' no figura en el padrón del simulador.');
+    raz.value = e ? e.razon_social : '';
+    if (!e) {
+      // No figura en el padrón: la razón social se escribe a mano
+      raz.readOnly = false; raz.style.background = '#FFF6E0';
+      raz.placeholder = 'Escriba la razón social del transportista';
+      raz.oninput = function () { raz.value = raz.value.toUpperCase(); };
+      raz.focus();
+    }
+    mostrarError('gre-tr-err', e ? '' : 'El RUC ' + ruc + ' no figura en el padrón del simulador. Escriba la razón social del transportista tal como figura en su ficha RUC.');
   }
   function agregarTransportista() {
     var t = { ruc: $('gre-tr-ruc').value.trim(), razon_social: $('gre-tr-razon').value.trim(), mtc: $('gre-tr-mtc').value.trim(),
               entidad: $('gre-tr-ent').value, autorizacion: $('gre-tr-aut').value.trim() };
-    if (!/^\d{11}$/.test(t.ruc) || !t.razon_social || t.razon_social === 'Buscando...') return mostrarError('gre-tr-err', 'Ingrese un RUC válido del transportista.');
+    if (!/^\d{11}$/.test(t.ruc) || !t.razon_social || t.razon_social === 'Buscando...') return mostrarError('gre-tr-err', 'Ingrese un RUC válido del transportista y su razón social.');
     if (t.ruc === emisor().ruc) return mostrarError('gre-tr-err', 'En transporte público el transportista es un tercero, no el propio remitente. Si trasladas con tus vehículos elige Transporte Privado.');
     if (!/^[A-Z0-9]{3,20}$/.test(t.mtc)) return mostrarError('gre-tr-err', 'Ingrese el número de registro MTC del transportista.');
     if (!!t.entidad !== !!t.autorizacion) return mostrarError('gre-tr-err', 'Complete la entidad emisora y el número de autorización, o deje ambos vacíos.');

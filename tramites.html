@@ -4530,10 +4530,36 @@
                 razonSocialDiv.style.background = '#e8f5e9';
                 greDestinatarioActual = { tipoDoc: tipoDoc, tipoDocLabel: tipoLabel, numDoc: numDoc, razonSocial: razon };
             } else {
-                razonSocialDiv.innerHTML = '<span style="color: #999;">' + mensaje + '</span>';
+                // No figura en el padrón: se permite escribir el nombre a mano
+                const largoOk = tipoDoc === 'RUC' ? /^\d{11}$/.test(numDoc) : tipoDoc === 'DNI' ? /^\d{8}$/.test(numDoc) : numDoc.length > 0;
+                if (largoOk) {
+                    razonSocialDiv.innerHTML = '<div style="width:100%;"><div style="font-size:12px;color:#7C4A03;margin-bottom:4px;">' + mensaje +
+                        '. Escriba el nombre o razón social del destinatario:</div>' +
+                        '<input type="text" id="gre-dest-nombre-manual" oninput="greDestManual(this.value)" ' +
+                        'style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ccc;border-radius:4px;font-size:13px;"></div>';
+                    greDestManualCtx = { tipoDoc: tipoDoc, tipoDocLabel: tipoLabel, numDoc: numDoc };
+                    const inp = document.getElementById('gre-dest-nombre-manual');
+                    if (inp) inp.focus();
+                } else {
+                    razonSocialDiv.innerHTML = '<span style="color: #999;">' + mensaje + '</span>';
+                }
                 razonSocialDiv.style.background = '#fff3e0';
             }
-            
+            greDestPintarBoton();
+        }
+
+        // Destinatario escrito a mano (documento que no está en el padrón)
+        let greDestManualCtx = null;
+        function greDestManual(valor) {
+            const nombre = String(valor || '').trim().toUpperCase();
+            greDestinatarioActual = (nombre && greDestManualCtx)
+                ? Object.assign({}, greDestManualCtx, { razonSocial: nombre })
+                : null;
+            greDestPintarBoton();
+        }
+
+        function greDestPintarBoton() {
+            const btnAgregar = document.getElementById('gre-dest-btn-agregar');
             // Activar/desactivar botón Agregar
             if (greDestinatarioActual) {
                 btnAgregar.style.background = '#00aeef';
@@ -7072,19 +7098,33 @@
                 currentReceptorData.ruc = ruc;
                 currentReceptorData.razon_social = info.razon_social;
                 currentReceptorData.direccion_legal = (info.direccion_legal && info.direccion_legal !== '-') ? info.direccion_legal : 'AV. MOCK RECEPTOR S/N';
-            } else if (info.motivo === 'NO_ENCONTRADO') {
-                // No encontrado en SUNAT ni en la API de respaldo
-                display.innerText = 'RUC NO ENCONTRADO EN SUNAT';
-                display.style.backgroundColor = '#FDECEA';
-                display.style.color = '#B71C1C';
+                currentReceptorData.manual = false;
+            } else {
+                // No figura en el padrón (o no se pudo consultar SUNAT):
+                // el alumno escribe la razón social a mano.
+                const motivo = info.motivo === 'NO_ENCONTRADO'
+                    ? 'El RUC no figura en el padrón del laboratorio ni en SUNAT.'
+                    : 'No se pudo consultar SUNAT (verifique su conexión).';
+                display.innerHTML = '<div style="color:#7C4A03;font-weight:normal;margin-bottom:4px;">' + motivo +
+                    ' Escriba la razón social del receptor:</div>' +
+                    '<input type="text" id="ruc-nombre-manual" class="factura-input-text" style="width:100%;box-sizing:border-box;" ' +
+                    'placeholder="Razón social tal como figura en su ficha RUC" oninput="setReceptorManual(this.value)">';
+                display.style.backgroundColor = '#FFF6E0';
+                display.style.color = '#333';
                 currentReceptorData.ruc = ruc;
                 currentReceptorData.razon_social = '';
                 currentReceptorData.direccion_legal = '';
-            } else {
-                display.innerText = 'No se pudo consultar SUNAT (verifique su conexión)';
-                display.style.backgroundColor = '#FDECEA';
-                display.style.color = '#B71C1C';
+                currentReceptorData.manual = true;
+                const inp = document.getElementById('ruc-nombre-manual');
+                if (inp) inp.focus();
             }
+        }
+
+        // Razón social escrita a mano cuando el RUC no figura en el padrón
+        function setReceptorManual(valor) {
+            currentReceptorData.ruc = document.getElementById('ruc-receptor').value.trim();
+            currentReceptorData.razon_social = String(valor || '').trim().toUpperCase();
+            currentReceptorData.manual = true;
         }
 
         function continueInvoice() {
@@ -7093,7 +7133,14 @@
                 alert('Por favor, ingrese un RUC receptor válido de 11 dígitos.');
                 return;
             }
-            
+            if (currentReceptorData.manual && currentReceptorData.ruc === rucVal && !currentReceptorData.razon_social) {
+                alert('El RUC ' + rucVal + ' no figura en el padrón. Escriba la razón social del receptor en el recuadro amarillo ' +
+                      '(o regístrela con "+ Registrar Nueva Empresa") y vuelva a presionar Continuar.');
+                const inp = document.getElementById('ruc-nombre-manual');
+                if (inp) inp.focus();
+                return;
+            }
+
             // Si por alguna razón no se han cargado los datos del RUC actual o hay desfase asíncrono
             if (currentReceptorData.ruc !== rucVal) {
                 if (localEmpresas[rucVal]) {
@@ -8312,13 +8359,19 @@
                         direccion: mockDirs[numDoc] || 'AV. MOCK CLIENTE S/N'
                     };
                 } else if (numDoc.length === 11) {
-                    nombreInput.value = 'EMPRESA CLIENTE DE PRUEBA';
-                    currentPersonaData = {
-                        tipo_doc: tipoDoc,
-                        num_doc: numDoc,
-                        nombre: 'EMPRESA CLIENTE DE PRUEBA',
-                        direccion: 'AV. CLIENTE PRUEBA S/N'
-                    };
+                    // Misma búsqueda que la factura (empresas del simulador y SUNAT)
+                    let info = null;
+                    if (typeof resolverRuc === 'function') {
+                        try { info = await resolverRuc(numDoc); } catch (e) { info = null; }
+                    }
+                    if (document.getElementById('boleta-num-doc').value.trim() !== numDoc) return;
+                    if (info && info.ok) {
+                        nombreInput.value = info.razon_social;
+                        currentPersonaData = { tipo_doc: tipoDoc, num_doc: numDoc, nombre: info.razon_social,
+                                               direccion: (info.direccion_legal && info.direccion_legal !== '-') ? info.direccion_legal : '' };
+                    } else {
+                        pedirNombreManualBoleta(tipoDoc, numDoc, 'El RUC no figura en el padrón: escriba la razón social del cliente');
+                    }
                 }
             } else { // DNI/Other docs lookup
                 // First search local cache
@@ -8358,17 +8411,24 @@
                     }
                 }
                 
-                // Fallback DNI mock data
+                // No figura en la base: se escribe el nombre a mano
                 if (tipoDoc === '1' && numDoc.length === 8) {
-                    nombreInput.value = 'PERSONA DE PRUEBA S.A.';
-                    currentPersonaData = {
-                        tipo_doc: tipoDoc,
-                        num_doc: numDoc,
-                        nombre: 'PERSONA DE PRUEBA S.A.',
-                        direccion: 'AV. PERSONA PRUEBA S/N'
-                    };
+                    pedirNombreManualBoleta(tipoDoc, numDoc, 'El DNI no figura en la base: escriba los apellidos y nombres del cliente');
                 }
             }
+        }
+
+        // Deja el nombre del cliente vacío y editable cuando el documento no está en el padrón
+        function pedirNombreManualBoleta(tipoDoc, numDoc, aviso) {
+            const nombreInput = document.getElementById('boleta-nombre-cliente');
+            nombreInput.value = '';
+            nombreInput.disabled = false;
+            nombreInput.readOnly = false;
+            nombreInput.placeholder = aviso;
+            nombreInput.style.backgroundColor = '#FFF6E0';
+            nombreInput.oninput = function () { nombreInput.style.backgroundColor = ''; };
+            currentPersonaData = { tipo_doc: tipoDoc, num_doc: numDoc, nombre: '', direccion: '' };
+            nombreInput.focus();
         }
 
         function openNuevaPersonaModal() {
@@ -8482,7 +8542,13 @@
                 return;
             }
             
-            const finalNombre = nombre || (tipoDoc === '0' ? 'CLIENTE VARIOS' : 'PERSONA DE PRUEBA');
+            if (tipoDoc !== '0' && !nombre) {
+                alert('Escriba los apellidos y nombres (o la razón social) del cliente: el documento ' + numDoc +
+                      ' no figura en el padrón del laboratorio, así que debe ingresarse a mano.');
+                document.getElementById('boleta-nombre-cliente').focus();
+                return;
+            }
+            const finalNombre = nombre ? nombre.toUpperCase() : 'CLIENTE VARIOS';
             const finalDoc = tipoDoc === '0' ? 'SIN DOCUMENTO' : numDoc;
             
             currentPersonaData.tipo_doc = tipoDoc;
