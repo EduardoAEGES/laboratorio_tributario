@@ -6661,15 +6661,23 @@
                 acceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
                 
                 try {
+                    // anon no escribe en empresas: el alta pasa por fn_registrar_empresa
+                    // (sql_supabase/72). Si el RUC ya existía, no se sobrescribe.
                     const { data, error } = await supabaseClient
-                        .from('empresas')
-                        .insert([newCompany]);
+                        .rpc('fn_registrar_empresa', { p_datos: newCompany });
                         
                     if (error) {
-                        console.error('Error al insertar en Supabase:', error);
-                        alert('Empresa guardada localmente. Error al sincronizar con Supabase: ' + error.message);
+                        console.error('Error al registrar la empresa en Supabase:', error);
+                        alert('La empresa se usará solo en esta sesión: no se pudo guardar en el laboratorio (' + error.message + '). ' +
+                              'Avisa a tu docente para que la registre.');
+                    } else if (!data || !data.ok) {
+                        delete localEmpresas[ruc];
+                        alert((data && data.mensaje) || 'No se pudo registrar la empresa.');
+                        return;
                     } else {
-                        alert('Empresa registrada con éxito en Supabase.');
+                        // Se usan los datos que quedaron en la base (si el RUC ya existía, los de quien lo registró)
+                        if (data.empresa) localEmpresas[ruc] = Object.assign({}, newCompany, data.empresa);
+                        alert(data.mensaje);
                     }
                 } catch (err) {
                     console.error('Error de red al conectar con Supabase:', err);
