@@ -4118,7 +4118,7 @@
                         <!-- Botones Volver / Siguiente -->
                         <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
                             <button type="button" onclick="backToGREStep1()" style="padding: 10px 40px; background: #00aeef; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; font-family: 'Roboto', sans-serif;">Volver</button>
-                            <button type="button" id="gre-step2-btn-siguiente" onclick="alert('EN PROCESO DE IMPLEMENTACION');" style="padding: 10px 40px; border: 1px solid #ccc; background: #fff; color: #999; font-size: 14px; cursor: default; border-radius: 4px; font-family: 'Roboto', sans-serif;">Siguiente</button>
+                            <button type="button" id="gre-step2-btn-siguiente" onclick="GRE.desdeActores();" style="padding: 10px 40px; border: 1px solid #ccc; background: #fff; color: #999; font-size: 14px; cursor: default; border-radius: 4px; font-family: 'Roboto', sans-serif;">Siguiente</button>
                         </div>
                     </div>
                 </div>
@@ -4215,6 +4215,8 @@
 
         // === Emisión de GRE ===
         function showEmisionGRE() {
+            // Cada ingreso empieza una GRE nueva desde el paso 1 (ver gre_emision.js)
+            if (window.GRE) GRE.reiniciar();
             // Leer la empresa elegida en la Clave SOL; si no hay, el usuario de plataforma
             let ruc = '20123456789';
             let denominacion = 'EMPRESA DEMO S.A.C.';
@@ -4404,17 +4406,23 @@
                 html += '<input type="radio" name="gre-destinatario-selected" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + ' style="margin: 0;">';
                 html += '<span style="font-size: 13px; color: #333; min-width: 250px;">' + dest.tipoDocLabel + '</span>';
                 html += '<span style="font-size: 13px; color: #333; min-width: 120px;">' + dest.numDoc + '</span>';
-                html += '<span style="font-size: 13px; color: #333;">' + dest.razonSocial + '</span>';
+                html += '<span style="font-size: 13px; color: #333; flex: 1;">' + dest.razonSocial + '</span>';
+                html += '<a href="#" onclick="quitarDestinatarioGRE(' + idx + '); return false;" title="Quitar" style="color: #c0392b;"><i class="fas fa-times"></i></a>';
                 html += '</div>';
             });
             container.innerHTML = html;
             
             // Activar siguiente
             const btn = document.getElementById('gre-step2-btn-siguiente');
-            btn.style.background = '#fff';
-            btn.style.color = '#999';
-            btn.style.border = '1px solid #ccc';
-            btn.style.cursor = 'default';
+            btn.style.background = '#00aeef';
+            btn.style.color = '#fff';
+            btn.style.border = '1px solid #00aeef';
+            btn.style.cursor = 'pointer';
+        }
+
+        function quitarDestinatarioGRE(idx) {
+            greDestinatarios.splice(idx, 1);
+            renderGREDestinatarios();
         }
 
         function openGREAgregarDestinatarioModal() {
@@ -4490,50 +4498,39 @@
             razonSocialDiv.style.background = '#f5f5f5';
             greDestinatarioActual = null;
             
-            // Buscar en Supabase tabla EMPRESAS
-            let found = false;
-            
-            // Primero buscar en caché local
-            if (typeof localEmpresas !== 'undefined' && localEmpresas[numDoc]) {
-                const data = localEmpresas[numDoc];
-                razonSocialDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60; margin-right: 6px;"></i> ' + data.razon_social;
-                razonSocialDiv.style.background = '#e8f5e9';
-                greDestinatarioActual = {
-                    tipoDoc: tipoDoc,
-                    tipoDocLabel: document.getElementById('gre-dest-tipo-doc').options[document.getElementById('gre-dest-tipo-doc').selectedIndex].text,
-                    numDoc: numDoc,
-                    razonSocial: data.razon_social
-                };
-                found = true;
-            }
-            
-            // Buscar en Supabase
-            if (!found && supabaseClient) {
+            const tipoLabel = document.getElementById('gre-dest-tipo-doc').options[document.getElementById('gre-dest-tipo-doc').selectedIndex].text;
+            let razon = null, mensaje = 'No se encontró información';
+
+            if (tipoDoc === 'RUC') {
+                // Misma búsqueda que Factura SEE - SOL (ver resolverRuc)
+                if (!/^\d{11}$/.test(numDoc)) {
+                    mensaje = 'El RUC debe tener 11 dígitos';
+                } else {
+                    const info = await resolverRuc(numDoc, function () {
+                        razonSocialDiv.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: #006699;"></i> Consultando SUNAT...';
+                    });
+                    if (info.ok) razon = info.razon_social;
+                    else if (info.motivo === 'NO_ENCONTRADO') mensaje = 'RUC NO ENCONTRADO EN SUNAT';
+                    else mensaje = 'No se pudo consultar SUNAT (verifique su conexión)';
+                }
+            } else if (tipoDoc === 'DNI' && supabaseClient) {
                 try {
-                    const { data, error } = await supabaseClient
-                        .from('empresas')
-                        .select('razon_social, ruc')
-                        .eq('ruc', numDoc)
-                        .maybeSingle();
-                    
-                    if (data && data.razon_social) {
-                        razonSocialDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60; margin-right: 6px;"></i> ' + data.razon_social;
-                        razonSocialDiv.style.background = '#e8f5e9';
-                        greDestinatarioActual = {
-                            tipoDoc: tipoDoc,
-                            tipoDocLabel: document.getElementById('gre-dest-tipo-doc').options[document.getElementById('gre-dest-tipo-doc').selectedIndex].text,
-                            numDoc: numDoc,
-                            razonSocial: data.razon_social
-                        };
-                        found = true;
-                    }
+                    const r = await supabaseClient.from('personas').select('nombres').eq('dni', numDoc).maybeSingle();
+                    if (r.data && r.data.nombres) razon = r.data.nombres;
                 } catch (err) {
                     console.error('Error al buscar en Supabase (GRE destinatario):', err);
                 }
             }
-            
-            if (!found) {
-                razonSocialDiv.innerHTML = '<span style="color: #999;">No se encontró información</span>';
+
+            // Si el usuario cambió el número mientras se consultaba, ignorar esta respuesta
+            if (document.getElementById('gre-dest-num-doc').value.trim() !== numDoc) return;
+
+            if (razon) {
+                razonSocialDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60; margin-right: 6px;"></i> ' + razon;
+                razonSocialDiv.style.background = '#e8f5e9';
+                greDestinatarioActual = { tipoDoc: tipoDoc, tipoDocLabel: tipoLabel, numDoc: numDoc, razonSocial: razon };
+            } else {
+                razonSocialDiv.innerHTML = '<span style="color: #999;">' + mensaje + '</span>';
                 razonSocialDiv.style.background = '#fff3e0';
             }
             
@@ -4553,6 +4550,10 @@
 
         function agregarDestinatarioGRE() {
             if (!greDestinatarioActual) return;
+            if (greDestinatarios.some(function (d) { return d.numDoc === greDestinatarioActual.numDoc; })) {
+                alert('Ese destinatario ya fue agregado.');
+                return;
+            }
             
             greDestinatarios.push(greDestinatarioActual);
             closeGREAgregarDestinatarioModal();
@@ -6940,36 +6941,100 @@
             }
         }
 
+        // RUCs de prueba conocidos (empresas demo): se resuelven al instante
+        const RUCS_DEMO = {
+            '20123456789': 'EMPRESA DEMO S.A.C.',
+            '20606966823': 'EMPRESA DEMO S.A.C.',
+            '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
+            '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
+            '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
+            '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
+            '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
+            '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
+            '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
+            '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
+            '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
+        };
+        const DIRS_DEMO = {
+            '20123456789': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
+            '20606966823': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
+            '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
+            '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
+            '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
+            '20606927283': 'Jr. Lima Nro. 264, Barranca',
+            '20613448706': 'Av. Huancayo Nro. 198, Jauja',
+            '20517941507': 'PJ. VILLAC UMO URB. SALAMANCA DE MONTERRICO 176 ATE, LIMA',
+            '20448190740': 'Mza. H Lote. H-1, Municipal Taparachi, Juliaca',
+            '20562707108': 'Av. Coronel Samuel Alcazar Nro. 1280, Rimac',
+            '20611979828': 'Cal. Principal Mza. e Lote. 6 Apv. las Casuarinas de Nieveri, Lurigancho'
+        };
+        // URL del proxy servidor (Edge Function) que consulta SUNAT + API de respaldo
+        const RUC_LOOKUP_URL = 'https://klmjmlhwuzhymrplemgw.supabase.co/functions/v1/consultar-ruc';
+
+        /**
+         * Busca un RUC con la misma lógica en todo SEE - SOL (Factura y GRE):
+         * caché de la sesión -> empresas registradas en la sesión -> tabla empresas ->
+         * las 10 empresas del simulador -> RUCs de prueba -> consulta real a SUNAT.
+         * Devuelve { ok, razon_social, direccion_legal } o { ok:false, motivo: 'NO_ENCONTRADO' | 'SIN_CONEXION' }.
+         * alConsultarSunat() se llama justo antes de la consulta externa (para mostrar "Consultando SUNAT...").
+         */
+        async function resolverRuc(ruc, alConsultarSunat) {
+            // Caché en memoria: evita reconsultar el mismo RUC en la misma sesión
+            window.__rucCache = window.__rucCache || {};
+            if (window.__rucCache[ruc]) return Object.assign({ ok: true }, window.__rucCache[ruc]);
+
+            // Empresas registradas localmente en esta sesión
+            if (localEmpresas[ruc]) {
+                return { ok: true, razon_social: localEmpresas[ruc].razon_social, direccion_legal: localEmpresas[ruc].direccion_legal };
+            }
+
+            if (supabaseClient) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('empresas')
+                        .select('razon_social, direccion_legal')
+                        .eq('ruc', ruc)
+                        .maybeSingle();
+                    if (data && data.razon_social) return { ok: true, razon_social: data.razon_social, direccion_legal: data.direccion_legal };
+
+                    const sim = await supabaseClient
+                        .from('empresas_simulador')
+                        .select('razon_social, direccion_fiscal, distrito, provincia, departamento')
+                        .eq('ruc', ruc)
+                        .maybeSingle();
+                    if (sim.data && sim.data.razon_social) {
+                        const d = sim.data;
+                        return { ok: true, razon_social: d.razon_social,
+                                 direccion_legal: [d.direccion_fiscal, [d.distrito, d.provincia, d.departamento].filter(Boolean).join(' - ')].filter(Boolean).join(', ') };
+                    }
+                } catch (err) {
+                    console.error('Error al conectar con Supabase:', err);
+                }
+            }
+
+            if (RUCS_DEMO[ruc]) return { ok: true, razon_social: RUCS_DEMO[ruc], direccion_legal: DIRS_DEMO[ruc] };
+
+            // Consulta real a SUNAT (proxy servidor: scraping SUNAT + API de respaldo)
+            if (typeof alConsultarSunat === 'function') alConsultarSunat();
+            try {
+                const resp = await fetch(RUC_LOOKUP_URL + '?ruc=' + ruc);
+                if (resp.ok) {
+                    const info = await resp.json();
+                    if (info && info.ok && info.razon_social) {
+                        window.__rucCache[ruc] = info;
+                        return Object.assign({ ok: true }, info);
+                    }
+                }
+                return { ok: false, motivo: 'NO_ENCONTRADO' };
+            } catch (e) {
+                console.warn('No se pudo consultar el RUC:', e);
+                return { ok: false, motivo: 'SIN_CONEXION' };
+            }
+        }
+
         async function lookupRuc(val) {
             const ruc = val.trim();
             const display = document.getElementById('ruc-nombre-display');
-            const rucs = {
-                '20123456789': 'EMPRESA DEMO S.A.C.',
-                '20606966823': 'EMPRESA DEMO S.A.C.',
-                '20100100100': 'SUNAT - SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA',
-                '10460693395': 'MAMANI ROQUE EDUARDO LUIS',
-                '20607502316': 'CONSTRUCTORA AREQUIPA SUR S.R.L.',
-                '20606927283': 'DISTRIBUIDORA FERRETERA EL CONSTRUCTOR E.I.R.L.',
-                '20613448706': 'GRUPO EMPRESARIAL LOS ANDES S.A.C.',
-                '20517941507': 'SERVICIOS Y GESTIONES EMPRESARIALES DEL PERU EIRL',
-                '20448190740': 'ALTIPLANO CIA MINERA SOCIEDAD ANÓNIMA CERRADA',
-                '20562707108': 'CONSORCIO TRANSPORTE AREQUIPA S.A.',
-                '20611979828': 'SERVICIOS EMPRESARIALES E & P E.I.R.L.'
-            };
-            
-            const dirs = {
-                '20123456789': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
-                '20606966823': 'AV. MANUEL OLGUÍN NRO. 211, SANTIAGO DE SURCO - LIMA - LIMA',
-                '20100100100': 'AV. GARCILASO DE LA VEGA NRO. 1472, LIMA',
-                '10460693395': 'P.J. MIGUEL GRAU V ETAPA ZN D MZA. 32G LOTE. 6 AREQUIPA-AREQUIPA-PAUCARPATA',
-                '20607502316': 'Cal. Santo Domingo Nro. 306a Int. 404, Arequipa',
-                '20606927283': 'Jr. Lima Nro. 264, Barranca',
-                '20613448706': 'Av. Huancayo Nro. 198, Jauja',
-                '20517941507': 'PJ. VILLAC UMO URB. SALAMANCA DE MONTERRICO 176 ATE, LIMA',
-                '20448190740': 'Mza. H Lote. H-1, Municipal Taparachi, Juliaca',
-                '20562707108': 'Av. Coronel Samuel Alcazar Nro. 1280, Rimac',
-                '20611979828': 'Cal. Principal Mza. e Lote. 6 Apv. las Casuarinas de Nieveri, Lurigancho'
-            };
             
             if (ruc.length === 0) {
                 display.innerText = '';
@@ -6984,90 +7049,22 @@
                 return;
             }
 
-            // URL del proxy servidor (Edge Function) que consulta SUNAT + API de respaldo
-            const RUC_LOOKUP_URL = 'https://klmjmlhwuzhymrplemgw.supabase.co/functions/v1/consultar-ruc';
-            // Caché en memoria: evita reconsultar el mismo RUC en la misma sesión
-            window.__rucCache = window.__rucCache || {};
-            if (window.__rucCache[ruc]) {
-                const info = window.__rucCache[ruc];
+            const info = await resolverRuc(ruc, function () {
+                display.innerText = 'Consultando SUNAT...';
+                display.style.backgroundColor = '#fff';
+                display.style.color = '#666';
+            });
+            // Si el usuario ya cambió el RUC mientras esperábamos, ignorar esta respuesta
+            if (document.getElementById('ruc-receptor').value.trim() !== ruc) return;
+
+            if (info.ok) {
                 display.innerText = info.razon_social;
                 display.style.backgroundColor = '#E2EDF4';
                 display.style.color = '#1E395B';
                 currentReceptorData.ruc = ruc;
                 currentReceptorData.razon_social = info.razon_social;
-                currentReceptorData.direccion_legal = info.direccion_legal || 'AV. MOCK RECEPTOR S/N';
-                return;
-            }
-
-            // Intentar buscar primero en el caché de empresas registradas localmente en esta sesión
-            if (localEmpresas[ruc]) {
-                const data = localEmpresas[ruc];
-                display.innerText = data.razon_social;
-                display.style.backgroundColor = '#E2EDF4';
-                display.style.color = '#1E395B';
-                
-                currentReceptorData.ruc = ruc;
-                currentReceptorData.razon_social = data.razon_social;
-                currentReceptorData.direccion_legal = data.direccion_legal || 'AV. MOCK RECEPTOR S/N';
-                return;
-            }
-            
-            // Intentar buscar en Supabase si está configurado
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('empresas')
-                        .select('razon_social, direccion_legal')
-                        .eq('ruc', ruc)
-                        .single();
-                        
-                    if (data && data.razon_social) {
-                        display.innerText = data.razon_social;
-                        display.style.backgroundColor = '#E2EDF4';
-                        display.style.color = '#1E395B';
-                        
-                        currentReceptorData.ruc = ruc;
-                        currentReceptorData.razon_social = data.razon_social;
-                        currentReceptorData.direccion_legal = data.direccion_legal || 'AV. MOCK RECEPTOR S/N';
-                        return;
-                    }
-                } catch (err) {
-                    console.error('Error al conectar con Supabase:', err);
-                }
-            }
-            
-            // RUCs de prueba conocidos (empresas demo): se resuelven al instante
-            if (rucs[ruc]) {
-                display.innerText = rucs[ruc];
-                currentReceptorData.ruc = ruc;
-                currentReceptorData.razon_social = rucs[ruc];
-                currentReceptorData.direccion_legal = dirs[ruc] || 'AV. MOCK RECEPTOR S/N';
-                display.style.backgroundColor = '#E2EDF4';
-                display.style.color = '#1E395B';
-                return;
-            }
-
-            // Consulta real a SUNAT (proxy servidor: scraping SUNAT + API de respaldo)
-            display.innerText = 'Consultando SUNAT...';
-            display.style.backgroundColor = '#fff';
-            display.style.color = '#666';
-            try {
-                const resp = await fetch(RUC_LOOKUP_URL + '?ruc=' + ruc);
-                // Si el usuario ya cambió el RUC mientras esperábamos, ignorar esta respuesta
-                if (document.getElementById('ruc-receptor').value.trim() !== ruc) return;
-                if (resp.ok) {
-                    const info = await resp.json();
-                    if (info && info.ok && info.razon_social) {
-                        window.__rucCache[ruc] = info;
-                        display.innerText = info.razon_social;
-                        display.style.backgroundColor = '#E2EDF4';
-                        display.style.color = '#1E395B';
-                        currentReceptorData.ruc = ruc;
-                        currentReceptorData.razon_social = info.razon_social;
-                        currentReceptorData.direccion_legal = info.direccion_legal || 'AV. MOCK RECEPTOR S/N';
-                        return;
-                    }
-                }
+                currentReceptorData.direccion_legal = (info.direccion_legal && info.direccion_legal !== '-') ? info.direccion_legal : 'AV. MOCK RECEPTOR S/N';
+            } else if (info.motivo === 'NO_ENCONTRADO') {
                 // No encontrado en SUNAT ni en la API de respaldo
                 display.innerText = 'RUC NO ENCONTRADO EN SUNAT';
                 display.style.backgroundColor = '#FDECEA';
@@ -7075,9 +7072,7 @@
                 currentReceptorData.ruc = ruc;
                 currentReceptorData.razon_social = '';
                 currentReceptorData.direccion_legal = '';
-            } catch (e) {
-                console.warn('No se pudo consultar el RUC:', e);
-                if (document.getElementById('ruc-receptor').value.trim() !== ruc) return;
+            } else {
                 display.innerText = 'No se pudo consultar SUNAT (verifique su conexión)';
                 display.style.backgroundColor = '#FDECEA';
                 display.style.color = '#B71C1C';
@@ -9064,6 +9059,7 @@
         <span style="display:flex; align-items:center; gap:5px;"><i class="fas fa-laptop-code" style="color:#00AEEF;"></i> Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
         <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
     </footer>
+    <script src="gre_emision.js"></script>
     <script src="survey.js"></script>
 </body>
 </html>
