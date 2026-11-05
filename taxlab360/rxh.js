@@ -697,6 +697,8 @@
         if ($('rxh-wrapper')) $('rxh-wrapper').style.display = 'none';
         var cont = $('tramites-content-container');
         if (cont) cont.style.display = 'flex';
+        // Vuelve a la pestaña que corresponde a la Clave SOL
+        if (window.RxH && RxH.pestana) RxH.pestana(/^1[057]\d{9}$/.test(empresaActiva().ruc) ? 'personas' : 'empresas');
         window.scrollTo(0, 0);
     }
 
@@ -730,4 +732,104 @@
         _enLetras: enLetras
     };
     window.showEmitirRxH = function () { abrir('emitir'); };
+
+    // ======================================================================
+    // Pestaña "Personas" del menú SOL (como en SUNAT Operaciones en Línea).
+    // Ahí vive el Recibo por Honorarios Electrónicos. Si la Clave SOL es de
+    // una persona natural (RUC 10) se abre esta pestaña por defecto.
+    // ======================================================================
+    var NO_IMPL = "alert('EN PROCESO DE IMPLEMENTACION'); return false;";
+
+    function hoja(txt, onclick) {
+        return '<li><a href="#" onclick="' + (onclick || NO_IMPL) + '"><i class="fas fa-caret-right"></i> ' + txt + '</a></li>';
+    }
+    function rama(txt, hijos, implementado, abierto) {
+        return '<li class="has-submenu' + (abierto ? ' open' : '') + '"><a href="#" class="rxh-toggle' + (implementado ? ' menu-item-implemented' : '') + '">' +
+            '<i class="fas ' + (abierto ? 'fa-caret-down' : 'fa-caret-right') + '"></i> ' + txt + '</a><ul class="submenu-list">' + hijos.join('') + '</ul></li>';
+    }
+    function hojaFinal(txt, onclick) {
+        return '<li><a href="#" onclick="' + (onclick || NO_IMPL) + '">' + txt + '</a></li>';
+    }
+
+    function menuPersonasHTML() {
+        var rhe = '<li class="has-submenu"><a href="#" class="rxh-toggle menu-item-implemented"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a>' +
+            '<ul class="submenu-list last-level">' +
+            hojaFinal('Emitir Recibo por Honorario Electrónico', "RxH.ir('emitir'); return false;") +
+            hojaFinal('Emitir Nota de Crédito Electrónica') +
+            hojaFinal('Registrar Recibo por Honorario Físico') +
+            hojaFinal('Registrar Nota de Crédito Física') +
+            hojaFinal('Registrar Pagos') +
+            hojaFinal('Registrar Otros Ingresos de Cuarta Categoria') +
+            hojaFinal('Revertir Recibo por Honorario Electrónico') +
+            hojaFinal('Dar de Baja al Registro de Recibo por Honorario Físico') +
+            hojaFinal('Dar de Baja al Registro de Nota de Crédito Física') +
+            hojaFinal('Consultas', "RxH.ir('consultar'); return false;") +
+            '</ul></li>';
+        var col1 = [
+            rama('Mi RUC y Otros Registros', [hoja('Mis Datos del RUC'), hoja('Actualizo información de mi RUC'), hoja('Reporte Tributario y Aduanero')]),
+            rama('Perfil de Cumplimiento', [hoja('Consulta de Perfil de Cumplimiento')]),
+            rama('Propuesta información para declaración jurada', [hoja('Renta Anual Personas')]),
+            rama('Comprobantes de pago', [
+                hoja('Comprobantes de Pago'),
+                hoja('Comprobantes de Pago Físico'),
+                rama('SEE - SOL', [rhe, hoja('Consulta de Validez de Comprobante de Pago')], true, true),
+                hoja('Liquidación de Compra')
+            ], true, true)
+        ];
+        var col2 = [
+            rama('Sistema Integrado de Registros Electronicos', [hoja('Registros Electronicos')]),
+            rama('Mis declaraciones informativas', [hoja('Declaraciones informativas')]),
+            rama('Otras declaraciones y solicitudes', [hoja('Form. 1609 Solicitud de Suspensión Retenciones 4ta Cat.')]),
+            rama('Ventanilla de Atención al Operador', [hoja('Ventanilla')]),
+            rama('Observaciones realizadas por SUNAT', [hoja('Consulta de observaciones')])
+        ];
+        return '<div class="menu-col"><ul class="menu-list">' + col1.join('') + '</ul></div>' +
+            '<div class="menu-col"><ul class="menu-list">' + col2.join('') + '</ul></div>';
+    }
+
+    function pestana(cual) {
+        var emp = $('menu-columns-container'), per = $('menu-personas-container');
+        if (!emp || !per) return;
+        // Si estaba abierto un formulario de emisión, se vuelve al menú
+        if ($('rxh-wrapper')) $('rxh-wrapper').style.display = 'none';
+        var cont = $('tramites-content-container');
+        if (cont && cont.style.display === 'none') cont.style.display = 'flex';
+        emp.style.display = cual === 'empresas' ? 'flex' : 'none';
+        per.style.display = cual === 'personas' ? 'flex' : 'none';
+        var lis = document.querySelectorAll('.tramites-sidebar .sidebar-menu > li');
+        lis.forEach(function (li, i) {
+            var on = (i === 0 && cual === 'personas') || (i === 1 && cual === 'empresas');
+            li.classList.toggle('active', on);
+            var a = li.querySelector('a'), flecha = a && a.querySelector('.arrow-right');
+            if (on && a && !flecha) a.insertAdjacentHTML('beforeend', ' <i class="fas fa-chevron-right arrow-right"></i>');
+            if (!on && flecha) flecha.remove();
+        });
+    }
+
+    function initPersonas() {
+        var emp = $('menu-columns-container');
+        if (!emp || $('menu-personas-container')) return;
+        var per = document.createElement('div');
+        per.className = 'menu-columns';
+        per.id = 'menu-personas-container';
+        per.style.display = 'none';
+        per.innerHTML = menuPersonasHTML();
+        emp.parentNode.insertBefore(per, emp.nextSibling);
+        per.addEventListener('click', function (e) {
+            var t = e.target.closest('.rxh-toggle');
+            if (!t) return;
+            e.preventDefault();
+            var li = t.parentElement, ic = t.querySelector('i');
+            li.classList.toggle('open');
+            if (ic) { ic.classList.toggle('fa-caret-down', li.classList.contains('open')); ic.classList.toggle('fa-caret-right', !li.classList.contains('open')); }
+        });
+        var lis = document.querySelectorAll('.tramites-sidebar .sidebar-menu > li > a');
+        if (lis[0]) lis[0].setAttribute('onclick', "RxH.pestana('personas'); return false;");
+        if (lis[1]) lis[1].setAttribute('onclick', "RxH.pestana('empresas'); return false;");
+        if (/^1[057]\d{9}$/.test(empresaActiva().ruc)) pestana('personas');
+    }
+
+    window.RxH.pestana = pestana;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPersonas);
+    else initPersonas();
 })();
