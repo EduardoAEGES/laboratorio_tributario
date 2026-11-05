@@ -2,16 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "sunat-sim",
+      "name": "static",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5502"],
-      "port": 5502
-    },
-    {
-      "name": "sunat-sim-alt",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5512"],
-      "port": 5512
+      "runtimeArgs": ["-m", "http.server", "8777"],
+      "port": 8777
     }
   ]
 }
