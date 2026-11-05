@@ -691,6 +691,14 @@
         if (typeof window.mostrarToastExito === 'function') {
             try { window.mostrarToastExito('¡Recibo por honorarios emitido!', 'Comprobante ' + numero + ' generado en la simulación.'); } catch (e) {}
         }
+        if (window.TaxComp) {
+            TaxComp.registrar({
+                tipo: 'Recibo por Honorarios', numero: numero, fecha: fechaDMY(registro.fecha),
+                emisor_ruc: emisor.ruc, emisor: emisor.nombre,
+                receptor: registro.nombre, receptor_doc: (registro.tipoDoc === '6' ? 'RUC ' : 'Doc. ') + (registro.numDoc || ''),
+                total: 'Neto S/ ' + fmt(imp.neto)
+            }, $('rxh-recibo'), $('rxh-main'));
+        }
     }
 
     function consultar() {
@@ -835,6 +843,13 @@
         guardar(CLAVE_1609, lista);
         f1609 = null;
         f1609Resultado(reg);
+        if (window.TaxComp) {
+            TaxComp.registrar({
+                tipo: 'Constancia Formulario 1609', numero: reg.numero, fecha: fechaDMY(reg.presentado),
+                emisor_ruc: emisor.ruc, emisor: emisor.nombre,
+                receptor: reg.procede ? 'Suspensión aceptada' : 'Solicitud no procedente', total: 'Proyectado S/ ' + fmt(reg.total)
+            }, $('rxh-recibo'), $('rxh-main'));
+        }
     }
 
     function htmlConstancia(c) {

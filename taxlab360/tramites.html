@@ -4673,7 +4673,20 @@
             // Reset fields
             document.getElementById('nota-correlativo').value = '';
             document.getElementById('nota-motivo').value = '';
-            document.getElementById('nota-fecha-emision').value = '05/07/2026';
+            // Fecha de hoy y serie de factura de la empresa activa
+            const hoyNC = new Date();
+            document.getElementById('nota-fecha-emision').value =
+                String(hoyNC.getDate()).padStart(2, '0') + '/' + String(hoyNC.getMonth() + 1).padStart(2, '0') + '/' + hoyNC.getFullYear();
+            const serieEmp = (window.currentEmisorData && window.currentEmisorData.serie_factura) || 'E001';
+            ['nota-series', 'nota-nueva-series'].forEach(function (id) { const el = document.getElementById(id); if (el) el.value = serieEmp; });
+            cargarFacturasParaNota();
+            if (typeof cargarEmisor === 'function') {
+                cargarEmisor().then(function (em) {
+                    const s = (em && em.serie_factura) || serieEmp;
+                    ['nota-series', 'nota-nueva-series'].forEach(function (id) { const el = document.getElementById(id); if (el) el.value = s; });
+                    cargarFacturasParaNota();
+                });
+            }
             document.getElementById('nota-tipo').value = '1';
             
             if (document.getElementById('nota-nueva-correlativo')) document.getElementById('nota-nueva-correlativo').value = '';
@@ -4686,10 +4699,10 @@
                 handleNotaTipoChange();
             }
             
-            selectedCalDate = { day: 5, month: 6, year: 2026 };
-            currentCalMonth = 6;
-            currentCalYear = 2026;
-            
+            selectedCalDate = { day: hoyNC.getDate(), month: hoyNC.getMonth(), year: hoyNC.getFullYear() };
+            currentCalMonth = hoyNC.getMonth();
+            currentCalYear = hoyNC.getFullYear();
+
             initNotaCalendar();
         }
 
@@ -5111,7 +5124,8 @@
         };
 
         function populateVerFacturaModal(invoiceData, correlativo) {
-            document.getElementById('modal-invoice-number').textContent = correlativo.startsWith('E001-') ? correlativo : `E001-${correlativo}`;
+            const serieFact = invoiceData.serie || 'E001';
+            document.getElementById('modal-invoice-number').textContent = String(correlativo).indexOf('-') !== -1 ? correlativo : `${serieFact}-${correlativo}`;
             document.getElementById('modal-invoice-fecha').textContent = invoiceData.fecha;
             document.getElementById('modal-cliente-nombre').textContent = invoiceData.cliente;
             document.getElementById('modal-cliente-ruc').textContent = invoiceData.ruc;
@@ -5185,16 +5199,147 @@
             document.getElementById('ver-factura-modal').style.display = 'flex';
         }
 
-        function verificarFacturaNota() {
+        // ====================================================================
+        // Factura que modifica la nota de crédito: se busca entre las facturas
+        // de la EMPRESA ACTIVA (Clave SOL), no en una lista de ejemplo:
+        //   1) las que el alumno emitió en el simulador (taxlab_facturas)
+        //   2) las del caso cargadas en el Registro de Ventas (registro_ventas
+        //      + ventas_detalle + ventas_adicional), p. ej. F001-00321
+        //   3) las facturas de ejemplo, solo para EMPRESA DEMO (20123456789)
+        // ====================================================================
+        window.__facturasNota = {};
+        function serieNota(campo) {
+            const el = document.getElementById(campo || 'nota-series');
+            return ((el && el.value) || 'E001').trim().toUpperCase();
+        }
+        function claveFactura(serie, numero) { return String(serie).toUpperCase() + '-' + (parseInt(numero, 10) || 0); }
+        function textoSoles(n) { return 'S/ ' + window.fmtMiles(n); }
+
+        async function cargarFacturasParaNota() {
+            const mapa = {};
+            const ruc = String((window.currentEmisorData && window.currentEmisorData.ruc) || '');
+            // 1) Emitidas en el simulador
+            try {
+                const lista = JSON.parse(almacenFacturas().getItem('taxlab_facturas') || sessionStorage.getItem('taxlab_facturas') || '[]');
+                lista.filter(function (f) { return String(f.emisor_ruc) === ruc && f.comprobante; }).forEach(function (f) {
+                    const p = String(f.comprobante).split('-');
+                    const items = (f.items && f.items.length) ? f.items
+                        : [{ cantidad: '1.00', descripcion: 'SEGÚN FACTURA ' + f.comprobante, valorUnitario: String(f.subtotal || f.total || '0').replace(/[^\d.]/g, '') }];
+                    mapa[claveFactura(p[0], p[1])] = {
+                        origen: 'emitida', serie: p[0], numero: p[1], cliente: f.receptor || '', ruc: f.receptor_ruc || '',
+                        direccion: f.direccion || '-', fecha: f.fecha || '', formaPago: f.forma_pago || 'Contado', moneda: f.moneda || 'SOLES',
+                        items: items, subtotal: f.subtotal || '', igv: f.igv || '', total: f.total || '',
+                        totalLetras: f.total ? 'SON: ' + numeroALetrasSoles(String(f.total).replace(/[^\d.]/g, '')) : ''
+                    };
+                });
+            } catch (e) {}
+            // 2) Facturas del caso en el Registro de Ventas de la empresa
+            if (supabaseClient && /^\d{11}$/.test(ruc)) {
+                try {
+                    const rv = await supabaseClient.from('registro_ventas').select('*').eq('Ruc', Number(ruc)).limit(1000);
+                    const filas = ((rv && rv.data) || []).filter(function (r) { return String(r['Tipo CP/Doc.']).padStart(2, '0') === '01'; });
+                    const ids = filas.map(function (r) { return r.id_venta; });
+                    let det = [], adi = [];
+                    if (ids.length) {
+                        const d = await supabaseClient.from('ventas_detalle').select('id_venta, item_nro, codigo_sku, descripcion, unidad_medida, cantidad, valor_unitario').in('id_venta', ids);
+                        det = (d && d.data) || [];
+                        const a = await supabaseClient.from('ventas_adicional').select('id_venta, forma_de_pago').in('id_venta', ids);
+                        adi = (a && a.data) || [];
+                    }
+                    let dirCli = {};
+                    const rucsCli = Array.from(new Set(filas.map(function (r) { return String(r['Nro Doc Identidad'] || ''); }).filter(Boolean)));
+                    if (rucsCli.length) {
+                        const em = await supabaseClient.from('empresas_simulador').select('ruc, direccion_fiscal, distrito, provincia, departamento').in('ruc', rucsCli);
+                        ((em && em.data) || []).forEach(function (x) {
+                            dirCli[x.ruc] = [x.direccion_fiscal, [x.distrito, x.provincia, x.departamento].filter(Boolean).join(' - ')].filter(Boolean).join(', ').toUpperCase();
+                        });
+                        // Empresas registradas por los alumnos (+ Registrar Nueva Empresa)
+                        const faltan = rucsCli.filter(function (r) { return !dirCli[r]; });
+                        if (faltan.length) {
+                            const reg = await supabaseClient.from('empresas').select('ruc, direccion_legal').in('ruc', faltan);
+                            ((reg && reg.data) || []).forEach(function (x) { if (x.direccion_legal) dirCli[x.ruc] = String(x.direccion_legal).toUpperCase(); });
+                        }
+                    }
+                    filas.forEach(function (r) {
+                        const k = claveFactura(r['Serie del CDP'], r['Nro CP o Doc. Nro Inicial (Rango)']);
+                        if (mapa[k]) return;   // la emitida por el alumno manda
+                        const its = det.filter(function (x) { return x.id_venta === r.id_venta; })
+                            .sort(function (a, b) { return (a.item_nro || 0) - (b.item_nro || 0); })
+                            .map(function (x) { return { cantidad: Number(x.cantidad || 0).toFixed(2), descripcion: String(x.descripcion || '').toUpperCase(),
+                                                         codigo: x.codigo_sku || '', unidad: x.unidad_medida || '', valorUnitario: Number(x.valor_unitario || 0).toFixed(2) }; });
+                        const fp = (adi.find(function (x) { return x.id_venta === r.id_venta; }) || {}).forma_de_pago || 'Contado';
+                        mapa[k] = {
+                            origen: 'registro', serie: String(r['Serie del CDP']).toUpperCase(), numero: String(r['Nro CP o Doc. Nro Inicial (Rango)']),
+                            cliente: r['Apellidos Nombres/ Razón Social'] || '', ruc: String(r['Nro Doc Identidad'] || ''),
+                            direccion: dirCli[String(r['Nro Doc Identidad'] || '')] || '-', fecha: r['Fecha de emisión'] || '',
+                            formaPago: /cr[eé]d/i.test(fp) ? 'Crédito' : 'Contado', moneda: r['Moneda'] === 'USD' ? 'DÓLARES AMERICANOS' : 'SOLES',
+                            items: its.length ? its : [{ cantidad: '1.00', descripcion: 'SEGÚN FACTURA ' + r['Serie del CDP'] + '-' + r['Nro CP o Doc. Nro Inicial (Rango)'], valorUnitario: Number(r['BI Gravada'] || 0).toFixed(2) }],
+                            subtotal: textoSoles(r['BI Gravada']), igv: textoSoles(r['IGV / IPM']), total: textoSoles(r['Total CP']),
+                            totalLetras: 'SON: ' + numeroALetrasSoles(r['Total CP'])
+                        };
+                    });
+                } catch (e) { console.warn('No se pudieron leer las facturas del Registro de Ventas:', e); }
+            }
+            window.__facturasNota = mapa;
+            return mapa;
+        }
+
+        function facturaParaNota(correlativo, campoSerie) {
+            const serie = serieNota(campoSerie);
+            const f = (window.__facturasNota || {})[claveFactura(serie, correlativo)];
+            if (f) return f;
+            const ruc = String((window.currentEmisorData && window.currentEmisorData.ruc) || '');
+            if ((ruc === '20123456789' || !ruc) && serie === 'E001') return mockInvoices[String(parseInt(correlativo, 10))] || null;
+            return null;
+        }
+
+        function avisoFacturaNoEncontrada(correlativo, campoSerie) {
+            const serie = serieNota(campoSerie);
+            const disponibles = Object.keys(window.__facturasNota || {}).slice(0, 12);
+            const razonEmp = ((window.currentEmisorData && window.currentEmisorData.razon_social) || 'la empresa');
+            alert('No se encontró la factura ' + serie + '-' + correlativo + ' de ' + razonEmp + (/\.$/.test(razonEmp) ? '' : '.') + '\n\n' +
+                  (disponibles.length ? 'Facturas disponibles para esta empresa: ' + disponibles.join(', ') + '.\n\n' : '') +
+                  'Revise la serie y el número, o emita primero la factura en Factura Electrónica > Emitir Factura.');
+        }
+
+        // Monto a letras: 277.30 -> "DOSCIENTOS SETENTA Y SIETE Y 30/100 SOLES"
+        function numeroALetrasSoles(monto) {
+            const U = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE', 'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE',
+                'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE', 'VEINTE', 'VEINTIUNO', 'VEINTIDOS', 'VEINTITRES', 'VEINTICUATRO', 'VEINTICINCO',
+                'VEINTISEIS', 'VEINTISIETE', 'VEINTIOCHO', 'VEINTINUEVE'];
+            const D = ['', '', '', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+            const C = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+            function m1000(n) {
+                if (n === 0) return ''; if (n === 100) return 'CIEN';
+                const c = Math.floor(n / 100), r = n % 100;
+                let s = C[c];
+                if (r) s = (s ? s + ' ' : '') + (r < 30 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ' Y ' + U[r % 10] : ''));
+                return s;
+            }
+            function ent(n) {
+                if (n === 0) return 'CERO';
+                const mi = Math.floor(n / 1000000), mil = Math.floor((n % 1000000) / 1000), r = n % 1000, o = [];
+                if (mi) o.push(mi === 1 ? 'UN MILLON' : m1000(mi).replace(/UNO$/, 'UN') + ' MILLONES');
+                if (mil) o.push(mil === 1 ? 'MIL' : m1000(mil).replace(/UNO$/, 'UN') + ' MIL');
+                if (r) o.push(m1000(r));
+                return o.join(' ');
+            }
+            const v = Math.round((parseFloat(monto) || 0) * 100) / 100, e = Math.floor(Math.abs(v)), ce = Math.round((Math.abs(v) - e) * 100);
+            return ent(e) + ' Y ' + String(ce).padStart(2, '0') + '/100 SOLES';
+        }
+
+        async function verificarFacturaNota() {
             const correlativoRaw = document.getElementById('nota-correlativo').value.trim();
             if (!correlativoRaw) {
                 alert('Debe ingresar el número de correlativo de la factura.');
                 return;
             }
-            
+            await cargarFacturasParaNota();
+            if (!facturaParaNota(correlativoRaw)) { avisoFacturaNoEncontrada(correlativoRaw); return; }
+
             const num = parseInt(correlativoRaw, 10);
             const numStr = String(num);
-            let invoiceData = mockInvoices[numStr];
+            let invoiceData = facturaParaNota(correlativoRaw);
             
             if (!invoiceData) {
                 invoiceData = {
@@ -5230,14 +5375,16 @@
             document.getElementById('ver-factura-modal').style.display = 'none';
         }
 
-        function verificarNuevaFacturaNota() {
+        async function verificarNuevaFacturaNota() {
             const correlativo = document.getElementById('nota-nueva-correlativo').value.trim();
             if (!correlativo) {
                 alert('Debe ingresar el número de correlativo de la nueva factura.');
                 return;
             }
-            
-            let invoiceData = mockInvoices[correlativo];
+            await cargarFacturasParaNota();
+            if (!facturaParaNota(correlativo, 'nota-nueva-series')) { avisoFacturaNoEncontrada(correlativo, 'nota-nueva-series'); return; }
+
+            let invoiceData = facturaParaNota(correlativo, 'nota-nueva-series');
             if (!invoiceData) {
                 invoiceData = {
                     cliente: "NUEVO CLIENTE S.A.C.",
@@ -5352,16 +5499,23 @@
         let notaCuotas = [];
         let currentEditingCuotaIndex = -1;
 
-        function continuarNotaCredito() {
+        async function continuarNotaCredito() {
             const correlativo = document.getElementById('nota-correlativo').value.trim();
             const motivo = document.getElementById('nota-motivo').value.trim();
             const tipo = document.getElementById('nota-tipo').value;
-            
+
             if (!correlativo) {
                 alert('Debe ingresar el número correlativo de la factura vinculada.');
                 return;
             }
-            
+            // La factura debe existir para la empresa activa (emitida o del caso)
+            await cargarFacturasParaNota();
+            if (!facturaParaNota(correlativo)) { avisoFacturaNoEncontrada(correlativo); return; }
+            if (tipo === "2") {
+                const nc = document.getElementById('nota-nueva-correlativo').value.trim();
+                if (nc && !facturaParaNota(nc, 'nota-nueva-series')) { avisoFacturaNoEncontrada(nc, 'nota-nueva-series'); return; }
+            }
+
             if (tipo === "2") {
                 const nuevaCorrelativo = document.getElementById('nota-nueva-correlativo').value.trim();
                 if (!nuevaCorrelativo) {
@@ -5445,7 +5599,7 @@
             
             const num = parseInt(correlativo, 10);
             const numStr = String(num);
-            let invoiceData = mockInvoices[numStr];
+            let invoiceData = facturaParaNota(correlativo);
             
             if (!invoiceData) {
                 invoiceData = {
@@ -5475,7 +5629,7 @@
             
             // Populate selection view header
             document.getElementById('selection-nota-tipo-text').textContent = notaTipoTitulos[tipo] || "CORRECCIÓN POR ERROR EN LA DESCRIPCIÓN";
-            document.getElementById('selection-nota-factura-text').textContent = `E001 - ${correlativo}`;
+            document.getElementById('selection-nota-factura-text').textContent = `${serieNota()} - ${correlativo}`;
             document.getElementById('selection-nota-motivo-text').textContent = motivo;
             
             renderSelectionNotaItems();
@@ -5812,7 +5966,7 @@
             
             const num = parseInt(correlativo, 10);
             const numStr = String(num);
-            let invoiceData = mockInvoices[numStr];
+            let invoiceData = facturaParaNota(correlativo);
             
             if (!invoiceData) {
                 invoiceData = {
@@ -5830,9 +5984,9 @@
                 };
             }
             
-            document.getElementById('ajustes-nota-factura-text').textContent = `E001 - ${correlativo}`;
+            document.getElementById('ajustes-nota-factura-text').textContent = `${serieNota()} - ${correlativo}`;
             document.getElementById('ajustes-nota-motivo-text').textContent = motivo;
-            document.getElementById('ajustes-info-factura').textContent = `E001 - ${correlativo}`;
+            document.getElementById('ajustes-info-factura').textContent = `${serieNota()} - ${correlativo}`;
             
             const totalVal = parseFloat(invoiceData.total.replace(/[^\d.]/g, '')) || 0;
             document.getElementById('ajustes-monto-dice').value = totalVal.toFixed(2);
@@ -6010,7 +6164,7 @@
             
             const num = parseInt(correlativo, 10);
             const numStr = String(num);
-            let invoiceData = mockInvoices[numStr];
+            let invoiceData = facturaParaNota(correlativo);
             
             if (!invoiceData) {
                 invoiceData = {
@@ -6029,7 +6183,7 @@
             }
             
             document.getElementById('preview-nota-fecha-emision').textContent = fechaEmision;
-            document.getElementById('preview-nota-factura-vinculada').textContent = `E001 - ${correlativo}`;
+            document.getElementById('preview-nota-factura-vinculada').textContent = `${serieNota()} - ${correlativo}`;
             document.getElementById('preview-nota-cliente-nombre').textContent = invoiceData.cliente;
             document.getElementById('preview-nota-cliente-ruc').textContent = invoiceData.ruc;
             document.getElementById('preview-nota-motivo-texto').textContent = motivo;
@@ -6270,9 +6424,15 @@
             document.getElementById('notacredito-preview-container').style.display = 'none';
             document.getElementById('notacredito-final-container').style.display = 'block';
             
-            // Generate sequential/random credit note number in the form E001-X
-            const randomNum = Math.floor(Math.random() * 99) + 1;
-            const notaNum = `E001-${randomNum}`;
+            // Número correlativo de la nota en la misma serie de la factura que
+            // modifica (SEE - SOL), independiente del de las facturas.
+            const serieNC = serieNota();
+            const rucNC = (window.currentEmisorData && window.currentEmisorData.ruc) || 'anon';
+            const keyNC = 'taxlab_correlativo_nc_' + rucNC + '_' + serieNC;
+            const stNC = almacenFacturas();
+            let nNC = (parseInt(stNC.getItem(keyNC) || '0', 10) || 0) + 1;
+            try { stNC.setItem(keyNC, String(nNC)); } catch (e) {}
+            const notaNum = serieNC + '-' + String(nNC).padStart(8, '0');
             document.getElementById('final-nota-document-number').textContent = notaNum;
             
             // Copy fields from preview
@@ -6327,7 +6487,19 @@
                 });
             }
             
-            alert('Simulación: Nota de Crédito emitida con éxito.');
+            // Registro para "Mis comprobantes" (gatito ayudante) y botón de descarga
+            if (window.TaxComp) {
+                TaxComp.registrar({
+                    tipo: 'Nota de Crédito', numero: notaNum,
+                    fecha: document.getElementById('final-nota-fecha-emision').textContent.trim(),
+                    receptor: document.getElementById('final-nota-cliente-nombre').textContent.trim(),
+                    receptor_doc: document.getElementById('final-nota-cliente-ruc').textContent.trim(),
+                    total: document.getElementById('final-nota-total').textContent.trim(),
+                    referencia: document.getElementById('final-nota-factura-vinculada').textContent.trim()
+                }, document.getElementById('notacredito-final-container'));
+            }
+            mostrarToastExito('¡Nota de crédito emitida!', 'Comprobante ' + notaNum + ' que modifica la factura ' +
+                document.getElementById('final-nota-factura-vinculada').textContent.trim() + '.');
         }
 
         function descargarXMLNota() {
@@ -6357,25 +6529,12 @@
             URL.revokeObjectURL(url);
         }
 
+        // PDF real de la nota de crédito emitida (antes descargaba un .txt con
+        // extensión .pdf y el RUC de EMPRESA DEMO)
         function descargarPDFNota() {
-            const num = document.getElementById('final-nota-document-number').textContent;
-            const text = `NOTA DE CRÉDITO ELECTRÓNICA\n` +
-                         `RUC: 20123456789\n` +
-                         `Número: ${num}\n` +
-                         `Fecha: ${document.getElementById('final-nota-fecha-emision').textContent}\n\n` +
-                         `Modifica: ${document.getElementById('final-nota-factura-vinculada').textContent}\n` +
-                         `Cliente: ${document.getElementById('final-nota-cliente-nombre').textContent}\n` +
-                         `RUC Cliente: ${document.getElementById('final-nota-cliente-ruc').textContent}\n` +
-                         `Motivo: ${document.getElementById('final-nota-motivo-texto').textContent}\n\n` +
-                         `Total: ${document.getElementById('final-nota-total').textContent}`;
-                         
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `NotaCredito_${num}.pdf`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const num = document.getElementById('final-nota-document-number').textContent.trim();
+            if (window.TaxComp) TaxComp.descargarNodo(document.getElementById('notacredito-final-container'), 'NotaCredito_' + num);
+            else window.print();
         }
 
         // Configuración de Supabase
@@ -6419,7 +6578,7 @@
                 try {
                     const { data } = await supabaseClient
                         .from('empresas_simulador')
-                        .select('razon_social, nombre_comercial, direccion_fiscal, distrito, provincia, departamento, serie_factura')
+                        .select('razon_social, nombre_comercial, direccion_fiscal, distrito, provincia, departamento, serie_factura, serie_boleta')
                         .eq('ruc', ruc).maybeSingle();
                     if (data) {
                         const partes = [data.direccion_fiscal, data.distrito, data.provincia, data.departamento]
@@ -6431,6 +6590,7 @@
                         if (data.nombre_comercial) window.currentEmisorData.nombre_comercial = data.nombre_comercial;
                         if (data.razon_social) window.currentEmisorData.razon_social = data.razon_social;
                         if (data.serie_factura) window.currentEmisorData.serie_factura = data.serie_factura;
+                        window.currentEmisorData.serie_boleta = (data.serie_boleta && /^B/i.test(data.serie_boleta)) ? data.serie_boleta : 'B001';
                     }
                 } catch (e) { console.warn('No se pudo cargar el emisor:', e); }
             }
@@ -6506,7 +6666,17 @@
                     receptor: g('final-señor'),
                     total: g('final-total-importe'),
                     emisor: (window.currentEmisorData && window.currentEmisorData.razon_social) || '',
-                    emisor_ruc: (window.currentEmisorData && window.currentEmisorData.ruc) || ''
+                    emisor_ruc: (window.currentEmisorData && window.currentEmisorData.ruc) || '',
+                    // Datos completos para la nota de crédito / débito que la modifique
+                    direccion: g('final-direccion'),
+                    forma_pago: g('final-forma-pago'),
+                    moneda: g('final-moneda'),
+                    subtotal: g('final-total-valorventa'),
+                    igv: g('final-total-igv'),
+                    items: (invoiceItems || []).map(function (it) {
+                        return { cantidad: Number(it.cantidad || 0).toFixed(2), descripcion: it.descripcion || '', codigo: it.codigo || '',
+                                 unidad: it.unidadMedida || '', valorUnitario: Number(it.valorUnitario || 0).toFixed(2) };
+                    })
                 };
                 const st = almacenFacturas();
                 const arr = JSON.parse(st.getItem('taxlab_facturas') || sessionStorage.getItem('taxlab_facturas') || '[]');
@@ -8152,6 +8322,15 @@
             }
             
             registrarFacturaEnSesion();
+            if (window.TaxComp) {
+                TaxComp.registrar({
+                    tipo: 'Factura', numero: (window.__ultimaFactura && window.__ultimaFactura.id) || '',
+                    fecha: document.getElementById('final-fecha').textContent.trim(),
+                    receptor: document.getElementById('final-señor').textContent.trim(),
+                    receptor_doc: 'RUC ' + document.getElementById('final-ruc').textContent.trim(),
+                    total: document.getElementById('final-total-importe').textContent.trim()
+                }, document.getElementById('factura-step-5'));
+            }
             mostrarToastExito('¡Factura emitida con éxito!',
                 'Comprobante ' + ((window.__ultimaFactura && window.__ultimaFactura.id) || '') + ' generado en la simulación.');
         }
@@ -8779,8 +8958,14 @@
                 }
             }
 
-            const boletaNum = String(Math.floor(Math.random() * 899999) + 100000);
-            document.getElementById('final-boleta-number').innerText = `B001-00${boletaNum}`;
+            // Correlativo persistente por empresa y serie (antes era un número al azar)
+            const serieBol = (window.currentEmisorData && window.currentEmisorData.serie_boleta) || 'B001';
+            const keyBol = 'taxlab_correlativo_' + ((window.currentEmisorData && window.currentEmisorData.ruc) || 'anon') + '_' + serieBol;
+            const stBol = almacenFacturas();
+            const nBol = (parseInt(stBol.getItem(keyBol) || '0', 10) || 0) + 1;
+            try { stBol.setItem(keyBol, String(nBol)); } catch (e) {}
+            const boletaId = serieBol + '-' + String(nBol).padStart(8, '0');
+            document.getElementById('final-boleta-number').innerText = boletaId;
             
             const tbody = document.getElementById('boleta-final-items-tbody');
             let html = '';
@@ -8828,7 +9013,15 @@
             document.getElementById('boleta-step-3').style.display = 'none';
             document.getElementById('boleta-step-4').style.display = 'block';
             
-            alert('Simulación: Boleta de venta emitida con éxito.');
+            if (window.TaxComp) {
+                TaxComp.registrar({
+                    tipo: 'Boleta de Venta', numero: boletaId,
+                    fecha: document.getElementById('boleta-final-fecha').innerText.trim(),
+                    receptor: currentPersonaData.nombre || '', receptor_doc: docLabel,
+                    total: document.getElementById('boleta-final-total-importe').innerText.trim()
+                }, document.getElementById('boleta-step-4'));
+            }
+            mostrarToastExito('¡Boleta emitida con éxito!', 'Comprobante ' + boletaId + ' generado en la simulación.');
             showSimulationSuccessModal();
         }
 
@@ -9135,6 +9328,7 @@
     </footer>
     <script src="gre_emision.js"></script>
     <script src="rxh.js"></script>
+    <script src="mis_comprobantes.js"></script>
     <script src="survey.js"></script>
 </body>
 </html>
