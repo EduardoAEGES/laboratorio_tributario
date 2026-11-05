@@ -423,7 +423,6 @@
         s.numDoc = $('rxh-num-doc').value.trim();
         s.nombre = $('rxh-nombre').value.trim().toUpperCase();
         if (!s.validado || !s.nombre) { mensaje('rxh-msg1', 'err', 'Primero valide el documento del usuario.'); return; }
-        if (s.tipoDoc !== '6') s.retencion = 'no';
         paso2();
     }
 
@@ -457,7 +456,7 @@
             '</div></div>' +
             '<div class="rxh-box" id="rxh-box-ret"><div class="rxh-sec">Retención del Impuesto a la Renta:</div>' +
             '<div class="rxh-radio-list" style="padding:4px 10px;font-size:12px;">' +
-            (conRuc ? radio('rxh-ret', 'si', s.retencion, 'Sí') : '') + radio('rxh-ret', 'no', s.retencion, 'No') +
+            radio('rxh-ret', 'si', s.retencion, 'Sí') + radio('rxh-ret', 'no', s.retencion, 'No') +
             '<div id="rxh-msg-ret"></div></div></div>' +
             (s.forma === 'contado'
                 ? '<div class="rxh-box" id="rxh-box-pago"><div class="rxh-sec">El pago total del servicio está siendo efectuado al momento de la emisión de este comprobante:</div>' +
@@ -523,25 +522,28 @@
         var ret = s.retencion === 'si' ? r2(m * TASA_RETENCION) : 0;
         $('rxh-retencion').value = fmt(ret);
         $('rxh-neto').value = fmt(m - ret);
-        // Ayuda: regla de retención de cuarta categoría
-        var aviso = '';
+        // Sugerencia según la regla de retención de cuarta categoría. Es solo
+        // una ayuda: el alumno elige Sí o No libremente y puede emitir igual.
+        var sug = '';
         var cons = s.fecha ? constancia1609(emisor.ruc, Number(s.fecha.slice(0, 4))) : null;
-        if (!gratis && s.tipoDoc === '6' && s.moneda === 'PEN') {
-            if (cons && s.retencion === 'si') {
-                aviso = 'Usted tiene constancia de suspensión de retenciones del ' + cons.anio + ' (Formulario 1609, N° ' + esc(cons.numero) +
-                    '): si se la entregó al usuario, <b>no corresponde retener</b>. Marque "No".';
-            } else if (cons && m > TOPE_RETENCION) {
-                aviso = 'Correcto: el recibo supera S/ 1,500.00, pero usted tiene constancia de suspensión de retenciones del ' + cons.anio +
-                    ' (Formulario 1609, N° ' + esc(cons.numero) + '), así que el usuario no le retiene el 8 %.';
-            } else if (m > TOPE_RETENCION && s.retencion === 'no') {
-                aviso = 'El recibo supera S/ 1,500.00 y el usuario tiene RUC: si es agente de retención, corresponde <b>retener el 8 %</b>. ' +
-                    'Para que no le retengan, primero presente el <a href="#" onclick="RxH.ir(\'f1609\'); return false;">Formulario Virtual 1609</a> ' +
-                    '(suspensión de retenciones) y entregue la constancia al usuario.';
-            } else if (m > 0 && m <= TOPE_RETENCION && s.retencion === 'si') {
-                aviso = 'El recibo no supera S/ 1,500.00: en ese caso <b>no corresponde retención</b> del 8 %.';
+        var link1609 = '<a href="#" onclick="RxH.ir(\'f1609\'); return false;">Formulario Virtual 1609</a>';
+        if (!gratis && m > 0 && s.moneda === 'PEN') {
+            if (s.tipoDoc !== '6') {
+                sug = s.retencion === 'si'
+                    ? 'El usuario no tiene RUC (persona sin negocio): normalmente no es agente de retención, por lo que lo usual es <b>No</b> retener.'
+                    : 'El usuario no tiene RUC: normalmente no es agente de retención, así que <b>No</b> retener es lo usual.';
+            } else if (cons) {
+                sug = 'Usted tiene constancia de suspensión de retenciones del ' + cons.anio + ' (Formulario 1609, N° ' + esc(cons.numero) +
+                    '): si se la entregó al usuario, lo que corresponde es <b>No</b> retener.';
+            } else if (m > TOPE_RETENCION) {
+                sug = 'El recibo supera S/ 1,500.00 y el usuario tiene RUC: si es agente de retención, lo que corresponde es <b>Sí</b> retener el 8 %. ' +
+                    'Para evitar la retención puede presentar antes el ' + link1609 + ' y entregar la constancia al usuario.';
+            } else {
+                sug = 'El recibo no supera S/ 1,500.00: lo que corresponde es <b>No</b> retener.';
             }
         }
-        mensaje('rxh-msg-ret', 'warn', aviso);
+        mensaje('rxh-msg-ret', 'info', sug ? '<i class="fas fa-lightbulb" style="color:#B45309;"></i> <b>Sugerencia:</b> ' + sug +
+            ' <span style="opacity:.8;">Usted decide: puede marcar Sí o No.</span>' : '');
     }
 
     function formatearMonto() {
