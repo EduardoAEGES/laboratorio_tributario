@@ -143,7 +143,7 @@
                                 <li class="has-submenu">
                                     <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> SEE - SOL</a>
                                     <ul class="submenu-list">
-                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
+                                        <li><a href="#" onclick="showEmitirRxH(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
                                         <li class="has-submenu">
                                             <a href="#" class="toggle-submenu"><i class="fas fa-caret-right"></i> Factura Electrónica</a>
                                             <ul class="submenu-list last-level">
@@ -397,7 +397,7 @@
                         <li class="has-submenu open">
                             <a href="#" class="menu-item-link" style="font-weight: bold;"><i class="fas fa-caret-down"></i> SEE - SOL</a>
                             <ul class="submenu-list-factura">
-                                <li><a href="#" class="menu-item-link" onclick="hideEmitirBoleta(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
+                                <li><a href="#" class="menu-item-link" onclick="hideEmitirBoleta(); showEmitirRxH(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
                                 <li class="has-submenu open">
                                     <a href="#" class="menu-item-link" style="font-weight: bold;"><i class="fas fa-caret-down"></i> Boleta de Venta Electrónica</a>
                                     <ul class="submenu-list-factura last-level-factura">
@@ -1100,7 +1100,7 @@
                         <li class="has-submenu open">
                             <a href="#" class="menu-item-link" style="font-weight: 600;"><i class="fas fa-caret-down"></i> SEE - SOL</a>
                             <ul class="submenu-list-factura">
-                                <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
+                                <li><a href="#" class="menu-item-link" onclick="hideEmitirFactura(); showEmitirRxH(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
                                 <li class="has-submenu open">
                                     <a href="#" class="menu-item-link" style="font-weight: 600;"><i class="fas fa-caret-down"></i> Factura Electrónica</a>
                                     <ul class="submenu-list-factura last-level-factura">
@@ -2893,7 +2893,7 @@
                         <li class="has-submenu open">
                             <a href="#" class="menu-item-link" style="font-weight: 600;"><i class="fas fa-caret-down"></i> SEE - SOL</a>
                             <ul class="submenu-list-factura">
-                                <li><a href="#" class="menu-item-link" onclick="hideEmitirNotaCredito(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
+                                <li><a href="#" class="menu-item-link" onclick="hideEmitirNotaCredito(); showEmitirRxH(); return false;"><i class="fas fa-caret-right"></i> Recibo por Honorarios Electrónicos</a></li>
                                 <li class="has-submenu open">
                                     <a href="#" class="menu-item-link" style="font-weight: 600;"><i class="fas fa-caret-down"></i> Factura Electrónica</a>
                                     <ul class="submenu-list-factura last-level-factura">
@@ -9064,6 +9064,7 @@
         <span style="display:flex; align-items:center; gap:5px;"><i class="fas fa-laptop-code" style="color:#00AEEF;"></i> Simulador de prueba | Elaborado por <strong style="color:#fff;">Equipo Académico de Contabilidad CERTUS</strong></span>
         <a href="https://www.sunat.gob.pe/portalanterior.html" target="_blank" style="color:#CCC; text-decoration:none;">Aprende en la página oficial de SUNAT</a>
     </footer>
+    <script src="rxh.js"></script>
     <script src="survey.js"></script>
 </body>
 </html>
