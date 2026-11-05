@@ -1,5 +1,5 @@
 -- =============================================================================
--- 72 · Prestadores de cuarta categoría (RUC 10) para emitir Recibos por Honorarios
+-- 73 · Prestadores de cuarta categoría (RUC 10) para emitir Recibos por Honorarios
 -- =============================================================================
 -- El Recibo por Honorarios Electrónico solo lo emite una persona natural con RUC
 -- (10...). Las empresas del simulador son RUC 20, así que se agregan los dos
