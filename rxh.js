@@ -166,7 +166,7 @@
         '#rxh-recibo .cab .izq .nom{font-size:14.5px;margin-bottom:10px;}',
         '#rxh-recibo .cab .izq p{margin:0 0 10px;}',
         '#rxh-recibo .cab .der{border:1.5px solid #4F81BD;padding:14px 18px;text-align:center;min-width:190px;align-self:flex-start;line-height:1.6;}',
-        '#rxh-recibo .cuerpo p{margin:0 0 11px;}',
+        '#rxh-recibo .cuerpo p,#rxh-recibo > p{margin:0 0 11px;line-height:1.45;}',
         '#rxh-recibo table.tot{margin:18px 0 6px auto;border-collapse:collapse;}',
         '#rxh-recibo table.tot td{padding:6px 10px;vertical-align:top;}',
         '#rxh-recibo table.tot td.v{text-align:right;min-width:110px;}',
@@ -205,6 +205,9 @@
             noImpl('Registrar Otros Ingresos de Cuarta Categoría') +
             noImpl('Revertir Recibo por Honorario Electrónico') +
             item('consultar', 'Consultas de Recibos emitidos') +
+            '</ul><h3>Otras declaraciones y solicitudes</h3><ul>' +
+            item('f1609', 'Form. 1609 Solicitud de Suspensión Retenciones 4ta Cat.') +
+            item('f1609-consulta', 'Consulta de Suspensión de Retenciones') +
             '</ul></div>';
     }
 
@@ -300,15 +303,18 @@
         };
     }
 
-    function pantallaNoPersona() {
+    function pantallaNoPersona(vista) {
         var act = empresaActiva();
-        pintar('emitir',
-            '<h2 class="rxh-title">Emisión del Recibo por Honorarios Electrónico</h2>' +
+        var es1609 = vista === 'f1609' || vista === 'f1609-consulta';
+        pintar(es1609 ? 'f1609' : 'emitir',
+            '<h2 class="rxh-title">' + (es1609 ? 'Suspensiones de 4ta Categoría - Formulario 1609' : 'Emisión del Recibo por Honorarios Electrónico') + '</h2>' +
             '<div class="rxh-msg err"><b>Esta opción es solo para personas naturales con RUC (rentas de cuarta categoría).</b><br>' +
             'Ingresaste con la Clave SOL de <b>' + esc(act.razon_social || 'una empresa') + '</b>' + (act.ruc ? ' (RUC ' + esc(act.ruc) + ')' : '') +
-            '. Una empresa no emite recibos por honorarios: los <b>recibe</b> de sus prestadores de servicios y, cuando le corresponde ' +
-            'retener el 8 %, declara esa retención en el PDT PLAME (Formulario 0601).</div>' +
-            '<div class="rxh-msg info">Para practicar la emisión, sal de la Clave SOL y vuelve a ingresar con el RUC de un prestador ' +
+            (es1609
+                ? '. La suspensión de retenciones la solicita el prestador del servicio, no la empresa que paga los honorarios.</div>'
+                : '. Una empresa no emite recibos por honorarios: los <b>recibe</b> de sus prestadores de servicios y, cuando le corresponde ' +
+                  'retener el 8 %, declara esa retención en el PDT PLAME (Formulario 0601).</div>') +
+            '<div class="rxh-msg info">Para practicar, sal de la Clave SOL y vuelve a ingresar con el RUC de un prestador ' +
             '(usuario <b>SIST</b>, clave <b>NORTON</b>):<br>' +
             '• <b>10457821634</b> · QUISPE FLORES ANA MARIA (asesoría contable)<br>' +
             '• <b>10428765391</b> · TORRES MAMANI LUIS ALBERTO (diseño del catálogo digital)</div>' +
@@ -519,10 +525,18 @@
         $('rxh-neto').value = fmt(m - ret);
         // Ayuda: regla de retención de cuarta categoría
         var aviso = '';
+        var cons = s.fecha ? constancia1609(emisor.ruc, Number(s.fecha.slice(0, 4))) : null;
         if (!gratis && s.tipoDoc === '6' && s.moneda === 'PEN') {
-            if (m > TOPE_RETENCION && s.retencion === 'no') {
-                aviso = 'El recibo supera S/ 1,500.00 y el usuario tiene RUC: si es agente de retención, corresponde <b>retener el 8 %</b>, ' +
-                    'salvo que usted le haya entregado la constancia de suspensión de retenciones (Formulario Virtual 1609).';
+            if (cons && s.retencion === 'si') {
+                aviso = 'Usted tiene constancia de suspensión de retenciones del ' + cons.anio + ' (Formulario 1609, N° ' + esc(cons.numero) +
+                    '): si se la entregó al usuario, <b>no corresponde retener</b>. Marque "No".';
+            } else if (cons && m > TOPE_RETENCION) {
+                aviso = 'Correcto: el recibo supera S/ 1,500.00, pero usted tiene constancia de suspensión de retenciones del ' + cons.anio +
+                    ' (Formulario 1609, N° ' + esc(cons.numero) + '), así que el usuario no le retiene el 8 %.';
+            } else if (m > TOPE_RETENCION && s.retencion === 'no') {
+                aviso = 'El recibo supera S/ 1,500.00 y el usuario tiene RUC: si es agente de retención, corresponde <b>retener el 8 %</b>. ' +
+                    'Para que no le retengan, primero presente el <a href="#" onclick="RxH.ir(\'f1609\'); return false;">Formulario Virtual 1609</a> ' +
+                    '(suspensión de retenciones) y entregue la constancia al usuario.';
             } else if (m > 0 && m <= TOPE_RETENCION && s.retencion === 'si') {
                 aviso = 'El recibo no supera S/ 1,500.00: en ese caso <b>no corresponde retención</b> del 8 %.';
             }
@@ -611,7 +625,7 @@
         var n = ultimo ? ultimo + 1 : (CORRELATIVO_INICIAL[emisor.ruc] || 1);
         mapa[emisor.ruc] = n;
         guardar(CLAVE_CORRELATIVO, mapa);
-        return 'E001-' + n;
+        return 'E001-' + String(n).padStart(3, '0');
     }
 
     function emitir() {
@@ -676,6 +690,172 @@
             ]));
     }
 
+    // ------------------------------------------------------------------ Formulario 1609
+    // Solicitud de suspensión de retenciones y/o pagos a cuenta de 4ta categoría.
+    // Procede si los ingresos que proyecta percibir en el año no superan:
+    //   · solo rentas de 4ta ............ 8.75 UIT  (2026: S/ 48,125)
+    //   · rentas de 4ta + 5ta ........... 7 UIT     (2026: S/ 38,500)
+    // (mismo criterio que publica SUNAT cada año: 2025 = S/ 46,813 y S/ 37,450).
+    // En el simulador la constancia vale para todo el ejercicio, para que los
+    // recibos de enero del caso puedan emitirse sin retención aunque la
+    // solicitud se haga en clase meses después.
+    var CLAVE_1609 = 'sire_f1609_constancias';
+    var UIT = { 2025: 5350, 2026: 5500 };
+    var f1609 = null;
+
+    function uitDe(anio) { return UIT[anio] || UIT[Math.max.apply(null, Object.keys(UIT).map(Number))]; }
+
+    function limites1609(anio) {
+        var u = uitDe(anio);
+        return { uit: u, solo4ta: r2(u * 8.75), con5ta: r2(u * 7) };
+    }
+
+    function constancia1609(ruc, anio) {
+        var lista = leer(CLAVE_1609, []) || [];
+        return lista.filter(function (c) { return String(c.ruc) === String(ruc) && Number(c.anio) === Number(anio) && c.procede; }).pop() || null;
+    }
+
+    function montoDe(id) {
+        var n = parseFloat(String(($(id) || {}).value || '').replace(/,/g, ''));
+        return isNaN(n) ? NaN : n;
+    }
+
+    function f1609Cabecera() {
+        return '<h2 class="rxh-title" style="text-align:center;">Suspensiones de 4ta Categoría-Formulario 1609</h2>' +
+            '<div class="rxh-box"><div class="rxh-sec" style="text-align:center;">Sugerimos leer las instrucciones antes de elaborar su ' +
+            '<a href="#" onclick="RxH.instrucciones1609(); return false;">solicitud</a></div>' +
+            '<div id="rxh-1609-instr" style="display:none;font-size:12px;padding:8px 12px;line-height:1.5;">' +
+            'Puede solicitar la suspensión de las retenciones (8 %) y pagos a cuenta del Impuesto a la Renta de cuarta categoría si ' +
+            'los ingresos que proyecta percibir en el año no superan <b>S/ ' + fmt(limites1609(new Date().getFullYear()).solo4ta) +
+            '</b> (solo cuarta categoría) o <b>S/ ' + fmt(limites1609(new Date().getFullYear()).con5ta) + '</b> (si además percibe rentas de quinta ' +
+            'categoría). Si procede, entregue la constancia a quien le paga los honorarios: ya no le retendrá el 8 %.</div>';
+    }
+
+    function f1609Paso1() {
+        var anio = new Date().getFullYear();
+        var previa = constancia1609(emisor.ruc, anio);
+        f1609 = f1609 && f1609.ruc === emisor.ruc ? f1609 : { ruc: emisor.ruc, ing4ta: '', ing5ta: '', inicio: hoyISO() };
+        pintar('f1609', f1609Cabecera() +
+            (previa ? '<div class="rxh-msg info" style="margin:8px;">Ya tiene una constancia de suspensión del ejercicio ' + anio +
+                ' (N° ' + esc(previa.numero) + '). Si presenta una nueva solicitud, la reemplaza.</div>' : '') +
+            '<table class="factura-form-table">' +
+            '<tr><td class="question-cell">Monto total de ingresos que proyecta percibir por rentas de 4ta durante el presente año:</td>' +
+            '<td class="separator-cell"></td><td class="control-cell"><input type="text" id="rxh-1609-4ta" class="factura-input-text rxh-num" inputmode="decimal" value="' + esc(f1609.ing4ta) + '"></td></tr>' +
+            '<tr><td class="question-cell">Monto total de ingresos que proyecta percibir por rentas de 5ta durante el presente año:</td>' +
+            '<td class="separator-cell"></td><td class="control-cell"><input type="text" id="rxh-1609-5ta" class="factura-input-text rxh-num" inputmode="decimal" value="' + esc(f1609.ing5ta) + '"></td></tr>' +
+            '</table><div id="rxh-1609-msg" style="padding:0 8px;"></div></div>' +
+            botones([
+                { id: 'rxh-1609-ok', fn: 'RxH.aceptar1609a()', ic: 'fa-check-circle', col: '#006699', t: 'Aceptar' },
+                { id: 'rxh-1609-limp', fn: 'RxH.limpiar1609a()', ic: 'fa-eraser', col: '#006699', t: 'Limpiar' },
+                { id: 'rxh-1609-reg', fn: 'RxH.salir()', ic: 'fa-arrow-alt-circle-left', col: '#006699', t: 'Regresar' }
+            ]));
+        var i4 = $('rxh-1609-4ta'); if (i4) i4.focus();
+    }
+
+    function aceptar1609a() {
+        var m4 = montoDe('rxh-1609-4ta'), m5 = montoDe('rxh-1609-5ta');
+        if (($('rxh-1609-5ta').value || '').trim() === '') m5 = 0;
+        var err = [];
+        if (isNaN(m4) || m4 <= 0) err.push('Ingrese el monto de ingresos por rentas de 4ta que proyecta percibir en el año (mayor que cero).');
+        if (isNaN(m5) || m5 < 0) err.push('El monto de rentas de 5ta debe ser un número; si no percibe rentas de 5ta, déjelo vacío o en 0.');
+        if (err.length) { mensaje('rxh-1609-msg', 'err', err.join('<br>')); return; }
+        f1609.ing4ta = fmt(m4); f1609.ing5ta = fmt(m5);
+        f1609.m4 = r2(m4); f1609.m5 = r2(m5);
+        f1609Paso2();
+    }
+
+    function f1609Paso2() {
+        var anio = new Date().getFullYear();
+        pintar('f1609', f1609Cabecera() +
+            '<table class="factura-form-table">' +
+            '<tr><td class="question-cell">Fecha en que comienza a percibir ingresos por rentas de 4ta (dd/mm/aaaa):</td>' +
+            '<td class="separator-cell"></td><td class="control-cell"><input type="date" id="rxh-1609-inicio" class="factura-input-text" ' +
+            'min="' + anio + '-01-01" max="' + anio + '-12-31" value="' + esc(f1609.inicio) + '"></td></tr>' +
+            '<tr><td class="question-cell">Fecha actual:</td><td class="separator-cell"></td><td class="control-cell">' + fechaDMY(hoyISO()) + '</td></tr>' +
+            '</table><div id="rxh-1609-msg" style="padding:0 8px;"></div></div>' +
+            botones([
+                { id: 'rxh-1609-ok2', fn: 'RxH.aceptar1609b()', ic: 'fa-check-circle', col: '#006699', t: 'Aceptar' },
+                { id: 'rxh-1609-limp2', fn: 'RxH.limpiar1609b()', ic: 'fa-eraser', col: '#006699', t: 'Limpiar' },
+                { id: 'rxh-1609-reg2', fn: 'RxH.f1609Paso1()', ic: 'fa-arrow-alt-circle-left', col: '#006699', t: 'Regresar' }
+            ]));
+    }
+
+    function aceptar1609b() {
+        var anio = new Date().getFullYear();
+        var ini = $('rxh-1609-inicio').value;
+        if (!ini) { mensaje('rxh-1609-msg', 'err', 'Indique la fecha en que comienza a percibir ingresos de 4ta categoría.'); return; }
+        if (ini.slice(0, 4) !== String(anio)) { mensaje('rxh-1609-msg', 'err', 'La fecha debe estar dentro del presente año (' + anio + ').'); return; }
+        f1609.inicio = ini;
+        var lim = limites1609(anio);
+        var total = r2(f1609.m4 + f1609.m5);
+        var tope = f1609.m5 > 0 ? lim.con5ta : lim.solo4ta;
+        var procede = total <= tope;
+        var reg = {
+            ruc: emisor.ruc, nombre: emisor.nombre, anio: anio, ingreso4ta: f1609.m4, ingreso5ta: f1609.m5,
+            total: total, tope: tope, uit: lim.uit, inicio: ini, presentado: hoyISO(), procede: procede,
+            numero: String(Date.now()).slice(-9)
+        };
+        // Una solicitud aceptada reemplaza a las anteriores del año; una que no
+        // procede queda registrada pero no anula una constancia ya aceptada.
+        var lista = leer(CLAVE_1609, []) || [];
+        if (procede) lista = lista.filter(function (c) { return !(String(c.ruc) === String(emisor.ruc) && Number(c.anio) === anio); });
+        lista.push(reg);
+        guardar(CLAVE_1609, lista);
+        f1609 = null;
+        f1609Resultado(reg);
+    }
+
+    function htmlConstancia(c) {
+        var base = c.ingreso5ta > 0 ? 'rentas de 4ta y 5ta categoría (7 UIT)' : 'solo rentas de 4ta categoría (8.75 UIT)';
+        return '<div id="rxh-recibo"><div style="text-align:center;font-size:15px;margin-bottom:14px;"><b>CONSTANCIA DE ' +
+            (c.procede ? 'AUTORIZACIÓN DE SUSPENSIÓN DE RETENCIONES Y/O PAGOS A CUENTA' : 'SOLICITUD DE SUSPENSIÓN NO PROCEDENTE') +
+            '</b><br>Impuesto a la Renta - Cuarta Categoría · Formulario Virtual 1609</div>' +
+            '<p>Número de orden: <b>' + esc(c.numero) + '</b></p>' +
+            '<p>RUC: <b>' + esc(c.ruc) + '</b> · Apellidos y nombres: <b>' + esc(c.nombre) + '</b></p>' +
+            '<p>Ejercicio: <b>' + c.anio + '</b> · Fecha de presentación: ' + fechaDMY(c.presentado) + '</p>' +
+            '<p>Fecha en que comienza a percibir rentas de 4ta: ' + fechaDMY(c.inicio) + '</p>' +
+            '<table class="tot" style="margin-left:0;">' +
+            '<tr><td>Ingresos proyectados de 4ta categoría</td><td>:</td><td class="v">S/ ' + fmt(c.ingreso4ta) + '</td></tr>' +
+            '<tr><td>Ingresos proyectados de 5ta categoría</td><td>:</td><td class="v">S/ ' + fmt(c.ingreso5ta) + '</td></tr>' +
+            '<tr><td><b>Total proyectado</b></td><td>:</td><td class="v"><b>S/ ' + fmt(c.total) + '</b></td></tr>' +
+            '<tr><td>Límite para ' + base + ', UIT S/ ' + fmt(c.uit) + '</td><td>:</td><td class="v">S/ ' + fmt(c.tope) + '</td></tr></table>' +
+            (c.procede
+                ? '<p style="margin-top:12px;">Se autoriza la suspensión de las retenciones y/o pagos a cuenta del Impuesto a la Renta de cuarta ' +
+                  'categoría durante el ejercicio ' + c.anio + '. Entregue esta constancia a quien le paga los honorarios: <b>no deberá retenerle el 8 %</b>.</p>'
+                : '<p style="margin-top:12px;">No procede la suspensión: sus ingresos proyectados superan el límite. Quien le pague honorarios ' +
+                  'por más de S/ 1,500.00 deberá retenerle el 8 %.</p>') +
+            '<div class="valido">Constancia generada en el SIMULADOR SUNAT (TAXLAB 360). Sin valor tributario real.</div></div>';
+    }
+
+    function f1609Resultado(c) {
+        pintar('f1609',
+            '<h2 class="rxh-title" style="text-align:center;">Suspensiones de 4ta Categoría-Formulario 1609</h2>' +
+            '<div class="rxh-msg ' + (c.procede ? 'info' : 'err') + '" style="text-align:center;font-size:13px;"><b>' +
+            (c.procede ? 'Su solicitud fue aceptada.' : 'Su solicitud no procede.') + '</b> ' +
+            (c.procede ? 'Ya puede emitir sus recibos por honorarios del ' + c.anio + ' sin retención.'
+                       : 'El total proyectado (S/ ' + fmt(c.total) + ') supera el límite de S/ ' + fmt(c.tope) + '.' +
+                         (constancia1609(c.ruc, c.anio) ? ' Su constancia anterior del ' + c.anio + ' sigue vigente.' : '')) + '</div>' +
+            htmlConstancia(c) +
+            botones([
+                { id: 'rxh-1609-imp', fn: 'window.print()', ic: 'fa-print', col: '#006699', t: 'Imprimir' },
+                { id: 'rxh-1609-rhe', fn: 'RxH.ir(\'emitir\')', ic: 'fa-file-invoice', col: '#006699', t: 'Emitir Recibo por Honorarios' },
+                { id: 'rxh-1609-fin', fn: 'RxH.salir()', ic: 'fa-home', col: '#006699', t: 'Ir al inicio' }
+            ]));
+    }
+
+    function f1609Consulta() {
+        var lista = (leer(CLAVE_1609, []) || []).filter(function (c) { return String(c.ruc) === String(emisor.ruc); });
+        if (!lista.length) {
+            return pintar('f1609-consulta',
+                '<h2 class="rxh-title">Consulta de Suspensión de Retenciones de 4ta Categoría</h2>' +
+                '<div class="rxh-msg info">No ha presentado el Formulario Virtual 1609 con este RUC.</div>' +
+                botones([{ id: 'rxh-1609-nueva', fn: 'RxH.ir(\'f1609\')', ic: 'fa-plus-circle', col: '#006699', t: 'Presentar Formulario 1609' }]));
+        }
+        // Se muestra la constancia vigente del año; si no hay, la última solicitud
+        f1609Resultado(constancia1609(emisor.ruc, new Date().getFullYear()) || lista[lista.length - 1]);
+        $('rxh-sidebar').innerHTML = menuLateral('f1609-consulta');
+    }
+
     // ------------------------------------------------------------------ API
     async function abrir(vista) {
         asegurarVista();
@@ -687,8 +867,10 @@
         $('rxh-wrapper').style.display = 'block';
         $('rxh-main').innerHTML = '<p style="padding:20px;">Cargando...</p>';
         emisor = await cargarEmisor();
-        if (!/^1[057]\d{9}$/.test(String(emisor.ruc || ''))) return pantallaNoPersona();
+        if (!/^1[057]\d{9}$/.test(String(emisor.ruc || ''))) return pantallaNoPersona(vista);
         if (vista === 'consultar') return consultar();
+        if (vista === 'f1609') return f1609Paso1();
+        if (vista === 'f1609-consulta') return f1609Consulta();
         estado = nuevoEstado();
         paso1();
     }
@@ -728,6 +910,13 @@
         anterior3: function () { paso2(); },
         emitir: emitir,
         ver: ver,
+        f1609Paso1: f1609Paso1,
+        aceptar1609a: aceptar1609a,
+        aceptar1609b: aceptar1609b,
+        limpiar1609a: function () { $('rxh-1609-4ta').value = ''; $('rxh-1609-5ta').value = ''; mensaje('rxh-1609-msg', '', ''); },
+        limpiar1609b: function () { $('rxh-1609-inicio').value = ''; mensaje('rxh-1609-msg', '', ''); },
+        instrucciones1609: function () { var d = $('rxh-1609-instr'); if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none'; },
+        _limites1609: limites1609,
         // expuesto para pruebas
         _enLetras: enLetras
     };
@@ -779,7 +968,10 @@
         var col2 = [
             rama('Sistema Integrado de Registros Electronicos', [hoja('Registros Electronicos')]),
             rama('Mis declaraciones informativas', [hoja('Declaraciones informativas')]),
-            rama('Otras declaraciones y solicitudes', [hoja('Form. 1609 Solicitud de Suspensión Retenciones 4ta Cat.')]),
+            rama('Otras declaraciones y solicitudes', [
+                hoja('Form. 1609 Solicitud de Suspensión Retenciones 4ta Cat.', "RxH.ir('f1609'); return false;"),
+                hoja('Consulta de Suspensión de Retenciones 4ta Cat.', "RxH.ir('f1609-consulta'); return false;")
+            ], true),
             rama('Ventanilla de Atención al Operador', [hoja('Ventanilla')]),
             rama('Observaciones realizadas por SUNAT', [hoja('Consulta de observaciones')])
         ];
