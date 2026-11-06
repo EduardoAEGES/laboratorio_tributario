@@ -4885,6 +4885,14 @@
             document.getElementById('const-tributo').textContent = tributo;
             document.getElementById('const-monto').textContent = soles(total);
             document.getElementById('const-monto-pagado').textContent = soles(pagado);
+            // Para el acumulado del día (finalizar.js / reporte_dia.js)
+            let razon621 = '';
+            try { razon621 = (JSON.parse(sessionStorage.getItem('sunat_empresa') || '{}') || {}).razon_social || ''; } catch (e) {}
+            window.__decl621 = {
+                periodo: periodoSUNAT, total: total, ruc: rucDeclarante() || '', razon: razon621,
+                orden: document.getElementById('const-orden').textContent
+            };
+            if (window.HistorialSim) window.HistorialSim.registrarActual('FV 621');
         }
 
         function cambiarTabConstancia(tab) {

@@ -452,6 +452,25 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             SimStore.setItem('sire_resumen', JSON.stringify(resumen));
 
+            // Acumulado del día: un renglón por cada registro generado
+            if (window.ReporteDia) {
+                const f2 = v => (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const consts = (correlativo && window.SireConstancias) ? SireConstancias.listar().filter(c => c.correlativo === correlativo) : [];
+                [['rvie', 'RVIE', 'Registro de Ventas e Ingresos'], ['rce', 'RCE', 'Registro de Compras'],
+                 ['rvie_ap', 'RVIE', 'Ajustes posteriores del RVIE'], ['rce_ap', 'RCE', 'Ajustes posteriores del RCE']].forEach(function (d) {
+                    if (!estado[d[0]]) return;
+                    const esAp = /_ap$/.test(d[0]);
+                    const c = consts.find(x => x.registro === d[1] && (x.anotacion === 'Ajustes Posteriores') === esAp) || {};
+                    const tt = c.totales || {};
+                    const bi = d[1] === 'RCE' ? tt.biDg : tt.bi, igv = d[1] === 'RCE' ? tt.igvDg : tt.igv;
+                    window.ReporteDia.registrar({
+                        modulo: 'SIRE', accion: 'Generó ' + d[2] + ' ' + estado[d[0]],
+                        detalle: (c.cantidad != null ? c.cantidad + ' reg. | ' : '') + 'BI ' + f2(bi) + ' | IGV ' + f2(igv) + (correlativo ? ' | Const. ' + correlativo : ''),
+                        clave: 'SIRE|' + d[0] + '|' + estado[d[0]] + '|' + (correlativo || '')
+                    });
+                });
+            }
+
             SimStore.removeItem('sire_aceptado');
             mostrarVistaGeneracionVacia();
             window.scrollTo(0, 0);
@@ -605,6 +624,9 @@ document.addEventListener('DOMContentLoaded', function () {
         doc.setFontSize(9);
         doc.setTextColor(120, 120, 120);
         doc.text('Simulador de prueba | Elaborado por el Equipo Académico de Contabilidad CERTUS', 105, 285, { align: 'center' });
+
+        // Páginas siguientes: el acumulado de TODO lo realizado hoy
+        if (window.ReporteDia) window.ReporteDia.anexar(doc);
 
         const stamp = ahora.toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
         doc.save('Reporte_Simulacion_SIRE_' + stamp + '.pdf');

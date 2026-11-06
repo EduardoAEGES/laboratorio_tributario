@@ -14,6 +14,13 @@
         s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         document.head.appendChild(s);
     }
+    // Acumulado del día (reporte_dia.js), en la misma carpeta que este archivo
+    if (!window.ReporteDia && !document.querySelector('script[src*="reporte_dia.js"]')) {
+        const actual = document.currentScript && document.currentScript.src;
+        const r = document.createElement('script');
+        r.src = actual ? actual.replace(/finalizar\.js(\?.*)?$/, 'reporte_dia.js') : 'reporte_dia.js';
+        document.head.appendChild(r);
+    }
 
     // ------------------------------------------------------------------------
     // Historial de declaraciones del DIA (persistente entre páginas).
@@ -55,7 +62,15 @@
                 return a;
             },
             delDia: function () { return leer(); },
-            limpiarDia: function () { guardar([]); }
+            limpiarDia: function () { guardar([]); },
+            // Anota la declaración que se acaba de presentar en esta pantalla
+            // (se llama al mostrar la constancia, sin esperar a "Finalizar").
+            registrarActual: function (modulo) {
+                try {
+                    var ent = entradaActual(modulo);
+                    if (hayDeclaracion(ent)) this.registrar(ent);
+                } catch (err) { console.warn('Historial de declaraciones:', err); }
+            }
         };
     })();
 
@@ -69,7 +84,13 @@
         return 'Laboratorio Tributario';
     }
 
-    const val = id => { const el = document.getElementById(id); return el ? (el.value || el.textContent || '').trim() : ''; };
+    const val = id => {
+        const el = document.getElementById(id);
+        if (!el) return '';
+        // En un desplegable, el texto de la opción elegida (no el de todas)
+        if (el.tagName === 'SELECT') return el.value ? (el.options[el.selectedIndex].text || el.value).trim() : '';
+        return (el.value || el.textContent || '').trim();
+    };
 
     // Reúne las filas del reporte propias de cada módulo
     function datosDelModulo(modulo) {
@@ -217,6 +238,9 @@
         doc.setTextColor(120, 120, 120);
         doc.text('Simulador de prueba | Elaborado por el Equipo Académico de Contabilidad CERTUS', 105, 285, { align: 'center' });
 
+        // Páginas siguientes: el acumulado de TODO lo realizado hoy
+        if (window.ReporteDia) window.ReporteDia.anexar(doc);
+
         const modSlug = modulo.replace(/[^A-Za-z0-9]+/g, '_');
         const stamp = ahora.toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
         doc.save('Reporte_Simulacion_' + modSlug + '_' + stamp + '.pdf');
@@ -233,7 +257,7 @@
             ruc: emp.ruc || '', razon: emp.razon_social || '',
             fechaISO: ahora.toISOString(),
             fecha: ahora.toLocaleDateString('es-PE'),
-            hora: ahora.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
+            hora: String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0')
         };
         if (modulo === 'FV 621') {
             var d = window.__decl621 || {};
@@ -381,17 +405,22 @@
         e.preventDefault();
 
         var modulo = detectarModulo();
-        // Para las declaraciones (FV 621 / FV 710): registrar la del módulo
-        // actual y generar UN solo reporte con todo lo declarado hoy. Los demás
-        // módulos (comprobantes, ajustes, T-Registro) mantienen su reporte.
+        // Anotar lo hecho en esta pantalla y descargar UN solo PDF: la hoja del
+        // módulo + el acumulado de todo lo realizado hoy (comprobantes,
+        // declaraciones, SIRE y ajustes, de todas las empresas).
         if (modulo === 'FV 621' || modulo === 'FV 710') {
-            try {
-                var ent = entradaActual(modulo);
-                if (hayDeclaracion(ent)) window.HistorialSim.registrar(ent);
-            } catch (err) { console.warn('Historial de declaraciones:', err); }
-            if (!generarReporteConsolidado()) generarReportePDF(modulo);
-        } else {
-            generarReportePDF(modulo);
+            window.HistorialSim.registrarActual(modulo);
+        } else if (modulo === 'Ajustes Posteriores' && window.ReporteDia) {
+            var tb = document.querySelector('#tabla tbody');
+            var n = tb ? tb.rows.length : 0;
+            if (n) window.ReporteDia.registrar({
+                modulo: 'Ajustes Posteriores', accion: 'Archivo plano de ajustes',
+                detalle: n + ' comprobante(s) en el editor', ruc: val('txtRuc'), razon: val('txtDenom'),
+                clave: 'AJUSTES|' + val('txtRuc')
+            });
+        }
+        if (!generarReportePDF(modulo) && !generarReporteConsolidado()) {
+            alert('No se pudo generar el reporte en PDF. Revisa tu conexión a internet y vuelve a pulsar "Finalizar simulación".');
         }
 
         // Algunas pantallas (p. ej. el T-Registro) piden quedarse donde están

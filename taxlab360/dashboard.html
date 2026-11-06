@@ -4531,6 +4531,7 @@
                 impuesto: getVal('ir-113'),
                 deuda: getVal('dd-146')
             };
+            if (window.HistorialSim) window.HistorialSim.registrarActual('FV 710');   // acumulado del día
             mostrarConstancia710(record, tipo === 'nps');
         }
 

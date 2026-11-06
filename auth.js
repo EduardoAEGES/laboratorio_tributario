@@ -45,6 +45,13 @@ window.SimStore = (function () {
     }
 
     /** RUC de la empresa elegida en la Clave SOL (puerta 2) */
+    /** Empresa elegida con un RUC que no está en el simulador (ingreso temporal):
+     *  su avance queda solo en esta computadora, nunca va al servidor. */
+    function empresaTemporal() {
+        try { return !!(JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null') || {}).temporal; }
+        catch (err) { return false; }
+    }
+
     function rucActivo() {
         try {
             const e = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
@@ -99,7 +106,7 @@ window.SimStore = (function () {
     let _syncTimer = null;
 
     function syncToServer() {
-        if (!persistente('sire_') || !guardaAvance()) return;
+        if (!persistente('sire_') || !guardaAvance() || empresaTemporal()) return;
         if (typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
         clearTimeout(_syncTimer);
         _syncTimer = setTimeout(async function () {
@@ -123,7 +130,7 @@ window.SimStore = (function () {
     // Carga el avance del usuario para la empresa activa hacia localStorage.
     // Se llama al iniciar sesión y al elegir empresa en la Clave SOL.
     async function hydrate() {
-        if (!uid() || !guardaAvance() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
+        if (!uid() || !guardaAvance() || empresaTemporal() || typeof authSupabaseClient === 'undefined' || !authSupabaseClient) return;
         const ruc = rucActivo();
         if (!ruc) return;
         try {

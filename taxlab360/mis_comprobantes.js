@@ -292,10 +292,13 @@
             '<button type="button" class="tc-x" title="Cerrar">&times;</button></div>' +
             '<div class="tc-body" id="tc-body">' + cuerpo + '</div>' +
             '<div class="tc-pie">' + (lista.length ? '<button type="button" class="tc-btn tc-btn-pri" id="tc-todos"><i class="fas fa-file-pdf"></i> Descargar todos en un PDF</button>' : '') +
+            (window.ReporteDia ? '<button type="button" class="tc-btn" style="background:#1E395B;color:#fff;" id="tc-acumulado" ' +
+                'title="Resumen de todo lo realizado hoy: comprobantes, declaraciones y SIRE"><i class="fas fa-clipboard-list"></i> Acumulado del día</button>' : '') +
             '<button type="button" class="tc-btn" style="background:#eee;color:#333;" id="tc-cerrar">Cerrar</button></div></div>';
         document.body.appendChild(ov);
         ov.querySelector('.tc-x').onclick = cerrarPanel;
         $('tc-cerrar').onclick = cerrarPanel;
+        if ($('tc-acumulado')) $('tc-acumulado').onclick = function () { window.ReporteDia.descargar(); };
         if ($('tc-todos')) $('tc-todos').onclick = function () {
             pdfDe(lista.map(function (c) { return encabezado(c) + c.html; }), 'Comprobantes_del_dia_' + hoy(), this);
         };

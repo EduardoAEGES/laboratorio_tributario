@@ -157,6 +157,23 @@
       if (res.ok) sessionStorage.setItem('sunat_empresa', JSON.stringify(res.empresa));
       return res;
     },
+    /** Clave SOL con un RUC que NO está en el simulador: ingreso temporal.
+     *  No crea la empresa ni guarda avance en el servidor (fn_login_clave_sol_temporal). */
+    claveSolTemporal: async function (ruc, usuario, clave, modulo, razonSocial, direccion) {
+      var s = leer();
+      if (!s) return { ok: false, motivo: 'SIN_SESION',
+                       mensaje: 'Primero inicia sesion en el laboratorio.' };
+      if (!cli) return { ok: false, mensaje: 'Sin conexion con el servidor.' };
+      var r = await cli.rpc('fn_login_clave_sol_temporal', {
+        p_usuario_sesion: this.uid(), p_ruc: ruc, p_razon_social: razonSocial,
+        p_usuario: usuario, p_clave: clave, p_modulo: modulo || null, p_direccion: direccion || null
+      });
+      if (r.error) return { ok: false, mensaje: r.error.message };
+      var res = r.data || {};
+      if (res.ok) sessionStorage.setItem('sunat_empresa', JSON.stringify(res.empresa));
+      return res;
+    },
+    esTemporal: function () { return !!(this.empresa() || {}).temporal; },
     empresa: function () {
       try { return JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null'); }
       catch (e) { return null; }

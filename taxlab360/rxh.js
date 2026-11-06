@@ -81,7 +81,7 @@
     function empresaActiva() {
         try {
             var e = JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null');
-            if (e && e.ruc) return { ruc: String(e.ruc), razon_social: e.razon_social || '' };
+            if (e && e.ruc) return { ruc: String(e.ruc), razon_social: e.razon_social || '', direccion: e.direccion || '' };
         } catch (err) {}
         try {
             var a = JSON.parse(sessionStorage.getItem('sunat_auth') || '{}');
@@ -257,7 +257,7 @@
     // ------------------------------------------------------------------ emisor
     async function cargarEmisor() {
         var act = empresaActiva();
-        var e = { ruc: act.ruc, nombre: act.razon_social, profesion: '', direccion: '', telefono: '' };
+        var e = { ruc: act.ruc, nombre: act.razon_social, profesion: '', direccion: String(act.direccion || '').toUpperCase(), telefono: '' };
         var sb = cliente();
         if (sb && act.ruc) {
             try {

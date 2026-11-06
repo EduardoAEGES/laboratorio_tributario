@@ -167,12 +167,34 @@
         emp = (window.EMPRESAS_TAXLAB || []).filter(function (x) { return x.ruc === ruc; })[0] || null;
       }
       if (!emp) {
-        return { ok: false, mensaje: 'El RUC ' + ruc + ' no corresponde a ninguna empresa del laboratorio. ' +
+        return { ok: false, motivo: 'RUC_NO_EXISTE',
+                 mensaje: 'El RUC ' + ruc + ' no corresponde a ninguna empresa del laboratorio. ' +
                  'Abre "Ver empresas" (gato, abajo a la derecha) para ver los RUC disponibles.' };
       }
       sessionStorage.setItem('sunat_empresa', JSON.stringify(emp));
       return { ok: true, empresa: emp };
     },
+    /** Clave SOL con un RUC que NO está en el laboratorio: ingreso temporal
+     *  (solo en esta computadora; no crea la empresa). */
+    claveSolTemporal: async function (ruc, usuario, clave, modulo, razonSocial, direccion) {
+      ruc = String(ruc || '').trim();
+      var razon = String(razonSocial || '').trim().replace(/\s+/g, ' ').toUpperCase();
+      if (String(usuario || '').trim().toUpperCase() !== 'SIST' || String(clave || '').trim().toUpperCase() !== 'NORTON') {
+        return { ok: false, mensaje: 'Clave SOL incorrecta. Usa Usuario: SIST y Contraseña: NORTON.' };
+      }
+      if (!/^(10|15|17|20)\d{9}$/.test(ruc)) {
+        return { ok: false, mensaje: 'El RUC debe tener 11 dígitos y empezar con 10 (persona natural) o 20 (empresa). Revisa el número.' };
+      }
+      if (razon.length < 3) {
+        return { ok: false, mensaje: 'Escribe la razón social (o los apellidos y nombres) del contribuyente.' };
+      }
+      var emp = { ruc: ruc, razon_social: razon, nombre_comercial: razon,
+                  regimen: /^10/.test(ruc) ? 'Renta de Cuarta Categoria' : 'Regimen General',
+                  cod_empresa: 'TEMP', direccion: String(direccion || '').trim().toUpperCase() || null, temporal: true };
+      sessionStorage.setItem('sunat_empresa', JSON.stringify(emp));
+      return { ok: true, empresa: emp };
+    },
+    esTemporal: function () { return !!(this.empresa() || {}).temporal; },
     empresa: function () {
       try { return JSON.parse(sessionStorage.getItem('sunat_empresa') || 'null'); }
       catch (e) { return null; }

@@ -14,6 +14,21 @@ esa empresa. Solo elige con qué empresa se trabaja.
 
 El avance se guarda por la pareja **(usuario, RUC)**.
 
+**RUC fuera del simulador (ingreso temporal — `75_clave_sol_temporal.sql`).** Si el RUC no
+está en `empresas_simulador`, `login.js` ofrece entrar igual: el alumno escribe la razón
+social (y, opcionalmente, el domicilio) y `fn_login_clave_sol_temporal` lo valida.
+
+- El RUC debe tener 11 dígitos y empezar con 10, 15, 17 o 20.
+- Aplica las mismas reglas de rol: un rol con `todas_las_empresas = false` (`INVITADO`) no
+  puede entrar así.
+- No se crea la empresa en la base, no trae registros del SIRE y el avance **no va al
+  servidor**: `SimStore` no sincroniza cuando `sunat_empresa.temporal` es `true`, y
+  `fn_guardar_avance` ignora los RUC que no son del simulador.
+- En `taxlab360` (acceso público) se valida en el navegador.
+
+Probado el 06/11/2026 con un usuario de cada rol (`INVITADO` bloqueado, el resto entra).
+Después de probar, `avance_usuario` tenía 0 filas de esos RUC.
+
 ## Matriz de permisos
 
 | Rol | Módulos | Empresas | Guarda | Reinicia | Gestiona alumnos |

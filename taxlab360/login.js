@@ -222,7 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const modulo = window.moduloDeDestino
                         ? window.moduloDeDestino(redirectParam || '')
                         : null;
-                    const res = await window.Sesion.claveSol(ruc, user, pass, modulo);
+                    let res = await window.Sesion.claveSol(ruc, user, pass, modulo);
+                    // RUC fuera del simulador: ofrecer el ingreso temporal
+                    if (res && !res.ok && res.motivo === 'RUC_NO_EXISTE' && window.Sesion.claveSolTemporal) {
+                        res = (await ofrecerIngresoTemporal(ruc, user, pass, modulo)) || { ok: false, cancelado: true };
+                    }
                     if (res && res.ok) {
                         // Guardar el nombre del estudiante para los PDF/reportes
                         try {
@@ -235,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Cargar el avance guardado de este usuario para esa empresa
                         try { await window.SimStore.hydrate(); } catch (e) {}
                         irADashboard();
-                    } else {
+                    } else if (!(res && res.cancelado)) {
                         alert((res && res.mensaje) || 'No se pudo validar la Clave SOL.');
                     }
                 } else {
@@ -271,3 +275,92 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+// ---------------------------------------------------------------------------
+// Ingreso TEMPORAL con un RUC que no está en el simulador.
+// Pide la razón social (y, si se quiere, el domicilio) y entra con esa empresa
+// solo durante esta sesión: no se crea en la base, no trae registros
+// precargados y el avance no se guarda en el servidor.
+// Devuelve la respuesta de Sesion.claveSolTemporal, o null si se cancela.
+// ---------------------------------------------------------------------------
+function ofrecerIngresoTemporal(ruc, user, pass, modulo) {
+    return new Promise(function (resolver) {
+        var esPersona = /^10/.test(String(ruc));
+        var fondo = document.createElement('div');
+        fondo.style.cssText = 'position:fixed;inset:0;background:rgba(10,25,45,.55);z-index:100000;display:flex;' +
+            'align-items:center;justify-content:center;padding:16px;font-family:Roboto,Arial,sans-serif;';
+        fondo.innerHTML =
+            '<div role="dialog" aria-modal="true" aria-labelledby="tmp-titulo" style="background:#fff;border-radius:10px;max-width:440px;width:100%;' +
+            'box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden;">' +
+            '<div style="background:#1E395B;color:#fff;padding:13px 18px;font-weight:700;font-size:15px;" id="tmp-titulo">' +
+            'RUC ' + ruc + ' no registrado en el simulador</div>' +
+            '<div style="padding:16px 18px;font-size:13px;color:#333;line-height:1.5;">' +
+            '<p style="margin:0 0 10px;">Puedes entrar con este RUC <b>de forma temporal</b>. Ten en cuenta que:</p>' +
+            '<ul style="margin:0 0 12px;padding-left:18px;">' +
+            '<li>No tendrá compras ni ventas precargadas en el SIRE.</li>' +
+            '<li>Lo que hagas queda solo en esta computadora; no se guarda en el servidor.</li>' +
+            '<li>Si el RUC está mal escrito, pulsa <b>Corregir el RUC</b>.</li></ul>' +
+            '<label style="display:block;font-weight:600;margin-bottom:4px;" for="tmp-razon">' +
+            (esPersona ? 'Apellidos y nombres' : 'Razón social') + ' <span style="color:#c00;">*</span></label>' +
+            '<input id="tmp-razon" type="text" maxlength="120" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;' +
+            'border:1px solid #9aa7b5;border-radius:5px;font-size:13px;text-transform:uppercase;" placeholder="' +
+            (esPersona ? 'Ej.: QUISPE MAMANI JUAN CARLOS' : 'Ej.: COMERCIAL LOS ANDES S.A.C.') + '">' +
+            '<label style="display:block;font-weight:600;margin:10px 0 4px;" for="tmp-dir">Domicilio fiscal <span style="color:#777;font-weight:400;">(opcional)</span></label>' +
+            '<input id="tmp-dir" type="text" maxlength="160" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;' +
+            'border:1px solid #9aa7b5;border-radius:5px;font-size:13px;text-transform:uppercase;" placeholder="Ej.: AV. EJERCITO 1245, YANAHUARA, AREQUIPA">' +
+            '<div id="tmp-error" role="alert" style="display:none;margin-top:10px;background:#fdecea;color:#a12622;border-radius:5px;padding:7px 10px;font-size:12.5px;"></div>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;background:#f4f6f9;border-top:1px solid #e3e7ec;flex-wrap:wrap;">' +
+            '<button type="button" id="tmp-cancelar" style="padding:8px 14px;border:1px solid #9aa7b5;background:#fff;border-radius:5px;cursor:pointer;font-size:13px;">Corregir el RUC</button>' +
+            '<button type="button" id="tmp-entrar" style="padding:8px 14px;border:none;background:#004B91;color:#fff;border-radius:5px;cursor:pointer;font-size:13px;font-weight:700;">Ingresar temporalmente</button>' +
+            '</div></div>';
+        document.body.appendChild(fondo);
+        var razon = fondo.querySelector('#tmp-razon');
+        var dir = fondo.querySelector('#tmp-dir');
+        var error = fondo.querySelector('#tmp-error');
+        var btnEntrar = fondo.querySelector('#tmp-entrar');
+        setTimeout(function () { razon.focus(); }, 30);
+
+        function cerrar(valor) {
+            document.removeEventListener('keydown', teclas, true);
+            fondo.remove();
+            resolver(valor);
+        }
+        function mostrarError(t) { error.textContent = t; error.style.display = 'block'; }
+        async function entrar() {
+            if (razon.value.trim().length < 3) {
+                mostrarError('Escribe ' + (esPersona ? 'los apellidos y nombres' : 'la razón social') + ' para continuar.');
+                razon.focus();
+                return;
+            }
+            btnEntrar.disabled = true;
+            btnEntrar.textContent = 'Verificando...';
+            try {
+                var r = await window.Sesion.claveSolTemporal(ruc, user, pass, modulo, razon.value, dir.value);
+                if (r && r.ok) { cerrar(r); return; }
+                mostrarError((r && r.mensaje) || 'No se pudo ingresar con este RUC.');
+            } catch (e) {
+                mostrarError('No se pudo conectar con el servidor. Intenta nuevamente.');
+            }
+            btnEntrar.disabled = false;
+            btnEntrar.textContent = 'Ingresar temporalmente';
+        }
+        // En fase de captura, para que el Enter no dispare también el login de fondo
+        function teclas(ev) {
+            if (ev.key === 'Escape') { ev.stopPropagation(); cerrar(null); }
+            else if (ev.key === 'Enter') {
+                ev.preventDefault(); ev.stopPropagation();
+                if (ev.target !== fondo.querySelector('#tmp-cancelar')) entrar();
+                else cerrar(null);
+            }
+        }
+        document.addEventListener('keydown', teclas, true);
+        btnEntrar.addEventListener('click', entrar);
+        fondo.querySelector('#tmp-cancelar').addEventListener('click', function () {
+            cerrar(null);
+            var campo = document.getElementById('ruc-field');
+            if (campo) { campo.focus(); if (campo.select) campo.select(); }
+        });
+    });
+}
