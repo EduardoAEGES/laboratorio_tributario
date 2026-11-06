@@ -1550,6 +1550,35 @@
         .rus-radios strong { font-weight: 700; }
 
         /* Botonera inferior */
+        /* IGV Justo (Ley 30524): prórroga del pago del IGV para micro y pequeñas empresas */
+        .igv-justo-box {
+            margin: 28px 0 0;
+            min-width: 0;
+        }
+        .igv-justo-fila {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px 30px;
+            font-size: 14px;
+            color: #333;
+        }
+        .igv-justo-opciones { display: flex; gap: 40px; }
+        .igv-justo-opciones label { display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; }
+        .igv-justo-opciones input { width: 17px; height: 17px; cursor: pointer; }
+        .igv-justo-nota {
+            margin-top: 14px;
+            padding: 10px 14px;
+            border-radius: 3px;
+            font-size: 13px;
+            line-height: 1.45;
+            background: #FFFDE7;
+            border: 1px solid #FFF59D;
+            color: #5D4037;
+        }
+        .igv-justo-nota.no { background: #FDECEA; border-color: #F5C6CB; color: #7A0000; }
+
         .form-bottom-actions {
             display: flex;
             justify-content: center;
@@ -2817,6 +2846,19 @@
                             </div>
 
                         </div>
+
+                        <!-- IGV Justo: solo micro y pequeñas empresas (REMYPE) que dejan la casilla 189 en cero -->
+                        <fieldset class="sunat-fieldset igv-justo-box" id="igv-justo-box" style="display: none;">
+                            <legend>Acogimiento a la prórroga de Pago del IGV</legend>
+                            <div class="igv-justo-fila">
+                                <span>¿Deseo acogerme a la prórroga del pago del IGV (IGV justo)(Si/No)?</span>
+                                <div class="igv-justo-opciones">
+                                    <label><input type="radio" name="igv-justo" value="si" onchange="actualizarIGVJusto();"> Si</label>
+                                    <label><input type="radio" name="igv-justo" value="no" onchange="actualizarIGVJusto();"> No</label>
+                                </div>
+                            </div>
+                            <div class="igv-justo-nota" id="igv-justo-nota" style="display: none;"></div>
+                        </fieldset>
 
                         <div class="form-bottom-actions">
                             <button class="btn-ant" onclick="cambiarTab621('detalle');"><i class="fas fa-chevron-left"></i> Anterior</button>
@@ -4638,6 +4680,89 @@
             document.getElementById('importe-total').textContent =
                 's/. ' + totalPagar.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+            actualizarIGVJusto();
+        }
+
+        // ===== IGV Justo (Ley 30524): prórroga del pago del IGV =====
+        // Las micro y pequeñas empresas inscritas en el REMYPE pueden postergar el pago
+        // del IGV del período por tres meses. La pregunta aparece cuando la empresa es
+        // micro o pequeña (régimen laboral REMYPE en empresas_simulador), declara IGV,
+        // tiene deuda (casilla 188 > 0) y deja en 0 el importe a pagar (casilla 189).
+        var empresaMype = null; // null = todavía no se sabe (var: recalcularDeuda puede correr antes)
+        // Respaldo si no hay conexión: empresas con régimen laboral REMYPE
+        var RUCS_MYPE_RESPALDO = ['20455678120', '20548912343', '20602345671'];
+        var MESES_IGV_JUSTO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+            'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
+
+        function rucEmpresaActual() {
+            try {
+                if (typeof Sesion !== 'undefined' && Sesion.ruc()) return String(Sesion.ruc()).replace(/\D/g, '');
+            } catch (e) { /* sin sesión: se usa el RUC del login */ }
+            return rucDeclarante();
+        }
+
+        async function cargarTamanoEmpresa() {
+            const ruc = rucEmpresaActual();
+            let mype = null;
+            if (ruc) {
+                try {
+                    if (typeof authSupabaseClient !== 'undefined' && authSupabaseClient) {
+                        const r = await authSupabaseClient.from('empresas_simulador')
+                            .select('regimen_laboral').eq('ruc', ruc).maybeSingle();
+                        if (!r.error && r.data) mype = /micro|peque/i.test(r.data.regimen_laboral || '');
+                    }
+                } catch (e) { /* queda el respaldo */ }
+                if (mype === null) mype = RUCS_MYPE_RESPALDO.includes(ruc);
+            }
+            empresaMype = !!mype;
+            actualizarIGVJusto();
+        }
+
+        function igvJustoVisible() {
+            const box = document.getElementById('igv-justo-box');
+            return !!box && box.style.display !== 'none';
+        }
+
+        // 'si' | 'no' | '' (sin responder o pregunta no visible)
+        function prorrogaIGVJusto() {
+            if (!igvJustoVisible()) return '';
+            const r = document.querySelector('input[name="igv-justo"]:checked');
+            return r ? r.value : '';
+        }
+
+        // Período cuyo vencimiento sirve de plazo para pagar el IGV prorrogado (3 meses después)
+        function periodoPagoIGVJusto() {
+            const p = document.getElementById('periodo-input').value; // mm-aaaa
+            if (!/^\d{2}-\d{4}$/.test(p)) return 'del tercer mes siguiente';
+            const d = new Date(parseInt(p.slice(3), 10), parseInt(p.slice(0, 2), 10) - 1 + 3, 1);
+            return MESES_IGV_JUSTO[d.getMonth()] + ' ' + d.getFullYear();
+        }
+
+        function actualizarIGVJusto() {
+            const box = document.getElementById('igv-justo-box');
+            if (!box) return;
+            const tieneIGV = !!document.querySelector('input[name="igv-full"]:checked');
+            const c189Lleno = document.getElementById('c189').value.trim() !== '';
+            const mostrar = empresaMype === true && tieneIGV && c189Lleno &&
+                val('c189') === 0 && val('c188') > 0;
+            box.style.display = mostrar ? '' : 'none';
+
+            const nota = document.getElementById('igv-justo-nota');
+            const opcion = prorrogaIGVJusto();
+            if (!mostrar || !opcion) { nota.style.display = 'none'; return; }
+
+            const deuda = 'S/ ' + formatoMiles(val('c188'));
+            nota.classList.toggle('no', opcion === 'no');
+            nota.innerHTML = opcion === 'si'
+                ? '<strong>Prórroga solicitada.</strong> El IGV de este período (' + deuda + ') podrá pagarse hasta la ' +
+                  'fecha de vencimiento de las obligaciones del período <strong>' + periodoPagoIGVJusto() + '</strong>, ' +
+                  'sin intereses ni multas. Recuerde los requisitos: ventas anuales de hasta 1,700 UIT, estar inscrito ' +
+                  'en el REMYPE, no tener deudas en cobranza coactiva mayores a 1 UIT, haber presentado las ' +
+                  'declaraciones de los últimos 12 meses y presentar esta declaración dentro del plazo.'
+                : '<strong>No se acoge a la prórroga.</strong> El IGV de este período (' + deuda + ') vence en la fecha ' +
+                  'normal. Si no lo paga ahora, generará intereses moratorios. Ingrese el importe en la casilla 189 ' +
+                  'o marque <strong>Si</strong> para postergar el pago.';
+            nota.style.display = 'block';
         }
 
         function agregarBandeja621() {
@@ -4645,6 +4770,12 @@
             const c188 = val('c188'), c324 = val('c324');
             if (c189 > c188) { alert('El importe a pagar de IGV (casilla 189) no puede ser mayor a la deuda tributaria (casilla 188: S/ ' + formatoMiles(c188) + ').'); return; }
             if (c307 > c324) { alert('El importe a pagar de Renta (casilla 307) no puede ser mayor a la deuda tributaria (casilla 324: S/ ' + formatoMiles(c324) + ').'); return; }
+            actualizarIGVJusto();
+            if (igvJustoVisible() && !prorrogaIGVJusto()) {
+                alert('Sr. Contribuyente, indique si desea acogerse a la prórroga del pago del IGV (IGV Justo): marque Si o No al final del formulario.');
+                document.getElementById('igv-justo-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
 
             document.querySelector('.badge-count').textContent = '1';
             mostrarPasarela621();
@@ -4873,8 +5004,10 @@
             const nombre = document.querySelector('.user-info-right span').textContent
                 .replace('Bienvenido,', '').trim();
             const igv = val('c189'), renta = val('c307');
-            const tributo = (igv > 0 && renta > 0) ? 'Varios'
-                : (igv > 0 ? '1011' : (renta > 0 ? tributoRenta()[0] : '-'));
+            // Con IGV Justo el IGV se declara aunque se pague después
+            const igvDeclarado = igv > 0 || prorrogaIGVJusto() === 'si';
+            const tributo = (igvDeclarado && renta > 0) ? 'Varios'
+                : (igvDeclarado ? '1011' : (renta > 0 ? tributoRenta()[0] : '-'));
 
             document.getElementById('const-ruc').textContent = rucDeclarante() || '-';
             document.getElementById('const-nombre').textContent = nombre;
@@ -4923,6 +5056,9 @@
             const el = document.getElementById(id);
             el.addEventListener('input', () => { formatearMilesInput(el); recalcularDeuda(); });
         });
+
+        // Tamaño de la empresa (micro / pequeña) para la pregunta del IGV Justo
+        cargarTamanoEmpresa();
 
         // Los descuentos y devoluciones (102) no pueden superar las ventas gravadas (100).
         document.getElementById('c102').addEventListener('blur', () => {
@@ -5615,10 +5751,14 @@
             if (tieneIGV) requeridas.push('c189');
             if (renta) requeridas.push('c307');
 
-            return requeridas
+            const errores = requeridas
                 .filter(id => document.getElementById(id).value.trim() === '')
                 .map(id => 'Sr. Contribuyente, la casilla ' + id.slice(1) +
                     ' es de ingreso obligatoria, debe ingresarla antes de salir de la sección.');
+            if (igvJustoVisible() && !prorrogaIGVJusto()) {
+                errores.push('Sr. Contribuyente, debe indicar si desea acogerse a la prórroga del pago del IGV (IGV Justo): marque Si o No.');
+            }
+            return errores;
         }
 
         function mostrarListaErrores(errores) {
@@ -5671,7 +5811,9 @@
                 document.getElementById('info-inicial').style.display = 'block';
 
                 // Limpia todas las casillas del Detalle y la Determinación de la Deuda
-                document.querySelectorAll('#tab621-detalle input, #tab621-deuda input').forEach(i => i.value = '');
+                document.querySelectorAll('#tab621-detalle input:not([type="radio"]), #tab621-deuda input:not([type="radio"])').forEach(i => i.value = '');
+                document.querySelectorAll('input[name="igv-justo"]').forEach(r => r.checked = false);
+                actualizarIGVJusto();
                 // Limpia los asistentes
                 ['m127-183', 'm127-186', 'm105-a1', 'm105-a2', 'm105-a3', 'm105-a4', 'm105-b',
                  'm109-a1', 'm109-a2', 'm109-a3', 'm109-a4', 'm109-b',
