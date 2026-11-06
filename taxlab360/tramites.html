@@ -149,7 +149,7 @@
                                             <ul class="submenu-list last-level">
                                                 <li><a href="#" onclick="showEmitirFactura(); return false;">Emitir Factura</a></li>
                                                 <li><a href="#" onclick="showEmitirNotaCredito(); return false;">Emitir Nota de Crédito</a></li>
-                                                <li><a href="#" onclick="showDashboard(); return false;">Emitir Nota de Débito</a></li>
+                                                <li><a href="#" onclick="showEmitirNotaDebito(); return false;">Emitir Nota de Débito</a></li>
                                                 <li><a href="#" onclick="showDashboard(); return false;">Rechazar Factura</a></li>
                                                 <li><a href="#" onclick="showDashboard(); return false;">Catalogo de productos</a></li>
                                                 <li><a href="#" onclick="showDashboard(); return false;">Consultar Factura y Nota</a></li>
@@ -1106,7 +1106,7 @@
                                     <ul class="submenu-list-factura last-level-factura">
                                         <li class="active-factura"><a href="#" onclick="return false;">Emitir Factura <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a></li>
                                         <li><a href="#" onclick="showEmitirNotaCredito(); return false;">Emitir Nota de Crédito</a></li>
-                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emitir Nota de Débito</a></li>
+                                        <li><a href="#" onclick="hideEmitirFactura(); showEmitirNotaDebito(); return false;">Emitir Nota de Débito</a></li>
                                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Rechazar Factura</a></li>
                                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Catálogo de productos</a></li>
                                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Consultar Factura y Nota</a></li>
@@ -2899,7 +2899,7 @@
                                     <ul class="submenu-list-factura last-level-factura">
                                         <li><a href="#" onclick="showEmitirFactura(); return false;">Emitir Factura</a></li>
                                         <li class="active-factura"><a href="#" onclick="return false;">Emitir Nota de Crédito <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a></li>
-                                        <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Emitir Nota de Débito</a></li>
+                                        <li><a href="#" onclick="hideEmitirNotaCredito(); showEmitirNotaDebito(); return false;">Emitir Nota de Débito</a></li>
                                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Rechazar Factura</a></li>
                                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Catálogo de productos</a></li>
                                         <li><a href="#" onclick="alert('EN PROCESO DE IMPLEMENTACION'); return false;">Consultar Factura y Nota</a></li>
@@ -7216,6 +7216,24 @@
                 }
             }
 
+            // Clientes y proveedores de la empresa activa en sus registros (casos):
+            // el mismo RUC tiene distinto nombre en cada caso, por eso se filtra
+            // por la empresa de la Clave SOL.
+            if (supabaseClient && window.currentEmisorData && /^\d{11}$/.test(String(window.currentEmisorData.ruc || ''))) {
+                try {
+                    const propio = Number(window.currentEmisorData.ruc);
+                    const v = await supabaseClient.from('registro_ventas').select('"Apellidos Nombres/ Razón Social"')
+                        .eq('Ruc', propio).eq('Nro Doc Identidad', Number(ruc)).limit(1);
+                    let nom = v && v.data && v.data[0] && v.data[0]['Apellidos Nombres/ Razón Social'];
+                    if (!nom) {
+                        const c = await supabaseClient.from('registro_compras').select('"Apellidos Nombres/ Razón  Social"')
+                            .eq('RUC', propio).eq('Nro Doc Identidad', Number(ruc)).limit(1);
+                        nom = c && c.data && c.data[0] && c.data[0]['Apellidos Nombres/ Razón  Social'];
+                    }
+                    if (nom) return { ok: true, razon_social: nom, direccion_legal: '-' };
+                } catch (err) { console.warn('No se pudo buscar el RUC en los registros:', err); }
+            }
+
             if (RUCS_DEMO[ruc]) return { ok: true, razon_social: RUCS_DEMO[ruc], direccion_legal: DIRS_DEMO[ruc] };
 
             // Consulta real a SUNAT (proxy servidor: scraping SUNAT + API de respaldo)
@@ -9329,6 +9347,7 @@
     <script src="gre_emision.js"></script>
     <script src="rxh.js"></script>
     <script src="mis_comprobantes.js"></script>
+    <script src="nota_debito.js"></script>
     <script src="survey.js"></script>
 </body>
 </html>
